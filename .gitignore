@@ -1,0 +1,15 @@
+Debug/
+Release/
+x64/
+x86/
+v16/
+
+
+*.db
+*.exe
+*.obj
+*.log
+*.tlog
+*.user
+*.filters
+
