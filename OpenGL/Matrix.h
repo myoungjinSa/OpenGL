@@ -1,6 +1,7 @@
 #pragma once
 #include <initializer_list>
 #include <cassert>
+
 template<typename T, int m, int n> 
 class Matrix
 {
@@ -51,7 +52,7 @@ public :
 
 	Matrix<T, n, m> Transpose() const;
 
-	Matrix<T, n, m> Inverse(int method, bool* p_is_ok = NULL) const;
+	//Matrix<T, n, m> Inverse(int method, bool* p_is_ok = NULL) const;
 
 	Matrix<T, m, n> Multiply(const Matrix<T, m, n>& a) const;
 
@@ -105,7 +106,7 @@ Matrix<T, m, n>::Matrix(T v0, T v1, T v2, T v3)
 {
 	static_assert(channels >= 4, "Matx should have at least 4 elements.");
 	val[0] = v0; val[1] = v1; val[2] = v2; val[3] = v3;
-	for (int i = 4; i < channels; i++) val[i] = _Tp(0);
+	for (int i = 4; i < channels; i++) val[i] = T(0);
 }
 
 template<typename T, int m, int n> inline
@@ -159,7 +160,7 @@ template<typename T, int m, int n> inline
 T Matrix<T, m, n>::Dot(const Matrix<T, m, n>& mat)const {
 	T s = 0;
 	for (int i = 0; i < channels; i++)
-		s += val[i] * M.val[i];
+		s += val[i] * mat.val[i];
 	return s;
 }
 
@@ -221,11 +222,18 @@ typename Matrix<T, m, n>::diag_type Matrix<T, m, n>::Diagonal() const
 		d.val[i] = val[i * n + i];
 	return d;
 }
-template<typename _Tp, int m, int n> inline
-Matrix<_Tp, n, m> Matrix<_Tp, m, n>::Transpose() const
+template<typename T, int m, int n> inline
+Matrix<T, n, m> Matrix<T, m, n>::Transpose() const
 {
-	return Matrix<_Tp, n, m>(*this);
+	return Matrix<T, n, m>(*this);
 }
+
+//template<typename T, int m, int n> inline
+//Matrix<T, n, m> Matrix<T, m, n>::Inverse() const {
+//
+//
+//}
+
 template<typename T, int m, int n> inline
 Matrix<T, m, n> Matrix<T, m, n>::Multiply(const Matrix<T, m, n>& a) const
 {
@@ -277,7 +285,9 @@ _Tp& Matrix<_Tp, m, n>::operator ()(int i)
 template<typename T, int count>
 class Vector  : public Matrix<T, count, 1>
 {
+public:
 	typedef T value_type;
+	
 	enum {
 		channels = count,
 		_dummy_enum_finalizer = 0
@@ -384,7 +394,7 @@ template<typename T, int count> inline
 Vector<T, count> Vector<T, count>::All(T alpha)
 {
 	Vector v;
-	for (int i = 0; i < cn; i++) v.val[i] = alpha;
+	for (int i = 0; i < count; i++) v.val[i] = alpha;
 	return v;
 }
 
@@ -430,7 +440,7 @@ Vector<double, 4> Vector<double, 4>::Conjugation() const
 template<typename T, int count> inline
 Vector<T, count> Vector<T, count>::Cross(const Vector<T, count>&) const
 {
-	static_assert(cn == 3, "for arbitrary-size vector there is no cross-product defined");
+	static_assert(count == 3, "for arbitrary-size vector there is no cross-product defined");
 	return Vector<T, count>();
 }
 
@@ -487,3 +497,4 @@ T& Vector<T, count>::operator ()(int i)
 	assert((unsigned)i < (unsigned)count);
 	return this->val[i];
 }
+
