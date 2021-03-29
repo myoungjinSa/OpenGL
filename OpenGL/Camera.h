@@ -11,13 +11,16 @@ public:
 	~Camera();
 
 	void SetPosition(float x, float y, float z);
+	Vec3f GetPosition() const;
+
 	void SetRotation(float x, float y, float z);
+	Vec3f GetRotation() const;
 
 	void Render();
-	void GetViewMatrix(float* pMat);
+	void GetViewMatrix(const Matrix<float, 3, 3>& Matrix) const;
 private:
-	void MatrixRotationYawPitchRoll(float* pMat, float, float, float);
-	void TransformCoord(Vec3f& Vec, float* pMat);
+	void MatrixRotationYawPitchRoll(Matrix<float, 3, 3>& Matrix, float, float, float);
+	void TransformCoord(Vec3f& Vec, Matrix<float, 3, 3>& Matrix);
 	void BuildViewMatrix(Vec3f, Vec3f, Vec3f);
 	
 	Vec3f position;

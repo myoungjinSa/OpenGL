@@ -13,7 +13,7 @@ public :
 		shortdim	= (m < n ? m : n)
 	};
 
-	typedef T						value_type;
+	typedef T						valueue_type;
 	typedef Matrix<T, m, n>			mat_type;
 	typedef Matrix<T, shortdim, 1>	diag_type;
 
@@ -24,9 +24,9 @@ public :
 	Matrix(T v0, T v1, T v2);
 	Matrix(T v0, T v1, T v2, T v3);
 
-	explicit Matrix(const T* vals);
+	explicit Matrix(const T* values);
 
-	Matrix(std::initializer_list<T> vals);
+	Matrix(std::initializer_list<T> values);
 
 	static Matrix All(T alpha);
 	static Matrix Zeros();
@@ -64,7 +64,10 @@ public :
 	const T& operator() (int i) const;
 	T& operator()(int i);
 
-	T val[m * n];
+	const T& operator[](size_t idx) const;
+	T& operator[](size_t idx);
+
+	T value[m * n];
 };
 
 /*Utility Method*/
@@ -75,44 +78,44 @@ public :
 template<typename T, int m, int n> inline
 Matrix<T, m, n>::Matrix()
 {
-	for (int i = 0; i < channels; i++) val[i] = T(0);
+	for (int i = 0; i < channels; i++) value[i] = T(0);
 }
 
 
 template<typename T, int m, int n> inline
 Matrix<T, m, n>::Matrix(T v0)
 {
-	val[0] = v0;
-	for (int i = 1; i < channels; i++) val[i] = T(0);
+	value[0] = v0;
+	for (int i = 1; i < channels; i++) value[i] = T(0);
 }
 
 template<typename T, int m, int n> inline
 Matrix<T, m, n>::Matrix(T v0, T v1)
 {
 	static_assert((channels >= 2), "Matx should have at least 2 elements.");
-	val[0] = v0; val[1] = v1;
-	for (int i = 2; i < channels; i++) val[i] = T(0);
+	value[0] = v0; value[1] = v1;
+	for (int i = 2; i < channels; i++) value[i] = T(0);
 }
 
 template<typename T, int m, int n> inline
 Matrix<T, m, n>::Matrix(T v0, T v1, T v2)
 {
 	static_assert(channels >= 3, "Matx should have at least 3 elements.");
-	val[0] = v0; val[1] = v1; val[2] = v2;
-	for (int i = 3; i < channels; i++) val[i] = T(0);
+	value[0] = v0; value[1] = v1; value[2] = v2;
+	for (int i = 3; i < channels; i++) value[i] = T(0);
 }
 template<typename T, int m, int n> inline
 Matrix<T, m, n>::Matrix(T v0, T v1, T v2, T v3)
 {
 	static_assert(channels >= 4, "Matx should have at least 4 elements.");
-	val[0] = v0; val[1] = v1; val[2] = v2; val[3] = v3;
-	for (int i = 4; i < channels; i++) val[i] = T(0);
+	value[0] = v0; value[1] = v1; value[2] = v2; value[3] = v3;
+	for (int i = 4; i < channels; i++) value[i] = T(0);
 }
 
 template<typename T, int m, int n> inline
-Matrix<T, m, n>::Matrix(const T* values)
+Matrix<T, m, n>::Matrix(const T* valueues)
 {
-	for (int i = 0; i < channels; i++) val[i] = values[i];
+	for (int i = 0; i < channels; i++) value[i] = valueues[i];
 }
 
 template<typename T, int m, int n> inline
@@ -122,7 +125,7 @@ Matrix<T, m, n>::Matrix(std::initializer_list<T> list)
 	int i = 0;
 	for (const auto& elem : list)
 	{
-		val[i++] = elem;
+		value[i++] = elem;
 	}
 }
 
@@ -131,7 +134,7 @@ template<typename T, int m, int n> inline
 Matrix<T, m, n> Matrix<T, m, n>::All(T alpha) {
 	Matrix<T, m, n> mat;
 	for (int i = 0; i < m * n; i++)
-		mat.val[i] = alpha;
+		mat.value[i] = alpha;
 	return mat;
 }
 
@@ -160,7 +163,7 @@ template<typename T, int m, int n> inline
 T Matrix<T, m, n>::Dot(const Matrix<T, m, n>& mat)const {
 	T s = 0;
 	for (int i = 0; i < channels; i++)
-		s += val[i] * mat.val[i];
+		s += value[i] * mat.value[i];
 	return s;
 }
 
@@ -168,7 +171,7 @@ template<typename T, int m, int n> inline
 double Matrix<T, m, n>::DDot(const Matrix<T, m, n>& mat) const {
 	double s = 0;
 	for (int i = 0; i < channels; i++)
-		s += (double)val[i] * mat.val[i];
+		s += (double)value[i] * mat.value[i];
 
 	return s;
 }
@@ -202,7 +205,7 @@ Matrix<T, m1, n1> Matrix<T, m, n>::GetMinor(int i, int j) const {
 template<typename T, int m, int n> inline
 Matrix<T, 1, n> Matrix<T, m, n>::Row(int i) const {
 	assert((unsigned)i < (unsigned)m);
-	return Matrix<T, 1, n>(&val[i * n]);
+	return Matrix<T, 1, n>(&value[i * n]);
 }
 
 template<typename T, int m, int n> inline
@@ -210,7 +213,7 @@ Matrix<T, m, 1> Matrix<T, m, n>::Col(int j) const {
 	assert((unsigned)j < (unsigned)n);
 	Matrix<T, m, 1> v;
 	for (int i = 0; i < m; i++)
-		v.val[i] = val[i * n + j];
+		v.value[i] = value[i * n + j];
 	return v;
 }
 
@@ -219,7 +222,7 @@ typename Matrix<T, m, n>::diag_type Matrix<T, m, n>::Diagonal() const
 {
 	diag_type d;
 	for (int i = 0; i < shortdim; i++)
-		d.val[i] = val[i * n + i];
+		d.value[i] = value[i * n + i];
 	return d;
 }
 template<typename T, int m, int n> inline
@@ -247,34 +250,47 @@ Matrix<T, m, n> Matrix<T, m, n>::Divide(const Matrix<T, m, n>& a) const
 	return Matrix<T, m, n>(*this, a);
 }
 
-template<typename _Tp, int m, int n> inline
-const _Tp& Matrix<_Tp, m, n>::operator()(int i, int j) const
+template<typename T, int m, int n> inline
+const T& Matrix<T, m, n>::operator()(int i, int j) const
 {
 	assert((unsigned)i < (unsigned)m && (unsigned)j < (unsigned)n);
-	return this->val[i * n + j];
+	return this->value[i * n + j];
 }
 
-template<typename _Tp, int m, int n> inline
-_Tp& Matrix<_Tp, m, n>::operator ()(int i, int j)
+template<typename T, int m, int n> inline
+T& Matrix<T, m, n>::operator ()(int i, int j)
 {
 	assert((unsigned)i < (unsigned)m && (unsigned)j < (unsigned)n);
-	return val[i * n + j];
+	return value[i * n + j];
 }
 
-template<typename _Tp, int m, int n> inline
-const _Tp& Matrix<_Tp, m, n>::operator ()(int i) const
+template<typename T, int m, int n> inline
+const T& Matrix<T, m, n>::operator ()(int i) const
 {
 	static_assert(m == 1 || n == 1, "Single index indexation requires matrix to be a column or a row");
 	assert((unsigned)i < (unsigned)(m + n - 1));
-	return val[i];
+	return value[i];
 }
 
-template<typename _Tp, int m, int n> inline
-_Tp& Matrix<_Tp, m, n>::operator ()(int i)
+template<typename T, int m, int n> inline
+T& Matrix<T, m, n>::operator ()(int i)
 {
 	static_assert(m == 1 || n == 1, "Single index indexation requires matrix to be a column or a row");
 	assert((unsigned)i < (unsigned)(m + n - 1));
-	return val[i];
+	return value[i];
+}
+
+
+template<typename T, int m, int n> inline
+const T& Matrix<T, m, n>::operator[](size_t idx) const{
+	assert((unsigned)idx < (unsigned) m * n);
+	return this->value[idx];
+}
+
+template<typename T, int m, int n> inline
+T& Matrix<T, m, n>::operator[](size_t idx) {
+	assert((unsigned)idx < (unsigned)m * n);
+	return this->value[idx];
 }
 
 
@@ -286,8 +302,8 @@ template<typename T, int count>
 class Vector  : public Matrix<T, count, 1>
 {
 public:
-	typedef T value_type;
-	
+	typedef T valueue_type;
+
 	enum {
 		channels = count,
 		_dummy_enum_finalizer = 0
@@ -300,7 +316,7 @@ public:
 	Vector(T v0, T v1, T v2);
 	Vector(T v0, T v1, T v2, T v3);
 
-	explicit Vector(const T* values);
+	explicit Vector(const T* valueues);
 
 	Vector(std::initializer_list<T> list);
 	Vector(const Vector<T, count>& v);
@@ -322,7 +338,12 @@ public:
 	T& operator()(int idx);
 
 
+	void SetValues(const Vector<T, count>& vec);
+	
+	//static Vector Bind(T x, T y, T z, T w);
 };
+
+
 typedef Vector<unsigned char, 2> Vec2b;
 typedef Vector<unsigned char, 3> Vec3b;
 typedef Vector<unsigned char, 4> Vec4b;
@@ -376,8 +397,8 @@ Vector<T, count>::Vector(T v0, T v1, T v2, T v3)
 
 
 template<typename T, int count> inline
-Vector<T, count>::Vector(const T* values) 
-	:Matrix<T, count, 1>(values){
+Vector<T, count>::Vector(const T* valueues) 
+	:Matrix<T, count, 1>(valueues){
 
 }
 
@@ -387,14 +408,14 @@ Vector<T, count>::Vector(std::initializer_list<T> list)
 
 template<typename T, int count> inline
 Vector<T, count>::Vector(const Vector<T, count>& m)
-	: Matrix<T, count, 1>(m.val) {}
+	: Matrix<T, count, 1>(m.value) {}
 
 
 template<typename T, int count> inline
 Vector<T, count> Vector<T, count>::All(T alpha)
 {
 	Vector v;
-	for (int i = 0; i < count; i++) v.val[i] = alpha;
+	for (int i = 0; i < count; i++) v.value[i] = alpha;
 	return v;
 }
 
@@ -402,7 +423,7 @@ template<typename T, int count> inline
 Vector<T, count> Vector<T, count>::Multiply(const Vector<T, count>& v) const
 {
 	Vector<T, count> w;
-	for (int i = 0; i < count; i++) w.val[i] = this->val[i] * v.val[i];
+	for (int i = 0; i < count; i++) w.value[i] = this->value[i] * v.value[i];
 	return w;
 }
 
@@ -448,24 +469,24 @@ Vector<T, count> Vector<T, count>::Cross(const Vector<T, count>&) const
 template<> inline
 Vector<float, 3> Vector<float, 3>::Cross(const Vector<float, 3>& v) const
 {
-	return Vector<float, 3>(this->val[1] * v.val[2] - this->val[2] * v.val[1],
-		this->val[2] * v.val[0] - this->val[0] * v.val[2],
-		this->val[0] * v.val[1] - this->val[1] * v.val[0]);
+	return Vector<float, 3>(this->value[1] * v.value[2] - this->value[2] * v.value[1],
+		this->value[2] * v.value[0] - this->value[0] * v.value[2],
+		this->value[0] * v.value[1] - this->value[1] * v.value[0]);
 }
 
 template<> inline
 Vector<double, 3> Vector<double, 3>::Cross(const Vector<double, 3>& v) const
 {
-	return Vector<double, 3>(this->val[1] * v.val[2] - this->val[2] * v.val[1],
-		this->val[2] * v.val[0] - this->val[0] * v.val[2],
-		this->val[0] * v.val[1] - this->val[1] * v.val[0]);
+	return Vector<double, 3>(this->value[1] * v.value[2] - this->value[2] * v.value[1],
+		this->value[2] * v.value[0] - this->value[0] * v.value[2],
+		this->value[0] * v.value[1] - this->value[1] * v.value[0]);
 }
 
 template<typename T, int count> template<typename T2> inline
 Vector<T, count>::operator Vector<T2, count>() const
 {
 	Vector<T2, count> v;
-	for (int i = 0; i < count; i++) v.val[i] = this->val[i];
+	for (int i = 0; i < count; i++) v.value[i] = this->value[i];
 	return v;
 }
 
@@ -474,27 +495,34 @@ template<typename T, int count> inline
 const T& Vector<T, count>::operator [](int i) const
 {
 	assert((unsigned)i < (unsigned)count);
-	return this->val[i];
+	return this->value[i];
 }
 
 template<typename T, int count> inline
 T& Vector<T, count>::operator [](int i)
 {
 	assert((unsigned)i < (unsigned)count);
-	return this->val[i];
+	return this->value[i];
 }
 
 template<typename T, int count> inline
 const T& Vector<T, count>::operator()(int i) const
 {
 	assert((unsigned)i < (unsigned)count);
-	return this->val[i];
+	return this->value[i];
 }
 
 template<typename T, int count> inline
 T& Vector<T, count>::operator ()(int i)
 {
 	assert((unsigned)i < (unsigned)count);
-	return this->val[i];
+	return this->value[i];
+}
+
+template<typename T, int count> inline
+void Vector<T, count>::SetValues(const Vector<T, count>& vec) {
+	for (size_t iVal = 0; iVal < count; iVal++) {
+		this->value[iVal] = vec.value[iVal];
+	}
 }
 
