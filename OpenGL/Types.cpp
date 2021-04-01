@@ -26,10 +26,10 @@ Point2<T>::Point2(const Size<T>& size)
 	: x(size.width), y(size.height)
 {}
 
-template<typename T> inline
-Point2<T>::Point2(const Vector<T, 2>& v)
-	: x(v[0]), y(v[1])
-{}
+//template<typename T> inline
+//Point2<T>::Point2(const Vector2<T>& v)
+//	: x(v.x), y(v.y)
+//{}
 
 template<typename T> inline
 Point2<T>& Point2<T>::operator=(const Point2& pt) {

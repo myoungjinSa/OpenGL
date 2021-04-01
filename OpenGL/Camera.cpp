@@ -10,7 +10,7 @@ Camera::~Camera() {
 }
 
 void Camera::SetPosition(float x, float y, float z) {
-	position.SetValues(Vec3f(x, y, z));
+	position = Vec3f(x, y, z);
 }
 
 Vec3f Camera::GetPosition() const {
@@ -18,7 +18,7 @@ Vec3f Camera::GetPosition() const {
 }
 
 void Camera::SetRotation(float x, float y, float z) {
-	rotation.SetValues(Vec3f(x, y, z));
+	rotation = Vec3f(x, y, z);
 }
 
 Vec3f Camera::GetRotation() const {
@@ -31,19 +31,19 @@ void Camera::Render() {
 	Matrix<float, 3, 3> rotationMatrix;
 	
 	//Setup the vector that points upwards.
-	up.SetValues(Vec3f(0.0f, 1.0f, 0.0f));
+	up.SetXYZ(0.0f, 1.0f, 0.0f);
 	
 	//Setup the position of the camera in the world
 	pos = GetPosition();
 
 	//Setup where the camera is looking by default.
-	lookAt.SetValues(Vec3f(0.0f, 0.0f, 1.0f));
+	lookAt.SetXYZ(0.0f, 0.0f, 1.0f);
 
 	//Set the yaw (Y axis), pitch(X axis) and roll(Z axis) roations in radians
 
-	pitch = rotation.value[0] * 0.0174532925f;
-	yaw = rotation.value[1] * 0.0174532925f;
-	roll = rotation.value[2] * 0.0174532925f;
+	pitch = rotation.x * 0.0174532925f;
+	yaw = rotation.y * 0.0174532925f;
+	roll = rotation.z * 0.0174532925f;
 
 	//Create the rotation matrix from the yawm pitch, and roll values
 	MatrixRotationYawPitchRoll(rotationMatrix, yaw, pitch, roll);
@@ -54,9 +54,7 @@ void Camera::Render() {
 	TransformCoord(up, rotationMatrix);
 
 	//Translate the rotated camera position to the location of the viewer.
-	lookAt.SetValues(Vec3f(pos.value[0] + lookAt.value[0],
-							pos.value[1] + lookAt.value[1],
-							pos.value[2] + lookAt.value[2]));
+	lookAt.SetXYZ(pos.x + lookAt.x, pos.y + lookAt.y, pos.z + lookAt.z);
 
 	//Finally create the view matrix from the three updated vectors.
 	BuildViewMatrix(pos, lookAt, up);
@@ -91,17 +89,18 @@ void Camera::TransformCoord(Vec3f& vec, Matrix<float, 3, 3>& matrix) {
 	float x, y, z;
 
 	//Transform the vector by the 3x3 matrix.
-	x = (vec.value[0] * matrix[0]) + (vec.value[1] * matrix[3]) + (vec.value[2] * matrix[6]);
-	y = (vec.value[0] * matrix[1]) + (vec.value[1] * matrix[4]) + (vec.value[2] * matrix[7]);
-	z = (vec.value[0] * matrix[2]) + (vec.value[1] * matrix[5]) + (vec.value[2] * matrix[8]);
+	x = (vec.x * matrix[0]) + (vec.y * matrix[3]) + (vec.z * matrix[6]);
+	y = (vec.x * matrix[1]) + (vec.y * matrix[4]) + (vec.z * matrix[7]);
+	z = (vec.x * matrix[2]) + (vec.y * matrix[5]) + (vec.z * matrix[8]);
 
-	vec.value[0] = x;
-	vec.value[1] = y;
-	vec.value[2] = z;
+	vec.x = x;
+	vec.y = y;
+	vec.z = z;
 }
 
 
 void Camera::BuildViewMatrix(Vec3f pos, Vec3f lookAt, Vec3f up) {
-
-
+	Vec3f xAxis, yAxis, zAxis;
+	
+	//xAxis = (up.value[1] * zAxis.value[2])
 }

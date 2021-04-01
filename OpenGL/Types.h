@@ -6,6 +6,7 @@
 template<typename> class Size;
 template<typename> class Rect;
 template<typename> class Point2;
+template<typename> class Point3;
 
 template<typename T> class Point2
 {
@@ -17,7 +18,7 @@ public:
 	Point2(const Point2& pt);
 	Point2(Point2&& pt) noexcept;
 	Point2(const Size<T>& size);
-	Point2(const Vector<T, 2>& vec);
+	//Point2(const Vector2<T>& vec);
 	
 	Point2& operator =(const Point2& pt);
 	Point2& operator =(Point2&& pt) noexcept;
@@ -25,7 +26,7 @@ public:
 	T Dot(const Point2& pt) const;
 	double DDot(const Point2& pt) const;
 	double Cross(const Point2& pt) const;
-	bool Inside(const const Rect<T>& rect)const;
+	bool Inside(const Rect<T>& rect) const;
 
 	T x;
 	T y;
@@ -35,7 +36,6 @@ typedef Point2<int> Point2i;
 typedef Point2<long long> Point2l;
 typedef Point2<float> Point2f;
 typedef Point2<double> Point2d;
-
 
 
 template<typename T> class Size
