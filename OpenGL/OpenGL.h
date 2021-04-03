@@ -5,6 +5,7 @@
 #include <Windows.h>
 #include "../OpenGL_Lib/gl/GL.h"
 #include <math.h>
+#include "Matrix.h"
 
 /////////////
 // DEFINES //
@@ -91,15 +92,20 @@ public:
 	void BeginScene(float red, float green, float blue, float alpha);
 	void EndScene();
 
+	void GetWorldMatrix(Matrix<float, 4, 4>& matrix);
+	void GetProjectionMatrix(Matrix<float, 4, 4>& matrix);
+
+
 	void GetWorldMatrix(float* matrix);
 	void GetProjectionMatrix(float* matrix);
 	void GetVideoCardInfo(char* videoCardList);
 
-	void BuildIdentityMatrix(float* matrix);
-	void BuildPerspectiveFovLHMatrix(float* matrix, float fieldOfView, float screenAspectRatio, float screenNear, float screenDepth);
-	void MatrixRotationY(float* matrix, float angle);
-	void MatrixTranslation(float* matrix, float x, float y, float z);
-	void MatrixMultiply(float* result, float* matrix1, float* matrix2);
+
+	void BuildIdentityMatrix(Matrix<float, 4, 4>& matrix);
+	void BuildPerspectiveFovLHMatrix(Matrix<float, 4, 4>& matrix, float fieldOfView, float screenAspectRatio, float screenNear, float screenDepth);
+	void MatrixRotationY(Matrix<float, 4, 4>& matrix, float angle);
+	void MatrixTranslation(Matrix<float, 4, 4>& matrix, float x, float y, float z);
+	void MatrixMultiply(Matrix<float, 4, 4>& matrix, const Matrix<float, 4, 4>& matrix1, const Matrix<float, 4, 4>& matrix2);
 
 
 private:
@@ -148,8 +154,8 @@ private:
 	PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB;
 	PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT;
 
-	float worldMatrix[16];
-	float projectionMatrix[16];
+	Matrix<float, 4, 4> worldMatrix;
+	Matrix<float, 4, 4> projectionMatrix;
 	char videoCardDescription[128];
 };
 

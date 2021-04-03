@@ -1,6 +1,7 @@
 #pragma once
 #include <initializer_list>
 #include <cassert>
+#include <cmath>
 
 template<typename T, int m, int n> 
 class Matrix
@@ -321,7 +322,7 @@ public:
 	void SetXYZ(T x, T y, T z);
 	Vector3<T> GetXYZ() const;
 
-
+	
 	T x; T y; T z;
 };
 template<typename T> inline
@@ -383,6 +384,74 @@ typedef Vector3<unsigned short> Vec3w;
 typedef Vector3<int> Vec3i;
 typedef Vector3<double> Vec3d;
 typedef Vector3<float> Vec3f;
+
+template<typename T>
+Vector3<T> operator+(const Vector3<T>& v1, const Vector3<T>& v2) {
+	Vector3<T> ret;
+
+	ret.x = v1.x + v2.x;
+	ret.y = v1.y + v2.y;
+	ret.z = v1.z + v2.z;
+	return ret;
+}
+
+template<typename T>
+Vector3<T> operator-(const Vector3<T>& v1, const Vector3<T>& v2) {
+	Vector3<T> ret;
+	
+	ret.x = v1.x - v2.x;
+	ret.y = v1.y - v2.y;
+	ret.z = v1.z - v2.z;
+	return ret;
+}
+
+template<typename T, typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr>
+Vector3<T> Cross(const Vector3<T>& v1, const Vector3<T>& v2) {
+	return Vector3<T>(v1.y * v2.z - v1.z * v2.y, v1.z * v2.x - v1.x * v2.z, v1.x * v2.y - v1.y * v2.x);
+}
+
+template<typename T, typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr>
+Vector3<T> Normalize(const Vector3<T>& v) {
+	Vector3<T> ret;
+	T length = sqrt(v.x * v.x) + (v.y * v.y) + (v.z * v.z);
+	ret.x = v.x / length;
+	ret.y = v.y / length;
+	ret.z = v.z / length;
+	
+	return ret;
+}
+
+template<typename T, typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr>
+T Dot(const Vector3<T>& v1, const Vector3<T>& v2) {
+	return T((v1.x * v2.x) + (v1.y * v2.y) + (v1.z * v2.z));
+}
+//Vector3<float> Normalize(const Vector3<float>& from, const Vector3<float>& to) {
+//	Vector3<float> ret;
+//
+//	ret = from - to;
+//
+//	float length = sqrtf((ret.x * ret.x) + (ret.y * ret.y) + (ret.z * ret.z));
+//
+//	ret.x = ret.x / length;
+//	ret.y = ret.y / length;
+//	ret.z = ret.z / length;
+//
+//	return ret;
+//}
+
+//Vector3<double> Normalize(const Vector3<double>& from, const Vector3<double>& to) {
+//	Vector3<double> ret;
+//
+//	ret = from - to;
+//
+//	double length = sqrt((ret.x * ret.x) + (ret.y * ret.y) + (ret.z * ret.z));
+//
+//	ret.x = ret.x / length;
+//	ret.y = ret.y / length;
+//	ret.z = ret.z / length;
+//
+//	return ret;
+//}
 
 ////////////////////////////////////////////////////////////////////
 //Vector
@@ -618,3 +687,5 @@ typedef Vector3<float> Vec3f;
 //	}
 //}
 //
+
+

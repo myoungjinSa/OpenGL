@@ -9,6 +9,9 @@ const float SCREEN_DEPTH = 1000.0f;
 const float SCREEN_NEAR = 0.1f;
 
 class OpenGL;
+class Object;
+class ColorShader;
+class Camera;
 class Renderer
 {
 public:
@@ -23,6 +26,9 @@ public:
 private:
 	bool Render();
 private:
-	OpenGL* pOpenGL;
+	OpenGL* pGL;
+	Camera* pCamera;
+	Object* pObject;
+	ColorShader* pShader;
 };
 

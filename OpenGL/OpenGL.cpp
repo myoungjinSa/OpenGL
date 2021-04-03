@@ -17,9 +17,7 @@ OpenGL::~OpenGL() {
 bool OpenGL::InitializeExtensions(HWND hWnd) {
 	HDC deviceContext;
 	PIXELFORMATDESCRIPTOR pixelFormat;
-	int error;
 	HGLRC renderContext;
-	bool result;
 
 	//Get the device context for this window.
 	deviceContext = GetDC(hWnd);
@@ -415,6 +413,18 @@ bool OpenGL::LoadExtensionList() {
 	return true;
 }
 
+void OpenGL::GetWorldMatrix(Matrix<float, 4, 4>& matrix) {
+	for (size_t iVal = 0; iVal < matrix.rows * matrix.cols; iVal++) {
+		matrix[iVal] = worldMatrix[iVal];
+	}
+}
+
+void OpenGL::GetProjectionMatrix(Matrix<float, 4, 4>& matrix) {
+	for (size_t iVal = 0; iVal < matrix.rows * matrix.cols; iVal++) {
+		matrix[iVal] = projectionMatrix[iVal];
+	}
+}
+
 void OpenGL::GetWorldMatrix(float* matrix) {
 	matrix[0] = worldMatrix[0];
 	matrix[1] = worldMatrix[1];
@@ -436,6 +446,7 @@ void OpenGL::GetWorldMatrix(float* matrix) {
 	matrix[14] = worldMatrix[14];
 	matrix[15] = worldMatrix[15];
 }
+
 
 
 
@@ -467,7 +478,7 @@ void OpenGL::GetVideoCardInfo(char* cardName)
 	strcpy_s(cardName, 128, videoCardDescription);
 }
 
-void OpenGL::BuildIdentityMatrix(float* matrix)
+void OpenGL::BuildIdentityMatrix(Matrix<float, 4, 4>& matrix)
 {
 	matrix[0] = 1.0f;
 	matrix[1] = 0.0f;
@@ -489,7 +500,7 @@ void OpenGL::BuildIdentityMatrix(float* matrix)
 	matrix[14] = 0.0f;
 	matrix[15] = 1.0f;
 }
-void OpenGL::BuildPerspectiveFovLHMatrix(float* matrix, float fieldOfView, float screenAspect, float screenNear, float screenDepth)
+void OpenGL::BuildPerspectiveFovLHMatrix(Matrix<float, 4, 4>& matrix, float fieldOfView, float screenAspect, float screenNear, float screenDepth)
 {
 	matrix[0] = 1.0f / (screenAspect * tan(fieldOfView * 0.5f));
 	matrix[1] = 0.0f;
@@ -512,7 +523,7 @@ void OpenGL::BuildPerspectiveFovLHMatrix(float* matrix, float fieldOfView, float
 	matrix[15] = 0.0f;
 }
 
-void OpenGL::MatrixRotationY(float* matrix, float angle)
+void OpenGL::MatrixRotationY(Matrix<float, 4, 4>& matrix, float angle)
 {
 	matrix[0] = cosf(angle);
 	matrix[1] = 0.0f;
@@ -535,7 +546,7 @@ void OpenGL::MatrixRotationY(float* matrix, float angle)
 	matrix[15] = 1.0f;
 }
 
-void OpenGL::MatrixTranslation(float* matrix, float x, float y, float z)
+void OpenGL::MatrixTranslation(Matrix<float, 4, 4>& matrix, float x, float y, float z)
 {
 	matrix[0] = 1.0f;
 	matrix[1] = 0.0f;
@@ -559,7 +570,7 @@ void OpenGL::MatrixTranslation(float* matrix, float x, float y, float z)
 
 }
 
-void OpenGL::MatrixMultiply(float* result, float* matrix1, float* matrix2)
+void OpenGL::MatrixMultiply(Matrix<float, 4, 4>& result, const Matrix<float, 4, 4>& matrix1, const Matrix<float, 4, 4>& matrix2)
 {
 	result[0] = (matrix1[0] * matrix2[0]) + (matrix1[1] * matrix2[4]) + (matrix1[2] * matrix2[8]) + (matrix1[3] * matrix2[12]);
 	result[1] = (matrix1[0] * matrix2[1]) + (matrix1[1] * matrix2[5]) + (matrix1[2] * matrix2[9]) + (matrix1[3] * matrix2[13]);

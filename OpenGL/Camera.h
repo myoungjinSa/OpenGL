@@ -17,7 +17,7 @@ public:
 	Vec3f GetRotation() const;
 
 	void Render();
-	void GetViewMatrix(const Matrix<float, 3, 3>& Matrix) const;
+	void GetViewMatrix(Matrix<float, 4, 4>& Matrix) const;
 private:
 	void MatrixRotationYawPitchRoll(Matrix<float, 3, 3>& Matrix, float, float, float);
 	void TransformCoord(Vec3f& Vec, Matrix<float, 3, 3>& Matrix);

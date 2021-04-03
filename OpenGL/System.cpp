@@ -274,6 +274,7 @@ bool System::InitializeWindows(OpenGL* pOpenGL, int& screenWidth, int& screenHei
 
 	// Hide the mouse cursor.
 	ShowCursor(false);
+	return true;
 }
 
 
