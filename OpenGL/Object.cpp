@@ -12,7 +12,7 @@ Object::~Object() {
 
 bool Object::Initialize(OpenGL* pGL) {
 	
-	pMesh = new Mesh();
+	pMesh = new TriangleMesh();
 	if (!pMesh)
 		return false;
 

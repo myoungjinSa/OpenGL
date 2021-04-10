@@ -92,7 +92,7 @@ bool Renderer::Render()
 	Matrix<float, 4, 4> projectionMatrix;
 
 	// Clear the buffers to begin the scene.
-	pGL->BeginScene(0.0f, 1.0f, 1.0f, 1.0f);
+	pGL->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
 
 	pCamera->Render();
 

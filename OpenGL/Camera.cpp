@@ -103,6 +103,8 @@ void Camera::BuildViewMatrix(Vec3f pos, Vec3f lookAt, Vec3f up) {
 	Vec3f xAxis, yAxis, zAxis;
 	zAxis = Normalize(lookAt - position);
 
+
+
 	xAxis = Cross(up, zAxis);
 	xAxis = Normalize(xAxis);
 

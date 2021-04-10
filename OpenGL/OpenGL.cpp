@@ -174,6 +174,7 @@ bool OpenGL::InitializeOpenGL(HWND hWnd, int screenWidth, int screenHeight, floa
 	//Turn on or off the vertical sync depending on the inpu bool value;
 	(vSync) ? result = wglSwapIntervalEXT(1) : result = wglSwapIntervalEXT(0);
 
+
 	//Check if vSync was set correctly.
 	if (result != TRUE)
 		return false;
@@ -209,38 +210,54 @@ void OpenGL::EndScene() {
 }
 
 bool OpenGL::LoadExtensionList() {
-	//Load the OpenGL extensions that this application will be Using.
+	// Load the OpenGL extensions that this application will be using.
 	wglChoosePixelFormatARB = (PFNWGLCHOOSEPIXELFORMATARBPROC)wglGetProcAddress("wglChoosePixelFormatARB");
 	if (!wglChoosePixelFormatARB)
+	{
 		return false;
+	}
 
 	wglCreateContextAttribsARB = (PFNWGLCREATECONTEXTATTRIBSARBPROC)wglGetProcAddress("wglCreateContextAttribsARB");
 	if (!wglCreateContextAttribsARB)
+	{
 		return false;
+	}
 
 	wglSwapIntervalEXT = (PFNWGLSWAPINTERVALEXTPROC)wglGetProcAddress("wglSwapIntervalEXT");
 	if (!wglSwapIntervalEXT)
+	{
 		return false;
+	}
 
 	glAttachShader = (PFNGLATTACHSHADERPROC)wglGetProcAddress("glAttachShader");
 	if (!glAttachShader)
+	{
 		return false;
+	}
 
 	glBindBuffer = (PFNGLBINDBUFFERPROC)wglGetProcAddress("glBindBuffer");
 	if (!glBindBuffer)
+	{
 		return false;
+	}
 
 	glBindVertexArray = (PFNGLBINDVERTEXARRAYPROC)wglGetProcAddress("glBindVertexArray");
 	if (!glBindVertexArray)
+	{
 		return false;
+	}
 
 	glBufferData = (PFNGLBUFFERDATAPROC)wglGetProcAddress("glBufferData");
 	if (!glBufferData)
+	{
 		return false;
+	}
 
 	glCompileShader = (PFNGLCOMPILESHADERPROC)wglGetProcAddress("glCompileShader");
 	if (!glCompileShader)
+	{
 		return false;
+	}
 
 	glCreateProgram = (PFNGLCREATEPROGRAMPROC)wglGetProcAddress("glCreateProgram");
 	if (!glCreateProgram)

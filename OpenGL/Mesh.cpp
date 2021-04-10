@@ -1,5 +1,6 @@
 #include "OpenGL.h"
 #include "Mesh.h"
+#include <string>
 
 Vertex::Vertex()
 	: position()
@@ -44,8 +45,31 @@ void Mesh::Render(const OpenGL& gl) {
 }
 
 bool Mesh::InitializeBuffers(const OpenGL& gl) {
+	return true;
+}
+
+void Mesh::RenderBuffers(const OpenGL& gl) {
+
+}
+
+void Mesh::ShutdownBuffers(const OpenGL& gl) {
+
+}
+
+TriangleMesh::TriangleMesh() 
+	: Mesh()
+{
+
+}
+
+TriangleMesh::~TriangleMesh() {
+
+}
+
+bool TriangleMesh::InitializeBuffers(const OpenGL& gl) {
 	vertexCount = 3;
 	indexCount = 3;
+
 	vertices = new ColorVertex[vertexCount];
 	if (!vertices)
 		return false;
@@ -57,7 +81,7 @@ bool Mesh::InitializeBuffers(const OpenGL& gl) {
 	//Bottom Left
 	vertices[0].position = Vec3f(-1.0f, -1.0f, 0.0f);
 	vertices[0].color = Vec3f(0.0f, 1.0f, 0.0f);
- 
+
 	//Top Middle
 	vertices[1].position = Vec3f(0.0f, 1.0f, 0.0f);
 	vertices[1].color = Vec3f(0.0f, 1.0f, 0.0f);
@@ -93,7 +117,7 @@ bool Mesh::InitializeBuffers(const OpenGL& gl) {
 
 	//Specify the location and format of the color portion of the vertex buffer.
 	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
-	gl.glVertexAttribPointer(1, 3, GL_FLOAT, false, sizeof(ColorVertex), (unsigned char*)0 + (3 * sizeof(float)));
+	gl.glVertexAttribPointer(1, 3, GL_FLOAT, false, sizeof(ColorVertex), (unsigned char*)NULL + (3 * sizeof(float)));
 
 	//Generate an ID for the index buffer
 	gl.glGenBuffers(1, &indexBufferId);
@@ -112,17 +136,17 @@ bool Mesh::InitializeBuffers(const OpenGL& gl) {
 	return true;
 }
 
-void Mesh::RenderBuffers(const OpenGL& gl) {
+void TriangleMesh::RenderBuffers(const OpenGL& gl) {
 	gl.glBindVertexArray(vertexArrayId);
 
 	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
 }
 
-void Mesh::ShutdownBuffers(const OpenGL& gl) {
+void TriangleMesh::ShutdownBuffers(const OpenGL& gl) {
 	//Disable the two vertex array attributes.
 	gl.glDisableVertexAttribArray(0);
 	gl.glDisableVertexAttribArray(1);
-	
+
 	//Release the vertex buffer.
 	gl.glBindBuffer(GL_ARRAY_BUFFER, 0);
 	gl.glDeleteBuffers(1, &vertexBufferId);
