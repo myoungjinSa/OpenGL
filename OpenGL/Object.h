@@ -7,10 +7,13 @@ public:
 	Object();
 	~Object();
 
-	bool Initialize(OpenGL* pGL);
-	void Shutdown(OpenGL* pGL);
-	void Render(OpenGL* pGL);
+	virtual bool Initialize(OpenGL* pGL);
+	virtual void Shutdown(OpenGL* pGL);
+	virtual void Render(OpenGL* pGL);
 private:
 	Mesh* pMesh;
 };
 
+class Triangle : public Object {
+
+};

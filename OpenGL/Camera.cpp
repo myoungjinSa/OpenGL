@@ -40,7 +40,6 @@ void Camera::Render() {
 	lookAt.SetXYZ(0.0f, 0.0f, 1.0f);
 
 	//Set the yaw (Y axis), pitch(X axis) and roll(Z axis) roations in radians
-
 	pitch = rotation.x * 0.0174532925f;
 	yaw = rotation.y * 0.0174532925f;
 	roll = rotation.z * 0.0174532925f;

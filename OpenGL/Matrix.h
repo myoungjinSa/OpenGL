@@ -2,6 +2,7 @@
 #include <initializer_list>
 #include <cassert>
 #include <cmath>
+#include "MathUtils.h"
 
 template<typename T, int m, int n> 
 class Matrix
@@ -300,9 +301,157 @@ template<typename T>
 class Vector2 {
 public:
 	typedef T value_type;
+	
+	Vector2();
+	Vector2(T v0, T v1);
+	Vector2(const Vector2<T>& v);
+	void SetXY(T x, T y);
+
+	T CalculateMagnitude();
+	float CalculateTheta();
+	void Normalize();
+	Vector2 Multiply(const Vector2<T>& v);	
+	static Vector2 GetMidPoint(const Vector2<T>& start, const Vector2<T>& end);
 
 
+	template<typename T2> operator Vector2<T2>() const;
+	Vector2<T>& operator+=(const Vector2<T>& rhs);
+	Vector2<T>& operator-=(const Vector2<T>& rhs);
+	Vector2<T>& operator*=(const Vector2<T>& rhs);
+	Vector2<T>& operator*=(const float& scalarConstant);
+	Vector2<T>& operator/=(const float& scalarConstant);
+
+	T x; T y;
 };
+
+template<typename T> inline
+Vector2<T>::Vector2() 
+	: x(T(0)), y(T(0))
+{
+
+}
+
+template<typename T> inline
+Vector2<T>::Vector2(T v0, T v1)
+	: x(v0), y(v1)
+{
+
+}
+
+template<typename T> inline
+Vector2<T>::Vector2(const Vector2<T>& v)
+	: x(v.x), y(v.y)
+{
+
+}
+
+template<typename T> inline
+T Vector2<T>::CalculateMagnitude() {
+	return sqrt(x * x) + (y * y);
+}
+
+template<typename T> inline
+void Vector2<T>::Normalize() {
+	T len = CalculateMagnitude();
+	if (len == 0)
+		return;
+	x /= len;
+	y /= len;
+}
+
+template<typename T> inline
+float Vector2<T>::CalculateTheta() {
+	return MathUtils::RadiansToDegrees(atan2(y, x));
+}
+
+template<typename T> inline
+Vector2<T> Vector2<T>::Multiply(const Vector2<T>& v) {
+	Vector2<T> ret;
+	ret.x = x * v.x;
+	ret.y = y * v.y;
+	return ret;
+}
+
+template<typename T> inline
+void Vector2<T>::SetXY(T _x, T _y) {
+	x = _x; y = _y; 
+}
+
+template<typename T> 
+Vector2<T> Vector2<T>::GetMidPoint(const Vector2<T>& start, const Vector2<T>& end) {
+	Vector2<T> midPoint;
+	midPoint.x = (start.x + end.x) / 2.0f;
+	midPoint.y = (start.y + end.y) / 2.0f;
+	return midPoint;
+}
+///////////////////////////////////
+//operator
+template<typename T> inline
+Vector2<T>& Vector2<T>::operator+=(const Vector2<T>& rhs) {
+	x += rhs.x;
+	y += rhs.y;
+	return *this;
+}
+
+template<typename T> inline
+Vector2<T>& Vector2<T>::operator-=(const Vector2<T>& rhs) {
+	x -= rhs.x;
+	y -= rhs.y;
+	return *this;
+}
+template<typename T> inline
+Vector2<T>& Vector2<T>::operator*=(const Vector2<T>& rhs) {
+	x *= rhs.x;
+	y *= rhs.y;
+	return *this;
+}
+template<typename T> inline
+Vector2<T>& Vector2<T>::operator*=(const float& scalarConstant) {
+	x *= scalarConstant;
+	y *= scalarConstant;
+	return *this;
+}
+
+template<typename T> inline
+Vector2<T>& Vector2<T>::operator/=(const float& scalarConstant) {
+	if (scalarConstant == 0)
+		return *this;
+	x /= scalarConstant;
+	y /= scalarConstant;
+	return *this;
+}
+
+///////////////////////////////////
+//Global Function
+template<typename T, typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr>
+Vector2<T> Normalize(const Vector2<T>& v) {
+	Vector2<T> ret;
+	T length = sqrt(v.x * v.x) + (v.y * v.y);
+	ret.x = v.x / length;
+	ret.y = v.y / length;
+	
+	return ret;
+}
+
+template<typename T, typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr>
+T Dot(const Vector2<T>& v1, const Vector2<T>& v2) {
+	return T((v1.x * v2.x) + (v1.y * v2.y));
+}
+
+template<typename T> template<typename T2> inline
+Vector2<T>::operator Vector2<T2>() const
+{
+	Vector2<T2> v;
+	v.x = x; v.y = y;;
+	return v;
+}
+typedef Vector2<unsigned char> Vec2b;
+typedef Vector2<short> Vec2s;
+typedef Vector2<unsigned short> Vec2w;
+typedef Vector2<int> Vec2i;
+typedef Vector2<double> Vec2d;
+typedef Vector2<float> Vec2f;
+
 
 template<typename T>
 class Vector3{
@@ -322,7 +471,6 @@ public:
 	void SetXYZ(T x, T y, T z);
 	Vector3<T> GetXYZ() const;
 
-	
 	T x; T y; T z;
 };
 template<typename T> inline
@@ -353,7 +501,6 @@ Vector3<T> Vector3<T>::Multiply(const Vector3<T>& v) {
 	return ret;
 }
 
-
 template<> inline
 Vector3<float> Vector3<float>::Cross(const Vector3<float>& v) const {
 	return Vector3<float>(y * z - z * y, z * x - x * z, x * y - y * x);
@@ -370,6 +517,7 @@ template<typename T> inline
 void Vector3<T>::SetXYZ(T _x, T _y, T _z) {
 	x = _x; y = _y; z = _z;
 }
+
 
 
 
@@ -425,267 +573,3 @@ template<typename T, typename std::enable_if<std::is_floating_point<T>::value>::
 T Dot(const Vector3<T>& v1, const Vector3<T>& v2) {
 	return T((v1.x * v2.x) + (v1.y * v2.y) + (v1.z * v2.z));
 }
-//Vector3<float> Normalize(const Vector3<float>& from, const Vector3<float>& to) {
-//	Vector3<float> ret;
-//
-//	ret = from - to;
-//
-//	float length = sqrtf((ret.x * ret.x) + (ret.y * ret.y) + (ret.z * ret.z));
-//
-//	ret.x = ret.x / length;
-//	ret.y = ret.y / length;
-//	ret.z = ret.z / length;
-//
-//	return ret;
-//}
-
-//Vector3<double> Normalize(const Vector3<double>& from, const Vector3<double>& to) {
-//	Vector3<double> ret;
-//
-//	ret = from - to;
-//
-//	double length = sqrt((ret.x * ret.x) + (ret.y * ret.y) + (ret.z * ret.z));
-//
-//	ret.x = ret.x / length;
-//	ret.y = ret.y / length;
-//	ret.z = ret.z / length;
-//
-//	return ret;
-//}
-
-////////////////////////////////////////////////////////////////////
-//Vector
-
-//
-//template<typename T, int count> 
-//class Vector  : public Matrix<T, count, 1>
-//{
-//public:
-//	typedef T value_type;
-//
-//	enum {
-//		channels = count,
-//		_dummy_enum_finalizer = 0
-//	};
-//
-//	
-//	Vector();
-//
-//	Vector(T v0);
-//	Vector(T v0, T v1);
-//	Vector(T v0, T v1, T v2);
-//	Vector(T v0, T v1, T v2, T v3);
-//
-//	explicit Vector(const T* valueues);
-//
-//	Vector(std::initializer_list<T> list);
-//	Vector(const Vector<T, count>& v);
-//
-//	static Vector All(T alpha);
-//
-//	Vector Multiply(const Vector<T, count>& v)const;
-//
-//	template<typename T2> operator Vector<T2, count>() const;
-//
-//	//conjugation (makes sense for complex numbers and quaternions)
-//	Vector Conjugation() const;
-//	Vector Cross(const Vector& v)const;
-//
-//	const T& operator[](int idx) const;
-//	T& operator[](int idx);
-//
-//	const T& operator()(int idx) const;
-//	T& operator()(int idx);
-//
-//
-//	void SetValues(const Vector<T, count>& vec);
-//	
-//	//T& p = Matrix<T, count, 1>::value;
-//	//static Vector Bind(T x, T y, T z, T w);
-//};
-//
-//
-//typedef Vector<unsigned char, 2> Vec2b;
-//typedef Vector<unsigned char, 3> Vec3b;
-//typedef Vector<unsigned char, 4> Vec4b;
-//
-//typedef Vector<short, 2> Vec2s;
-//typedef Vector<short, 3> Vec3s;
-//typedef Vector<short, 4> Vec4s;
-//
-//typedef Vector<unsigned short, 2> Vec2w;
-//typedef Vector<unsigned short, 3> Vec3w;
-//typedef Vector<unsigned short, 4> Vec4w;
-//
-//typedef Vector<int, 2> Vec2i;
-//typedef Vector<int, 3> Vec3i;
-//typedef Vector<int, 4> Vec4i;
-//
-//typedef Vector<float, 2> Vec2f;
-//typedef Vector<float, 3> Vec3f;
-//typedef Vector<float, 4> Vec4f;
-//
-//typedef Vector<double, 2> Vec2d;
-//typedef Vector<double, 3> Vec3d;
-//typedef Vector<double, 4> Vec4d;
-//
-//
-//template<typename T, int count> inline
-//Vector<T, count>::Vector() {
-//
-//}
-//
-//template<typename T, int count> inline
-//Vector<T, count>::Vector(T v0) 
-//	: Matrix<T, count, 1>(v0) {
-//
-//}
-//
-//template<typename T, int count> inline
-//Vector<T, count>::Vector(T v0, T v1) 
-//	: Matrix<T, count, 1>(v0, v1){
-//
-//}
-//
-//template<typename T, int count> inline
-//Vector<T, count>::Vector(T v0, T v1, T v2)
-//	: Matrix<T, count, 1>(v0, v1, v2) {
-//
-//}
-//template<typename T, int count> inline
-//Vector<T, count>::Vector(T v0, T v1, T v2, T v3)
-//	: Matrix<T, count, 1>(v0, v1, v2, v3) {}
-//
-//
-//template<typename T, int count> inline
-//Vector<T, count>::Vector(const T* valueues) 
-//	:Matrix<T, count, 1>(valueues){
-//
-//}
-//
-//template<typename T, int count> inline
-//Vector<T, count>::Vector(std::initializer_list<T> list)
-//	: Matrix<T, count, 1>(list) {}
-//
-//template<typename T, int count> inline
-//Vector<T, count>::Vector(const Vector<T, count>& m)
-//	: Matrix<T, count, 1>(m.value) {}
-//
-//
-//template<typename T, int count> inline
-//Vector<T, count> Vector<T, count>::All(T alpha)
-//{
-//	Vector v;
-//	for (int i = 0; i < count; i++) v.value[i] = alpha;
-//	return v;
-//}
-//
-//template<typename T, int count> inline
-//Vector<T, count> Vector<T, count>::Multiply(const Vector<T, count>& v) const
-//{
-//	Vector<T, count> w;
-//	for (int i = 0; i < count; i++) w.value[i] = this->value[i] * v.value[i];
-//	return w;
-//}
-//
-//template<typename T> Vector<T, 2> inline Conjugate(const Vector<T, 2>& v) {
-//	return Vector<T, 2>(v[0], -v[1]);
-//}
-//
-//template<typename T> Vector<T, 4> inline Conjugate(const Vector<T, 4>& v)
-//{
-//	return Vector<T, 4>(v[0], -v[1], -v[2], -v[3]);
-//}
-//template<> inline
-//Vector<float, 2> Vector<float, 2>::Conjugation() const
-//{
-//	return Conjugate(*this);
-//}
-//template<> inline
-//Vector<double, 2> Vector<double, 2>::Conjugation() const
-//{
-//	return Conjugate(*this);
-//}
-//
-//template<> inline
-//Vector<float, 4> Vector<float, 4>::Conjugation() const
-//{
-//	return Conjugate(*this);
-//}
-//
-//template<> inline
-//Vector<double, 4> Vector<double, 4>::Conjugation() const
-//{
-//	return Conjugate(*this);
-//}
-//
-//template<typename T, int count> inline
-//Vector<T, count> Vector<T, count>::Cross(const Vector<T, count>&) const
-//{
-//	static_assert(count == 3, "for arbitrary-size vector there is no cross-product defined");
-//	return Vector<T, count>();
-//}
-//
-//
-//template<> inline
-//Vector<float, 3> Vector<float, 3>::Cross(const Vector<float, 3>& v) const
-//{
-//	return Vector<float, 3>(this->value[1] * v.value[2] - this->value[2] * v.value[1],
-//		this->value[2] * v.value[0] - this->value[0] * v.value[2],
-//		this->value[0] * v.value[1] - this->value[1] * v.value[0]);
-//}
-//
-//template<> inline
-//Vector<double, 3> Vector<double, 3>::Cross(const Vector<double, 3>& v) const
-//{
-//	return Vector<double, 3>(this->value[1] * v.value[2] - this->value[2] * v.value[1],
-//		this->value[2] * v.value[0] - this->value[0] * v.value[2],
-//		this->value[0] * v.value[1] - this->value[1] * v.value[0]);
-//}
-//
-//template<typename T, int count> template<typename T2> inline
-//Vector<T, count>::operator Vector<T2, count>() const
-//{
-//	Vector<T2, count> v;
-//	for (int i = 0; i < count; i++) v.value[i] = this->value[i];
-//	return v;
-//}
-//
-//
-//template<typename T, int count> inline
-//const T& Vector<T, count>::operator [](int i) const
-//{
-//	assert((unsigned)i < (unsigned)count);
-//	return this->value[i];
-//}
-//
-//template<typename T, int count> inline
-//T& Vector<T, count>::operator [](int i)
-//{
-//	assert((unsigned)i < (unsigned)count);
-//	return this->value[i];
-//}
-//
-//template<typename T, int count> inline
-//const T& Vector<T, count>::operator()(int i) const
-//{
-//	assert((unsigned)i < (unsigned)count);
-//	return this->value[i];
-//}
-//
-//template<typename T, int count> inline
-//T& Vector<T, count>::operator ()(int i)
-//{
-//	assert((unsigned)i < (unsigned)count);
-//	return this->value[i];
-//}
-//
-//template<typename T, int count> inline
-//void Vector<T, count>::SetValues(const Vector<T, count>& vec) {
-//	for (size_t iVal = 0; iVal < count; iVal++) {
-//		this->value[iVal] = vec.value[iVal];
-//	}
-//}
-//
-
-

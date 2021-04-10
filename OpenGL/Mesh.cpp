@@ -23,7 +23,7 @@ ColorVertex::~ColorVertex() {
 }
 
 Mesh::Mesh()
-	: vertices(nullptr), indices(nullptr),vertexCount(0), vertexArrayId(0), vertexBufferId(0), indexCount(0), indexBufferId(0)
+	:vertexCount(0), vertexArrayId(0), vertexBufferId(0), indexCount(0), indexBufferId(0)
 {
 
 }
@@ -56,19 +56,20 @@ void Mesh::ShutdownBuffers(const OpenGL& gl) {
 
 }
 
-TriangleMesh::TriangleMesh() 
-	: Mesh()
+DiffuseMesh::DiffuseMesh() 
+	: Mesh(), vertices(nullptr), indices(nullptr)
 {
 
 }
 
-TriangleMesh::~TriangleMesh() {
+DiffuseMesh::~DiffuseMesh() {
 
 }
 
-bool TriangleMesh::InitializeBuffers(const OpenGL& gl) {
+bool DiffuseMesh::InitializeBuffers(const OpenGL& gl) {
 	vertexCount = 3;
 	indexCount = 3;
+
 
 	vertices = new ColorVertex[vertexCount];
 	if (!vertices)
@@ -78,22 +79,24 @@ bool TriangleMesh::InitializeBuffers(const OpenGL& gl) {
 	if (!indices)
 		return false;
 
-	//Bottom Left
-	vertices[0].position = Vec3f(-1.0f, -1.0f, 0.0f);
-	vertices[0].color = Vec3f(0.0f, 1.0f, 0.0f);
+	// Bottom left.
+	vertices[0].position = Vec3f(-1.0f, -1.0f, 0.0f);  // Position.
+	vertices[0].color = Vec3f(0.0f, 1.0f, 0.0f);  // Color.
+	
+	// Top middle.
+	vertices[1].position = Vec3f(0.0f, 1.0f, 0.0f);  // Position.
+	vertices[1].color = Vec3f(0.0f, 1.0f, 0.0f);  // Color.
 
-	//Top Middle
-	vertices[1].position = Vec3f(0.0f, 1.0f, 0.0f);
-	vertices[1].color = Vec3f(0.0f, 1.0f, 0.0f);
 
-	//Bottom Right
-	vertices[2].position = Vec3f(1.0f, -1.0f, 0.0f);
-	vertices[2].color = Vec3f(0.0f, 1.0f, 0.0f);
+	// Bottom right.
+	vertices[2].position = Vec3f(1.0f, -1.0f, 0.0f);  // Position.
+	vertices[2].color = Vec3f(0.0f, 1.0f, 0.0f);  // Color.
 
-	indices[0] = 0;	// bottom left
-	indices[1] = 1; // top Middle
-	indices[2] = 2; // bottom right
-
+	// Load the index array with data.
+	indices[0] = 0;  // Bottom left.
+	indices[1] = 1;  // Top middle.
+	indices[2] = 2;  // Bottom right.
+	
 	//Allocate an OpenGL vertex array object.
 	gl.glGenVertexArrays(1, &vertexArrayId);
 
@@ -136,13 +139,13 @@ bool TriangleMesh::InitializeBuffers(const OpenGL& gl) {
 	return true;
 }
 
-void TriangleMesh::RenderBuffers(const OpenGL& gl) {
+void DiffuseMesh::RenderBuffers(const OpenGL& gl) {
 	gl.glBindVertexArray(vertexArrayId);
 
 	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
 }
 
-void TriangleMesh::ShutdownBuffers(const OpenGL& gl) {
+void DiffuseMesh::ShutdownBuffers(const OpenGL& gl) {
 	//Disable the two vertex array attributes.
 	gl.glDisableVertexAttribArray(0);
 	gl.glDisableVertexAttribArray(1);
@@ -158,4 +161,18 @@ void TriangleMesh::ShutdownBuffers(const OpenGL& gl) {
 	//Release the vertex array object.
 	gl.glBindVertexArray(0);
 	gl.glDeleteVertexArrays(1, &vertexArrayId);
+}
+
+
+///////////////////////////////// Mesh Builder /////////////////////////////
+MeshBuilder::MeshBuilder() {
+
+}
+
+void MeshBuilder::Begin() {
+
+}
+
+void MeshBuilder::End() {
+
 }
