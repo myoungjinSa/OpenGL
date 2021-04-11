@@ -304,7 +304,7 @@ public:
 	
 	Vector2();
 	Vector2(T v0, T v1);
-	Vector2(const Vector2<T>& v);
+	Vector2(const Vector2<T>& v) = default;
 	void SetXY(T x, T y);
 
 	T CalculateMagnitude();
@@ -339,13 +339,6 @@ Vector2<T>::Vector2(T v0, T v1)
 }
 
 template<typename T> inline
-Vector2<T>::Vector2(const Vector2<T>& v)
-	: x(v.x), y(v.y)
-{
-
-}
-
-template<typename T> inline
 T Vector2<T>::CalculateMagnitude() {
 	return sqrt(x * x) + (y * y);
 }
@@ -353,7 +346,7 @@ T Vector2<T>::CalculateMagnitude() {
 template<typename T> inline
 void Vector2<T>::Normalize() {
 	T len = CalculateMagnitude();
-	if (len == 0)
+	if (len == T(0))
 		return;
 	x /= len;
 	y /= len;
@@ -461,16 +454,22 @@ public:
 	Vector3();
 	Vector3(T v0, T v1, T v2);
 	//explicit Vector3(const T* values);
-	Vector3(const Vector3<T>& v);
-
-	Vector3 Multiply(const Vector3<T>& v);
-	template<typename T2> operator Vector3<T2>() const;
+	Vector3(const Vector3<T>& v) = default;
+	void SetXYZ(T x, T y, T z);
 
 	Vector3 Cross(const Vector3& v) const;
+	void Normalize();
+	T CalculateMagnitude() const;
+	static Vector3 GetMidPoint(const Vector3& start, const Vector3& end);
+	Vector3 Multiply(const Vector3<T>& v);
 
-	void SetXYZ(T x, T y, T z);
-	Vector3<T> GetXYZ() const;
 
+	template<typename T2> operator Vector3<T2>() const;
+	Vector3& operator+=(const Vector3& rhs);
+	Vector3& operator-=(const Vector3& rhs);
+	Vector3& operator*=(const float& scalarConstant);
+	Vector3& operator=(const Vector2<T>& rhs);
+	
 	T x; T y; T z;
 };
 template<typename T> inline
@@ -484,14 +483,6 @@ Vector3<T>::Vector3(T v0, T v1, T v2)
 
 }
 
-
-template<typename T> inline
-Vector3<T>::Vector3(const Vector3<T>& v) 
-	: x(v.x), y(v.y), z(v.z)
-{
-
-}
-
 template<typename T> inline
 Vector3<T> Vector3<T>::Multiply(const Vector3<T>& v) {
 	Vector3<T> ret;
@@ -501,10 +492,6 @@ Vector3<T> Vector3<T>::Multiply(const Vector3<T>& v) {
 	return ret;
 }
 
-template<> inline
-Vector3<float> Vector3<float>::Cross(const Vector3<float>& v) const {
-	return Vector3<float>(y * z - z * y, z * x - x * z, x * y - y * x);
-}
 template<typename T> template<typename T2> inline
 Vector3<T>::operator Vector3<T2>() const
 {
@@ -512,20 +499,77 @@ Vector3<T>::operator Vector3<T2>() const
 	v.x = x; v.y = y; v.z = z;
 	return v;
 }
+template<typename T> inline
+Vector3<T> Vector3<T>::Cross(const Vector3<T>& v) const {
+	return Vector3<T>(y * z - z * y, z * x - x * z, x * y - y * x);
+}
+
+template<typename T>
+void Vector3<T>::Normalize() {
+	T len = CalculateMagnitude();
+	if (len == T(0))
+		return;
+	x /= len;
+	y /= len;
+	z /= len;
+}
+
+template<typename T> 
+T Vector3<T>::CalculateMagnitude() const {
+	return sqrt((x * x) + (y * y) + (z * z));
+}
 
 template<typename T> inline
 void Vector3<T>::SetXYZ(T _x, T _y, T _z) {
 	x = _x; y = _y; z = _z;
 }
 
+template<typename T> inline
+Vector3<T> Vector3<T>::GetMidPoint(const Vector3<T>& start, const Vector3<T>& end) {
+	Vector3<T> midPoint;
+	midPoint.x = (start.x + end.x) / 2.0f;
+	midPoint.y = (start.y + end.y) / 2.0f;
+	midPoint.z = (start.z + end.z) / 2.0f;
+	return midPoint;
+}
 
 
+/// <summary>
+/// operator
+/// </summary>
+template<typename T> inline
+Vector3<T>& Vector3<T>::operator+=(const Vector3<T>& rhs) {
+	x += rhs.x;
+	y += rhs.y;
+	z += rhs.z;
+	return *this;
+}
 
 template<typename T> inline
-Vector3<T> Vector3<T>::GetXYZ() const{
-	Vector3<T> v(x, y, z);
-	return v;
+Vector3<T>& Vector3<T>::operator-=(const Vector3<T>& rhs) {
+	x -= rhs.x;
+	y -= rhs.y;
+	z -= rhs.z;
+	return *this;
 }
+
+template<typename T> inline
+Vector3<T>& Vector3<T>::operator*=(const float& scalar) {
+	x *= scalar;
+	y *= scalar;
+	z *= scalar;
+	return *this;
+}
+
+template<typename T> inline
+Vector3<T>& Vector3<T>::operator=(const Vector2<T>& rhs) {
+	x += rhs.x;
+	y += rhs.y;
+	z += T(0);
+	return *this;
+}
+
+
 typedef Vector3<unsigned char> Vec3b;
 typedef Vector3<short> Vec3s;
 typedef Vector3<unsigned short> Vec3w;
@@ -533,6 +577,9 @@ typedef Vector3<int> Vec3i;
 typedef Vector3<double> Vec3d;
 typedef Vector3<float> Vec3f;
 
+
+///////
+//Global Functions
 template<typename T>
 Vector3<T> operator+(const Vector3<T>& v1, const Vector3<T>& v2) {
 	Vector3<T> ret;
@@ -573,3 +620,162 @@ template<typename T, typename std::enable_if<std::is_floating_point<T>::value>::
 T Dot(const Vector3<T>& v1, const Vector3<T>& v2) {
 	return T((v1.x * v2.x) + (v1.y * v2.y) + (v1.z * v2.z));
 }
+
+
+template<typename T> 
+class Vector4 {
+public:
+	typedef T value_type;
+
+	Vector4();
+	Vector4(T v0, T v1, T v2, T v3);
+	Vector4(const Vector2<T>& base, float z, float w);
+	Vector4(const Vector3<T>& base, float w);
+	Vector4(const Vector4<T>& other) = default;
+	void SetXYZW(T x, T y, T z, T w);
+
+	///////////////////////////////////////////////
+	T CalculateMagnitude() const;
+	void Normalize();
+	static Vector4 GetMidPoint(const Vector4& start, const Vector4& end);
+
+	///////////////////////////////////////////////
+	Vector4& operator+=(const Vector4& rhs);
+	Vector4& operator-=(const Vector4& rhs);
+	Vector4& operator*=(const float& scalarConstant);
+	Vector4& operator=(const Vector2<T>& rhs);
+	Vector4& operator=(const Vector3<T>& rhs);
+
+	T x; T y; T z; T w;
+};
+
+template<typename T> inline
+Vector4<T>::Vector4() 
+	:x(T(0)), y(T(0)), z(T(0)), w(T(0))
+{
+
+}
+
+template<typename T> inline
+Vector4<T>::Vector4(T v0, T v1, T v2, T v3) 
+	:x(v0), y(v1), z(v2), w(v3)
+{
+
+}
+
+template<typename T> inline
+Vector4<T>::Vector4(const Vector2<T>& base, float _z, float _w) 
+	:x(base.x), y(base.y), z(_z), w(_w)
+{
+
+}
+
+template<typename T> inline
+Vector4<T>::Vector4(const Vector3<T>& base, float _w) 
+	: x(base.x), y(base.y), z(base.z), w(_w)
+{
+
+}
+
+
+template<typename T> inline
+void Vector4<T>::SetXYZW(T _x, T _y, T _z, T _w) {
+	x = _x; y = _y; z = _z; w = _w;
+}
+
+template<typename T> inline
+T Vector4<T>::CalculateMagnitude() const
+{
+	return sqrt((x * x) + (y * y) + (z * z) + (w * w));
+}
+
+template<typename T> inline
+void Vector4<T>::Normalize()
+{
+	T length = CalculateMagnitude();
+	if (length == T(0))
+	{
+		return;
+	}
+	x /= length;
+	y /= length;
+	z /= length;
+	w /= length;
+}
+
+
+/////////////////////////////////////////////////////////////////////////////////
+//operator
+template<typename T> inline
+Vector4<T>& Vector4<T>::operator+=(const Vector4<T>& rhs)
+{
+	this->x += rhs.x;
+	this->y += rhs.y;
+	this->z += rhs.z;
+	this->w += rhs.w;
+	return *this;
+}
+
+template<typename T> inline
+Vector4<T>& Vector4<T>::operator-=(const Vector4<T>& rhs)
+{
+	this->x += rhs.x;
+	this->y += rhs.y;
+	this->z += rhs.z;
+	this->w += rhs.w;
+	return *this;
+}
+
+template<typename T> inline
+Vector4<T>& Vector4<T>::operator*=(const float& scalar)
+{
+	this->x += scalar;
+	this->y += scalar;
+	this->z += scalar;
+	this->w += scalar;
+	return *this;
+}
+
+template<typename T> inline
+Vector4<T>& Vector4<T>::operator=(const Vector2<T>& rhs) {
+	this->x = rhs.x;
+	this->y = rhs.y;
+	this->z = 0.0f;
+	this->w = 0.0f;
+	return *this;
+}
+template<typename T> inline
+Vector4<T>& Vector4<T>::operator=(const Vector3<T>& rhs) {
+	this->x = rhs.x;
+	this->y = rhs.y;
+	this->z = rhs.z;
+	this->w = 0.0f;
+	return *this;
+}
+
+
+//-----------------------------------------------------------------------------------
+template<typename T> 
+Vector4<T> Vector4<T>::GetMidPoint(const Vector4<T>& start, const Vector4<T>& end)
+{
+	Vector4<T> midpoint;
+	midpoint.x = (start.x + end.x) / 2.0f;
+	midpoint.y = (start.y + end.y) / 2.0f;
+	midpoint.z = (start.z + end.z) / 2.0f;
+	midpoint.w = (start.w + end.w) / 2.0f;
+	return(midpoint);
+}
+
+
+//Global Functions
+template<typename T, typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr>
+T Dot(const Vector4<T>& v1, const Vector4<T>& v2) {
+	return T((v1.x * v2.x) + (v1.y * v2.y) + (v1.z * v2.z));
+}
+
+typedef Vector4<unsigned char> Vec4b;
+typedef Vector4<short> Vec4s;
+typedef Vector4<unsigned short> Vec4w;
+typedef Vector4<int> Vec4i;
+typedef Vector4<double> Vec4d;
+typedef Vector4<float> Vec4f;
