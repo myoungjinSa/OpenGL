@@ -1,8 +1,8 @@
-#include "OpenGL.h"
+#include "Renderer.h"
 #include "Camera.h"
 #include "Shader.h"
 #include "Object.h"
-#include "Renderer.h"
+
 
 
 Renderer::Renderer() 
@@ -32,13 +32,12 @@ Renderer::~Renderer() {
 	}
 }
 
-bool Renderer::Initialize(OpenGL* _pOpenGL, HWND hWnd) {
-	
+bool Renderer::Initialize(OpenGL* pOpenGL, HWND hWnd) {
 	//Store a pointer to ther OpenGL class object.
-	pGL = _pOpenGL;
+	pGL = pOpenGL;
 
 	pCamera = new Camera();
-	pCamera->SetPosition(0.0f, 0.0f, -10.0f);
+	pCamera->SetPosition(5.0f, 3.0f, -10.0f);
 
 	pObject = new Object();
 	if (!pObject)
@@ -63,7 +62,6 @@ bool Renderer::Initialize(OpenGL* _pOpenGL, HWND hWnd) {
 
 	return true;
 }
-
 void Renderer::Shutdown() {
 	pGL = 0;
 }
@@ -93,7 +91,6 @@ bool Renderer::Render()
 
 	// Clear the buffers to begin the scene.
 	pGL->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
-
 	pCamera->Render();
 
 	//Get the world, view, and projection matrices from the opengl and camera objects.

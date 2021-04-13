@@ -1,11 +1,11 @@
 #pragma once
 
 #pragma comment(lib, "opengl32.lib")
-
 #include <Windows.h>
-#include "../OpenGL_Lib/gl/GL.h"
 #include <math.h>
 #include "Matrix.h"
+
+#include "../OpenGL_Lib/gl/GL.h"
 
 /////////////
 // DEFINES //
@@ -106,8 +106,6 @@ public:
 	void MatrixRotationY(Matrix<float, 4, 4>& matrix, float angle);
 	void MatrixTranslation(Matrix<float, 4, 4>& matrix, float x, float y, float z);
 	void MatrixMultiply(Matrix<float, 4, 4>& matrix, const Matrix<float, 4, 4>& matrix1, const Matrix<float, 4, 4>& matrix2);
-
-
 private:
 	bool LoadExtensionList();
 

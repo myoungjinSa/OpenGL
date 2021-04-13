@@ -1,5 +1,5 @@
 #pragma once
-
+#include "OpenGL.h"
 /////////////
 // GLOBALS //
 /////////////
@@ -15,11 +15,22 @@ class Camera;
 class Renderer
 {
 public:
+	enum class DrawMode : unsigned int {
+		QUADS,
+		QUAD_STRIP,
+		POINTS,
+		LINES,
+		LINE_LOOP,
+		POLYGON,
+		TRIANGLES,
+		NUM_DRAW_MODES
+	};
+
 	Renderer();
 	Renderer(const Renderer&);
 	~Renderer();
 
-	bool Initialize(OpenGL* pOpenGL, HWND hWnd);
+	bool Initialize(OpenGL* pOpenGL, HWND hWnd); 
 	void Shutdown();
 	bool Frame();
 	

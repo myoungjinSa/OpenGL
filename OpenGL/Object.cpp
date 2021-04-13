@@ -11,14 +11,16 @@ Object::~Object() {
 }
 
 bool Object::Initialize(OpenGL* pGL) {
+	//MeshBuilder Call
+	MeshBuilder meshBuilder;
+	meshBuilder.AddCube(2.0f, RGBA::BLUE);
+	if(!pMesh)
+		pMesh = new Mesh();
 	
-	pMesh = new DiffuseMesh();
 	if (!pMesh)
 		return false;
+	meshBuilder.CopyToMesh(*pGL, pMesh, &ColorVertex::Copy, sizeof(ColorVertex));
 
-	if(!pMesh->Initialize(*pGL)) {
-		return false;
-	}
 	return true;
 }
 

@@ -321,6 +321,12 @@ public:
 	Vector2<T>& operator*=(const float& scalarConstant);
 	Vector2<T>& operator/=(const float& scalarConstant);
 
+
+	static const Vector2 ZERO;
+	static const Vector2 ONE;
+	static const Vector2 UNIT_X;
+	static const Vector2 UNIT_Y;
+
 	T x; T y;
 };
 
@@ -370,13 +376,6 @@ void Vector2<T>::SetXY(T _x, T _y) {
 	x = _x; y = _y; 
 }
 
-template<typename T> 
-Vector2<T> Vector2<T>::GetMidPoint(const Vector2<T>& start, const Vector2<T>& end) {
-	Vector2<T> midPoint;
-	midPoint.x = (start.x + end.x) / 2.0f;
-	midPoint.y = (start.y + end.y) / 2.0f;
-	return midPoint;
-}
 ///////////////////////////////////
 //operator
 template<typename T> inline
@@ -438,6 +437,20 @@ Vector2<T>::operator Vector2<T2>() const
 	v.x = x; v.y = y;;
 	return v;
 }
+
+
+template<typename T>
+const Vector2<T> Vector2<T>::ZERO(0, 0);
+
+template<typename T>
+const Vector2<T> Vector2<T>::ONE(1, 1);
+
+template<typename T>
+const Vector2<T> Vector2<T>::UNIT_X(1, 0);
+
+template<typename T>
+const Vector2<T> Vector2<T>::UNIT_Y(0, 1);
+
 typedef Vector2<unsigned char> Vec2b;
 typedef Vector2<short> Vec2s;
 typedef Vector2<unsigned short> Vec2w;
@@ -469,7 +482,13 @@ public:
 	Vector3& operator-=(const Vector3& rhs);
 	Vector3& operator*=(const float& scalarConstant);
 	Vector3& operator=(const Vector2<T>& rhs);
-	
+
+	static const Vector3 ZERO;
+	static const Vector3 ONE;
+	static const Vector3 FORWARD;
+	static const Vector3 UP;
+	static const Vector3 RIGHT;
+
 	T x; T y; T z;
 };
 template<typename T> inline
@@ -524,15 +543,6 @@ void Vector3<T>::SetXYZ(T _x, T _y, T _z) {
 	x = _x; y = _y; z = _z;
 }
 
-template<typename T> inline
-Vector3<T> Vector3<T>::GetMidPoint(const Vector3<T>& start, const Vector3<T>& end) {
-	Vector3<T> midPoint;
-	midPoint.x = (start.x + end.x) / 2.0f;
-	midPoint.y = (start.y + end.y) / 2.0f;
-	midPoint.z = (start.z + end.z) / 2.0f;
-	return midPoint;
-}
-
 
 /// <summary>
 /// operator
@@ -570,6 +580,21 @@ Vector3<T>& Vector3<T>::operator=(const Vector2<T>& rhs) {
 }
 
 
+template<typename T>
+const Vector3<T> Vector3<T>::ZERO(0, 0, 0);
+
+template<typename T>
+const Vector3<T> Vector3<T>::ONE(1, 1, 1);
+
+template<typename T>
+const Vector3<T> Vector3<T>::FORWARD(0, 0, 1);
+
+template<typename T>
+const Vector3<T> Vector3<T>::UP(0, 1, 0);
+
+template<typename T>
+const Vector3<T> Vector3<T>::RIGHT(1, 0, 0);
+
 typedef Vector3<unsigned char> Vec3b;
 typedef Vector3<short> Vec3s;
 typedef Vector3<unsigned short> Vec3w;
@@ -599,6 +624,27 @@ Vector3<T> operator-(const Vector3<T>& v1, const Vector3<T>& v2) {
 	ret.z = v1.z - v2.z;
 	return ret;
 }
+template<typename T>
+Vector3<T> operator*(const Vector3<T>& v1, const Vector3<T>& v2) {
+	Vector3<T> ret;
+
+	ret.x = v1.x * v2.x;
+	ret.y = v1.y * v2.y;
+	ret.z = v1.z * v2.z;
+	return ret;
+}
+
+
+template<typename T>
+Vector3<T> operator*(const Vector3<T>& v1, const float& scalar) {
+	Vector3<T> ret;
+
+	ret.x = v1.x * scalar;
+	ret.y = v1.y * scalar;
+	ret.z = v1.z * scalar;
+	return ret;
+}
+
 
 template<typename T, typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr>
 Vector3<T> Cross(const Vector3<T>& v1, const Vector3<T>& v2) {
@@ -729,10 +775,10 @@ Vector4<T>& Vector4<T>::operator-=(const Vector4<T>& rhs)
 template<typename T> inline
 Vector4<T>& Vector4<T>::operator*=(const float& scalar)
 {
-	this->x += scalar;
-	this->y += scalar;
-	this->z += scalar;
-	this->w += scalar;
+	this->x *= scalar;
+	this->y *= scalar;
+	this->z *= scalar;
+	this->w *= scalar;
 	return *this;
 }
 
@@ -753,18 +799,6 @@ Vector4<T>& Vector4<T>::operator=(const Vector3<T>& rhs) {
 	return *this;
 }
 
-
-//-----------------------------------------------------------------------------------
-template<typename T> 
-Vector4<T> Vector4<T>::GetMidPoint(const Vector4<T>& start, const Vector4<T>& end)
-{
-	Vector4<T> midpoint;
-	midpoint.x = (start.x + end.x) / 2.0f;
-	midpoint.y = (start.y + end.y) / 2.0f;
-	midpoint.z = (start.z + end.z) / 2.0f;
-	midpoint.w = (start.w + end.w) / 2.0f;
-	return(midpoint);
-}
 
 
 //Global Functions
