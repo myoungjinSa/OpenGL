@@ -5,6 +5,7 @@
 #include <array>
 #include <vector>
 
+
 //the master Vertex. this is a superset of all possible vertex data.
 struct VertexMaster {
 	Vec3f position;
@@ -19,6 +20,7 @@ struct VertexMaster {
 };
 typedef unsigned char byte;
 typedef void (VertexCopyCallback)(const VertexMaster& source, byte* destination);
+typedef void (VertexBufferBindCallback)(const OpenGL& gl, void* pVertexBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeofVertex);
 
 struct Vertex {
 public:
@@ -37,7 +39,7 @@ public:
 	~ColorVertex();
 
 	static void Copy(const VertexMaster& source, byte* destination);
-	static void BindMeshToVAO(GLuint vao, GLuint vbo, GLuint ibo);
+	static void BindVertexBuffer(const OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeofVertex);
 
 	RGBA color;
 };
@@ -57,13 +59,17 @@ class Mesh
 	typedef unsigned int GLuint;
 public:
 	Mesh();
+	Mesh(Mesh&& other) = delete;
 	Mesh(const Mesh& other) = delete;
 	virtual ~Mesh();
 
-	bool Initialize(const OpenGL& gl, void* vertexData, unsigned int numVertices, unsigned int sizeofVertex, unsigned int* indexData, unsigned int numIndices);
+	bool Initialize(const OpenGL& gl, VertexBufferBindCallback* pBindFuction, void* vertexData, unsigned int numVertices, unsigned int sizeofVertex, unsigned int* indexData, unsigned int numIndices);
 	void BindToVAO(const OpenGL& gl, Shader* pShader,GLuint vaoID);
 	void Shutdown(const OpenGL& gl);
 	void Render(const OpenGL& gl);
+
+	Mesh& operator=(const Mesh& other) = delete;
+	Mesh& operator=(Mesh&& other) = delete;
 
 	Renderer::DrawMode drawMode;
 protected:

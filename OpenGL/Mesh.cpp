@@ -17,6 +17,7 @@ Vertex::~Vertex() {
 
 }
 
+
 ColorVertex::ColorVertex() 
 	: Vertex(), color()
 {
@@ -29,6 +30,7 @@ ColorVertex::ColorVertex(const Vec3f& pos, const RGBA& _color)
 
 }
 
+
 ColorVertex::~ColorVertex() {
 
 }
@@ -38,10 +40,20 @@ void ColorVertex::Copy(const VertexMaster& source, byte* pDestination) {
 	pColorVertex->position = source.position;
 	pColorVertex->color = source.color;
 }
+void ColorVertex::BindVertexBuffer(const OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeofVertex) {
+	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
+	gl.glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(ColorVertex), pBuffer, GL_STATIC_DRAW);
 
-void ColorVertex::BindMeshToVAO(GLuint vao, GLuint vbo, GLuint ibo) {
-	
+	gl.glEnableVertexAttribArray(0);		//Vertex Position
+	gl.glEnableVertexAttribArray(1);		//Vertex color.
+
+	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
+	gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeofVertex, 0);
+
+	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
+	gl.glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, false, sizeofVertex, (unsigned char*)NULL + (3 * sizeof(float)));
 }
+
 
 Mesh::Mesh()
 	:vertexCount(0), vertexArrayId(0), vertexBufferId(0), indexCount(0), indexBufferId(0), drawMode(Renderer::DrawMode::TRIANGLES)
@@ -53,7 +65,7 @@ Mesh::~Mesh() {
 
 }
 
-bool Mesh::Initialize(const OpenGL& gl, void* vertexData, unsigned int numVertices, unsigned int sizeofVertex, unsigned int* indexData, unsigned int numIndices) {
+bool Mesh::Initialize(const OpenGL& gl, VertexBufferBindCallback* pBindFuction, void* vertexData, unsigned int numVertices, unsigned int sizeofVertex, unsigned int* indexData, unsigned int numIndices) {
 	vertexCount = numVertices;
 	indexCount = numIndices;
 
@@ -67,18 +79,8 @@ bool Mesh::Initialize(const OpenGL& gl, void* vertexData, unsigned int numVertic
 	gl.glGenBuffers(1, &vertexBufferId);
 	
 	//Bind the vertex buffer and load the vertex(position and color) data into the vertex buffer.
-	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
-	gl.glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(ColorVertex), vertexData, GL_STATIC_DRAW);
+	pBindFuction(gl, vertexData, vertexBufferId, numVertices, sizeofVertex);
 
-	gl.glEnableVertexAttribArray(0);		//Vertex Position
-	gl.glEnableVertexAttribArray(1);		//Vertex color.
-
-	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
-	gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeofVertex, 0);
-
-	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
-	gl.glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, false, sizeofVertex, (unsigned char*)NULL + (3 * sizeof(float)));
-	
 	gl.glGenBuffers(1, &indexBufferId);
 
 	gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferId);
@@ -310,7 +312,7 @@ void MeshBuilder::CopyToMesh(const OpenGL& gl, Mesh* pMesh, VertexCopyCallback* 
 		copyFunction(vertices[vertexIndex], currentBufferIndex);
 		currentBufferIndex += vertexSize;
 	}
-	pMesh->Initialize(gl, vertexBuffer, vertexCount, sizeofVertex, indices.data(), indices.size());
+	pMesh->Initialize(gl, &ColorVertex::BindVertexBuffer, vertexBuffer, vertexCount, sizeofVertex, indices.data(), indices.size());
 	pMesh->drawMode = this->drawMode;
 
 	delete[] vertexBuffer;

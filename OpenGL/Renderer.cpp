@@ -39,22 +39,12 @@ bool Renderer::Initialize(OpenGL* pOpenGL, HWND hWnd) {
 	pCamera = new Camera();
 	pCamera->SetPosition(5.0f, 3.0f, -10.0f);
 
-	pObject = new Object();
-	if (!pObject)
-		return false;
-
-
-	bool result = pObject->Initialize(pGL);
-	if (!result) {
-		MessageBox(hWnd, L"Could not initialize the model object", L"Error", MB_OK);
-		return false;
-	}
 
 	pShader = new ColorShader();
 	if (!pShader)
 		return false;
 
-	result = pShader->Initialize(pGL, hWnd);
+	bool result = pShader->Initialize(pGL, hWnd);
 	if (!result) {
 		MessageBox(hWnd, L"Could not initialize the color shader object.", L"Error", MB_OK);
 		return false;
@@ -101,7 +91,7 @@ bool Renderer::Render()
 	pShader->SetShader(pGL);
 	pShader->SetShaderParameters(pGL, (float*)worldMatrix.value, (float*)viewMatrix.value, (float*)projectionMatrix.value);
 	
-	pObject->Render(pGL);
+	pShader->Render(pGL);
 
 	// Present the rendered scene to the screen.
 	pGL->EndScene();

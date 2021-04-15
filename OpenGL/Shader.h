@@ -1,7 +1,9 @@
 #pragma once
 #include "OpenGL.h"
+#include <vector>
 
 class OpenGL;
+class Object;
 class Shader {
 public:
 	Shader();
@@ -11,6 +13,7 @@ public:
 	virtual bool Initialize(OpenGL* pGL, HWND hWnd) = 0;
 	virtual void Shutdown(OpenGL* pGL) = 0;
 	virtual void SetShader(OpenGL* pGL) = 0;
+	virtual void Render(OpenGL* pGL) = 0;
 protected:
 	virtual bool InitializeShader(const char* vsFilename, const char* fsFilename, OpenGL* pGL, HWND hWnd) = 0;
 
@@ -23,6 +26,8 @@ protected:
 	unsigned int vertexShader;
 	unsigned int fragmentShader;
 	unsigned int shaderProgram;
+
+	std::vector<Object*> objects;
 };
 
 
@@ -36,7 +41,7 @@ public:
 	bool Initialize(OpenGL* pGL, HWND hWnd) override;
 	void Shutdown(OpenGL* pGL) override;
 	void SetShader(OpenGL* pGL) override;
-
+	void Render(OpenGL* pGL) override;
 
 	bool SetShaderParameters(OpenGL* pGL, float* worldMatrix, float* viewMatrix, float* projectionMatrix);
 protected:
@@ -53,6 +58,7 @@ public:
 	bool Initialize(OpenGL* pGL, HWND hWnd) override;
 	void Shutdown(OpenGL* pGL) override;
 	void SetShader(OpenGL* pGL) override;
+	void Render(OpenGL* pGL) override;
 
 	bool SetShaderParameters(OpenGL* pGL, float* worldMatrix, float* viewMatrix, float* projectionMatrix, int textureUnit);
 protected:

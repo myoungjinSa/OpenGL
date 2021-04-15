@@ -1,10 +1,11 @@
 #include "Shader.h"
+#include "Object.h"
 #include <fstream>
 
 Shader::Shader() 
 	:vertexShader(0), fragmentShader(0), shaderProgram(0)
 {
-
+	objects.clear();
 }
 
 Shader::~Shader() {
@@ -189,6 +190,17 @@ ColorShader::~ColorShader() {
 bool ColorShader::Initialize(OpenGL* pGL, HWND hWnd) {
 	bool result;
 	result = InitializeShader("color.vs", "color.ps", pGL, hWnd);
+
+	Object* pObject = new Object();
+	objects.emplace_back(pObject);
+
+	for (const auto& obj : objects) {
+		if (!obj->Initialize(pGL)) {
+			MessageBox(hWnd, L"Could not initialize the model object", L"Error", MB_OK);
+			return false;
+		}
+	}
+
 	if (!result)
 		return false;
 	return true;
@@ -203,6 +215,11 @@ void ColorShader::SetShader(OpenGL* pGL) {
 		return;
 	}
 	pGL->glUseProgram(shaderProgram);
+}
+
+void ColorShader::Render(OpenGL* pGL) {
+	for (const auto& obj : objects)
+		obj->Render(pGL);
 }
 
 bool ColorShader::InitializeShader(const char* vsFilename, const char* fsFilename, OpenGL* pGL, HWND hWnd) {
@@ -282,6 +299,10 @@ void TextureShader::SetShader(OpenGL* pGL) {
 		return;
 	}
 	pGL->glUseProgram(shaderProgram);
+}
+
+void TextureShader::Render(OpenGL* pGL) {
+
 }
 
 void TextureShader::Shutdown(OpenGL* pGL) {
