@@ -27,6 +27,7 @@ Renderer::~Renderer() {
 		pObject = nullptr;
 	}
 	if (pShader) {
+		pShader->Shutdown(pGL);
 		delete pShader;
 		pShader = nullptr;
 	}
@@ -40,7 +41,7 @@ bool Renderer::Initialize(OpenGL* pOpenGL, HWND hWnd) {
 	pCamera->SetPosition(5.0f, 3.0f, -10.0f);
 
 
-	pShader = new ColorShader();
+	pShader = new TextureShader();//ColorShader();
 	if (!pShader)
 		return false;
 
@@ -89,7 +90,7 @@ bool Renderer::Render()
 	pGL->GetProjectionMatrix(projectionMatrix);
 
 	pShader->SetShader(pGL);
-	pShader->SetShaderParameters(pGL, (float*)worldMatrix.value, (float*)viewMatrix.value, (float*)projectionMatrix.value);
+	pShader->SetShaderParameters(pGL, (float*)worldMatrix.value, (float*)viewMatrix.value, (float*)projectionMatrix.value, 0);
 	
 	pShader->Render(pGL);
 

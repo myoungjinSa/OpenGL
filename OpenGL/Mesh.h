@@ -38,18 +38,22 @@ public:
 	ColorVertex(const Vec3f& pos, const RGBA& color);
 	~ColorVertex();
 
-	static void Copy(const VertexMaster& source, byte* destination);
+	static void Copy(const VertexMaster& source, byte* pDestination);
 	static void BindVertexBuffer(const OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeofVertex);
 
 	RGBA color;
 };
 
-struct TextureVertex : public Vertex {
+struct TexturedVertex : public Vertex {
 public:
-	TextureVertex();
-	~TextureVertex();
+	TexturedVertex();
+	TexturedVertex(const Vec3f& pos, const Vec2f& uv);
+	~TexturedVertex();
 
-	Vec2f uv;
+	static void Copy(const VertexMaster& source, byte* pDestination);
+	static void BindVertexBuffer(const OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeOfVertex);
+
+	Vec2f uv0;
 };
 
 class Shader;
@@ -159,4 +163,5 @@ private:
 	unsigned int startIndex;
 	Renderer::DrawMode drawMode;
 };
+
 

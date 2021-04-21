@@ -1,4 +1,5 @@
 #include "Mesh.h"
+#include "Texture.h"
 #include "Object.h"
 
 Object::Object() 
@@ -32,11 +33,11 @@ bool Object::Initialize(OpenGL* pGL) {
 	if(!pMesh)
 		pMesh = std::make_shared<Mesh>();
 	
-
 	if (!pMesh)
 		return false;
 	meshBuilder.CopyToMesh(*pGL, pMesh.get(), &ColorVertex::Copy, sizeof(ColorVertex));
 
+	
 	return true;
 }
 
@@ -46,4 +47,27 @@ void Object::Shutdown(OpenGL* pGL) {
 
 void Object::Render(OpenGL* pGL) {
 	pMesh->Render(*pGL);
+}
+
+bool Object::LoadTexture(OpenGL* pGL, char* textureFileName, unsigned int textureUnit, bool wrap) {
+	bool result;
+
+	pTexture = new Texture();
+	if (!pTexture)
+		return false;
+
+	result = pTexture->Initialize(pGL, textureFileName, textureUnit, wrap);
+	if (!result)
+		return false;
+
+	return true;
+}
+
+
+void Object::ReleaseTexture() {
+	if (pTexture) {
+		pTexture->Shutdown();
+		delete pTexture;
+		pTexture = nullptr;
+	}
 }

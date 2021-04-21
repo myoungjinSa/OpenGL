@@ -291,7 +291,23 @@ TextureShader::~TextureShader() {
 }
 
 bool TextureShader::Initialize(OpenGL* pGL, HWND hWnd) {
-	return InitializeShader("texture.vs", "texture.ps", pGL, hWnd);
+	bool result;
+	result = InitializeShader("texture.vs", "texture.ps", pGL, hWnd);
+
+	Object* pObject = new Object();
+	objects.emplace_back(pObject);
+
+	for (const auto& obj : objects) {
+		if (!obj->Initialize(pGL)) {
+			MessageBox(hWnd, L"Could not initialize the model object", L"Error", MB_OK);
+			return false;
+		}
+	}
+
+
+	if (!result)
+		return false;
+	return true;
 }
 
 void TextureShader::SetShader(OpenGL* pGL) {
@@ -302,7 +318,8 @@ void TextureShader::SetShader(OpenGL* pGL) {
 }
 
 void TextureShader::Render(OpenGL* pGL) {
-
+	for (const auto& obj : objects)
+		obj->Render(pGL);	
 }
 
 void TextureShader::Shutdown(OpenGL* pGL) {

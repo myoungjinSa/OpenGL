@@ -55,6 +55,39 @@ void ColorVertex::BindVertexBuffer(const OpenGL& gl, void* pBuffer, unsigned int
 }
 
 
+TexturedVertex::TexturedVertex() 
+	:Vertex(), uv0()
+{
+
+}
+TexturedVertex::TexturedVertex(const Vec3f& pos, const Vec2f& _uv0) 
+	: Vertex(pos), uv0(_uv0)
+{
+
+}
+
+TexturedVertex::~TexturedVertex() {
+
+}
+void TexturedVertex::Copy(const VertexMaster& source, byte* pDestination) {
+	TexturedVertex* pColorVertex = (TexturedVertex*)(pDestination);
+	pColorVertex->position = source.position;
+	pColorVertex->uv0 = source.uv0;
+}
+
+void TexturedVertex::BindVertexBuffer(const OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeofVertex) {
+	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
+	gl.glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(TexturedVertex), pBuffer, GL_STATIC_DRAW);
+
+	gl.glEnableVertexAttribArray(0); // Vertex Position;
+	gl.glEnableVertexAttribArray(1); // Texture coordinates;
+
+	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
+	gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeofVertex, 0);
+
+	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
+	gl.glVertexAttribPointer(1, 2, GL_FLOAT, false, sizeofVertex, (unsigned char*)NULL + (3 * sizeof(float)));
+}
 Mesh::Mesh()
 	:vertexCount(0), vertexArrayId(0), vertexBufferId(0), indexCount(0), indexBufferId(0), drawMode(Renderer::DrawMode::TRIANGLES)
 {
@@ -318,3 +351,4 @@ void MeshBuilder::CopyToMesh(const OpenGL& gl, Mesh* pMesh, VertexCopyCallback* 
 	delete[] vertexBuffer;
 	vertexBuffer = nullptr;
 }
+

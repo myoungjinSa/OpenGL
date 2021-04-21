@@ -16,7 +16,7 @@ private:
 
 public:
 	Texture();
-	Texture(const Texture& other);
+	Texture(const Texture& other) = delete;
 	~Texture();
 
 	bool Initialize(OpenGL* gl, char* fileName, unsigned int textureUnit, bool wrap);

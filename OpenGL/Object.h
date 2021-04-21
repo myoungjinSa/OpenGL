@@ -2,6 +2,7 @@
 #include <memory>
 class OpenGL;
 class Mesh;
+class Texture;
 class Object
 {
 public:
@@ -19,8 +20,12 @@ public:
 	Object& operator=(Object&& other)noexcept;
 
 private:
+	bool LoadTexture(OpenGL* pGL, char*, unsigned int, bool);
+	void ReleaseTexture();
+	
 	//Mesh* pMesh;
 	std::shared_ptr<Mesh> pMesh;
+	Texture* pTexture;
 };
 
 class Triangle : public Object {

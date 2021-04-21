@@ -6,10 +6,6 @@ Texture::Texture() {
 
 }
 
-Texture::Texture(const Texture& other) {
-
-}
-
 Texture::~Texture() {
 
 }
