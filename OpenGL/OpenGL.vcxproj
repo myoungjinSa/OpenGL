@@ -149,6 +149,7 @@
     <ClCompile Include="OpenGL.cpp" />
     <ClCompile Include="RGBA.cpp" />
     <ClCompile Include="Shader.cpp" />
+    <ClCompile Include="String\String.cpp" />
     <ClCompile Include="System.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="Types.cpp" />
@@ -164,6 +165,7 @@
     <ClInclude Include="OpenGL.h" />
     <ClInclude Include="RGBA.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="String\String.h" />
     <ClInclude Include="System.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="Types.h" />

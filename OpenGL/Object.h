@@ -20,14 +20,15 @@ public:
 	Object& operator=(Object&& other)noexcept;
 
 private:
-	bool LoadTexture(OpenGL* pGL, char*, unsigned int, bool);
+	bool LoadTexture(OpenGL* pGL, const char*, unsigned int, bool);
 	void ReleaseTexture();
 	
 	//Mesh* pMesh;
 	std::shared_ptr<Mesh> pMesh;
-	Texture* pTexture;
+	std::shared_ptr<Texture> texture;
 };
 
 class Triangle : public Object {
 
 };
+

@@ -1,8 +1,10 @@
 #include "OpenGL.h"
 #include "Texture.h"
+#include <cassert>
 
-
-Texture::Texture() {
+Texture::Texture() 
+	: loaded(false), textureID(0)
+{
 
 }
 
@@ -10,11 +12,11 @@ Texture::~Texture() {
 
 }
 
-bool Texture::Initialize(OpenGL* pOpenGL, char* fileName, unsigned int textureUnit, bool wrap) {
+bool Texture::Initialize(const OpenGL& gl, const String& fileName, unsigned int textureUnit, bool wrap) {
 	bool result;
 
 	//Load the targa file.
-	result = LoadTarga(pOpenGL, fileName, textureUnit, wrap);
+	result = LoadTarga(gl, fileName, textureUnit, wrap);
 	if (!result) {
 		return false;
 	}
@@ -30,15 +32,18 @@ void Texture::Shutdown() {
 	return;
 }
 
-bool Texture::LoadTarga(OpenGL* pOpenGL, char* fileName, unsigned int textureUnit, bool wrap) {
-	FILE* filePtr;
-	int error = fopen_s(&filePtr, fileName, "rb");
+bool Texture::LoadTarga(const OpenGL& gl, const String& fileName, unsigned int textureUnit, bool wrap) {
+	FILE* filePtr = 0;
+	int error = fopen_s(&filePtr, fileName.c_str(), "rb");
 	if (error != 0)
 		return false;
 
 	TargaHeader targaFileHeader;
 	size_t count = fread(&targaFileHeader, sizeof(TargaHeader), 1, filePtr);
 	if (count != 1)
+		return false;
+
+	if (filePtr == 0)
 		return false;
 
 	size_t width = (size_t)targaFileHeader.width;
@@ -60,13 +65,15 @@ bool Texture::LoadTarga(OpenGL* pOpenGL, char* fileName, unsigned int textureUni
 	if (count != imageSize)
 		return false;
 
+	if (filePtr == 0)
+		return false;
 
 	error = fclose(filePtr);
 	if (error != 0)
 		return false;
 
 	//Set the unique texture unit in which to store the data
-	pOpenGL->glActiveTexture(GL_TEXTURE0 + textureUnit);
+	gl.glActiveTexture(GL_TEXTURE0 + textureUnit);
 
 	//Generate an ID for the texture.
 	glGenTextures(1, &textureID);
@@ -91,7 +98,7 @@ bool Texture::LoadTarga(OpenGL* pOpenGL, char* fileName, unsigned int textureUni
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 
 	//Generate mipmaps for the texture
-	pOpenGL->glGenerateMipmap(GL_TEXTURE_2D);
+	gl.glGenerateMipmap(GL_TEXTURE_2D);
 
 	delete[] targaImage;
 	targaImage = nullptr;
@@ -99,3 +106,45 @@ bool Texture::LoadTarga(OpenGL* pOpenGL, char* fileName, unsigned int textureUni
 	loaded = true;
 	return true;
 }
+
+
+/////////////////////////////////////////////////////////////////////////////
+TextureLoader::TextureLoader() {
+
+}
+
+TextureLoader::~TextureLoader() {
+
+}
+
+const std::shared_ptr<Texture>& TextureLoader::GetTexture(const OpenGL& gl, const String& filename) {
+	bool bFind = false;
+	for (size_t iTexture = 0; iTexture < textures.size(); iTexture++) {
+		if (textures[iTexture].first.Compare(filename)) {
+			bFind = true;
+			return textures[iTexture].second;
+		}
+	}
+	if (!bFind) {
+		if (!Load(gl, String(filename))) {
+			assert(false);
+		}
+		bFind = true;
+	}
+	size_t index = textures.size();
+	return textures[index - 1].second;
+}
+
+bool TextureLoader::Load(const OpenGL& gl, String&& _filename) {
+	std::shared_ptr<Texture> texture = std::make_shared<Texture>();
+	if (!texture)
+		return false;
+
+	String filename = std::move(_filename);
+	if(!texture->Initialize(gl, filename, 0, true))
+		return false;
+
+	textures.emplace_back(std::make_pair(filename, texture));
+	return true;
+}
+

@@ -12,7 +12,7 @@ Object::Object(const Object& other) {
 }
 
 Object::~Object() {
-
+	//ReleaseTexture();
 }
 
 Object& Object::operator=(const Object& other) {
@@ -35,9 +35,12 @@ bool Object::Initialize(OpenGL* pGL) {
 	
 	if (!pMesh)
 		return false;
-	meshBuilder.CopyToMesh(*pGL, pMesh.get(), &ColorVertex::Copy, sizeof(ColorVertex));
+	//meshBuilder.CopyToMesh(*pGL, pMesh.get(), &ColorVertex::Copy, sizeof(ColorVertex));
+	meshBuilder.CopyToMesh(*pGL, pMesh.get(), &TexturedVertex::Copy, sizeof(TexturedVertex));
 
-	
+	texture = TextureLoader::GetTexture(*pGL, "../Resource/Texture/Ice.png");
+	//LoadTexture(pGL, "../Resource/Texture/Ice", )
+
 	return true;
 }
 
@@ -48,26 +51,26 @@ void Object::Shutdown(OpenGL* pGL) {
 void Object::Render(OpenGL* pGL) {
 	pMesh->Render(*pGL);
 }
+//
+//bool Object::LoadTexture(OpenGL* pGL, const char* textureFileName, unsigned int textureUnit, bool wrap) {
+//	bool result;
+//
+//	pTexture = new Texture();
+//	if (!pTexture)
+//		return false;
+//
+//	result = pTexture->Initialize(pGL, textureFileName, textureUnit, wrap);
+//	if (!result)
+//		return false;
+//
+//	return true;
+//}
 
-bool Object::LoadTexture(OpenGL* pGL, char* textureFileName, unsigned int textureUnit, bool wrap) {
-	bool result;
 
-	pTexture = new Texture();
-	if (!pTexture)
-		return false;
-
-	result = pTexture->Initialize(pGL, textureFileName, textureUnit, wrap);
-	if (!result)
-		return false;
-
-	return true;
-}
-
-
-void Object::ReleaseTexture() {
-	if (pTexture) {
-		pTexture->Shutdown();
-		delete pTexture;
-		pTexture = nullptr;
-	}
-}
+//void Object::ReleaseTexture() {
+//	if (pTexture) {
+//		pTexture->Shutdown();
+//		delete pTexture;
+//		pTexture = nullptr;
+//	}
+//}

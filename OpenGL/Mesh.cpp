@@ -345,7 +345,8 @@ void MeshBuilder::CopyToMesh(const OpenGL& gl, Mesh* pMesh, VertexCopyCallback* 
 		copyFunction(vertices[vertexIndex], currentBufferIndex);
 		currentBufferIndex += vertexSize;
 	}
-	pMesh->Initialize(gl, &ColorVertex::BindVertexBuffer, vertexBuffer, vertexCount, sizeofVertex, indices.data(), indices.size());
+	//pMesh->Initialize(gl, &ColorVertex::BindVertexBuffer, vertexBuffer, vertexCount, sizeofVertex, indices.data(), indices.size());
+	pMesh->Initialize(gl, &TexturedVertex::BindVertexBuffer, vertexBuffer, vertexCount, sizeofVertex, indices.data(), indices.size());
 	pMesh->drawMode = this->drawMode;
 
 	delete[] vertexBuffer;
