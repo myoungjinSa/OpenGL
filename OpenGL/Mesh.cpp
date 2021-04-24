@@ -293,12 +293,17 @@ void MeshBuilder::AddQuad(const Vec3f& bottomLeft, const Vec3f& up, float upLeng
 	unsigned int currentVert = vertices.size();
 
 	SetColor(color);
+
+	SetUV(uvOffset + (Vec2f::UNIT_Y * uvStepSize));
 	AddVertex(bottomLeft);		//020
 
+	SetUV(uvOffset);
 	AddVertex(bottomLeft + (up * upLength));//022
 
+	SetUV(uvOffset + (Vec2f::ONE * uvStepSize));
 	AddVertex(bottomLeft + (right * rightLength));//220
 
+	SetUV(uvOffset + (Vec2f::UNIT_X * uvStepSize));
 	AddVertex(bottomLeft + (up * upLength) + (right * rightLength));
 
 	AddIndex(1 + currentVert);  

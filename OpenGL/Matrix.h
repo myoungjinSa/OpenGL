@@ -458,6 +458,45 @@ typedef Vector2<int> Vec2i;
 typedef Vector2<double> Vec2d;
 typedef Vector2<float> Vec2f;
 
+///////
+//Global Functions
+template<typename T>
+Vector2<T> operator+(const Vector2<T>& v1, const Vector2<T>& v2) {
+	Vector2<T> ret;
+
+	ret.x = v1.x + v2.x;
+	ret.y = v1.y + v2.y;
+	return ret;
+}
+
+template<typename T>
+Vector2<T> operator-(const Vector2<T>& v1, const Vector2<T>& v2) {
+	Vector2<T> ret;
+
+	ret.x = v1.x - v2.x;
+	ret.y = v1.y - v2.y;
+	return ret;
+}
+template<typename T>
+Vector2<T> operator*(const Vector2<T>& v1, const Vector2<T>& v2) {
+	Vector2<T> ret;
+
+	ret.x = v1.x * v2.x;
+	ret.y = v1.y * v2.y;
+	return ret;
+}
+
+
+template<typename T>
+Vector2<T> operator*(const Vector2<T>& v1, const float& scalar) {
+	Vector2<T> ret;
+
+	ret.x = v1.x * scalar;
+	ret.y = v1.y * scalar;
+	return ret;
+}
+
+
 
 template<typename T>
 class Vector3{

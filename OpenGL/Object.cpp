@@ -2,6 +2,7 @@
 #include "Texture.h"
 #include "Object.h"
 
+
 Object::Object() 
 	:pMesh{nullptr}
 {
@@ -38,7 +39,7 @@ bool Object::Initialize(OpenGL* pGL) {
 	//meshBuilder.CopyToMesh(*pGL, pMesh.get(), &ColorVertex::Copy, sizeof(ColorVertex));
 	meshBuilder.CopyToMesh(*pGL, pMesh.get(), &TexturedVertex::Copy, sizeof(TexturedVertex));
 
-	texture = TextureLoader::GetTexture(*pGL, "../Resource/Texture/Ice.png");
+	texture = TextureLoader::GetTexture(*pGL, "note.txt");
 	//LoadTexture(pGL, "../Resource/Texture/Ice", )
 
 	return true;
