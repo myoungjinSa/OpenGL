@@ -1,5 +1,4 @@
 #pragma once
-#include <fstream>
 #include <vector>
 #include "./String/String.h"
 
@@ -57,7 +56,8 @@ public:
 
 private:
 	bool LoadTarga(const OpenGL& gl, const String& fileName, unsigned int textureUnit, bool wrap);
-	
+	bool LoadBMP(const OpenGL& gl, const String& fileName, unsigned int textureUnit, bool wrap);
+
 	bool loaded;
 	unsigned int textureID;
 };
@@ -69,8 +69,9 @@ public:
 	~TextureLoader();
 	
 	static const std::shared_ptr<Texture>& GetTexture(const OpenGL& gl, const String& filename);
+	static void Release();
 private:
-	static bool Load(const OpenGL& gl, String&& filename);
+	static bool Load(const OpenGL& gl, const String& filename);
 
 	static std::vector<std::pair<String&&, std::shared_ptr<Texture>>> textures;
 	//std::vector<std::shared_ptr<Texture>> textures;

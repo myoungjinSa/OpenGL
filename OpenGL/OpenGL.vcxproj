@@ -152,6 +152,7 @@
     <ClCompile Include="String\String.cpp" />
     <ClCompile Include="System.cpp" />
     <ClCompile Include="Texture.cpp" />
+    <ClCompile Include="TGAReader\tga_reader.c" />
     <ClCompile Include="Types.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -168,6 +169,7 @@
     <ClInclude Include="String\String.h" />
     <ClInclude Include="System.h" />
     <ClInclude Include="Texture.h" />
+    <ClInclude Include="TGAReader\tga_reader.h" />
     <ClInclude Include="Types.h" />
   </ItemGroup>
   <ItemGroup>

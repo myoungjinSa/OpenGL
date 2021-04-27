@@ -2,6 +2,7 @@
 #include "Camera.h"
 #include "Shader.h"
 #include "Object.h"
+#include "Texture.h"
 
 
 
@@ -27,7 +28,6 @@ Renderer::~Renderer() {
 		pObject = nullptr;
 	}
 	if (pShader) {
-		pShader->Shutdown(pGL);
 		delete pShader;
 		pShader = nullptr;
 	}
@@ -54,7 +54,9 @@ bool Renderer::Initialize(OpenGL* pOpenGL, HWND hWnd) {
 	return true;
 }
 void Renderer::Shutdown() {
-	pGL = 0;
+	if(pShader)
+		pShader->Shutdown(pGL);
+	TextureLoader::Release();
 }
 
 

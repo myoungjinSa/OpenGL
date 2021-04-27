@@ -39,8 +39,7 @@ bool Object::Initialize(OpenGL* pGL) {
 	//meshBuilder.CopyToMesh(*pGL, pMesh.get(), &ColorVertex::Copy, sizeof(ColorVertex));
 	meshBuilder.CopyToMesh(*pGL, pMesh.get(), &TexturedVertex::Copy, sizeof(TexturedVertex));
 
-	texture = TextureLoader::GetTexture(*pGL, "note.txt");
-	//LoadTexture(pGL, "../Resource/Texture/Ice", )
+	texture = TextureLoader::GetTexture(*pGL, "Capture.bmp");
 
 	return true;
 }

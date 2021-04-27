@@ -366,7 +366,7 @@ bool TextureShader::SetShaderParameters(OpenGL* pGL, float* worldMatrix, float* 
 	pGL->glUniformMatrix4fv(location, 1, false, viewMatrix);
 
 	//Set the projection matrix in the vertex shader.
-	location = pGL->glGetUniformLocation(shaderProgram, "projectionMarix");
+	location = pGL->glGetUniformLocation(shaderProgram, "projectionMatrix");
 	if (location == -1)
 		return false;
 

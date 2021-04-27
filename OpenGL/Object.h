@@ -20,9 +20,6 @@ public:
 	Object& operator=(Object&& other)noexcept;
 
 private:
-	bool LoadTexture(OpenGL* pGL, const char*, unsigned int, bool);
-	void ReleaseTexture();
-	
 	//Mesh* pMesh;
 	std::shared_ptr<Mesh> pMesh;
 	std::shared_ptr<Texture> texture;

@@ -228,14 +228,7 @@ void String::Clear() {
 }
 
 const char* String::c_str() const{
-	size_t len = strlen(string);
-	std::vector<char> writable;
-
-	for (size_t iChar = 0; iChar < len; iChar++) {
-		writable.emplace_back(string[iChar]);
-	}
-	writable.emplace_back('\0');
-	return &writable.at(0);
+	return &string[0];
 }
 
 String String::Format(String fmt, ...) {
