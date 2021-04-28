@@ -5,7 +5,6 @@
 Shader::Shader() 
 	:vertexShader(0), fragmentShader(0), shaderProgram(0)
 {
-	objects.clear();
 }
 
 Shader::~Shader() {
@@ -49,9 +48,9 @@ char* Shader::LoadShaderSourceFile(const char* filename) {
 	return buffer;
 }
 
-void Shader::OutputLinkErrorMessage(OpenGL* pGL, HWND hWnd, unsigned int programId) {
+void Shader::OutputLinkErrorMessage(OpenGL& gl, HWND hWnd, unsigned int programId) {
 	int logSize = 0;
-	pGL->glGetProgramiv(programId, GL_INFO_LOG_LENGTH, &logSize);
+	gl.glGetProgramiv(programId, GL_INFO_LOG_LENGTH, &logSize);
 
 	//Increment the size by one to handle also the null terminator.
 	logSize++;
@@ -59,7 +58,7 @@ void Shader::OutputLinkErrorMessage(OpenGL* pGL, HWND hWnd, unsigned int program
 	if (!infoLog)
 		return;
 
-	pGL->glGetProgramInfoLog(programId, logSize, NULL, infoLog);
+	gl.glGetProgramInfoLog(programId, logSize, NULL, infoLog);
 	std::ofstream fout;
 	fout.open("linker-error.txt");
 	for (size_t iLog = 0; iLog < logSize; iLog++)
@@ -71,12 +70,12 @@ void Shader::OutputLinkErrorMessage(OpenGL* pGL, HWND hWnd, unsigned int program
 }
 
 
-void Shader::OutputShaderErrorMessage(OpenGL* pGL, HWND hWnd, unsigned int shaderId, char* shaderFilename) {
+void Shader::OutputShaderErrorMessage(OpenGL& gl, HWND hWnd, unsigned int shaderId, char* shaderFilename) {
 	std::ofstream fout;
 
 	char* infoLog = nullptr;
 	int logSize = 0;
-	pGL->glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &logSize);
+	gl.glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &logSize);
 
 	//Increment the size by one to handle also the null terminator.
 	logSize++;
@@ -86,7 +85,7 @@ void Shader::OutputShaderErrorMessage(OpenGL* pGL, HWND hWnd, unsigned int shade
 	if (!infoLog)
 		return;
 
-	pGL->glGetShaderInfoLog(shaderId, logSize, NULL, infoLog);
+	gl.glGetShaderInfoLog(shaderId, logSize, NULL, infoLog);
 
 	//Open a file to write the error message to.
 	fout.open("shader-error.txt");
@@ -108,17 +107,17 @@ void Shader::OutputShaderErrorMessage(OpenGL* pGL, HWND hWnd, unsigned int shade
 }
 
 
-void Shader::ShutdownShader(OpenGL* pGL) {
-	pGL->glDetachShader(shaderProgram, vertexShader);
-	pGL->glDetachShader(shaderProgram, fragmentShader);
+void Shader::ShutdownShader(OpenGL& gl) {
+	gl.glDetachShader(shaderProgram, vertexShader);
+	gl.glDetachShader(shaderProgram, fragmentShader);
 
-	pGL->glDeleteShader(vertexShader);
-	pGL->glDeleteShader(fragmentShader);
+	gl.glDeleteShader(vertexShader);
+	gl.glDeleteShader(fragmentShader);
 
-	pGL->glDeleteProgram(shaderProgram);
+	gl.glDeleteProgram(shaderProgram);
 }
 
-bool Shader::CompileShader(const char* vsFilename, const char* fsFilename, OpenGL* pGL, HWND hWnd) {
+bool Shader::CompileShader(const char* vsFilename, const char* fsFilename, OpenGL& gl, HWND hWnd) {
 	const char* vertexShaderBuffer;
 	const char* fragmentShaderBuffer;
 	int status;
@@ -139,12 +138,12 @@ bool Shader::CompileShader(const char* vsFilename, const char* fsFilename, OpenG
 	}
 
 	// Create a vertex and fragment shader object.
-	vertexShader = pGL->glCreateShader(GL_VERTEX_SHADER);
-	fragmentShader = pGL->glCreateShader(GL_FRAGMENT_SHADER);
+	vertexShader = gl.glCreateShader(GL_VERTEX_SHADER);
+	fragmentShader = gl.glCreateShader(GL_FRAGMENT_SHADER);
 
 	// Copy the shader source code strings into the vertex and fragment shader objects.
-	pGL->glShaderSource(vertexShader, 1, &vertexShaderBuffer, NULL);
-	pGL->glShaderSource(fragmentShader, 1, &fragmentShaderBuffer, NULL);
+	gl.glShaderSource(vertexShader, 1, &vertexShaderBuffer, NULL);
+	gl.glShaderSource(fragmentShader, 1, &fragmentShaderBuffer, NULL);
 
 	// Release the vertex and fragment shader buffers.
 	delete[] vertexShaderBuffer;
@@ -154,24 +153,24 @@ bool Shader::CompileShader(const char* vsFilename, const char* fsFilename, OpenG
 	fragmentShaderBuffer = 0;
 
 	// Compile the shaders.
-	pGL->glCompileShader(vertexShader);
-	pGL->glCompileShader(fragmentShader);
+	gl.glCompileShader(vertexShader);
+	gl.glCompileShader(fragmentShader);
 
 	// Check to see if the vertex shader compiled successfully.
-	pGL->glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &status);
+	gl.glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &status);
 	if (status != 1)
 	{
 		// If it did not compile then write the syntax error message out to a text file for review.
-		OutputShaderErrorMessage(pGL, hWnd, vertexShader, const_cast<char*>(vsFilename));
+		OutputShaderErrorMessage(gl, hWnd, vertexShader, const_cast<char*>(vsFilename));
 		return false;
 	}
 
 	// Check to see if the fragment shader compiled successfully.
-	pGL->glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &status);
+	gl.glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &status);
 	if (status != 1)
 	{
 		// If it did not compile then write the syntax error message out to a text file for review.
-		OutputShaderErrorMessage(pGL, hWnd, fragmentShader, const_cast<char*>(fsFilename));
+		OutputShaderErrorMessage(gl, hWnd, fragmentShader, const_cast<char*>(fsFilename));
 		return false;
 	}
 	return true;
@@ -187,92 +186,88 @@ ColorShader::~ColorShader() {
 
 }
 
-bool ColorShader::Initialize(OpenGL* pGL, HWND hWnd) {
+bool ColorShader::Initialize(OpenGL& gl, HWND hWnd) {
 	bool result;
-	result = InitializeShader("color.vs", "color.ps", pGL, hWnd);
+	result = InitializeShader("color.vs", "color.ps", gl, hWnd);
 
-	Object* pObject = new Object();
-	objects.emplace_back(pObject);
+	//Object* pObject = new Object();
+	//objects.emplace_back(pObject);
 
-	for (const auto& obj : objects) {
-		if (!obj->Initialize(pGL)) {
-			MessageBox(hWnd, L"Could not initialize the model object", L"Error", MB_OK);
-			return false;
-		}
-	}
+	//for (const auto& obj : objects) {
+	//	if (!obj->Initialize(gl)) {
+	//		MessageBox(hWnd, L"Could not initialize the model object", L"Error", MB_OK);
+	//		return false;
+	//	}
+	//}
 
 	if (!result)
 		return false;
 	return true;
 }
 
-void ColorShader::Shutdown(OpenGL* pGL) {
-	ShutdownShader(pGL);
+void ColorShader::Shutdown(OpenGL& gl) {
+	ShutdownShader(gl);
 }
 
-void ColorShader::SetShader(OpenGL* pGL) {
-	if (!pGL) {
-		return;
-	}
-	pGL->glUseProgram(shaderProgram);
+void ColorShader::SetShader(OpenGL& gl) {
+	gl.glUseProgram(shaderProgram);
 }
 
-void ColorShader::Render(OpenGL* pGL) {
-	for (const auto& obj : objects)
-		obj->Render(pGL);
-}
+//void ColorShader::Render(OpenGL& gl, Object& obj) {
+//	obj.Render(gl);
+//}
 
-bool ColorShader::InitializeShader(const char* vsFilename, const char* fsFilename, OpenGL* pGL, HWND hWnd) {
+bool ColorShader::InitializeShader(const char* vsFilename, const char* fsFilename, OpenGL& gl, HWND hWnd) {
 	
-	if (!CompileShader(vsFilename, fsFilename, pGL, hWnd))
+	if (!CompileShader(vsFilename, fsFilename, gl, hWnd))
 		return false;
 
 	//Create a shader program object.
-	shaderProgram = pGL->glCreateProgram();
+	shaderProgram = gl.glCreateProgram();
 
 	//Attach the vertex and fragment shader to the program object.
-	pGL->glAttachShader(shaderProgram, vertexShader);
-	pGL->glAttachShader(shaderProgram, fragmentShader);
+	gl.glAttachShader(shaderProgram, vertexShader);
+	gl.glAttachShader(shaderProgram, fragmentShader);
 
 	//Bind the shader input variables.
-	pGL->glBindAttribLocation(shaderProgram, 0, "inputPosition");
-	pGL->glBindAttribLocation(shaderProgram, 1, "inputColor");
+	gl.glBindAttribLocation(shaderProgram, 0, "inputPosition");
+	gl.glBindAttribLocation(shaderProgram, 1, "inputColor");
 
 	//Link the shader Program
-	pGL->glLinkProgram(shaderProgram);
+	gl.glLinkProgram(shaderProgram);
 
 	GLint status;
-	pGL->glGetProgramiv(shaderProgram, GL_LINK_STATUS, &status);
+	gl.glGetProgramiv(shaderProgram, GL_LINK_STATUS, &status);
 	if (status != 1)
 	{
-		OutputLinkErrorMessage(pGL, hWnd, shaderProgram);
+		OutputLinkErrorMessage(gl, hWnd, shaderProgram);
 		return false;
 	}
 	return true;
 }
 
 
-bool ColorShader::SetShaderParameters(OpenGL* pGL, float* worldMatrix, float* viewMatrix, float* projectionMatrix) {
-	unsigned int location = pGL->glGetUniformLocation(shaderProgram, "worldMatrix");
+bool ColorShader::SetShaderParameters(OpenGL& gl, float* worldMatrix, float* viewMatrix, float* projectionMatrix) {
+	unsigned int location = gl.glGetUniformLocation(shaderProgram, "worldMatrix");
 	if (location == -1)
 		return false;
 
-	pGL->glUniformMatrix4fv(location, 1, false, worldMatrix);
+	gl.glUniformMatrix4fv(location, 1, false, worldMatrix);
 
 	//Set the view matrix in the vertex shader
 
-	location = pGL->glGetUniformLocation(shaderProgram, "viewMatrix");
+	location = gl.glGetUniformLocation(shaderProgram, "viewMatrix");
 	if (location == -1)
 		return false;
 	
-	pGL->glUniformMatrix4fv(location, 1, false, viewMatrix);
+	gl.glUniformMatrix4fv(location, 1, false, viewMatrix);
 
 	//Set the projection matrix in the vertex shader
-	location = pGL->glGetUniformLocation(shaderProgram, "projectionMatrix");
+	location = gl.glGetUniformLocation(shaderProgram, "projectionMatrix");
 	if (location == -1)
 		return false;
 
-	pGL->glUniformMatrix4fv(location, 1, false, projectionMatrix);
+	gl.glUniformMatrix4fv(location, 1, false, projectionMatrix);
 
 	return true;
 }
@@ -290,19 +285,9 @@ TextureShader::~TextureShader() {
 
 }
 
-bool TextureShader::Initialize(OpenGL* pGL, HWND hWnd) {
+bool TextureShader::Initialize(OpenGL& gl, HWND hWnd) {
 	bool result;
-	result = InitializeShader("texture.vs", "texture.ps", pGL, hWnd);
-
-	Object* pObject = new Object();
-	objects.emplace_back(pObject);
-
-	for (const auto& obj : objects) {
-		if (!obj->Initialize(pGL)) {
-			MessageBox(hWnd, L"Could not initialize the model object", L"Error", MB_OK);
-			return false;
-		}
-	}
+	result = InitializeShader("texture.vs", "texture.ps", gl, hWnd);
 
 
 	if (!result)
@@ -310,73 +295,67 @@ bool TextureShader::Initialize(OpenGL* pGL, HWND hWnd) {
 	return true;
 }
 
-void TextureShader::SetShader(OpenGL* pGL) {
-	if (!pGL) {
-		return;
-	}
-	pGL->glUseProgram(shaderProgram);
+void TextureShader::SetShader(OpenGL& gl) {
+	gl.glUseProgram(shaderProgram);
 }
 
-void TextureShader::Render(OpenGL* pGL) {
-	for (const auto& obj : objects)
-		obj->Render(pGL);	
+
+void TextureShader::Shutdown(OpenGL& gl) {
+	ShutdownShader(gl);
 }
 
-void TextureShader::Shutdown(OpenGL* pGL) {
-	ShutdownShader(pGL);
-}
-
-bool TextureShader::InitializeShader(const char* vsFilename, const char* fsFilename, OpenGL* pGL, HWND hWnd) {
-	if (!CompileShader(vsFilename, fsFilename, pGL, hWnd))
+bool TextureShader::InitializeShader(const char* vsFilename, const char* fsFilename, OpenGL& gl, HWND hWnd) {
+	if (!CompileShader(vsFilename, fsFilename, gl, hWnd))
 		return false;
 
-	shaderProgram = pGL->glCreateProgram();
+	shaderProgram = gl.glCreateProgram();
 
-	pGL->glAttachShader(shaderProgram, vertexShader);
-	pGL->glAttachShader(shaderProgram, fragmentShader);
+	gl.glAttachShader(shaderProgram, vertexShader);
+	gl.glAttachShader(shaderProgram, fragmentShader);
+	
+	gl.glBindAttribLocation(shaderProgram, 0, "inputPosition");
+	gl.glBindAttribLocation(shaderProgram, 1, "inputTexCoord");
+	//gl.glBindAttribLocation(shaderProgram, 2, "inputNormal");
 
-	pGL->glBindAttribLocation(shaderProgram, 0, "inputPosition");
-	pGL->glBindAttribLocation(shaderProgram, 1, "inputTexCoord");
-
-	pGL->glLinkProgram(shaderProgram);
+	gl.glLinkProgram(shaderProgram);
 
 	GLint status;
-	pGL->glGetProgramiv(shaderProgram, GL_LINK_STATUS, &status);
+	gl.glGetProgramiv(shaderProgram, GL_LINK_STATUS, &status);
 	if (status != GL_TRUE) {
-		OutputLinkErrorMessage(pGL, hWnd, shaderProgram);
+		OutputLinkErrorMessage(gl, hWnd, shaderProgram);
 		return false;
 	}
 	return true;
 }
 
-bool TextureShader::SetShaderParameters(OpenGL* pGL, float* worldMatrix, float* viewMatrix, float* projectionMatrix, int textureUnit) {
+bool TextureShader::SetShaderParameters(OpenGL& gl, float* worldMatrix, float* viewMatrix, float* projectionMatrix, int textureUnit) {
 	unsigned int location;
 	
-	location = pGL->glGetUniformLocation(shaderProgram, "worldMatrix");
+	location = gl.glGetUniformLocation(shaderProgram, "worldMatrix");
 	if (location == -1)
 		return false;
 
-	pGL->glUniformMatrix4fv(location, 1, false, worldMatrix);
+	gl.glUniformMatrix4fv(location, 1, false, worldMatrix);
 
 	//Set the view matrix in the vertex shader.
-	location = pGL->glGetUniformLocation(shaderProgram, "viewMatrix");
+	location = gl.glGetUniformLocation(shaderProgram, "viewMatrix");
 	if (location == -1)
 		return false;
 
-	pGL->glUniformMatrix4fv(location, 1, false, viewMatrix);
+	gl.glUniformMatrix4fv(location, 1, false, viewMatrix);
 
 	//Set the projection matrix in the vertex shader.
-	location = pGL->glGetUniformLocation(shaderProgram, "projectionMatrix");
+	location = gl.glGetUniformLocation(shaderProgram, "projectionMatrix");
 	if (location == -1)
 		return false;
 
-	pGL->glUniformMatrix4fv(location, 1, false, projectionMatrix);
+	gl.glUniformMatrix4fv(location, 1, false, projectionMatrix);
 
 	//Set the texture in the pixel shader to use the data from the first texture unit.
-	location = pGL->glGetUniformLocation(shaderProgram, "shaderTexture");
+	location = gl.glGetUniformLocation(shaderProgram, "shaderTexture");
 	if (location == -1)
 		return false;
-	pGL->glUniform1i(location, textureUnit);
+	gl.glUniform1i(location, textureUnit);
 
 	return true;
 }

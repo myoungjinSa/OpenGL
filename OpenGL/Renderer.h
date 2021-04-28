@@ -13,6 +13,7 @@ class Object;
 class TextureShader;
 class ColorShader;
 class Camera;
+class Scene;
 class Renderer
 {
 public:
@@ -28,20 +29,20 @@ public:
 	};
 
 	Renderer();
-	Renderer(const Renderer&);
+	Renderer(const Renderer&) = delete;
 	~Renderer();
 
 	bool Initialize(OpenGL* pOpenGL, HWND hWnd); 
 	void Shutdown();
 	bool Frame();
-	
+
+	void Attach(Scene& scene);
+	void Detach();
 private:
-	bool Render();
+	bool Render(Scene& scene);
 private:
 	OpenGL* pGL;
-	Camera* pCamera;
-	Object* pObject;
-	//ColorShader* pShader;
 	TextureShader* pShader;
+	Scene* pTargetScene;
 };
 

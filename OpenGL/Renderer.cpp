@@ -1,61 +1,47 @@
 #include "Renderer.h"
 #include "Camera.h"
+#include "Scene.h"
 #include "Shader.h"
 #include "Object.h"
 #include "Texture.h"
 
-
-
 Renderer::Renderer() 
-	:pGL(nullptr), 
-	pCamera(nullptr),
-	pObject(nullptr),
-	pShader(nullptr)
+	:pGL(nullptr),
+	pShader(nullptr),
+	pTargetScene(nullptr)
 {
 }
 
-Renderer::Renderer(const Renderer& other) {
-
-}
-
 Renderer::~Renderer() {
-	if (pCamera) {
-		delete pCamera;
-		pCamera = nullptr;
-	}
-	if (pObject){
-		delete pObject;
-		pObject = nullptr;
-	}
 	if (pShader) {
 		delete pShader;
 		pShader = nullptr;
 	}
+	pTargetScene = nullptr;
 }
 
 bool Renderer::Initialize(OpenGL* pOpenGL, HWND hWnd) {
 	//Store a pointer to ther OpenGL class object.
 	pGL = pOpenGL;
-
-	pCamera = new Camera();
-	pCamera->SetPosition(5.0f, 3.0f, -10.0f);
-
-
-	pShader = new TextureShader();//ColorShader();
+	if (!pGL)
+		return false;
+	
+	pShader = new TextureShader();
 	if (!pShader)
 		return false;
 
-	bool result = pShader->Initialize(pGL, hWnd);
+	bool result = pShader->Initialize(*pGL, hWnd);
 	if (!result) {
 		MessageBox(hWnd, L"Could not initialize the color shader object.", L"Error", MB_OK);
 		return false;
 	}
-
 	return true;
 }
 void Renderer::Shutdown() {
 	if(pShader)
-		pShader->Shutdown(pGL);
+		pShader->Shutdown(*pGL);
+
+	Detach();
 	TextureLoader::Release();
 }
 
@@ -64,9 +50,8 @@ bool Renderer::Frame()
 {
 	bool result;
 
-
 	// Render the graphics scene.
- 	result = Render();
+ 	result = Render(*pTargetScene);
 	if (!result)
 	{
 		return false;
@@ -75,8 +60,15 @@ bool Renderer::Frame()
 	return true;
 }
 
+void Renderer::Attach(Scene& targetScene) {
+	pTargetScene = &targetScene;
+}
 
-bool Renderer::Render()
+void Renderer::Detach() {
+	pTargetScene = nullptr;
+}
+
+bool Renderer::Render(Scene& targetScene)
 {
 	Matrix<float, 4, 4> worldMatrix;
 	Matrix<float, 4, 4> viewMatrix;
@@ -84,17 +76,16 @@ bool Renderer::Render()
 
 	// Clear the buffers to begin the scene.
 	pGL->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
-	pCamera->Render();
+	targetScene.Prepare(*pGL);
 
-	//Get the world, view, and projection matrices from the opengl and camera objects.
-	pGL->GetWorldMatrix(worldMatrix);
-	pCamera->GetViewMatrix(viewMatrix);
-	pGL->GetProjectionMatrix(projectionMatrix);
+	worldMatrix = targetScene.GetWorldMatrix();
+	viewMatrix = targetScene.GetViewMatrix();
+	projectionMatrix = targetScene.GetProjectionMatrix();
 
-	pShader->SetShader(pGL);
-	pShader->SetShaderParameters(pGL, (float*)worldMatrix.value, (float*)viewMatrix.value, (float*)projectionMatrix.value, 0);
+	pShader->SetShader(*pGL);
+	pShader->SetShaderParameters(*pGL, (float*)worldMatrix.value, (float*)viewMatrix.value, (float*)projectionMatrix.value, 0);
 	
-	pShader->Render(pGL);
+	targetScene.Render(*pGL);
 
 	// Present the rendered scene to the screen.
 	pGL->EndScene();

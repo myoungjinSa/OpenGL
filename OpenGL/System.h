@@ -1,10 +1,10 @@
 #pragma once
 #include <Windows.h>
 
-
 class OpenGL;
 class Input;
 class Renderer;
+class Scene;
 class System
 {
 public:
@@ -31,6 +31,7 @@ private:
 	OpenGL* pOpenGL;
 	Input* pInput;
 	Renderer* pRenderer;
+	Scene* pScene;
 };
 
 

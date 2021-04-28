@@ -1,10 +1,16 @@
 #include "System.h"
 #include "OpenGL.h"
 #include "Input.h"
+#include "Scene.h"
 #include "Renderer.h"
 
-System::System() {
-	pOpenGL = NULL;
+System::System() 
+	: pOpenGL(nullptr),
+	pScene(nullptr),
+	pInput(nullptr),
+	pRenderer(nullptr)
+{
+
 }
 
 System::System(const System& other) {
@@ -29,7 +35,7 @@ bool System::Initialize() {
 	}
 
 	// Create the input object.  This object will be used to handle reading the input from the user.
-	pInput = new Input;
+	pInput = new Input();
 	if (!pInput)
 	{
 		return false;
@@ -37,12 +43,22 @@ bool System::Initialize() {
 
 	pInput->Initialize();
 
+	pScene = new Scene();
+	if (!pScene)
+	{
+		return false;
+	}
+	if (!pScene->BuildObject(*pOpenGL, hWnd)) {
+		return false;
+	}
+
 	// Create the graphics object.  This object will handle rendering all the graphics for this application.
-	pRenderer = new Renderer;
+	pRenderer = new Renderer();
 	if (!pRenderer)
 	{
 		return false;
 	}
+
 
 	// Initialize the graphics object.
 	result = pRenderer->Initialize(pOpenGL, hWnd);
@@ -51,23 +67,29 @@ bool System::Initialize() {
 		return false;
 	}
 
+	pRenderer->Attach(*pScene);
 	return true;
 }
 
 void System::Shutdown() {
+	if (pScene) {
+		pScene->Shutdown(*pOpenGL);
+		delete pScene;
+		pScene = nullptr;
+	}
 	// Release the graphics object.
 	if (pRenderer)
 	{
 		pRenderer->Shutdown();
 		delete pRenderer;
-		pRenderer = 0;
+		pRenderer = nullptr;
 	}
 
 	// Release the input object.
 	if (pInput)
 	{
 		delete pInput;
-		pInput = 0;
+		pInput = nullptr;
 	}
 
 	// Release the OpenGL object.
@@ -75,7 +97,7 @@ void System::Shutdown() {
 	{
 		pOpenGL->Shutdown(hWnd);
 		delete pOpenGL;
-		pOpenGL = 0;
+		pOpenGL = nullptr;
 	}
 
 	// Shutdown the window.

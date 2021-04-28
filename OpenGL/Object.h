@@ -12,9 +12,9 @@ public:
 	~Object();
 
 
-	virtual bool Initialize(OpenGL* pGL);
-	virtual void Shutdown(OpenGL* pGL);
-	virtual void Render(OpenGL* pGL);
+	virtual bool Initialize(OpenGL& pGL);
+	virtual void Shutdown(OpenGL& pGL);
+	virtual void Render(OpenGL& pGL);
 
 	Object& operator=(const Object& other);
 	Object& operator=(Object&& other)noexcept;

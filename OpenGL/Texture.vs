@@ -15,4 +15,6 @@ void main(void){
 	gl_Position = projectionMatrix * gl_Position;
 
 	texCoord = inputTexCoord;
+
 }
+

@@ -27,7 +27,7 @@ Object& Object::operator=(const Object& other) {
 	return *this;
 }
 
-bool Object::Initialize(OpenGL* pGL) {
+bool Object::Initialize(OpenGL& gl) {
 	//MeshBuilder Call
 	MeshBuilder meshBuilder;
 	meshBuilder.AddCube(2.0f, RGBA::BLUE);
@@ -37,40 +37,17 @@ bool Object::Initialize(OpenGL* pGL) {
 	if (!pMesh)
 		return false;
 	//meshBuilder.CopyToMesh(*pGL, pMesh.get(), &ColorVertex::Copy, sizeof(ColorVertex));
-	meshBuilder.CopyToMesh(*pGL, pMesh.get(), &TexturedVertex::Copy, sizeof(TexturedVertex));
+	meshBuilder.CopyToMesh(gl, pMesh.get(), &TexturedVertex::Copy, sizeof(TexturedVertex));
 
-	texture = TextureLoader::GetTexture(*pGL, "Capture.bmp");
+	texture = TextureLoader::GetTexture(gl, "Capture.bmp");
 
 	return true;
 }
 
-void Object::Shutdown(OpenGL* pGL) {
-	pMesh->Shutdown(*pGL);
+void Object::Shutdown(OpenGL& gl) {
+	pMesh->Shutdown(gl);
 }
 
-void Object::Render(OpenGL* pGL) {
-	pMesh->Render(*pGL);
+void Object::Render(OpenGL& gl) {
+	pMesh->Render(gl);
 }
-//
-//bool Object::LoadTexture(OpenGL* pGL, const char* textureFileName, unsigned int textureUnit, bool wrap) {
-//	bool result;
-//
-//	pTexture = new Texture();
-//	if (!pTexture)
-//		return false;
-//
-//	result = pTexture->Initialize(pGL, textureFileName, textureUnit, wrap);
-//	if (!result)
-//		return false;
-//
-//	return true;
-//}
-
-
-//void Object::ReleaseTexture() {
-//	if (pTexture) {
-//		pTexture->Shutdown();
-//		delete pTexture;
-//		pTexture = nullptr;
-//	}
-//}
