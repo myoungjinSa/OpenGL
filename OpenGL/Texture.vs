@@ -2,8 +2,10 @@
 
 in vec3 inputPosition;
 in vec2 inputTexCoord;
+in vec3 inputNormal;
 
 out vec2 texCoord;
+out vec3 normal;
 
 uniform mat4 worldMatrix;
 uniform mat4 viewMatrix;
@@ -16,5 +18,9 @@ void main(void){
 
 	texCoord = inputTexCoord;
 
+	normal = mat3(worldMatrix) * inputNormal;
+
+	//Normalize the normal vector.
+	normal = normalize(normal);
 }
 

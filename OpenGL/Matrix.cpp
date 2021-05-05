@@ -32,3 +32,5 @@ Vector4<T> Vector4<T>::GetMidPoint(const Vector4<T>& start, const Vector4<T>& en
 	midpoint.w = (start.w + end.w) / 2.0f;
 	return(midpoint);
 }
+
+

@@ -155,6 +155,7 @@ bool System::Frame()
 		return false;
 	}
 
+
 	// Do the frame processing for the graphics object.
 	result = pRenderer->Frame();
 	if (!result)

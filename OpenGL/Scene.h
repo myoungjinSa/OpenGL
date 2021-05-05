@@ -1,6 +1,9 @@
 #pragma once
 #include <vector>
+#include "Light.h"
 #include "Matrix.h"
+
+class TextureShader;
 class Object;
 class Camera;
 class Scene final
@@ -20,7 +23,8 @@ public:
 	const Matrix<float, 4, 4>& GetProjectionMatrix() const;
 private:
 	Camera* pCamera;
-	std::vector<Object*> objects;
+	TextureShader* pShader;
+	Light diffuseLight;
 
 	Matrix<float, 4, 4> worldMatrix;
 	Matrix<float, 4, 4> projectionMatrix;

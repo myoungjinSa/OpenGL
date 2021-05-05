@@ -42,7 +42,7 @@ private:
 	bool Render(Scene& scene);
 private:
 	OpenGL* pGL;
-	TextureShader* pShader;
+	//TextureShader* pShader;
 	Scene* pTargetScene;
 };
 

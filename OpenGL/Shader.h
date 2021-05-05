@@ -4,6 +4,8 @@
 
 class OpenGL;
 class Object;
+class ShaderVisitor;
+
 class Shader {
 public:
 	Shader();
@@ -11,21 +13,23 @@ public:
 	virtual ~Shader();
 
 	virtual bool Initialize(OpenGL& gl, HWND hWnd) = 0;
-	virtual void Shutdown(OpenGL& gl) = 0;
-	virtual void SetShader(OpenGL& gl) = 0;
-	//virtual void Render(OpenGL& gl) = 0;
+	virtual void Shutdown(OpenGL& gl);
+	virtual void SetShader(OpenGL& gl);
+	virtual void Render(OpenGL& gl) = 0;
 protected:
 	virtual bool InitializeShader(const char* vsFilename, const char* fsFilename, OpenGL& gl, HWND hWnd) = 0;
 
-	void OutputShaderErrorMessage(OpenGL& pGL, HWND hWnd, unsigned int shaderId, char*);
-	void OutputLinkErrorMessage(OpenGL& pGL, HWND hWnd, unsigned int programId);
+
+	void OutputShaderErrorMessage(OpenGL& gl, HWND hWnd, unsigned int shaderId, char*);
+	void OutputLinkErrorMessage(OpenGL& gl, HWND hWnd, unsigned int programId);
 	char* LoadShaderSourceFile(const char* filename);
-	void ShutdownShader(OpenGL& pGL);
+	void ShutdownShader(OpenGL& gl);
 	bool CompileShader(const char* vsFilename, const char* fsFilename, OpenGL& pGL, HWND hWnd);
 
 	unsigned int vertexShader;
 	unsigned int fragmentShader;
 	unsigned int shaderProgram;
+	std::vector<Object*> objects;
 };
 
 
@@ -39,9 +43,9 @@ public:
 	bool Initialize(OpenGL& gl, HWND hWnd) override;
 	void Shutdown(OpenGL& gl) override;
 	void SetShader(OpenGL& gl) override;
-	//void Render(OpenGL& gl, Object& obj) override;
+	void Render(OpenGL& gl) override;
 
-	bool SetShaderParameters(OpenGL& pGL, float* worldMatrix, float* viewMatrix, float* projectionMatrix);
+	bool SetShaderParameters(OpenGL& gl, float* worldMatrix, float* viewMatrix, float* projectionMatrix);
 protected:
 	bool InitializeShader(const char* vsFilename, const char* fsFilename, OpenGL& gl, HWND hWnd);
 };
@@ -53,12 +57,14 @@ public:
 	TextureShader(const TextureShader& other) = delete;
 	~TextureShader() override;
 
-	bool Initialize(OpenGL& pGL, HWND hWnd) override;
-	void Shutdown(OpenGL& pGL) override;
-	void SetShader(OpenGL& pGL) override;
-	//void Render(OpenGL& pGL) override;
-
-	bool SetShaderParameters(OpenGL& pGL, float* worldMatrix, float* viewMatrix, float* projectionMatrix, int textureUnit);
+	bool Initialize(OpenGL& gl, HWND hWnd) override;
+	void Shutdown(OpenGL& gl) override;
+	void SetShader(OpenGL& gl) override;
+	void Render(OpenGL& gl) override;
+	
+	bool SetShaderParameters(OpenGL& pGL, float* worldMatrix, float* viewMatrix, float* projectionMatrix, int textureUnit, float* lightDirection, float* diffuseLightColor);
 protected:
 	bool InitializeShader(const char* vsFilename, const char* fsFilename, OpenGL& gl, HWND hWnd);
 };
+
+

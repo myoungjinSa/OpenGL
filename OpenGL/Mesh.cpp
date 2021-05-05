@@ -56,12 +56,12 @@ void ColorVertex::BindVertexBuffer(const OpenGL& gl, void* pBuffer, unsigned int
 
 
 TexturedVertex::TexturedVertex() 
-	:Vertex(), uv0()
+	:Vertex(), uv0(), normal()
 {
 
 }
-TexturedVertex::TexturedVertex(const Vec3f& pos, const Vec2f& _uv0) 
-	: Vertex(pos), uv0(_uv0)
+TexturedVertex::TexturedVertex(const Vec3f& pos, const Vec2f& _uv0, const Vec3f& _normal) 
+	: Vertex(pos), uv0(_uv0), normal(_normal)
 {
 
 }
@@ -73,6 +73,7 @@ void TexturedVertex::Copy(const VertexMaster& source, byte* pDestination) {
 	TexturedVertex* pColorVertex = (TexturedVertex*)(pDestination);
 	pColorVertex->position = source.position;
 	pColorVertex->uv0 = source.uv0;
+	pColorVertex->normal = source.normal;
 }
 
 void TexturedVertex::BindVertexBuffer(const OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeofVertex) {
@@ -81,13 +82,20 @@ void TexturedVertex::BindVertexBuffer(const OpenGL& gl, void* pBuffer, unsigned 
 
 	gl.glEnableVertexAttribArray(0); // Vertex Position;
 	gl.glEnableVertexAttribArray(1); // Texture coordinates;
+	gl.glEnableVertexAttribArray(2); // Normal
 
 	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
 	gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeofVertex, 0);
 
 	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
 	gl.glVertexAttribPointer(1, 2, GL_FLOAT, false, sizeofVertex, (unsigned char*)NULL + (3 * sizeof(float)));
+
+	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
+	gl.glVertexAttribPointer(2, 3, GL_FLOAT, false, sizeofVertex, (unsigned char*)NULL + (5 * sizeof(float)));
+
 }
+
+
 Mesh::Mesh()
 	:vertexCount(0), vertexArrayId(0), vertexBufferId(0), indexCount(0), indexBufferId(0), drawMode(Renderer::DrawMode::TRIANGLES)
 {
@@ -126,6 +134,7 @@ bool Mesh::Initialize(const OpenGL& gl, VertexBufferBindCallback* pBindFuction, 
 void Mesh::Shutdown(const OpenGL& gl) {
 	gl.glDisableVertexAttribArray(0);
 	gl.glDisableVertexAttribArray(1);
+	gl.glDisableVertexAttribArray(2);
 
 	//Release the vertex buffer.
 	gl.glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -289,10 +298,11 @@ void MeshBuilder::End() {
 		startIndex = vertices.size();
 }
 
-void MeshBuilder::AddQuad(const Vec3f& bottomLeft, const Vec3f& up, float upLength, const Vec3f& right, float rightLength, const RGBA& color, const Vec2f& uvOffset, float uvStepSize) {
+void MeshBuilder::AddQuad(const Vec3f& bottomLeft, const Vec3f& up, float upLength, const Vec3f& right, float rightLength, const Vec3f& normal, const RGBA& color, const Vec2f& uvOffset, float uvStepSize) {
 	unsigned int currentVert = vertices.size();
 
 	SetColor(color);
+	SetNormal(normal);
 
 	SetUV(uvOffset + (Vec2f::UNIT_Y * uvStepSize));
 	AddVertex(bottomLeft);		//020
@@ -317,12 +327,12 @@ void MeshBuilder::AddQuad(const Vec3f& bottomLeft, const Vec3f& up, float upLeng
 void MeshBuilder::AddCube(float sideLength, const RGBA& color) {
 	const float halfSideLength = sideLength / 2.0f;
 
-	AddQuad(Vec3f::UP * sideLength, Vec3f::FORWARD, sideLength, Vec3f::RIGHT, sideLength, RGBA::CYAN, Vec2f::ZERO, 1.0f);								//TOP
-	AddQuad(Vec3f::FORWARD * sideLength, Vec3f::FORWARD * -1.0f, sideLength, Vec3f::RIGHT, sideLength, RGBA::SADDLE_BROWN, Vec2f::ZERO, 1.0f);					//BOTTOM
-	AddQuad(Vec3f::ZERO, Vec3f::UP, sideLength, Vec3f::RIGHT, sideLength, RGBA::RED, Vec2f::ZERO, 1.0f);													//SOUTH
-	AddQuad(Vec3f::FORWARD * sideLength + Vec3f::RIGHT * sideLength, Vec3f::UP, sideLength, Vec3f::RIGHT * -1.0f, sideLength, RGBA::GREEN, Vec2f::ZERO, 1.0f);		//NORTH
-	AddQuad(Vec3f::FORWARD * sideLength, Vec3f::UP, sideLength, Vec3f::FORWARD * -1.0f, sideLength, RGBA::VAPORWAVE, Vec2f::ZERO, 1.0f);									//WEST
-	AddQuad(Vec3f::RIGHT * sideLength, Vec3f::UP, sideLength, Vec3f::FORWARD, sideLength, RGBA::YELLOW, Vec2f::ZERO, 1.0f);									//EAST
+	AddQuad(Vec3f::UP * sideLength, Vec3f::FORWARD, sideLength, Vec3f::RIGHT, sideLength, Vec3f::FORWARD * -1.0f, RGBA::CYAN, Vec2f::ZERO, 1.0f);										//TOP
+	AddQuad(Vec3f::FORWARD * sideLength, Vec3f::FORWARD * -1.0f, sideLength, Vec3f::RIGHT, sideLength, Vec3f::FORWARD * -1.0f, RGBA::SADDLE_BROWN, Vec2f::ZERO, 1.0f);					//BOTTOM
+	AddQuad(Vec3f::ZERO, Vec3f::UP, sideLength, Vec3f::RIGHT, sideLength, Vec3f::FORWARD * -1.0f, RGBA::RED, Vec2f::ZERO, 1.0f);														//SOUTH
+	AddQuad(Vec3f::FORWARD * sideLength + Vec3f::RIGHT * sideLength, Vec3f::UP, sideLength, Vec3f::FORWARD * -1.0f, sideLength, Vec3f::FORWARD, RGBA::GREEN, Vec2f::ZERO, 1.0f);	//NORTH
+	AddQuad(Vec3f::FORWARD * sideLength, Vec3f::UP, sideLength, Vec3f::FORWARD * -1.0f, sideLength, Vec3f::FORWARD * -1.0f, RGBA::VAPORWAVE, Vec2f::ZERO, 1.0f);						//WEST
+	AddQuad(Vec3f::RIGHT * sideLength, Vec3f::UP, sideLength, Vec3f::FORWARD, sideLength, Vec3f::FORWARD * -1.0f, RGBA::YELLOW, Vec2f::ZERO, 1.0f);										//EAST
 }
 
 void MeshBuilder::AddVertex(const Vec3f& _position) {

@@ -5,12 +5,20 @@
 Shader::Shader() 
 	:vertexShader(0), fragmentShader(0), shaderProgram(0)
 {
+	objects.clear();
 }
 
 Shader::~Shader() {
-
+	for (auto& obj : objects) {
+		delete obj;
+	}
+	objects.clear();
 }
 
+void Shader::Shutdown(OpenGL& gl) {
+	for (const auto& obj : objects)
+		obj->Shutdown(gl);
+}
 char* Shader::LoadShaderSourceFile(const char* filename) {
 	std::ifstream fin;
 
@@ -106,6 +114,9 @@ void Shader::OutputShaderErrorMessage(OpenGL& gl, HWND hWnd, unsigned int shader
 	MessageBox(hWnd, L"Error compile shader. Check shader-error.txt for message.", newString, MB_OK);
 }
 
+void Shader::SetShader(OpenGL& gl) {
+	gl.glUseProgram(shaderProgram);
+}
 
 void Shader::ShutdownShader(OpenGL& gl) {
 	gl.glDetachShader(shaderProgram, vertexShader);
@@ -190,15 +201,15 @@ bool ColorShader::Initialize(OpenGL& gl, HWND hWnd) {
 	bool result;
 	result = InitializeShader("color.vs", "color.ps", gl, hWnd);
 
-	//Object* pObject = new Object();
-	//objects.emplace_back(pObject);
+	Object* pObject = new Object();
+	objects.emplace_back(pObject);
 
-	//for (const auto& obj : objects) {
-	//	if (!obj->Initialize(gl)) {
-	//		MessageBox(hWnd, L"Could not initialize the model object", L"Error", MB_OK);
-	//		return false;
-	//	}
-	//}
+	for (const auto& obj : objects) {
+		if (!obj->Initialize(gl)) {
+			MessageBox(hWnd, L"Could not initialize the model object", L"Error", MB_OK);
+			return false;
+		}
+	}
 
 	if (!result)
 		return false;
@@ -207,15 +218,17 @@ bool ColorShader::Initialize(OpenGL& gl, HWND hWnd) {
 
 void ColorShader::Shutdown(OpenGL& gl) {
 	ShutdownShader(gl);
+	Shader::Shutdown(gl);
 }
 
 void ColorShader::SetShader(OpenGL& gl) {
-	gl.glUseProgram(shaderProgram);
+	Shader::SetShader(gl);
 }
 
-//void ColorShader::Render(OpenGL& gl, Object& obj) {
-//	obj.Render(gl);
-//}
+void ColorShader::Render(OpenGL& gl) {
+	for (const auto& obj : objects)
+		obj->Render(gl);
+}
 
 bool ColorShader::InitializeShader(const char* vsFilename, const char* fsFilename, OpenGL& gl, HWND hWnd) {
 	
@@ -288,20 +301,32 @@ TextureShader::~TextureShader() {
 bool TextureShader::Initialize(OpenGL& gl, HWND hWnd) {
 	bool result;
 	result = InitializeShader("texture.vs", "texture.ps", gl, hWnd);
-
-
 	if (!result)
 		return false;
+
+	Object* pObject = new Object();
+	objects.emplace_back(pObject);
+
+	for (const auto& obj : objects) {
+		if (!obj->Initialize(gl)) {
+			MessageBox(hWnd, L"Could not initialize the model object", L"Error", MB_OK);
+			return false;
+		}
+	}
 	return true;
 }
 
-void TextureShader::SetShader(OpenGL& gl) {
-	gl.glUseProgram(shaderProgram);
+void TextureShader::Render(OpenGL& gl) {
+	for (const auto& obj : objects)
+		obj->Render(gl);
 }
-
+void TextureShader::SetShader(OpenGL& gl) {
+	Shader::SetShader(gl);
+}
 
 void TextureShader::Shutdown(OpenGL& gl) {
 	ShutdownShader(gl);
+	Shader::Shutdown(gl);
 }
 
 bool TextureShader::InitializeShader(const char* vsFilename, const char* fsFilename, OpenGL& gl, HWND hWnd) {
@@ -315,7 +340,7 @@ bool TextureShader::InitializeShader(const char* vsFilename, const char* fsFilen
 	
 	gl.glBindAttribLocation(shaderProgram, 0, "inputPosition");
 	gl.glBindAttribLocation(shaderProgram, 1, "inputTexCoord");
-	//gl.glBindAttribLocation(shaderProgram, 2, "inputNormal");
+	gl.glBindAttribLocation(shaderProgram, 2, "inputNormal");
 
 	gl.glLinkProgram(shaderProgram);
 
@@ -328,7 +353,7 @@ bool TextureShader::InitializeShader(const char* vsFilename, const char* fsFilen
 	return true;
 }
 
-bool TextureShader::SetShaderParameters(OpenGL& gl, float* worldMatrix, float* viewMatrix, float* projectionMatrix, int textureUnit) {
+bool TextureShader::SetShaderParameters(OpenGL& gl, float* worldMatrix, float* viewMatrix, float* projectionMatrix, int textureUnit, float* lightDirection, float* diffuseLightColor) {
 	unsigned int location;
 	
 	location = gl.glGetUniformLocation(shaderProgram, "worldMatrix");
@@ -357,5 +382,18 @@ bool TextureShader::SetShaderParameters(OpenGL& gl, float* worldMatrix, float* v
 		return false;
 	gl.glUniform1i(location, textureUnit);
 
+	location = gl.glGetUniformLocation(shaderProgram, "lightDirection");
+	if (location == -1)
+		return false;
+
+	gl.glUniform3fv(location, 1, lightDirection);
+
+	location = gl.glGetUniformLocation(shaderProgram, "diffuseLightColor");
+	if (location == -1)
+		return false;
+
+	gl.glUniform4fv(location, 1, diffuseLightColor);
+
 	return true;
 }
+

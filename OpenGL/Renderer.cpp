@@ -7,16 +7,11 @@
 
 Renderer::Renderer() 
 	:pGL(nullptr),
-	pShader(nullptr),
 	pTargetScene(nullptr)
 {
 }
 
 Renderer::~Renderer() {
-	if (pShader) {
-		delete pShader;
-		pShader = nullptr;
-	}
 	pTargetScene = nullptr;
 }
 
@@ -26,20 +21,9 @@ bool Renderer::Initialize(OpenGL* pOpenGL, HWND hWnd) {
 	if (!pGL)
 		return false;
 	
-	pShader = new TextureShader();
-	if (!pShader)
-		return false;
-
-	bool result = pShader->Initialize(*pGL, hWnd);
-	if (!result) {
-		MessageBox(hWnd, L"Could not initialize the color shader object.", L"Error", MB_OK);
-		return false;
-	}
 	return true;
 }
 void Renderer::Shutdown() {
-	if(pShader)
-		pShader->Shutdown(*pGL);
 
 	Detach();
 	TextureLoader::Release();
@@ -68,23 +52,12 @@ void Renderer::Detach() {
 	pTargetScene = nullptr;
 }
 
-bool Renderer::Render(Scene& targetScene)
-{
-	Matrix<float, 4, 4> worldMatrix;
-	Matrix<float, 4, 4> viewMatrix;
-	Matrix<float, 4, 4> projectionMatrix;
+bool Renderer::Render(Scene& targetScene) {
 
 	// Clear the buffers to begin the scene.
 	pGL->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
 	targetScene.Prepare(*pGL);
 
-	worldMatrix = targetScene.GetWorldMatrix();
-	viewMatrix = targetScene.GetViewMatrix();
-	projectionMatrix = targetScene.GetProjectionMatrix();
-
-	pShader->SetShader(*pGL);
-	pShader->SetShaderParameters(*pGL, (float*)worldMatrix.value, (float*)viewMatrix.value, (float*)projectionMatrix.value, 0);
-	
 	targetScene.Render(*pGL);
 
 	// Present the rendered scene to the screen.

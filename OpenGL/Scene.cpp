@@ -6,35 +6,40 @@
 Scene::Scene() 
 	:pCamera(nullptr),
 	 worldMatrix(),
+	 pShader(nullptr),
 	 projectionMatrix()
 {
-	objects.clear();
 }
 
 Scene::~Scene() {
+	if (pShader) {
+		delete pShader;
+		pShader = nullptr;
+	}
 	if (pCamera) {
 		delete pCamera;
 		pCamera = nullptr;
 	}
-	for (auto& obj : objects) {
-		delete obj;
-	}
-	objects.clear();
 }
 
-bool Scene::BuildObject(OpenGL& gl, HWND hWnd) {
+bool Scene::BuildObject(OpenGL& gl, HWND hWnd) {	
+	Vec4f lightColor(1.0f, 0.7f, 1.0f, 1.0f);
+	diffuseLight.SetDiffuseColor(lightColor);
+	diffuseLight.SetDirection(Vec3f::FORWARD);
+
+	pShader = new TextureShader();
+	if (!pShader)
+		return false;
+
+	bool result = pShader->Initialize(gl, hWnd);
+	if (!result) {
+		MessageBox(hWnd, L"Could not initialize the shader object.", L"Error", MB_OK);
+		return false;
+	}
+
 	pCamera = new Camera();
 	pCamera->SetPosition(5.0f, 3.0f, -10.0f);
-
-	Object* pObject = new Object();
-	objects.emplace_back(pObject);
-
-	for (const auto& obj : objects) {
-		if (!obj->Initialize(gl)) {
-			MessageBox(hWnd, L"Could not initialize the model object", L"Error", MB_OK);
-			return false;
-		}
-	}
+	return true;
 }
 void Scene::Prepare(OpenGL& gl) {
 	pCamera->Render();
@@ -44,13 +49,27 @@ void Scene::Prepare(OpenGL& gl) {
 	gl.GetProjectionMatrix(projectionMatrix);
 }
 void Scene::Render(OpenGL& gl) {
-	for (const auto& obj : objects)
-		obj->Render(gl);
+	Matrix<float, 4, 4> worldMatrix;
+	Matrix<float, 4, 4> viewMatrix;
+	Matrix<float, 4, 4> projectionMatrix;
+
+	worldMatrix = GetWorldMatrix();
+	viewMatrix = GetViewMatrix();
+	projectionMatrix = GetProjectionMatrix();
+	
+	float diffuseLightColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	float lightDirection[3] = { 0.0f, 0.0f, 0.0f };
+	diffuseLight.GetDiffuseColor(diffuseLightColor);
+	diffuseLight.GetDirection(lightDirection);
+
+	pShader->SetShader(gl);
+	pShader->SetShaderParameters(gl, (float*)worldMatrix.value, (float*)viewMatrix.value, (float*)projectionMatrix.value, 0, lightDirection, diffuseLightColor);
+	pShader->Render(gl);
 }
 
 void Scene::Shutdown(OpenGL& gl) {
-	for (const auto& obj : objects)
-		obj->Shutdown(gl);
+	if (pShader)
+		pShader->Shutdown(gl);
 }
 
 const Matrix<float, 4, 4>& Scene::GetWorldMatrix() const {

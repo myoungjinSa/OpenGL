@@ -515,6 +515,7 @@ public:
 	static Vector3 GetMidPoint(const Vector3& start, const Vector3& end);
 	Vector3 Multiply(const Vector3<T>& v);
 
+	T* ConvertToValue();
 
 	template<typename T2> operator Vector3<T2>() const;
 	Vector3& operator+=(const Vector3& rhs);
@@ -570,6 +571,15 @@ void Vector3<T>::Normalize() {
 	x /= len;
 	y /= len;
 	z /= len;
+}
+template<typename T> inline
+T* Vector3<T>::ConvertToValue() {
+	T val[3];
+	val[0] = x;
+	val[1] = y;
+	val[2] = z;
+
+	return *val;
 }
 
 template<typename T> 
@@ -719,11 +729,14 @@ public:
 	Vector4(const Vector4<T>& other) = default;
 	void SetXYZW(T x, T y, T z, T w);
 
+	T* ConvertToValue();
+
 	///////////////////////////////////////////////
 	T CalculateMagnitude() const;
 	void Normalize();
 	static Vector4 GetMidPoint(const Vector4& start, const Vector4& end);
 
+	
 	///////////////////////////////////////////////
 	Vector4& operator+=(const Vector4& rhs);
 	Vector4& operator-=(const Vector4& rhs);
@@ -762,6 +775,15 @@ Vector4<T>::Vector4(const Vector3<T>& base, float _w)
 
 }
 
+template<typename T> inline
+T* Vector4<T>::ConvertToValue() {
+	T* val;
+	val[0] = x;
+	val[1] = y;
+	val[2] = z;
+	val[3] = w;
+	return *val;
+}
 
 template<typename T> inline
 void Vector4<T>::SetXYZW(T _x, T _y, T _z, T _w) {
