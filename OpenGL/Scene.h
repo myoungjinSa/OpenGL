@@ -24,7 +24,7 @@ public:
 private:
 	Camera* pCamera;
 	TextureShader* pShader;
-	Light diffuseLight;
+	Light phongLight;
 
 	Matrix<float, 4, 4> worldMatrix;
 	Matrix<float, 4, 4> projectionMatrix;

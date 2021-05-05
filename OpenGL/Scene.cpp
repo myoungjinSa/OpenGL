@@ -23,9 +23,11 @@ Scene::~Scene() {
 }
 
 bool Scene::BuildObject(OpenGL& gl, HWND hWnd) {	
-	Vec4f lightColor(1.0f, 0.7f, 1.0f, 1.0f);
-	diffuseLight.SetDiffuseColor(lightColor);
-	diffuseLight.SetDirection(Vec3f::FORWARD);
+	Vec4f diffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+	Vec4f ambientColor(0.15f, 0.15f, 0.15f, 1.0f);
+	phongLight.SetDiffuseColor(diffuseColor);
+	phongLight.SetAmbientLight(ambientColor);
+	phongLight.SetDirection(Vec3f::FORWARD);
 
 	pShader = new TextureShader();
 	if (!pShader)
@@ -58,12 +60,15 @@ void Scene::Render(OpenGL& gl) {
 	projectionMatrix = GetProjectionMatrix();
 	
 	float diffuseLightColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	float ambientLightColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+
 	float lightDirection[3] = { 0.0f, 0.0f, 0.0f };
-	diffuseLight.GetDiffuseColor(diffuseLightColor);
-	diffuseLight.GetDirection(lightDirection);
+	phongLight.GetDiffuseColor(diffuseLightColor);
+	phongLight.GetDirection(lightDirection);
+	phongLight.GetAmbientLight(ambientLightColor);
 
 	pShader->SetShader(gl);
-	pShader->SetShaderParameters(gl, (float*)worldMatrix.value, (float*)viewMatrix.value, (float*)projectionMatrix.value, 0, lightDirection, diffuseLightColor);
+	pShader->SetShaderParameters(gl, (float*)worldMatrix.value, (float*)viewMatrix.value, (float*)projectionMatrix.value, 0, lightDirection, diffuseLightColor, ambientLightColor);
 	pShader->Render(gl);
 }
 

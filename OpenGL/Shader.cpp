@@ -353,7 +353,7 @@ bool TextureShader::InitializeShader(const char* vsFilename, const char* fsFilen
 	return true;
 }
 
-bool TextureShader::SetShaderParameters(OpenGL& gl, float* worldMatrix, float* viewMatrix, float* projectionMatrix, int textureUnit, float* lightDirection, float* diffuseLightColor) {
+bool TextureShader::SetShaderParameters(OpenGL& gl, float* worldMatrix, float* viewMatrix, float* projectionMatrix, int textureUnit, float* lightDirection, float* diffuseLightColor, float* ambientLight) {
 	unsigned int location;
 	
 	location = gl.glGetUniformLocation(shaderProgram, "worldMatrix");
@@ -393,6 +393,11 @@ bool TextureShader::SetShaderParameters(OpenGL& gl, float* worldMatrix, float* v
 		return false;
 
 	gl.glUniform4fv(location, 1, diffuseLightColor);
+
+	location = gl.glGetUniformLocation(shaderProgram, "ambientLight");
+	if (location == -1)
+		return false;
+	gl.glUniform4fv(location, 1, ambientLight);
 
 	return true;
 }

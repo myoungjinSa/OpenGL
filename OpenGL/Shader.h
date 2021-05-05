@@ -62,7 +62,8 @@ public:
 	void SetShader(OpenGL& gl) override;
 	void Render(OpenGL& gl) override;
 	
-	bool SetShaderParameters(OpenGL& pGL, float* worldMatrix, float* viewMatrix, float* projectionMatrix, int textureUnit, float* lightDirection, float* diffuseLightColor);
+	bool SetShaderParameters(OpenGL& pGL, float* worldMatrix, float* viewMatrix, float* projectionMatrix, int textureUnit, 
+		float* lightDirection, float* diffuseLightColor, float* ambientLight);
 protected:
 	bool InitializeShader(const char* vsFilename, const char* fsFilename, OpenGL& gl, HWND hWnd);
 };
