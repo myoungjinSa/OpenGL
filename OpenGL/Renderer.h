@@ -10,7 +10,7 @@ const float SCREEN_NEAR = 0.1f;
 
 class OpenGL;
 class Object;
-class TextureShader;
+class PhongShader;
 class ColorShader;
 class Camera;
 class Scene;
@@ -42,7 +42,7 @@ private:
 	bool Render(Scene& scene);
 private:
 	OpenGL* pGL;
-	//TextureShader* pShader;
+	//PhongShader* pShader;
 	Scene* pTargetScene;
 };
 

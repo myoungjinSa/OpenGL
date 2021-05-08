@@ -1,6 +1,5 @@
 #pragma once
-
-#include<math.h>
+#include "Common.h"
 #include "Matrix.h"
 
 class Camera
@@ -12,9 +11,13 @@ public:
 
 	void SetPosition(float x, float y, float z);
 	Vec3f GetPosition() const;
+	void GetPosition(std::array<float, 4>& position);
 
 	void SetRotation(float x, float y, float z);
 	Vec3f GetRotation() const;
+
+	void SetDirection(const Vec3f& lookVector);
+	void GetDirection(Vec3f& lookVector);
 
 	void Render();
 	void GetViewMatrix(Matrix<float, 4, 4>& Matrix) const;
@@ -25,6 +28,7 @@ private:
 	
 	Vec3f position;
 	Vec3f rotation;
+	Vec3f direction;
 	Matrix<float, 4, 4> viewMatrix;
 };
 

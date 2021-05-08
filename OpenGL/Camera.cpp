@@ -16,6 +16,12 @@ void Camera::SetPosition(float x, float y, float z) {
 Vec3f Camera::GetPosition() const {
 	return position;
 }
+void Camera::GetPosition(std::array<float, 4>& _position) {
+	_position[0] = position.x;
+	_position[1] = position.y;
+	_position[2] = position.z;
+	_position[3] = 1.0f;
+}
 
 void Camera::SetRotation(float x, float y, float z) {
 	rotation = Vec3f(x, y, z);
@@ -23,6 +29,14 @@ void Camera::SetRotation(float x, float y, float z) {
 
 Vec3f Camera::GetRotation() const {
 	return rotation;
+}
+
+void Camera::SetDirection(const Vec3f& _direction) {
+	direction = _direction;
+}
+
+void Camera::GetDirection(Vec3f& _direction) {
+	_direction = direction;
 }
 
 void Camera::Render() {
@@ -35,9 +49,6 @@ void Camera::Render() {
 	
 	//Setup the position of the camera in the world
 	pos = GetPosition();
-
-	//Setup where the camera is looking by default.
-	lookAt.SetXYZ(0.0f, 0.0f, 1.0f);
 
 	//Set the yaw (Y axis), pitch(X axis) and roll(Z axis) roations in radians
 	pitch = rotation.x * 0.0174532925f;
@@ -53,7 +64,7 @@ void Camera::Render() {
 	TransformCoord(up, rotationMatrix);
 
 	//Translate the rotated camera position to the location of the viewer.
-	lookAt.SetXYZ(pos.x + lookAt.x, pos.y + lookAt.y, pos.z + lookAt.z);
+	lookAt.SetXYZ(pos.x + direction.x, pos.y + direction.y, pos.z + direction.z);
 
 	//Finally create the view matrix from the three updated vectors.
 	BuildViewMatrix(pos, lookAt, up);
@@ -131,6 +142,8 @@ void Camera::BuildViewMatrix(Vec3f pos, Vec3f lookAt, Vec3f up) {
 	viewMatrix.value[14] = zPos;
 	viewMatrix.value[15] = 1.0f;
 }
+
+
 
 void Camera::GetViewMatrix(Matrix<float, 4, 4>& Matrix) const {
 	for (size_t iVal = 0; iVal < Matrix.rows * Matrix.cols; iVal++) {

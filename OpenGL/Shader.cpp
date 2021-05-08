@@ -288,19 +288,19 @@ bool ColorShader::SetShaderParameters(OpenGL& gl, float* worldMatrix, float* vie
 
 
 /////////////////////////////Texture Shader//////////////////////////////////////////////////////////////////
-TextureShader::TextureShader() 
+PhongShader::PhongShader() 
 	: Shader()
 {
 
 }
 
-TextureShader::~TextureShader() {
+PhongShader::~PhongShader() {
 
 }
 
-bool TextureShader::Initialize(OpenGL& gl, HWND hWnd) {
+bool PhongShader::Initialize(OpenGL& gl, HWND hWnd) {
 	bool result;
-	result = InitializeShader("texture.vs", "texture.ps", gl, hWnd);
+	result = InitializeShader("Texture.vs", "Texture.ps", gl, hWnd);
 	if (!result)
 		return false;
 
@@ -316,24 +316,24 @@ bool TextureShader::Initialize(OpenGL& gl, HWND hWnd) {
 	return true;
 }
 
-void TextureShader::Render(OpenGL& gl) {
+void PhongShader::Render(OpenGL& gl) {
 	for (const auto& obj : objects)
 		obj->Render(gl);
 }
-void TextureShader::SetShader(OpenGL& gl) {
+void PhongShader::SetShader(OpenGL& gl) {
 	Shader::SetShader(gl);
 }
 
-void TextureShader::Shutdown(OpenGL& gl) {
+void PhongShader::Shutdown(OpenGL& gl) {
 	ShutdownShader(gl);
 	Shader::Shutdown(gl);
 }
 
-bool TextureShader::InitializeShader(const char* vsFilename, const char* fsFilename, OpenGL& gl, HWND hWnd) {
+bool PhongShader::InitializeShader(const char* vsFilename, const char* fsFilename, OpenGL& gl, HWND hWnd) {
+	shaderProgram = gl.glCreateProgram();
+
 	if (!CompileShader(vsFilename, fsFilename, gl, hWnd))
 		return false;
-
-	shaderProgram = gl.glCreateProgram();
 
 	gl.glAttachShader(shaderProgram, vertexShader);
 	gl.glAttachShader(shaderProgram, fragmentShader);
@@ -353,8 +353,9 @@ bool TextureShader::InitializeShader(const char* vsFilename, const char* fsFilen
 	return true;
 }
 
-bool TextureShader::SetShaderParameters(OpenGL& gl, float* worldMatrix, float* viewMatrix, float* projectionMatrix, int textureUnit, float* lightDirection, float* diffuseLightColor, float* ambientLight) {
-	unsigned int location;
+bool PhongShader::SetShaderParameters(OpenGL& gl, float* worldMatrix, float* viewMatrix, float* projectionMatrix, int textureUnit, 
+	float* lightDirection, float* diffuseLightColor, float* ambientLight, float* specularLight, float* cameraPos, float* lightPos) {
+	int location = 0;
 	
 	location = gl.glGetUniformLocation(shaderProgram, "worldMatrix");
 	if (location == -1)
@@ -375,30 +376,42 @@ bool TextureShader::SetShaderParameters(OpenGL& gl, float* worldMatrix, float* v
 		return false;
 
 	gl.glUniformMatrix4fv(location, 1, false, projectionMatrix);
-
+	
 	//Set the texture in the pixel shader to use the data from the first texture unit.
 	location = gl.glGetUniformLocation(shaderProgram, "shaderTexture");
 	if (location == -1)
 		return false;
 	gl.glUniform1i(location, textureUnit);
 
-	location = gl.glGetUniformLocation(shaderProgram, "lightDirection");
-	if (location == -1)
-		return false;
-
-	gl.glUniform3fv(location, 1, lightDirection);
-
 	location = gl.glGetUniformLocation(shaderProgram, "diffuseLightColor");
 	if (location == -1)
 		return false;
 
 	gl.glUniform4fv(location, 1, diffuseLightColor);
-
+	
 	location = gl.glGetUniformLocation(shaderProgram, "ambientLight");
 	if (location == -1)
 		return false;
 	gl.glUniform4fv(location, 1, ambientLight);
 
+
+	//location = gl.glGetUniformLocation(shaderProgram, "specularLight");
+	//if (location == -1) {
+	//	return false;
+	//}
+	//gl.glUniform4fv(location, 1, specularLight);
+
+	location = gl.glGetUniformLocation(shaderProgram, "lightPosition");
+	if (location == -1)
+		return false;
+
+	gl.glUniform3fv(location, 1, lightPos);
+
+	location = gl.glGetUniformLocation(shaderProgram, "cameraPosition");
+	if (location == -1)
+		return false;
+
+	gl.glUniform4fv(location, 1, cameraPos);
 	return true;
 }
 

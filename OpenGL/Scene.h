@@ -3,7 +3,7 @@
 #include "Light.h"
 #include "Matrix.h"
 
-class TextureShader;
+class PhongShader;
 class Object;
 class Camera;
 class Scene final
@@ -23,7 +23,7 @@ public:
 	const Matrix<float, 4, 4>& GetProjectionMatrix() const;
 private:
 	Camera* pCamera;
-	TextureShader* pShader;
+	PhongShader* pShader;
 	Light phongLight;
 
 	Matrix<float, 4, 4> worldMatrix;

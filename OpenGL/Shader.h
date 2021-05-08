@@ -50,12 +50,12 @@ protected:
 	bool InitializeShader(const char* vsFilename, const char* fsFilename, OpenGL& gl, HWND hWnd);
 };
 
-class TextureShader : public Shader 
+class PhongShader : public Shader 
 {
 public:
-	TextureShader();
-	TextureShader(const TextureShader& other) = delete;
-	~TextureShader() override;
+	PhongShader();
+	PhongShader(const PhongShader& other) = delete;
+	~PhongShader() override;
 
 	bool Initialize(OpenGL& gl, HWND hWnd) override;
 	void Shutdown(OpenGL& gl) override;
@@ -63,7 +63,7 @@ public:
 	void Render(OpenGL& gl) override;
 	
 	bool SetShaderParameters(OpenGL& pGL, float* worldMatrix, float* viewMatrix, float* projectionMatrix, int textureUnit, 
-		float* lightDirection, float* diffuseLightColor, float* ambientLight);
+		float* lightDirection, float* diffuseLightColor, float* ambientLight, float* specularLight, float* cameraPosition, float* lightPosition);
 protected:
 	bool InitializeShader(const char* vsFilename, const char* fsFilename, OpenGL& gl, HWND hWnd);
 };
