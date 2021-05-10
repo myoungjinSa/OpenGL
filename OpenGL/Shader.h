@@ -1,10 +1,25 @@
 #pragma once
+#include "Common.h"
 #include "OpenGL.h"
-#include <vector>
 
 class OpenGL;
 class Object;
 class ShaderVisitor;
+
+struct ShaderParameter {
+	Matrix<float, 4, 4> worldMatrix;
+	Matrix<float, 4, 4> viewMatrix;
+	Matrix<float, 4, 4> projectionMatrix;
+
+	std::array<float, 3> lightDirection;
+	std::array<float, 4> diffuseAlbedo;
+	std::array<float, 4> specularAlbedo;
+	std::array<float, 4> ambientAlbedo;
+
+	int textureUnit;
+};
+
+typedef void(ShaderParameterBindCallback)(const ShaderParameter& param);
 
 class Shader {
 public:
@@ -63,7 +78,7 @@ public:
 	void Render(OpenGL& gl) override;
 	
 	bool SetShaderParameters(OpenGL& pGL, float* worldMatrix, float* viewMatrix, float* projectionMatrix, int textureUnit, 
-		float* lightDirection, float* diffuseLightColor, float* ambientLight, float* specularLight, float* cameraPosition, float* lightPosition);
+		float* lightDirection, float* diffuseAlbedo, float* ambientAlbedo, float* specularAlbedo);
 protected:
 	bool InitializeShader(const char* vsFilename, const char* fsFilename, OpenGL& gl, HWND hWnd);
 };

@@ -25,9 +25,9 @@ Scene::~Scene() {
 }
 
 bool Scene::BuildObject(OpenGL& gl, HWND hWnd) {	
-	Vec4f diffuseColor(1.0f, 1.0f, 1.0f, 1.0f);
+	Vec4f diffuseColor(1.0f, 0.9f, 0.9f, 1.0f);
 	Vec4f ambientColor(0.15f, 0.15f, 0.15f, 1.0f);
-	Vec4f specularColor(1.0f, 1.0f, 0.0f, 1.0f);
+	Vec4f specularColor(1.0f, 1.0f, 0.5f, 1.0f);
 
 	phongLight.SetDiffuseColor(diffuseColor);
 	phongLight.SetAmbientLight(ambientColor);
@@ -46,7 +46,7 @@ bool Scene::BuildObject(OpenGL& gl, HWND hWnd) {
 	}
 
 	pCamera = new Camera();
-	pCamera->SetPosition(5.0f, 3.0f, -10.0f);
+	pCamera->SetPosition(1.0f, 1.0f, -5.0f);
 	pCamera->SetDirection(Vec3f::FORWARD);
 	return true;
 }
@@ -66,25 +66,21 @@ void Scene::Render(OpenGL& gl) {
 	viewMatrix = GetViewMatrix();
 	projectionMatrix = GetProjectionMatrix();
 	
-	float diffuseLightColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	float ambientLightColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	float specularLightColor[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	float diffuseAlbedo[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	float ambientAlbedo[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+	float specularAlbedo[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	float lightPosition[3] = { 0.0f, 0.0f, 0.0f };
 	float lightDirection[3] = { 0.0f, 0.0f, 0.0f };
 
-	phongLight.GetDiffuseLight(diffuseLightColor);
-	phongLight.GetAmbientLight(ambientLightColor);
-	phongLight.GetSpecularLight(specularLightColor);
+	phongLight.GetDiffuseLight(diffuseAlbedo);
+	phongLight.GetAmbientLight(ambientAlbedo);
+	phongLight.GetSpecularLight(specularAlbedo);
 	
 	phongLight.GetPosition(lightPosition);
 	phongLight.GetDirection(lightDirection);
 
-
-	std::array<float, 4> cameraPosition;
-	pCamera->GetPosition(cameraPosition);
 	pShader->SetShader(gl);
-
-	pShader->SetShaderParameters(gl, (float*)worldMatrix.value, (float*)viewMatrix.value, (float*)projectionMatrix.value, 0, lightDirection, diffuseLightColor, ambientLightColor, specularLightColor, cameraPosition.data(), lightPosition);
+	pShader->SetShaderParameters(gl, (float*)worldMatrix.value, (float*)viewMatrix.value, (float*)projectionMatrix.value, 0, lightDirection, diffuseAlbedo, ambientAlbedo, specularAlbedo);
 	pShader->Render(gl);
 }
 

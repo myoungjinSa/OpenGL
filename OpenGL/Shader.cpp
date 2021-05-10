@@ -300,7 +300,7 @@ PhongShader::~PhongShader() {
 
 bool PhongShader::Initialize(OpenGL& gl, HWND hWnd) {
 	bool result;
-	result = InitializeShader("Texture.vs", "Texture.ps", gl, hWnd);
+	result = InitializeShader("PhongLight.vs", "PhongLight.ps", gl, hWnd);
 	if (!result)
 		return false;
 
@@ -354,7 +354,7 @@ bool PhongShader::InitializeShader(const char* vsFilename, const char* fsFilenam
 }
 
 bool PhongShader::SetShaderParameters(OpenGL& gl, float* worldMatrix, float* viewMatrix, float* projectionMatrix, int textureUnit, 
-	float* lightDirection, float* diffuseLightColor, float* ambientLight, float* specularLight, float* cameraPos, float* lightPos) {
+	float* lightDirection, float* diffuseAlbedo, float* ambientAlbedo, float* specularAlbedo) {
 	int location = 0;
 	
 	location = gl.glGetUniformLocation(shaderProgram, "worldMatrix");
@@ -377,41 +377,37 @@ bool PhongShader::SetShaderParameters(OpenGL& gl, float* worldMatrix, float* vie
 
 	gl.glUniformMatrix4fv(location, 1, false, projectionMatrix);
 	
+	location = gl.glGetUniformLocation(shaderProgram, "lightDirection");
+	if (location == -1)
+		return false;
+
+	gl.glUniform3fv(location, 1, lightDirection);
+
 	//Set the texture in the pixel shader to use the data from the first texture unit.
 	location = gl.glGetUniformLocation(shaderProgram, "shaderTexture");
 	if (location == -1)
 		return false;
 	gl.glUniform1i(location, textureUnit);
 
-	location = gl.glGetUniformLocation(shaderProgram, "diffuseLightColor");
+	location = gl.glGetUniformLocation(shaderProgram, "diffuseAlbedo");
 	if (location == -1)
 		return false;
 
-	gl.glUniform4fv(location, 1, diffuseLightColor);
+	gl.glUniform3fv(location, 1, diffuseAlbedo);
 	
-	location = gl.glGetUniformLocation(shaderProgram, "ambientLight");
+	location = gl.glGetUniformLocation(shaderProgram, "ambientAlbedo");
 	if (location == -1)
 		return false;
-	gl.glUniform4fv(location, 1, ambientLight);
+	gl.glUniform4fv(location, 1, ambientAlbedo);
 
 
-	//location = gl.glGetUniformLocation(shaderProgram, "specularLight");
-	//if (location == -1) {
-	//	return false;
-	//}
-	//gl.glUniform4fv(location, 1, specularLight);
-
-	location = gl.glGetUniformLocation(shaderProgram, "lightPosition");
-	if (location == -1)
+	location = gl.glGetUniformLocation(shaderProgram, "specularAlbedo");
+	if (location == -1) {
 		return false;
+	}
+	gl.glUniform3fv(location, 1, specularAlbedo);
 
-	gl.glUniform3fv(location, 1, lightPos);
 
-	location = gl.glGetUniformLocation(shaderProgram, "cameraPosition");
-	if (location == -1)
-		return false;
-
-	gl.glUniform4fv(location, 1, cameraPos);
 	return true;
 }
 
