@@ -34,6 +34,8 @@ bool System::Initialize() {
 		return false;
 	}
 
+	//glutInit(&__argc, __argv);
+
 	// Create the input object.  This object will be used to handle reading the input from the user.
 	pInput = new Input();
 	if (!pInput)

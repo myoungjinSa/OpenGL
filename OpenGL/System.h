@@ -1,5 +1,8 @@
 #pragma once
 #include <Windows.h>
+//#include "GL/glut.h"
+
+//#pragma comment(lib,"freeglut.lib")
 
 class OpenGL;
 class Input;
