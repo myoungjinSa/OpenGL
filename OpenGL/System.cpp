@@ -34,9 +34,7 @@ bool System::Initialize() {
 		return false;
 	}
 
-	//glutInit(&__argc, __argv);
-
-	// Create the input object.  This object will be used to handle reading the input from the user.
+	//Create the input object.  This object will be used to handle reading the input from the user.
 	pInput = new Input();
 	if (!pInput)
 	{
@@ -44,6 +42,7 @@ bool System::Initialize() {
 	}
 
 	pInput->Initialize();
+
 
 	pScene = new Scene();
 	if (!pScene)
@@ -168,7 +167,7 @@ bool System::Frame()
 	return true;
 }
 
-LRESULT CALLBACK System::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPARAM lparam)
+LRESULT CALLBACK System::MessageHandler(HWND hwnd, UINT umsg, WPARAM wParam, LPARAM lParam)
 {
 	switch (umsg)
 	{
@@ -176,7 +175,7 @@ LRESULT CALLBACK System::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPA
 	case WM_KEYDOWN:
 	{
 		// If a key is pressed send it to the input object so it can record that state.
-		pInput->KeyDown((unsigned int)wparam);
+		pInput->KeyDown((unsigned int)wParam);
 		return 0;
 	}
 
@@ -184,14 +183,35 @@ LRESULT CALLBACK System::MessageHandler(HWND hwnd, UINT umsg, WPARAM wparam, LPA
 	case WM_KEYUP:
 	{
 		// If a key is released then send it to the input object so it can unset the state for that key.
-		pInput->KeyUp((unsigned int)wparam);
+		pInput->KeyUp((unsigned int)wParam);
 		return 0;
 	}
-
+	case WM_LBUTTONDOWN:
+	{
+		if (pInput) {
+			pInput->ProcessLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+			SetCapture(hWnd);
+		}
+		return 0;
+	}
+	case WM_MOUSEMOVE:
+	{	
+		if(pInput)
+			pInput->ProcessMouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		return 0;
+	}
+	case WM_LBUTTONUP:
+	{
+		if (pInput) {
+			pInput->ProcessLButtonUp(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+			ReleaseCapture();
+		}
+		return 0;
+	}
 	// Any other messages send to the default message handler as our application won't make use of them.
 	default:
 	{
-		return DefWindowProc(hwnd, umsg, wparam, lparam);
+		return DefWindowProc(hwnd, umsg, wParam, lParam);
 	}
 	}
 }
