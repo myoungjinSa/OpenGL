@@ -33,15 +33,14 @@ bool System::Initialize() {
 		MessageBox(hWnd, L"Could not initialize the window", L"Error", MB_OK);
 		return false;
 	}
-
 	//Create the input object.  This object will be used to handle reading the input from the user.
-	pInput = new Input();
-	if (!pInput)
-	{
-		return false;
-	}
+	//pInput = new Input();
+	//if (!pInput)
+	//{
+	//	return false;
+	//}
 
-	pInput->Initialize();
+	Input::Initialize();
 
 
 	pScene = new Scene();
@@ -175,7 +174,7 @@ LRESULT CALLBACK System::MessageHandler(HWND hwnd, UINT umsg, WPARAM wParam, LPA
 	case WM_KEYDOWN:
 	{
 		// If a key is pressed send it to the input object so it can record that state.
-		pInput->KeyDown((unsigned int)wParam);
+		Input::KeyDown((unsigned int)wParam);
 		return 0;
 	}
 
@@ -183,29 +182,29 @@ LRESULT CALLBACK System::MessageHandler(HWND hwnd, UINT umsg, WPARAM wParam, LPA
 	case WM_KEYUP:
 	{
 		// If a key is released then send it to the input object so it can unset the state for that key.
-		pInput->KeyUp((unsigned int)wParam);
+		Input::KeyUp((unsigned int)wParam);
 		return 0;
 	}
 	case WM_LBUTTONDOWN:
 	{
-		if (pInput) {
-			pInput->ProcessLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-			SetCapture(hWnd);
-		}
+		
+		Input::ProcessLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		SetCapture(hWnd);
+		
 		return 0;
 	}
 	case WM_MOUSEMOVE:
 	{	
-		if(pInput)
-			pInput->ProcessMouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		
+		Input::ProcessMouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		return 0;
 	}
 	case WM_LBUTTONUP:
 	{
-		if (pInput) {
-			pInput->ProcessLButtonUp(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-			ReleaseCapture();
-		}
+
+		Input::ProcessLButtonUp(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		ReleaseCapture();
+		
 		return 0;
 	}
 	// Any other messages send to the default message handler as our application won't make use of them.

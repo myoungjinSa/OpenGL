@@ -46,12 +46,11 @@ bool Scene::BuildObject(OpenGL& gl, HWND hWnd) {
 	}
 
 	pCamera = new Camera();
-	pCamera->SetPosition(1.0f, 1.0f, -5.0f);
-	pCamera->SetDirection(Vec3f::FORWARD);
+	pCamera->SetPosition(0.0f, 0.0f, -10.0f);
 	return true;
 }
 void Scene::Prepare(OpenGL& gl) {
-	pCamera->Render();
+	pCamera->Update();
 
 	//Get the world, view, and projection matrices from the opengl and camera objects.
 	gl.GetWorldMatrix(worldMatrix);

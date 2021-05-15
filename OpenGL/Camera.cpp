@@ -1,4 +1,5 @@
 #include "Camera.h"
+#include "Input.h"
 
 Camera::Camera() 
 	:position(0.0f, 0.0f, 0.0f), rotation(0.0f, 0.0f, 0.0f)
@@ -31,15 +32,7 @@ Vec3f Camera::GetRotation() const {
 	return rotation;
 }
 
-void Camera::SetDirection(const Vec3f& _direction) {
-	direction = _direction;
-}
-
-void Camera::GetDirection(Vec3f& _direction) {
-	_direction = direction;
-}
-
-void Camera::Render() {
+void Camera::Update() {
 	Vec3f up, pos, lookAt;
 	float yaw, pitch, roll;
 	Matrix<float, 3, 3> rotationMatrix;
@@ -51,10 +44,13 @@ void Camera::Render() {
 	pos = GetPosition();
 
 	//Set the yaw (Y axis), pitch(X axis) and roll(Z axis) roations in radians
-	pitch = rotation.x * 0.0174532925f;
-	yaw = rotation.y * 0.0174532925f;
-	roll = rotation.z * 0.0174532925f;
+	lookAt.SetXYZ(0.0f, 0.0f, 1.0f);
 
+	float rotationSpeed = 0.0174532925f;
+	pitch = rotation.x + Input::xAngle * rotationSpeed;
+	yaw = rotation.y + Input::yAngle * rotationSpeed;
+	roll = rotation.z * rotationSpeed;
+	
 	//Create the rotation matrix from the yawm pitch, and roll values
 	MatrixRotationYawPitchRoll(rotationMatrix, yaw, pitch, roll);
 
@@ -63,8 +59,9 @@ void Camera::Render() {
 	TransformCoord(lookAt, rotationMatrix);
 	TransformCoord(up, rotationMatrix);
 
+
 	//Translate the rotated camera position to the location of the viewer.
-	lookAt.SetXYZ(pos.x + direction.x, pos.y + direction.y, pos.z + direction.z);
+	lookAt.SetXYZ(pos.x + lookAt.x, pos.y + lookAt.y, pos.z + lookAt.z);
 
 	//Finally create the view matrix from the three updated vectors.
 	BuildViewMatrix(pos, lookAt, up);

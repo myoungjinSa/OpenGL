@@ -8,20 +8,20 @@ public:
 	Input(const Input& other) = delete;
 	~Input();
 
-	void Initialize();
-	void KeyDown(unsigned int key);
-	void KeyUp(unsigned int key);
+	static void Initialize();
+	static void KeyDown(unsigned int key);
+	static void KeyUp(unsigned int key);
 
-	bool IsKeyDown(unsigned int key);
-	void ProcessLButtonUp(int x, int y);
-	void ProcessLButtonDown(int x, int y);
-	void ProcessMouseMove(int x, int y);
+	static bool IsKeyDown(unsigned int key);
+	static void ProcessLButtonUp(int x, int y);
+	static void ProcessLButtonDown(int x, int y);
+	static void ProcessMouseMove(int x, int y);
 
 	static float yAngle;
 	static float xAngle;
 private:
-	bool keys[256];
-	bool dragging;
-	Point2i mousePoint;
+	static bool keys[256];
+	static bool dragging;
+	static Point2i mousePoint;
 };
 

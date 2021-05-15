@@ -1,12 +1,13 @@
 #include "Input.h"
 #include "System.h"
 
-float Input::xAngle = 3.14f;
+float Input::xAngle = 0.0f;
 float Input::yAngle = 0.0f;
+bool Input::dragging = false;
+Point2i Input::mousePoint;
+bool Input::keys[256];
 
 Input::Input()
-	:	dragging(false),
-		mousePoint()
 {
 
 }
@@ -47,16 +48,18 @@ bool Input::IsKeyDown(unsigned int key)
 
 void Input::ProcessLButtonDown(int x, int y) {
 	dragging = !dragging;
-	mousePoint.x = x;
-	mousePoint.y = y;
+	if (dragging) {
+		mousePoint.x = x;
+		mousePoint.y = y;
+	}
 }
 void Input::ProcessMouseMove(int x, int y) {
 	if (dragging) {
 		int dragX = x;
 		int dragY = y;
 
-		xAngle += (float)(dragY - mousePoint.y) / 3.6f;
-		yAngle += (float)(dragX - mousePoint.x) / 3.6f;
+		xAngle += (y - mousePoint.y) / 3.6;
+		yAngle += (x - mousePoint.x) / 3.6;
 
 		mousePoint.x = dragX;
 		mousePoint.y = dragY;
@@ -65,6 +68,7 @@ void Input::ProcessMouseMove(int x, int y) {
 }
 
 void Input::ProcessLButtonUp(int x, int y) {
-	if (dragging)
+	if (dragging) 
 		dragging = false;
+
 }

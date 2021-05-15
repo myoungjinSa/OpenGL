@@ -16,10 +16,7 @@ public:
 	void SetRotation(float x, float y, float z);
 	Vec3f GetRotation() const;
 
-	void SetDirection(const Vec3f& lookVector);
-	void GetDirection(Vec3f& lookVector);
-
-	void Render();
+	void Update();
 	void GetViewMatrix(Matrix<float, 4, 4>& Matrix) const;
 private:
 	void MatrixRotationYawPitchRoll(Matrix<float, 3, 3>& Matrix, float, float, float);
@@ -28,7 +25,6 @@ private:
 	
 	Vec3f position;
 	Vec3f rotation;
-	Vec3f direction;
 	Matrix<float, 4, 4> viewMatrix;
 };
 
