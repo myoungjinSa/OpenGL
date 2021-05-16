@@ -150,7 +150,7 @@ bool System::Frame()
 
 
 	// Check if the user pressed escape and wants to exit the application.
-	if (pInput->IsKeyDown(VK_ESCAPE))
+	if (Input::IsKeyDown(VK_ESCAPE))
 	{
 		return false;
 	}
@@ -207,7 +207,6 @@ LRESULT CALLBACK System::MessageHandler(HWND hwnd, UINT umsg, WPARAM wParam, LPA
 		
 		return 0;
 	}
-	// Any other messages send to the default message handler as our application won't make use of them.
 	default:
 	{
 		return DefWindowProc(hwnd, umsg, wParam, lParam);
