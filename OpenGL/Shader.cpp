@@ -304,7 +304,7 @@ bool PhongShader::Initialize(OpenGL& gl, HWND hWnd) {
 	if (!result)
 		return false;
 
-	Object* pObject = new Object();
+	Object* pObject = new Cube();
 	objects.emplace_back(pObject);
 
 	for (const auto& obj : objects) {

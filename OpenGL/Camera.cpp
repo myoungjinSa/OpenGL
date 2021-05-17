@@ -1,8 +1,8 @@
 #include "Camera.h"
 #include "Input.h"
 
-Camera::Camera() 
-	:position(0.0f, 0.0f, 0.0f), rotation(0.0f, 0.0f, 0.0f)
+Camera::Camera()
+	:Object()
 {
 
 }
@@ -10,29 +10,20 @@ Camera::~Camera() {
 
 }
 
-void Camera::SetPosition(float x, float y, float z) {
-	position = Vec3f(x, y, z);
+bool Camera::Initialize(OpenGL& gl) {
+
+	return true;
 }
 
-Vec3f Camera::GetPosition() const {
-	return position;
-}
-void Camera::GetPosition(std::array<float, 4>& _position) {
-	_position[0] = position.x;
-	_position[1] = position.y;
-	_position[2] = position.z;
-	_position[3] = 1.0f;
+void Camera::Render(OpenGL& gl) {
+
 }
 
-void Camera::SetRotation(float x, float y, float z) {
-	rotation = Vec3f(x, y, z);
+void Camera::Shutdown(OpenGL& gl) {
+
 }
 
-Vec3f Camera::GetRotation() const {
-	return rotation;
-}
-
-void Camera::Update() {
+void Camera::Update(float deltaTime) {
 	Vec3f up, pos, lookAt;
 	float yaw, pitch, roll;
 	Matrix<float, 3, 3> rotationMatrix;
@@ -46,9 +37,9 @@ void Camera::Update() {
 	//Set the yaw (Y axis), pitch(X axis) and roll(Z axis) roations in radians
 	lookAt.SetXYZ(0.0f, 0.0f, 1.0f);
 
-	float rotationSpeed = 0.0174532925f;
-	pitch = rotation.x + Input::xAngle * rotationSpeed;
-	yaw = rotation.y + Input::yAngle * rotationSpeed;
+	const float rotationSpeed = 0.0174532925f;
+	pitch = rotation.x + Input::GetXAngle() * rotationSpeed;
+	yaw = rotation.y + Input::GetYAngle() * rotationSpeed;
 	roll = rotation.z * rotationSpeed;
 	
 	//Create the rotation matrix from the yawm pitch, and roll values
@@ -58,7 +49,6 @@ void Camera::Update() {
 	//so the view is correctly rotated at the origin.
 	TransformCoord(lookAt, rotationMatrix);
 	TransformCoord(up, rotationMatrix);
-
 
 	//Translate the rotated camera position to the location of the viewer.
 	lookAt.SetXYZ(pos.x + lookAt.x, pos.y + lookAt.y, pos.z + lookAt.z);

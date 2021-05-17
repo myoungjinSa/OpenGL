@@ -1,31 +1,48 @@
 #pragma once
 #include <memory>
+#include "Matrix.h"
 class OpenGL;
 class Mesh;
 class Texture;
+
 class Object
 {
 public:
 	Object();
-	Object(const Object& other);
-	Object(Object&& other)noexcept;
-	~Object();
+	virtual ~Object() {}
+	virtual bool Initialize(OpenGL& pGL) { return true; }
+	virtual void Shutdown(OpenGL& pGL) {}
+	virtual void Render(OpenGL& pGL) {}
+	virtual void Update(float deltaTime){}
 
+	void SetPosition(float x, float y, float z);
+	Vec3f GetPosition() const;
+	void GetPosition(std::array<float, 4>& position);
 
-	virtual bool Initialize(OpenGL& pGL);
-	virtual void Shutdown(OpenGL& pGL);
-	virtual void Render(OpenGL& pGL);
-
-	Object& operator=(const Object& other);
-	Object& operator=(Object&& other)noexcept;
-
-private:
-	//Mesh* pMesh;
-	std::shared_ptr<Mesh> pMesh;
-	std::shared_ptr<Texture> texture;
+	void SetRotation(float x, float y, float z);
+	Vec3f GetRotation() const;
+protected:
+	Vec3f position;
+	Vec3f rotation;
 };
 
-class Triangle : public Object {
+class Cube : public Object {
+public:
+	Cube();
+	Cube(const Cube& other);
+	Cube(Cube&& other) noexcept;
+	virtual ~Cube();
 
+	bool Initialize(OpenGL& gl) override;
+	void Shutdown(OpenGL& gl) override;
+	void Render(OpenGL& gl) override;
+	void Update(float deltaTime = 0.0f) override;
+
+	Cube& operator=(const Cube& other);
+	Cube& operator=(Cube&& other) noexcept;
+
+private:
+	std::shared_ptr<Mesh> pMesh;
+	std::shared_ptr<Texture> texture;
 };
 

@@ -72,3 +72,11 @@ void Input::ProcessLButtonUp(int x, int y) {
 		dragging = false;
 
 }
+
+float Input::GetXAngle(){
+	return xAngle;
+}
+
+float Input::GetYAngle(){
+	return yAngle;
+}

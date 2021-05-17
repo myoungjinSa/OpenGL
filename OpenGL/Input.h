@@ -17,11 +17,13 @@ public:
 	static void ProcessLButtonDown(int x, int y);
 	static void ProcessMouseMove(int x, int y);
 
-	static float yAngle;
-	static float xAngle;
+	static float GetXAngle();
+	static float GetYAngle();
 private:
 	static bool keys[256];
 	static bool dragging;
 	static Point2i mousePoint;
+	static float yAngle;
+	static float xAngle;
 };
 
