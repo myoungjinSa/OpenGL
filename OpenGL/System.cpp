@@ -42,6 +42,7 @@ bool System::Initialize() {
 
 	Input::Initialize();
 
+	timer.Start();
 
 	pScene = new Scene();
 	if (!pScene)
@@ -100,6 +101,7 @@ void System::Shutdown() {
 		pOpenGL = nullptr;
 	}
 
+	timer.Reset();
 	// Shutdown the window.
 	ShutdownWindows();
 }
@@ -131,6 +133,7 @@ void System::Run()
 		}
 		else
 		{
+			timer.Tick(0);
 			// Otherwise do the frame processing.
 			result = Frame();
 			if (!result)
@@ -162,6 +165,9 @@ bool System::Frame()
 	{
 		return false;
 	}
+
+	long long elapsedTime = timer.GetEalapsedTime();
+	long long a = elapsedTime;
 
 	return true;
 }

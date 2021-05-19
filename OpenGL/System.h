@@ -1,5 +1,6 @@
 #pragma once
 #include <Windows.h>
+#include "Timer.h"
 #include "GL/glut.h"
 
 #pragma comment(lib,"freeglut.lib")
@@ -38,6 +39,7 @@ private:
 	Input* pInput;
 	Renderer* pRenderer;
 	Scene* pScene;
+	Timer timer;
 };
 
 
