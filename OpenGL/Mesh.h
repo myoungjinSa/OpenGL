@@ -1,11 +1,12 @@
 #pragma once
-#include "Matrix.h"
-#include "Renderer.h"
-#include "RGBA.h"
-#include <array>
 #include <vector>
 
+#include "Matrix.h"
+#include "RGBA.h"
 
+class Renderer; 
+class Shader;
+class OpenGL;
 //the master Vertex. this is a superset of all possible vertex data.
 struct VertexMaster {
 	Vec3f position;
@@ -21,7 +22,6 @@ struct VertexMaster {
 typedef unsigned char byte;
 typedef void (VertexCopyCallback)(const VertexMaster& source, byte* destination);
 typedef void (VertexBufferBindCallback)(const OpenGL& gl, void* pVertexBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeofVertex);
-
 struct Vertex {
 public:
 	Vertex();
@@ -29,6 +29,8 @@ public:
 	~Vertex();
 
 	Vec3f position;
+
+	static size_t attributeCount;
 };
 struct ColorVertex : public Vertex {
 public:
@@ -40,7 +42,7 @@ public:
 
 	static void Copy(const VertexMaster& source, byte* pDestination);
 	static void BindVertexBuffer(const OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeofVertex);
-
+	
 	RGBA color;
 };
 
@@ -57,8 +59,6 @@ public:
 	Vec3f normal;
 };
 
-class Shader;
-class OpenGL;
 class Mesh
 {
 	typedef unsigned int GLuint;
@@ -68,20 +68,18 @@ public:
 	Mesh(const Mesh& other) = delete;
 	virtual ~Mesh();
 
-	bool Initialize(const OpenGL& gl, VertexBufferBindCallback* pBindFuction, void* vertexData, unsigned int numVertices, unsigned int sizeofVertex, unsigned int* indexData, unsigned int numIndices);
+	bool Initialize(Renderer& renderer, VertexBufferBindCallback* pBindFuction, void* vertexData, unsigned int numVertices, unsigned int sizeofVertex, unsigned int* indexData, unsigned int numIndices);
 	void BindToVAO(const OpenGL& gl, Shader* pShader,GLuint vaoID);
-	void Shutdown(const OpenGL& gl);
-	void Render(const OpenGL& gl);
+	void Shutdown(Renderer& renderer);
+	void Render(Renderer& renderer);
 
 	Mesh& operator=(const Mesh& other) = delete;
 	Mesh& operator=(Mesh&& other) = delete;
-
-	Renderer::DrawMode drawMode;
 protected:
 	//bool InitializeBuffers(const OpenGL& gl);
 	//void ShutdownBuffers(const OpenGL& gl);
 	//void RenderBuffers(const OpenGL& gl);
-
+	
 	int vertexCount, indexCount;
 	unsigned int vertexArrayId, vertexBufferId, indexBufferId;
 };
@@ -148,7 +146,7 @@ public:
 	void Begin();
 	void End();
 
-	void CopyToMesh(const OpenGL& gl, Mesh* mesh, VertexCopyCallback* copyFunction, unsigned int sizeofVertex);
+	void CopyToMesh(Renderer& renderers, Mesh* mesh, VertexCopyCallback* copyFunction, unsigned int sizeofVertex);
 
 	void AddCube(float sideLength, const RGBA& color);
 	void AddQuad(const Vec3f& bottomLeft, const Vec3f& up, float upLength, const Vec3f& right, float rightLength, const Vec3f& normal, const RGBA& color = RGBA::WHITE, const Vec2f& uvOffset = Vec2f::ZERO, float uvStepSize = 1.0f);
@@ -162,7 +160,6 @@ public:
 private:
 	VertexMaster stamp;
 	unsigned int startIndex;
-	Renderer::DrawMode drawMode;
 };
 
 

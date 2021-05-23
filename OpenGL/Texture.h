@@ -2,8 +2,7 @@
 #include <vector>
 #include "./String/String.h"
 
-class OpenGL;
-
+class Renderer;
 class TextureLoader;
 class Texture
 {
@@ -51,12 +50,11 @@ public:
 	Texture(const Texture& other) = delete;
 	~Texture();
 
-	bool Initialize(const OpenGL& gl, const String& fileName, unsigned int textureUnit, bool wrap);
+	bool Initialize(Renderer& renderer, const String& fileName, unsigned int textureUnit, bool wrap);
 	void Shutdown();
 
 private:
-	bool LoadTarga(const OpenGL& gl, const String& fileName, unsigned int textureUnit, bool wrap);
-	bool LoadBMP(const OpenGL& gl, const String& fileName, unsigned int textureUnit, bool wrap);
+	bool LoadBMP(Renderer& renderer, const String& fileName, unsigned int textureUnit, bool wrap);
 
 	bool loaded;
 	unsigned int textureID;
@@ -68,10 +66,10 @@ public:
 	TextureLoader();
 	~TextureLoader();
 	
-	static const std::shared_ptr<Texture>& GetTexture(const OpenGL& gl, const String& filename);
+	static const std::shared_ptr<Texture>& GetTexture(Renderer& renderer, const String& filename);
 	static void Release();
 private:
-	static bool Load(const OpenGL& gl, const String& filename);
+	static bool Load(Renderer& renderer, const String& filename);
 
 	static std::vector<std::pair<String&&, std::shared_ptr<Texture>>> textures;
 	//std::vector<std::shared_ptr<Texture>> textures;

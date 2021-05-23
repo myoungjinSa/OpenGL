@@ -1,19 +1,20 @@
 #pragma once
 #include <memory>
 #include "Matrix.h"
+
 class OpenGL;
 class Mesh;
 class Texture;
-
+class Renderer;
 class Object
 {
 public:
 	Object();
 	virtual ~Object() {}
-	virtual bool Initialize(OpenGL& pGL) { return true; }
-	virtual void Shutdown(OpenGL& pGL) {}
-	virtual void Render(OpenGL& pGL) {}
-	virtual void Update(float deltaTime){}
+	virtual bool Initialize(Renderer& renderer) { return true; }
+	virtual void Shutdown(Renderer& renderer) {}
+	virtual void Render(Renderer& renderer) {}
+	virtual void Update(float deltaTime = 0.0f){}
 
 	void SetPosition(float x, float y, float z);
 	Vec3f GetPosition() const;
@@ -33,9 +34,9 @@ public:
 	Cube(Cube&& other) noexcept;
 	virtual ~Cube();
 
-	bool Initialize(OpenGL& gl) override;
-	void Shutdown(OpenGL& gl) override;
-	void Render(OpenGL& gl) override;
+	bool Initialize(Renderer& renderer) override;
+	void Shutdown(Renderer& renderer) override;
+	void Render(Renderer& renderer) override;
 	void Update(float deltaTime = 0.0f) override;
 
 	Cube& operator=(const Cube& other);

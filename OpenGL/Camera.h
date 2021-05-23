@@ -11,10 +11,10 @@ public:
 
 
 
-	bool Initialize(OpenGL& gl) override;
-	void Render(OpenGL& gl) override;
-	void Shutdown(OpenGL& gl) override;
-	void Update(float deltaTime = 0.0f);
+	bool Initialize(Renderer& renderer) override;
+	void Render(Renderer& renderer) override;
+	void Shutdown(Renderer& renderer) override;
+	void Update(float deltaTime = 0.0f) override;
 	void GetViewMatrix(Matrix<float, 4, 4>& Matrix) const;
 private:
 	void MatrixRotationYawPitchRoll(Matrix<float, 3, 3>& Matrix, float, float, float);

@@ -1,3 +1,4 @@
+#include "Common.h"
 #include "Mesh.h"
 #include "Texture.h"
 #include "Object.h"
@@ -55,8 +56,8 @@ Cube& Cube::operator=(const Cube& other) {
 	return *this;
 }
 
-bool Cube::Initialize(OpenGL& gl) {
-	Object::Initialize(gl);
+bool Cube::Initialize(Renderer& renderer) {
+	Object::Initialize(renderer);
 
 	//MeshBuilder Call
 	MeshBuilder meshBuilder;
@@ -67,24 +68,24 @@ bool Cube::Initialize(OpenGL& gl) {
 	if (!pMesh)
 		return false;
 	//meshBuilder.CopyToMesh(*pGL, pMesh.get(), &ColorVertex::Copy, sizeof(ColorVertex));
-	meshBuilder.CopyToMesh(gl, pMesh.get(), &TexturedVertex::Copy, sizeof(TexturedVertex));
+	meshBuilder.CopyToMesh(renderer, pMesh.get(), &TexturedVertex::Copy, sizeof(TexturedVertex));
 
-	texture = TextureLoader::GetTexture(gl, "Capture.bmp");
+	texture = TextureLoader::GetTexture(renderer, "Capture.bmp");
 	return true;
 }
 
-void Cube::Shutdown(OpenGL& gl) {
-	Object::Shutdown(gl);
-	pMesh->Shutdown(gl);
+void Cube::Shutdown(Renderer& renderer) {
+	Object::Shutdown(renderer);
+	pMesh->Shutdown(renderer);
 }
 
 void Cube::Update(float deltaTime) {
 
 }
 
-void Cube::Render(OpenGL& gl) {
-	Object::Render(gl);
-	pMesh->Render(gl);
+void Cube::Render(Renderer& renderer) {
+	Object::Render(renderer);
+	pMesh->Render(renderer);
 }
 
 

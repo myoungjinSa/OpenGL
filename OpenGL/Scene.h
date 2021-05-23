@@ -16,7 +16,7 @@ public:
 	bool BuildObject(Renderer& gl, HWND hWnd);
 	void Prepare(Renderer& gl);
 	void Update(const float& elapsedTime);
-	void Render(Renderer& renderer);
+	bool Render(Renderer& renderer);
 	void Shutdown(Renderer& gl);
 
 	const Matrix<float, 4, 4>& GetWorldMatrix() const;

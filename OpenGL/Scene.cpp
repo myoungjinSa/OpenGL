@@ -51,17 +51,14 @@ bool Scene::BuildObject(Renderer& renderer, HWND hWnd) {
 }
 void Scene::Prepare(Renderer& renderer) {
 	pCamera->Update();
-
-	//Get the world, view, and projection matrices from the opengl and camera objects.
-	gl.GetWorldMatrix(worldMatrix);
-	gl.GetProjectionMatrix(projectionMatrix);
 }
 
 void Scene::Update(const float& elapsedTime) {
 	
 }
 
-void Scene::Render(Renderer& renderer) {
+bool Scene::Render(Renderer& renderer) {
+	renderer.BeginRender();
 	//Matrix<float, 4, 4> worldMatrix;
 	//Matrix<float, 4, 4> viewMatrix;
 	//Matrix<float, 4, 4> projectionMatrix;
@@ -71,8 +68,9 @@ void Scene::Render(Renderer& renderer) {
 	//projectionMatrix = GetProjectionMatrix();
 	
 	std::array<std::array<float, 4>, 4> worldMatrix;
-	for (size_t iValue = 0; iValue < 4; iValue ++) {
-		worldMatrix[iValue].assign(GetWorldMatrix()(iValue));
+	for (size_t iValue = 0; iValue < 16; iValue ++) {
+		
+		//worldMatrix.assign(GetWorldMatrix().value[iValue]);
 	}
 
 	float diffuseAlbedo[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
@@ -93,7 +91,10 @@ void Scene::Render(Renderer& renderer) {
 	pShader->SetShader(renderer);
 	//pShader->SetShaderParameters(renderer, )
 	//pShader->SetShaderParameters(gl, (float*)worldMatrix.value, (float*)viewMatrix.value, (float*)projectionMatrix.value, 0, lightDirection, diffuseAlbedo, ambientAlbedo, specularAlbedo);
-	pShader->Render(gl);
+	pShader->Render(renderer);
+
+	renderer.EndRender();
+	return true;
 }
 
 void Scene::Shutdown(Renderer& renderer) {

@@ -1,17 +1,18 @@
 #include "OpenGL.h"
+#include "Renderer.h"
 #include "Mesh.h"
 #include <string>
+
+size_t Vertex::attributeCount = 1;
 
 Vertex::Vertex()
 	: position()
 {
-
 }
 
 Vertex::Vertex(const Vec3f& pos) 
 	: position(pos)
 {
-
 }
 Vertex::~Vertex() {
 
@@ -39,6 +40,8 @@ void ColorVertex::Copy(const VertexMaster& source, byte* pDestination) {
 	ColorVertex* pColorVertex = (ColorVertex*)(pDestination);
 	pColorVertex->position = source.position;
 	pColorVertex->color = source.color;
+
+	attributeCount = 2;
 }
 void ColorVertex::BindVertexBuffer(const OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeofVertex) {
 	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
@@ -53,7 +56,6 @@ void ColorVertex::BindVertexBuffer(const OpenGL& gl, void* pBuffer, unsigned int
 	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
 	gl.glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, false, sizeofVertex, (unsigned char*)NULL + (3 * sizeof(float)));
 }
-
 
 TexturedVertex::TexturedVertex() 
 	:Vertex(), uv0(), normal()
@@ -74,6 +76,8 @@ void TexturedVertex::Copy(const VertexMaster& source, byte* pDestination) {
 	pColorVertex->position = source.position;
 	pColorVertex->uv0 = source.uv0;
 	pColorVertex->normal = source.normal;
+
+	attributeCount = 3;
 }
 
 void TexturedVertex::BindVertexBuffer(const OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeofVertex) {
@@ -95,9 +99,8 @@ void TexturedVertex::BindVertexBuffer(const OpenGL& gl, void* pBuffer, unsigned 
 
 }
 
-
 Mesh::Mesh()
-	:vertexCount(0), vertexArrayId(0), vertexBufferId(0), indexCount(0), indexBufferId(0), drawMode(Renderer::DrawMode::TRIANGLES)
+	:vertexCount(0), vertexArrayId(0), vertexBufferId(0), indexCount(0), indexBufferId(0)
 {
 
 }
@@ -106,61 +109,34 @@ Mesh::~Mesh() {
 
 }
 
-bool Mesh::Initialize(const OpenGL& gl, VertexBufferBindCallback* pBindFuction, void* vertexData, unsigned int numVertices, unsigned int sizeofVertex, unsigned int* indexData, unsigned int numIndices) {
+bool Mesh::Initialize(Renderer& renderer, VertexBufferBindCallback* pBindFuction, void* vertexData, unsigned int numVertices, unsigned int sizeofVertex, unsigned int* indexData, unsigned int numIndices) {
 	vertexCount = numVertices;
 	indexCount = numIndices;
 
-	//Allocate an OpenGL vertex array object.
-	gl.glGenVertexArrays(1, &vertexArrayId);
-
-	//Bind the vertex array object to store all the buffers and vertex attribute we create here.
-	gl.glBindVertexArray(vertexArrayId);
-
-	//Generate an ID for the vertex buffer.
-	gl.glGenBuffers(1, &vertexBufferId);
-	
-	//Bind the vertex buffer and load the vertex(position and color) data into the vertex buffer.
-	pBindFuction(gl, vertexData, vertexBufferId, numVertices, sizeofVertex);
-
-	gl.glGenBuffers(1, &indexBufferId);
-
-	gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferId);
-	gl.glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * sizeof(unsigned int), indexData, GL_STATIC_DRAW);
+	renderer.AllocateVertexBuffer(vertexArrayId, vertexBufferId, vertexData, pBindFuction, numVertices, sizeofVertex);
+	renderer.AllocateIndexBuffer(indexBufferId, indexCount, indexData);
 
 	return true;
 	//return InitializeBuffers(gl);
 }
 
-void Mesh::Shutdown(const OpenGL& gl) {
-	gl.glDisableVertexAttribArray(0);
-	gl.glDisableVertexAttribArray(1);
-	gl.glDisableVertexAttribArray(2);
+void Mesh::Shutdown(Renderer& renderer) {
+	renderer.DisableVertexAttribArray((size_t)TexturedVertex::attributeCount);
 
-	//Release the vertex buffer.
-	gl.glBindBuffer(GL_ARRAY_BUFFER, 0);
-	gl.glDeleteBuffers(1, &vertexBufferId);
+	renderer.ReleaseVertexBuffers(vertexBufferId, 1);
+	renderer.ReleaseIndexBuffers(indexBufferId, 1);
 
-	//Release the index buffer.
-	gl.glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	gl.glDeleteBuffers(1, &indexBufferId);
+	renderer.ReleaseVertexArray(vertexArrayId, 1);
 
-	//Release the vertex array object.
-	gl.glBindVertexArray(0);
-	gl.glDeleteVertexArrays(1, &vertexArrayId);
-	//ShutdownBuffers(gl);
 }
 
-void Mesh::Render(const OpenGL& gl) {
-	gl.glBindVertexArray(vertexArrayId);
-	
-	//glDrawArrays(GL_TRIANGLES, 0, vertexCount);
-	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
+void Mesh::Render(Renderer& renderer) {
+	renderer.DrawIndexBuffer(vertexArrayId, indexCount);
 }
 
 ///////////////////////////////// Mesh Builder /////////////////////////////
 MeshBuilder::MeshBuilder() 
 	: startIndex(0)
-	, drawMode(Renderer::DrawMode::TRIANGLES)
 {
 
 }
@@ -221,7 +197,7 @@ void MeshBuilder::AddIndex(int index) {
 	indices.emplace_back(index);
 }
 
-void MeshBuilder::CopyToMesh(const OpenGL& gl, Mesh* pMesh, VertexCopyCallback* copyFunction, unsigned int sizeofVertex) {
+void MeshBuilder::CopyToMesh(Renderer& renderer, Mesh* pMesh, VertexCopyCallback* copyFunction, unsigned int sizeofVertex) {
 	unsigned int vertexCount = vertices.size();
 	if (vertexCount == 0) {
 		return;
@@ -237,8 +213,7 @@ void MeshBuilder::CopyToMesh(const OpenGL& gl, Mesh* pMesh, VertexCopyCallback* 
 		currentBufferIndex += vertexSize;
 	}
 	//pMesh->Initialize(gl, &ColorVertex::BindVertexBuffer, vertexBuffer, vertexCount, sizeofVertex, indices.data(), indices.size());
-	pMesh->Initialize(gl, &TexturedVertex::BindVertexBuffer, vertexBuffer, vertexCount, sizeofVertex, indices.data(), indices.size());
-	pMesh->drawMode = this->drawMode;
+	pMesh->Initialize(renderer, &TexturedVertex::BindVertexBuffer, vertexBuffer, vertexCount, sizeofVertex, indices.data(), indices.size());
 
 	delete[] vertexBuffer;
 	vertexBuffer = nullptr;

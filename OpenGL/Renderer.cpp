@@ -5,17 +5,18 @@
 #include "Object.h"
 #include "Texture.h"
 #include "String/String.h"
+#include "Mesh.h"
 #include <fstream>
 #include <stdarg.h>
 
 Renderer::Renderer() 
 	:pGL(nullptr),
-	pTargetScene(nullptr)
+	drawMode(DrawMode::TRIANGLES)
 {
 }
 
 Renderer::~Renderer() {
-	pTargetScene = nullptr;
+
 }
 
 bool Renderer::Initialize(OpenGL* pOpenGL, HWND _hWnd) {
@@ -31,7 +32,6 @@ bool Renderer::Initialize(OpenGL* pOpenGL, HWND _hWnd) {
 
 
 void Renderer::Shutdown(unsigned int shaderProgram, unsigned int vertexShader, unsigned int fragmentShader) {
-
 	pGL->glDetachShader(shaderProgram, vertexShader);
 	pGL->glDetachShader(shaderProgram, fragmentShader);
 
@@ -40,44 +40,101 @@ void Renderer::Shutdown(unsigned int shaderProgram, unsigned int vertexShader, u
 	
 	pGL->glDeleteProgram(shaderProgram);
 
-	Detach();
 	TextureLoader::Release();
 }
 
+bool Renderer::AllocateVertexBuffer(unsigned int vertexArrayId, unsigned int vertexBufferId, void* vertexData, VertexBufferBindCallback* pBindFunction, unsigned int numVertices, unsigned int sizeofVertex) {
+	pGL->glGenVertexArrays(1, &vertexArrayId);
+	pGL->glBindVertexArray(vertexArrayId);
+	pGL->glGenBuffers(1, &vertexBufferId);
 
-bool Renderer::Frame()
-{
-	bool result;
+	pBindFunction(*pGL, vertexData, vertexBufferId, numVertices, sizeofVertex);
+	return true;
+}
 
-	// Render the graphics scene.
- 	result = Render(*pTargetScene);
-	if (!result)
-	{
-		return false;
+
+bool Renderer::AllocateIndexBuffer(unsigned int indexBufferId, size_t indexCount, unsigned int* indexData) {
+	pGL->glGenBuffers(1, &indexBufferId);
+
+	pGL->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferId);
+	pGL->glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * sizeof(unsigned int), indexData, GL_STATIC_DRAW);
+	return true;
+}
+
+
+bool Renderer::AllocateTextures(unsigned int textureUnit, unsigned int textureId, unsigned int textureCount) {
+	//Set the unique texture unit in which to store the data
+	pGL->glActiveTexture(GL_TEXTURE0 + textureUnit);
+
+	//Generate an ID for the texture.
+	glGenTextures(textureCount, &textureId);
+	return true;
+}
+
+void Renderer::SetSampleMode(bool wrapMode) {
+	if (wrapMode) {
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	}
-
-	return true;
+	else {
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+	}
 }
 
-void Renderer::Attach(Scene& targetScene) {
-	pTargetScene = &targetScene;
+void Renderer::SetFiltering() {
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+
+	pGL->glGenerateMipmap(GL_TEXTURE_2D);
+}
+void Renderer::BindTexture(unsigned int width, unsigned int height, unsigned int textureUnit, unsigned int textureId, unsigned char* pPixelData) {
+	glEnable(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, textureId);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, pPixelData);
 }
 
-void Renderer::Detach() {
-	pTargetScene = nullptr;
+void Renderer::DisableVertexAttribArray(size_t vertexAttribCount) {
+	for (size_t iVertexAttrib = 0; iVertexAttrib < vertexAttribCount; iVertexAttrib++) {
+		pGL->glDisableVertexAttribArray(iVertexAttrib);
+	}
 }
 
-bool Renderer::Render(Scene& targetScene) {
 
-	// Clear the buffers to begin the scene.
+void Renderer::ReleaseVertexArray(unsigned int vertexArrayId, size_t arrayCount) {
+	pGL->glBindVertexArray(0);
+	pGL->glDeleteVertexArrays(arrayCount, &vertexArrayId);
+}
+void Renderer::ReleaseVertexBuffers(unsigned int vertexBufferId, size_t bufferCount) {
+	pGL->glBindBuffer(GL_ARRAY_BUFFER, 0);
+	pGL->glDeleteBuffers(bufferCount, &vertexBufferId);
+}
+void Renderer::ReleaseIndexBuffers(unsigned int indexBufferId, size_t indexCount) {
+	pGL->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	pGL->glDeleteBuffers(indexCount, &indexBufferId);
+}
+
+void Renderer::DrawVertexBuffer(unsigned int vertexArrayId, size_t startPos, size_t vertexCount) {
+	pGL->glBindVertexArray(vertexArrayId);
+
+	glDrawArrays(GL_TRIANGLES, startPos, vertexCount);
+}
+
+void Renderer::DrawIndexBuffer(unsigned int vertexArrayId, size_t indexCount) {
+	pGL->glBindVertexArray(vertexArrayId);
+
+	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
+}
+
+
+bool Renderer::BeginRender() {
 	pGL->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
-	targetScene.Prepare(*pGL);
 
-	targetScene.Render(*pGL);
-
-	// Present the rendered scene to the screen.
-	pGL->EndScene();
 	return true;
+}
+
+void Renderer::EndRender() {
+	pGL->EndScene();
 }
 
 unsigned int Renderer::CreateShader() {

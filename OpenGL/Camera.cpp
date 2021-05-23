@@ -10,16 +10,16 @@ Camera::~Camera() {
 
 }
 
-bool Camera::Initialize(OpenGL& gl) {
+bool Camera::Initialize(Renderer& renderer) {
 
 	return true;
 }
 
-void Camera::Render(OpenGL& gl) {
+void Camera::Render(Renderer& renderer) {
 
 }
 
-void Camera::Shutdown(OpenGL& gl) {
+void Camera::Shutdown(Renderer& renderer) {
 
 }
 

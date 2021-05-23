@@ -32,7 +32,7 @@ public:
 	virtual void SetShader(Renderer& renderer);
 	virtual void Render(Renderer& renderer) = 0;
 protected:
-	virtual bool InitializeShader(const char* vsFilename, const char* fsFilename, OpenGL& gl, HWND hWnd) = 0;
+	virtual bool InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer, HWND hWnd) = 0;
 	void ShutdownShader(Renderer& gl);
 
 	/*void OutputShaderErrorMessage(OpenGL& gl, HWND hWnd, unsigned int shaderId, char*);

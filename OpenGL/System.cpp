@@ -33,12 +33,6 @@ bool System::Initialize() {
 		MessageBox(hWnd, L"Could not initialize the window", L"Error", MB_OK);
 		return false;
 	}
-	//Create the input object.  This object will be used to handle reading the input from the user.
-	//pInput = new Input();
-	//if (!pInput)
-	//{
-	//	return false;
-	//}
 
 	Input::Initialize();
 
@@ -66,20 +60,18 @@ bool System::Initialize() {
 	if (!pScene->BuildObject(*pRenderer, hWnd)) {
 		return false;
 	}
-	pRenderer->Attach(*pScene);
 	return true;
 }
 
 void System::Shutdown() {
 	if (pScene) {
-		pScene->Shutdown(*pOpenGL);
+		pScene->Shutdown(*pRenderer);
 		delete pScene;
 		pScene = nullptr;
 	}
 	// Release the graphics object.
 	if (pRenderer)
 	{
-		pRenderer->Shutdown();
 		delete pRenderer;
 		pRenderer = nullptr;
 	}
@@ -158,14 +150,11 @@ bool System::Frame()
 
 
 	// Do the frame processing for the graphics object.
-	result = pRenderer->Frame();
+	result = pScene->Render(*pRenderer);//pRenderer->Frame();
 	if (!result)
 	{
 		return false;
 	}
-
-	long long elapsedTime = timer.GetEalapsedTime();
-	long long a = elapsedTime;
 
 	return true;
 }

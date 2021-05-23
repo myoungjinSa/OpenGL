@@ -20,7 +20,7 @@ Shader::~Shader() {
 
 void Shader::Shutdown(Renderer& renderer) {
 	for (const auto& obj : objects)
-		obj->Shutdown(gl);
+		obj->Shutdown(renderer);
 }
 //char* Shader::LoadShaderSourceFile(const char* filename) {
 //	std::ifstream fin;
@@ -329,7 +329,7 @@ bool PhongShader::Initialize(Renderer& renderer, HWND hWnd) {
 	objects.emplace_back(pObject);
 
 	for (const auto& obj : objects) {
-		if (!obj->Initialize(gl)) {
+		if (!obj->Initialize(renderer)) {
 			MessageBox(hWnd, L"Could not initialize the model object", L"Error", MB_OK);
 			return false;
 		}
