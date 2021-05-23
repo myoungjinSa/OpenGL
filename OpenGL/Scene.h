@@ -6,17 +6,18 @@
 class PhongShader;
 class Object;
 class Camera;
+class Renderer;
 class Scene final
 {
 public:
 	Scene();
 	~Scene();
 
-	bool BuildObject(OpenGL& gl, HWND hWnd);
-	void Prepare(OpenGL& gl);
-	void Render(OpenGL& gl);
-	void Shutdown(OpenGL& gl);
-
+	bool BuildObject(Renderer& gl, HWND hWnd);
+	void Prepare(Renderer& gl);
+	void Update(const float& elapsedTime);
+	void Render(Renderer& renderer);
+	void Shutdown(Renderer& gl);
 
 	const Matrix<float, 4, 4>& GetWorldMatrix() const;
 	const Matrix<float, 4, 4>& GetViewMatrix() const;

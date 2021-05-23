@@ -5,7 +5,7 @@
 class OpenGL;
 class Object;
 class ShaderVisitor;
-
+class Renderer;
 struct ShaderParameter {
 	Matrix<float, 4, 4> worldMatrix;
 	Matrix<float, 4, 4> viewMatrix;
@@ -27,19 +27,19 @@ public:
 	Shader(const Shader& other) = delete;
 	virtual ~Shader();
 
-	virtual bool Initialize(OpenGL& gl, HWND hWnd) = 0;
-	virtual void Shutdown(OpenGL& gl);
-	virtual void SetShader(OpenGL& gl);
-	virtual void Render(OpenGL& gl) = 0;
+	virtual bool Initialize(Renderer& renderer, HWND hWnd) = 0;
+	virtual void Shutdown(Renderer& renderer);
+	virtual void SetShader(Renderer& renderer);
+	virtual void Render(Renderer& renderer) = 0;
 protected:
 	virtual bool InitializeShader(const char* vsFilename, const char* fsFilename, OpenGL& gl, HWND hWnd) = 0;
+	void ShutdownShader(Renderer& gl);
 
-
-	void OutputShaderErrorMessage(OpenGL& gl, HWND hWnd, unsigned int shaderId, char*);
+	/*void OutputShaderErrorMessage(OpenGL& gl, HWND hWnd, unsigned int shaderId, char*);
 	void OutputLinkErrorMessage(OpenGL& gl, HWND hWnd, unsigned int programId);
 	char* LoadShaderSourceFile(const char* filename);
-	void ShutdownShader(OpenGL& gl);
-	bool CompileShader(const char* vsFilename, const char* fsFilename, OpenGL& pGL, HWND hWnd);
+	
+	bool CompileShader(const char* vsFilename, const char* fsFilename, OpenGL& pGL, HWND hWnd);*/
 
 	unsigned int vertexShader;
 	unsigned int fragmentShader;
@@ -55,14 +55,15 @@ public:
 	ColorShader(const ColorShader& other) = delete;
 	~ColorShader() override;
 
-	bool Initialize(OpenGL& gl, HWND hWnd) override;
-	void Shutdown(OpenGL& gl) override;
-	void SetShader(OpenGL& gl) override;
-	void Render(OpenGL& gl) override;
+	bool Initialize(Renderer& renderer, HWND hWnd) override;
+	void Shutdown(Renderer& renderer) override;
+	void SetShader(Renderer& renderer) override;
+	void Render(Renderer& renderer) override;
 
-	bool SetShaderParameters(OpenGL& gl, float* worldMatrix, float* viewMatrix, float* projectionMatrix);
+	bool SetShaderParameters(Renderer& renderer, std::array<std::array<float, 4>, 4>& worldMatrix, std::array<std::array<float, 4>, 4>& viewMatrix, std::array<std::array<float, 4>, 4>& projectionMatrix);
+	//bool SetShaderParameters(Renderer& renderer, float* worldMatrix, float* viewMatrix, float* projectionMatrix);
 protected:
-	bool InitializeShader(const char* vsFilename, const char* fsFilename, OpenGL& gl, HWND hWnd);
+	bool InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer, HWND hWnd);
 };
 
 class PhongShader : public Shader 
@@ -72,15 +73,17 @@ public:
 	PhongShader(const PhongShader& other) = delete;
 	~PhongShader() override;
 
-	bool Initialize(OpenGL& gl, HWND hWnd) override;
-	void Shutdown(OpenGL& gl) override;
-	void SetShader(OpenGL& gl) override;
-	void Render(OpenGL& gl) override;
+	bool Initialize(Renderer& renderer, HWND hWnd) override;
+	void Shutdown(Renderer& renderer) override;
+	void SetShader(Renderer& renderer) override;
+	void Render(Renderer& gl) override;
 	
-	bool SetShaderParameters(OpenGL& pGL, float* worldMatrix, float* viewMatrix, float* projectionMatrix, int textureUnit, 
-		float* lightDirection, float* diffuseAlbedo, float* ambientAlbedo, float* specularAlbedo);
+	bool SetShaderParameters(Renderer& renderer, std::array<std::array<float, 4>, 4>& worldMatrix, std::array<std::array<float, 4>, 4>& viewMatrix, std::array<std::array<float, 4>, 4>& projectionMatrix 
+		, std::array<std::array<float, 3>, 3>& lightDirection, std::array<std::array<float, 3>, 3>& diffuseAlbedo, std::array<std::array<float, 4>, 4>& ambientAlbedo, std::array<std::array<float, 3>, 3>& specular, int textureUnit);
+	/*bool SetShaderParameters(Renderer& renderer, float* worldMatrix, float* viewMatrix, float* projectionMatrix, int textureUnit, 
+		float* lightDirection, float* diffuseAlbedo, float* ambientAlbedo, float* specularAlbedo);*/
 protected:
-	bool InitializeShader(const char* vsFilename, const char* fsFilename, OpenGL& gl, HWND hWnd);
+	bool InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer, HWND hWnd);
 };
 
 

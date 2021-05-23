@@ -3,7 +3,7 @@
 #include "Camera.h"
 #include "Scene.h"
 #include "Object.h"
-
+#include "Renderer.h"
 
 Scene::Scene() 
 	:pCamera(nullptr),
@@ -24,7 +24,7 @@ Scene::~Scene() {
 	}
 }
 
-bool Scene::BuildObject(OpenGL& gl, HWND hWnd) {	
+bool Scene::BuildObject(Renderer& renderer, HWND hWnd) {	
 	Vec4f diffuseColor(1.0f, 0.9f, 0.9f, 1.0f);
 	Vec4f ambientColor(0.15f, 0.15f, 0.15f, 1.0f);
 	Vec4f specularColor(1.0f, 1.0f, 0.5f, 1.0f);
@@ -39,7 +39,7 @@ bool Scene::BuildObject(OpenGL& gl, HWND hWnd) {
 	if (!pShader)
 		return false;
 
-	bool result = pShader->Initialize(gl, hWnd);
+	bool result = pShader->Initialize(renderer, hWnd);
 	if (!result) {
 		MessageBox(hWnd, L"Could not initialize the shader object.", L"Error", MB_OK);
 		return false;
@@ -49,22 +49,32 @@ bool Scene::BuildObject(OpenGL& gl, HWND hWnd) {
 	pCamera->SetPosition(0.0f, 0.0f, -10.0f);
 	return true;
 }
-void Scene::Prepare(OpenGL& gl) {
+void Scene::Prepare(Renderer& renderer) {
 	pCamera->Update();
 
 	//Get the world, view, and projection matrices from the opengl and camera objects.
 	gl.GetWorldMatrix(worldMatrix);
 	gl.GetProjectionMatrix(projectionMatrix);
 }
-void Scene::Render(OpenGL& gl) {
-	Matrix<float, 4, 4> worldMatrix;
-	Matrix<float, 4, 4> viewMatrix;
-	Matrix<float, 4, 4> projectionMatrix;
 
-	worldMatrix = GetWorldMatrix();
-	viewMatrix = GetViewMatrix();
-	projectionMatrix = GetProjectionMatrix();
+void Scene::Update(const float& elapsedTime) {
 	
+}
+
+void Scene::Render(Renderer& renderer) {
+	//Matrix<float, 4, 4> worldMatrix;
+	//Matrix<float, 4, 4> viewMatrix;
+	//Matrix<float, 4, 4> projectionMatrix;
+
+	//worldMatrix = GetWorldMatrix();
+	//viewMatrix = GetViewMatrix();
+	//projectionMatrix = GetProjectionMatrix();
+	
+	std::array<std::array<float, 4>, 4> worldMatrix;
+	for (size_t iValue = 0; iValue < 4; iValue ++) {
+		worldMatrix[iValue].assign(GetWorldMatrix()(iValue));
+	}
+
 	float diffuseAlbedo[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	float ambientAlbedo[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	float specularAlbedo[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
@@ -78,19 +88,24 @@ void Scene::Render(OpenGL& gl) {
 	phongLight.GetPosition(lightPosition);
 	phongLight.GetDirection(lightDirection);
 
-	pShader->SetShader(gl);
-	pShader->SetShaderParameters(gl, (float*)worldMatrix.value, (float*)viewMatrix.value, (float*)projectionMatrix.value, 0, lightDirection, diffuseAlbedo, ambientAlbedo, specularAlbedo);
+
+
+	pShader->SetShader(renderer);
+	//pShader->SetShaderParameters(renderer, )
+	//pShader->SetShaderParameters(gl, (float*)worldMatrix.value, (float*)viewMatrix.value, (float*)projectionMatrix.value, 0, lightDirection, diffuseAlbedo, ambientAlbedo, specularAlbedo);
 	pShader->Render(gl);
 }
 
-void Scene::Shutdown(OpenGL& gl) {
+void Scene::Shutdown(Renderer& renderer) {
 	if (pShader)
-		pShader->Shutdown(gl);
+		pShader->Shutdown(renderer);
 }
+
 
 const Matrix<float, 4, 4>& Scene::GetWorldMatrix() const {
 	return worldMatrix;
 }
+
 const Matrix<float, 4, 4>& Scene::GetViewMatrix() const {
 	Matrix<float, 4, 4> viewMatrix;
 	if (pCamera)

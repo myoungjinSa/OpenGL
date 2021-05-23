@@ -44,23 +44,13 @@ bool System::Initialize() {
 
 	timer.Start();
 
-	pScene = new Scene();
-	if (!pScene)
-	{
-		return false;
-	}
-	if (!pScene->BuildObject(*pOpenGL, hWnd)) {
-		return false;
-	}
-
 	// Create the graphics object.  This object will handle rendering all the graphics for this application.
 	pRenderer = new Renderer();
 	if (!pRenderer)
 	{
 		return false;
 	}
-
-
+	
 	// Initialize the graphics object.
 	result = pRenderer->Initialize(pOpenGL, hWnd);
 	if (!result)
@@ -68,6 +58,14 @@ bool System::Initialize() {
 		return false;
 	}
 
+	pScene = new Scene();
+	if (!pScene)
+	{
+		return false;
+	}
+	if (!pScene->BuildObject(*pRenderer, hWnd)) {
+		return false;
+	}
 	pRenderer->Attach(*pScene);
 	return true;
 }

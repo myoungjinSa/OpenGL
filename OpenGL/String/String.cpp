@@ -79,7 +79,7 @@ String::String(const String& other) {
 	currentChar = other.currentChar;
 }
 const String& String::operator=(const String& other) {
-	std::cout << "Copy Operator Called\n";
+	std::cout << "Move Operator Called\n";
 
 	if (this == &other)
 		return *this;
