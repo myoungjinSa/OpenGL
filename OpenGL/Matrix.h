@@ -506,6 +506,7 @@ public:
 	Vector3();
 	Vector3(T v0, T v1, T v2);
 	//explicit Vector3(const T* values);
+	Vector3(const Matrix<T, 1, 3>& mat);
 	Vector3(const Vector3<T>& v) = default;
 	void SetXYZ(T x, T y, T z);
 
@@ -540,6 +541,12 @@ template<typename T> inline
 Vector3<T>::Vector3(T v0, T v1, T v2)
 	: x(v0), y(v1), z(v2) {
 
+}
+template<typename T> inline
+Vector3<T>::Vector3(const Matrix<T, 1, 3>& mat) {
+	x = mat.Row(0).Col(0);
+	y = mat.Row(0).Col(1);
+	z = mat.Row(0).Col(2);
 }
 
 template<typename T> inline
@@ -727,6 +734,7 @@ public:
 	Vector4(const Vector2<T>& base, float z, float w);
 	Vector4(const Vector3<T>& base, float w);
 	Vector4(const Vector4<T>& other) = default;
+	Vector4(const Matrix<T, 1, 4>& mat);
 	void SetXYZW(T x, T y, T z, T w);
 
 	T* ConvertToValue();
@@ -773,6 +781,13 @@ Vector4<T>::Vector4(const Vector3<T>& base, float _w)
 	: x(base.x), y(base.y), z(base.z), w(_w)
 {
 
+}
+template<typename T>
+Vector4<T>::Vector4(const Matrix<T, 1, 4>& matrix) {
+	x = matrix.Row(0).Col(0);
+	y = matrix.Row(0).Col(1);
+	z = matrix.Row(0).Col(2);
+	w = matrix.Row(0).Col(3);
 }
 
 template<typename T> inline
@@ -874,3 +889,5 @@ typedef Vector4<unsigned short> Vec4w;
 typedef Vector4<int> Vec4i;
 typedef Vector4<double> Vec4d;
 typedef Vector4<float> Vec4f;
+
+

@@ -163,6 +163,7 @@ bool Renderer::CompileVertexShader(const char* vsFilename, unsigned int& vertexS
 		OutputShaderErrorMessage(*pGL, vertexShader, const_cast<char*>(vsFilename));
 		return false;
 	}
+	return true;
 }
 
 bool Renderer::CompileFragmentShader(const char* fsFilename, unsigned int& fragmentShader) {
@@ -172,7 +173,7 @@ bool Renderer::CompileFragmentShader(const char* fsFilename, unsigned int& fragm
 	{
 		return false;
 	}
-	fragmentShader = pGL->glCreateShader(GL_VERTEX_SHADER);
+	fragmentShader = pGL->glCreateShader(GL_FRAGMENT_SHADER);
 	pGL->glShaderSource(fragmentShader, 1, &fragmentShaderBuffer, NULL);
 	delete fragmentShaderBuffer;
 	fragmentShaderBuffer = nullptr;
@@ -181,26 +182,29 @@ bool Renderer::CompileFragmentShader(const char* fsFilename, unsigned int& fragm
 	pGL->glCompileShader(fragmentShader);
 	pGL->glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &status);
 	if (status != 1) {
-
+		// If it did not compile then write the syntax error message out to a text file for review.
+		OutputShaderErrorMessage(*pGL, fragmentShader, const_cast<char*>(fsFilename));
+		return false;
 	}
+	return true;
 }
 
-bool Renderer::SetShaderParameter(unsigned int shaderProgram, std::array<std::array<float, 4>, 4>& matrix, String&& variableName) {
+bool Renderer::SetShaderParameter(unsigned int shaderProgram, std::array<Vec4f, 4>& matrix, String&& variableName) {
 	_ASSERT(pGL);
 	unsigned int location = pGL->glGetUniformLocation(shaderProgram, variableName.c_str());
 	if (location == -1)
 		return false;
 
-	pGL->glUniformMatrix4fv(location, 1, false, matrix[0].data());
+	pGL->glUniformMatrix4fv(location, 1, false, matrix.data()->ConvertToValue());
 }
 
-bool Renderer::SetShaderParameter(unsigned int shaderProgram, std::array<std::array<float, 3>, 3>& matrix, String&& variableName) {
+bool Renderer::SetShaderParameter(unsigned int shaderProgram, std::array<Vec3f, 3>& matrix, String&& variableName) {
 	_ASSERT(pGL);
 	unsigned int location = pGL->glGetUniformLocation(shaderProgram, variableName.c_str());
 	if (location == -1)
 		return false;
 
-	pGL->glUniform3fv(location, 1, matrix[0].data());
+	pGL->glUniform3fv(location, 1, matrix.data()->ConvertToValue());
 }
 
 bool Renderer::SetShaderParameter(unsigned int shaderProgram, int integer, String&& variableName) {
@@ -211,22 +215,22 @@ bool Renderer::SetShaderParameter(unsigned int shaderProgram, int integer, Strin
 
 	pGL->glUniform1i(location, integer);
 }
-bool Renderer::SetShaderParameter(unsigned int shaderProgram, std::array<std::array<float, 4>, 4>& matrix,const String& variableName) {
+bool Renderer::SetShaderParameter(unsigned int shaderProgram, std::array<Vec4f, 4>& matrix,const String& variableName) {
 	_ASSERT(pGL);
 	unsigned int location = pGL->glGetUniformLocation(shaderProgram, variableName.c_str());
 	if (location == -1)
 		return false;
 
-	pGL->glUniformMatrix4fv(location, 1, false, matrix[0].data());
+	pGL->glUniformMatrix4fv(location, 1, false, matrix.data()->ConvertToValue());
 }
 
-bool Renderer::SetShaderParameter(unsigned int shaderProgram, std::array<std::array<float, 3>, 3>& matrix, const String& variableName) {
+bool Renderer::SetShaderParameter(unsigned int shaderProgram, std::array<Vec3f, 3>& matrix, const String& variableName) {
 	_ASSERT(pGL);
 	unsigned int location = pGL->glGetUniformLocation(shaderProgram, variableName.c_str());
 	if (location == -1)
 		return false;
 
-	pGL->glUniform3fv(location, 1, matrix[0].data());
+	pGL->glUniform3fv(location, 1, matrix.data()->ConvertToValue());
 }
 
 bool Renderer::SetShaderParameter(unsigned int shaderProgram, int integer, const String& variableName) {

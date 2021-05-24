@@ -267,7 +267,7 @@ bool ColorShader::InitializeShader(const char* vsFilename, const char* fsFilenam
 	return renderer.BindVertexAttrib(shaderProgram, vertexShader, fragmentShader, 2, inputPosition, inputColor);
 }
 
-bool ColorShader::SetShaderParameters(Renderer& renderer, std::array<std::array<float, 4>, 4>& worldMatrix, std::array<std::array<float, 4>, 4>& viewMatrix, std::array<std::array<float, 4>, 4>& projectionMatrix) {
+bool ColorShader::SetShaderParameters(Renderer& renderer, std::array<Vec4f, 4>& worldMatrix, std::array<Vec4f, 4>& viewMatrix, std::array<Vec4f, 4>& projectionMatrix) {
 	if (!renderer.SetShaderParameter(shaderProgram, worldMatrix, std::move(String("worldMatrix")))) {
 		return false;
 	}
@@ -386,8 +386,8 @@ bool PhongShader::InitializeShader(const char* vsFilename, const char* fsFilenam
 	return renderer.BindVertexAttrib(shaderProgram, vertexShader, fragmentShader, 3, inputPosition, inputTexCoord, inputNormal);
 }
 
-bool PhongShader::SetShaderParameters(Renderer& renderer, std::array<std::array<float, 4>, 4>& worldMatrix, std::array<std::array<float, 4>, 4>&viewMatrix,
-	std::array<std::array<float, 4>, 4>& projectionMatrix, std::array<std::array<float, 3>, 3>& lightDirection, std::array<std::array<float, 3>, 3>& diffuseAlbedo, std::array<std::array<float, 4>, 4>& ambientAlbedo, std::array<std::array<float, 3>, 3>& specular, int textureUnit) {
+bool PhongShader::SetShaderParameters(Renderer& renderer, std::array<Vec4f, 4>& worldMatrix, std::array<Vec4f, 4>&viewMatrix,
+	std::array<Vec4f, 4>& projectionMatrix, std::array<Vec3f, 3>& lightDirection, std::array<Vec3f, 3>& diffuseAlbedo, std::array<Vec4f, 4>& ambientAlbedo, std::array<Vec3f, 3>& specular, int textureUnit) {
 
 	if (!renderer.SetShaderParameter(shaderProgram, worldMatrix, std::move(String("worldMatrix")))) {
 		return false;

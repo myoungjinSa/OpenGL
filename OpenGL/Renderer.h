@@ -1,6 +1,7 @@
 #pragma once
 #include "Common.h"
 #include "OpenGL.h"
+#include "Mesh.h"
 /////////////
 // GLOBALS //
 /////////////
@@ -15,8 +16,6 @@ class PhongShader;
 class ColorShader;
 class Camera;
 class String;
-class VertexBufferBindCallback;
-
 class Renderer
 {
 public:
@@ -47,12 +46,12 @@ public:
 	void SetDrawMode(Renderer::DrawMode drawMode);
 	Renderer::DrawMode GetDrawMode() const { return drawMode; }
 
-	bool SetShaderParameter(unsigned int shaderProgram, std::array<std::array<float, 4>, 4>& matrix, const String& variableName);
-	bool SetShaderParameter(unsigned int shaderProgram, std::array<std::array<float, 3>, 3>& matrix, const String& variableName);
+	bool SetShaderParameter(unsigned int shaderProgram, std::array<Vec4f, 4>& matrix, const String& variableName);
+	bool SetShaderParameter(unsigned int shaderProgram, std::array<Vec3f, 3>& matrix, const String& variableName);
 	bool SetShaderParameter(unsigned int shaderProgram, int integer, const String& variableName);
 
-	bool SetShaderParameter(unsigned int shaderProgram, std::array<std::array<float, 4>, 4>& matrix, String&& variableName);
-	bool SetShaderParameter(unsigned int shaderProgram, std::array<std::array<float, 3>, 3>& matrix, String&& variableName);
+	bool SetShaderParameter(unsigned int shaderProgram, std::array<Vec4f, 4>& matrix, String&& variableName);
+	bool SetShaderParameter(unsigned int shaderProgram, std::array<Vec3f, 3>& matrix, String&& variableName);
 	bool SetShaderParameter(unsigned int shaderProgram, int integer, String&& variableName);
 
 	bool AllocateVertexBuffer(unsigned int vertexArrayId, unsigned int vertexBufferId, void* vertexData, VertexBufferBindCallback* pBindFunction, unsigned int numVertices, unsigned int sizeofVertex);

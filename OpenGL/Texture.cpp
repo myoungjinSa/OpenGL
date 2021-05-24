@@ -73,6 +73,7 @@ bool Texture::LoadBMP(Renderer& renderer, const String& fileName, unsigned int t
 	pPixelData = nullptr;
 
 	loaded = true;
+	return loaded;
 }
 
 /////////////////////////////////////////////////////////////////////////////

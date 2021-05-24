@@ -1,6 +1,6 @@
+#include "Mesh.h"
 #include "OpenGL.h"
 #include "Renderer.h"
-#include "Mesh.h"
 #include <string>
 
 size_t Vertex::attributeCount = 1;
@@ -117,7 +117,6 @@ bool Mesh::Initialize(Renderer& renderer, VertexBufferBindCallback* pBindFuction
 	renderer.AllocateIndexBuffer(indexBufferId, indexCount, indexData);
 
 	return true;
-	//return InitializeBuffers(gl);
 }
 
 void Mesh::Shutdown(Renderer& renderer) {

@@ -15,11 +15,11 @@ public:
 	void SetSpecularLight(const Vec4f& specular);
 	void SetDirection(const Vec3f& direction);
 	
-	void GetDiffuseLight(float* diffuse);
-	void GetAmbientLight(float* ambient);
-	void GetSpecularLight(float* specular);
-	void GetDirection(float* direction);
-	void GetPosition(float* position);
+	Vec4f GetDiffuseLight();
+	Vec4f GetAmbientLight();
+	Vec4f GetSpecularLight();
+	Vec3f GetDirection();
+	Vec3f GetPosition();
 private:
 	Vec4f diffuseColor;
 	Vec4f ambientColor;

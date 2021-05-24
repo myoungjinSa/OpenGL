@@ -59,36 +59,31 @@ void Scene::Update(const float& elapsedTime) {
 
 bool Scene::Render(Renderer& renderer) {
 	renderer.BeginRender();
-	//Matrix<float, 4, 4> worldMatrix;
-	//Matrix<float, 4, 4> viewMatrix;
-	//Matrix<float, 4, 4> projectionMatrix;
 
-	//worldMatrix = GetWorldMatrix();
-	//viewMatrix = GetViewMatrix();
-	//projectionMatrix = GetProjectionMatrix();
-	
-	std::array<std::array<float, 4>, 4> worldMatrix;
-	for (size_t iValue = 0; iValue < 16; iValue ++) {
-		
-		//worldMatrix.assign(GetWorldMatrix().value[iValue]);
+	const int columnCount = 4;
+	std::array<Vec4f, columnCount> worldMatrix;
+	std::array<Vec4f, columnCount> viewMatrix;
+	std::array<Vec4f, columnCount> projectionMatrix;
+	for (size_t iRow = 0; iRow < columnCount; iRow++) {
+		worldMatrix.fill(GetWorldMatrix().Row(iRow));
+		viewMatrix.fill(GetViewMatrix().Row(iRow));
+		projectionMatrix.fill(GetProjectionMatrix().Row(iRow));
 	}
-
+	
 	float diffuseAlbedo[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	float ambientAlbedo[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	float specularAlbedo[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
 	float lightPosition[3] = { 0.0f, 0.0f, 0.0f };
 	float lightDirection[3] = { 0.0f, 0.0f, 0.0f };
 
-	phongLight.GetDiffuseLight(diffuseAlbedo);
-	phongLight.GetAmbientLight(ambientAlbedo);
-	phongLight.GetSpecularLight(specularAlbedo);
-	
-	phongLight.GetPosition(lightPosition);
-	phongLight.GetDirection(lightDirection);
-
-
+	Vec4f diffuseAlbedo = phongLight.GetDiffuseLight();
+	Vec4f ambientAlbedo = phongLight.GetAmbientLight();
+	Vec4f specularAlbedo = phongLight.GetSpecularLight();
+	Vec3f lightPosition = phongLight.GetPosition();
+	Vec3f lightDirection = phongLight.GetDirection();
 
 	pShader->SetShader(renderer);
+
 	//pShader->SetShaderParameters(renderer, )
 	//pShader->SetShaderParameters(gl, (float*)worldMatrix.value, (float*)viewMatrix.value, (float*)projectionMatrix.value, 0, lightDirection, diffuseAlbedo, ambientAlbedo, specularAlbedo);
 	pShader->Render(renderer);
