@@ -46,32 +46,39 @@ public:
 	void SetDrawMode(Renderer::DrawMode drawMode);
 	Renderer::DrawMode GetDrawMode() const { return drawMode; }
 
-	bool SetShaderParameter(unsigned int shaderProgram, std::array<Vec4f, 4>& matrix, const String& variableName);
-	bool SetShaderParameter(unsigned int shaderProgram, std::array<Vec3f, 3>& matrix, const String& variableName);
+	bool SetShaderParameter(unsigned int shaderProgram, Matrix<float, 4, 4>& matrix, const String& variableName);
+	bool SetShaderParameter(unsigned int shaderProgram, Vec4f& vec4, const String& variableName);
+	bool SetShaderParameter(unsigned int shaderProgram, Vec3f& vec3, const String& variableName);
 	bool SetShaderParameter(unsigned int shaderProgram, int integer, const String& variableName);
 
-	bool SetShaderParameter(unsigned int shaderProgram, std::array<Vec4f, 4>& matrix, String&& variableName);
-	bool SetShaderParameter(unsigned int shaderProgram, std::array<Vec3f, 3>& matrix, String&& variableName);
+
+	bool SetShaderParameter(unsigned int shaderProgram, Matrix<float, 4, 4>& matrix, String&& variableName);
+	bool SetShaderParameter(unsigned int shaderProgram, Vec4f& vec4, String&& variableName);
+	bool SetShaderParameter(unsigned int shaderProgram, Vec3f& vec3, String&& variableName);
 	bool SetShaderParameter(unsigned int shaderProgram, int integer, String&& variableName);
 
-	bool AllocateVertexBuffer(unsigned int vertexArrayId, unsigned int vertexBufferId, void* vertexData, VertexBufferBindCallback* pBindFunction, unsigned int numVertices, unsigned int sizeofVertex);
-	bool AllocateIndexBuffer(unsigned int indexBufferId, size_t indexCount, unsigned int* indexData);
+
+	bool AllocateVertexBuffer(unsigned int& vertexArrayId, unsigned int& vertexBufferId, void* vertexData, VertexBufferBindCallback* pBindFunction, unsigned int numVertices, unsigned int sizeofVertex);
+	bool AllocateIndexBuffer(unsigned int& indexBufferId, size_t indexCount, unsigned int* indexData);
 	
-	bool AllocateTextures(unsigned int textureUnit, unsigned int textureID, unsigned int textureCount);
-	void BindTexture(unsigned int width, unsigned int height, unsigned int textureUnit, unsigned int textureId, unsigned char* pPixelData);
+	bool AllocateTextures(unsigned int textureUnit, unsigned int& textureID, unsigned int textureCount);
+	void BindTexture(unsigned int width, unsigned int height, unsigned int textureId, unsigned char* pPixelData);
 	void SetSampleMode(bool wrapMode);
 	void SetFiltering();
 
 
 	void DisableVertexAttribArray(size_t vertexAttribCount);
-	void ReleaseVertexBuffers(unsigned int vertexBufferId, size_t bufferCount);
-	void ReleaseIndexBuffers(unsigned int vertexBufferId, size_t bufferCount);
-	void ReleaseVertexArray(unsigned int vertedxArrayId, size_t arrayCount);
+	void ReleaseVertexBuffers(unsigned int& vertexBufferId, size_t bufferCount);
+	void ReleaseIndexBuffers(unsigned int& vertexBufferId, size_t bufferCount);
+	void ReleaseVertexArray(unsigned int& vertedxArrayId, size_t arrayCount);
 	void DrawVertexBuffer(unsigned int vertexArrayId, size_t startPos, size_t vertexCounts);
 	void DrawIndexBuffer(unsigned int vertexArrayId, size_t indexCount);
 
 	bool BeginRender();
 	void EndRender();
+
+	float GetRenderTargetWidth() const;
+	float GetRenderTargetHeight() const;
 private:
 	void OutputLinkErrorMessage(OpenGL& gl, unsigned int programId);
 	void OutputShaderErrorMessage(OpenGL& gl, unsigned int shaderId, char* shaderFilename);

@@ -3,7 +3,6 @@
 #include "Renderer.h"
 #include <string>
 
-size_t Vertex::attributeCount = 1;
 
 Vertex::Vertex()
 	: position()
@@ -41,9 +40,8 @@ void ColorVertex::Copy(const VertexMaster& source, byte* pDestination) {
 	pColorVertex->position = source.position;
 	pColorVertex->color = source.color;
 
-	attributeCount = 2;
 }
-void ColorVertex::BindVertexBuffer(const OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeofVertex) {
+void ColorVertex::BindVertexBuffer(OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeofVertex) {
 	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
 	gl.glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(ColorVertex), pBuffer, GL_STATIC_DRAW);
 
@@ -77,10 +75,9 @@ void TexturedVertex::Copy(const VertexMaster& source, byte* pDestination) {
 	pColorVertex->uv0 = source.uv0;
 	pColorVertex->normal = source.normal;
 
-	attributeCount = 3;
 }
 
-void TexturedVertex::BindVertexBuffer(const OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeofVertex) {
+void TexturedVertex::BindVertexBuffer(OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeofVertex) {
 	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
 	gl.glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(TexturedVertex), pBuffer, GL_STATIC_DRAW);
 
@@ -120,7 +117,7 @@ bool Mesh::Initialize(Renderer& renderer, VertexBufferBindCallback* pBindFuction
 }
 
 void Mesh::Shutdown(Renderer& renderer) {
-	renderer.DisableVertexAttribArray((size_t)TexturedVertex::attributeCount);
+	renderer.DisableVertexAttribArray(3);
 
 	renderer.ReleaseVertexBuffers(vertexBufferId, 1);
 	renderer.ReleaseIndexBuffers(indexBufferId, 1);
@@ -130,6 +127,7 @@ void Mesh::Shutdown(Renderer& renderer) {
 }
 
 void Mesh::Render(Renderer& renderer) {
+	//renderer.DrawVertexBuffer(vertexArrayId, 0, vertexCount);
 	renderer.DrawIndexBuffer(vertexArrayId, indexCount);
 }
 
@@ -211,7 +209,6 @@ void MeshBuilder::CopyToMesh(Renderer& renderer, Mesh* pMesh, VertexCopyCallback
 		copyFunction(vertices[vertexIndex], currentBufferIndex);
 		currentBufferIndex += vertexSize;
 	}
-	//pMesh->Initialize(gl, &ColorVertex::BindVertexBuffer, vertexBuffer, vertexCount, sizeofVertex, indices.data(), indices.size());
 	pMesh->Initialize(renderer, &TexturedVertex::BindVertexBuffer, vertexBuffer, vertexCount, sizeofVertex, indices.data(), indices.size());
 
 	delete[] vertexBuffer;

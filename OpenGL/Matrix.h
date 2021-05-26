@@ -30,6 +30,7 @@ public :
 
 	Matrix(std::initializer_list<T> values);
 
+	static Matrix Identity();
 	static Matrix All(T alpha);
 	static Matrix Zeros();
 	static Matrix Ones();
@@ -131,6 +132,18 @@ Matrix<T, m, n>::Matrix(std::initializer_list<T> list)
 	}
 }
 
+template<typename T, int m, int n> inline
+Matrix<T, m, n> Matrix<T, m, n>::Identity() {
+	Matrix<T, m, n> mat = Matrix::Zeros();
+
+	for (int iRow = 0; iRow < m; iRow++) {
+		for (int iCol = 0; iCol < n; iCol++) {
+			if (iRow == iCol)
+				mat.value[iRow * m + iCol] = 1;
+		}
+	}
+	return mat;
+}
 
 template<typename T, int m, int n> inline
 Matrix<T, m, n> Matrix<T, m, n>::All(T alpha) {
@@ -139,6 +152,7 @@ Matrix<T, m, n> Matrix<T, m, n>::All(T alpha) {
 		mat.value[i] = alpha;
 	return mat;
 }
+
 
 template<typename T, int m, int n> inline
 Matrix<T, m, n> Matrix<T, m, n>::Zeros() {
@@ -207,7 +221,7 @@ Matrix<T, m1, n1> Matrix<T, m, n>::GetMinor(int i, int j) const {
 template<typename T, int m, int n> inline
 Matrix<T, 1, n> Matrix<T, m, n>::Row(int i) const {
 	assert((unsigned)i < (unsigned)m);
-	return Matrix<T, 1, n>(&value[i * n]);
+	return Matrix<T, 1, n>(value[i * n]);
 }
 
 template<typename T, int m, int n> inline
@@ -581,12 +595,12 @@ void Vector3<T>::Normalize() {
 }
 template<typename T> inline
 T* Vector3<T>::ConvertToValue() {
-	T val[3];
+	T val[3] = {0, };
 	val[0] = x;
 	val[1] = y;
 	val[2] = z;
 
-	return *val;
+	return val;
 }
 
 template<typename T> 
@@ -718,6 +732,7 @@ Vector3<T> Normalize(const Vector3<T>& v) {
 	return ret;
 }
 
+
 template<typename T, typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr>
 T Dot(const Vector3<T>& v1, const Vector3<T>& v2) {
 	return T((v1.x * v2.x) + (v1.y * v2.y) + (v1.z * v2.z));
@@ -784,20 +799,22 @@ Vector4<T>::Vector4(const Vector3<T>& base, float _w)
 }
 template<typename T>
 Vector4<T>::Vector4(const Matrix<T, 1, 4>& matrix) {
-	x = matrix.Row(0).Col(0);
-	y = matrix.Row(0).Col(1);
-	z = matrix.Row(0).Col(2);
-	w = matrix.Row(0).Col(3);
+	x = matrix.Row(0).value[0];
+	y = matrix.Row(0).value[1];
+	z = matrix.Row(0).value[2];
+	w = matrix.Row(0).value[3];
 }
+
 
 template<typename T> inline
 T* Vector4<T>::ConvertToValue() {
-	T* val;
+	T val[4] = {0, };
+
 	val[0] = x;
 	val[1] = y;
 	val[2] = z;
 	val[3] = w;
-	return *val;
+	return val;
 }
 
 template<typename T> inline

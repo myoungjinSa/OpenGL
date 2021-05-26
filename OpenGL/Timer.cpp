@@ -35,6 +35,5 @@ long long Timer::GetEalapsedTime(){
 
 void Timer::Tick(float fLockFps) {
 	endTime = std::chrono::steady_clock::now();
-	elapsedTime = GetEalapsedTime();
 }
 

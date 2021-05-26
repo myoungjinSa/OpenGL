@@ -14,7 +14,7 @@ public:
 	virtual bool Initialize(Renderer& renderer) { return true; }
 	virtual void Shutdown(Renderer& renderer) {}
 	virtual void Render(Renderer& renderer) {}
-	virtual void Update(float deltaTime = 0.0f){}
+	virtual void Update(float deltaTime){}
 
 	void SetPosition(float x, float y, float z);
 	Vec3f GetPosition() const;
@@ -22,9 +22,18 @@ public:
 
 	void SetRotation(float x, float y, float z);
 	Vec3f GetRotation() const;
+
+	void Move(const Vec3f& direction,float elapsedTime);
+
+	Vec3f GetLook() const;
+	Vec3f GetRight() const;
+	Vec3f GetUp() const;
 protected:
 	Vec3f position;
 	Vec3f rotation;
+
+	Matrix<float, 4, 4> worldMatrix;
+	float movingSpeed;
 };
 
 class Cube : public Object {
@@ -37,7 +46,7 @@ public:
 	bool Initialize(Renderer& renderer) override;
 	void Shutdown(Renderer& renderer) override;
 	void Render(Renderer& renderer) override;
-	void Update(float deltaTime = 0.0f) override;
+	void Update(float deltaTime) override;
 
 	Cube& operator=(const Cube& other);
 	Cube& operator=(Cube&& other) noexcept;

@@ -64,7 +64,7 @@ bool Texture::LoadBMP(Renderer& renderer, const String& fileName, unsigned int t
 	fin.close();
 
 	renderer.AllocateTextures(textureUnit, textureID, 1);
-	renderer.BindTexture(width, height, textureUnit, textureID, pPixelData);
+	renderer.BindTexture(width, height, textureID, pPixelData);
 	renderer.SetSampleMode(true);
 	renderer.SetFiltering();
 

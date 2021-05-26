@@ -33,7 +33,7 @@ void Camera::Update(float deltaTime) {
 	
 	//Setup the position of the camera in the world
 	pos = GetPosition();
-
+	
 	//Set the yaw (Y axis), pitch(X axis) and roll(Z axis) roations in radians
 	lookAt.SetXYZ(0.0f, 0.0f, 1.0f);
 

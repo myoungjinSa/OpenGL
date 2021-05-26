@@ -49,43 +49,53 @@ bool Scene::BuildObject(Renderer& renderer, HWND hWnd) {
 	pCamera->SetPosition(0.0f, 0.0f, -10.0f);
 	return true;
 }
-void Scene::Prepare(Renderer& renderer) {
-	pCamera->Update();
-}
 
 void Scene::Update(const float& elapsedTime) {
-	
+	if (pCamera)
+		pCamera->Update(elapsedTime);
+}
+
+void BuildPerspectiveFovLHMatrix(Matrix<float, 4, 4>& matrix, float fieldOfView, float screenAspect, float screenNear, float screenDepth) {
+	matrix[0] = 1.0f / (screenAspect * tan(fieldOfView * 0.5f));
+	matrix[1] = 0.0f;
+	matrix[2] = 0.0f;
+	matrix[3] = 0.0f;
+
+	matrix[4] = 0.0f;
+	matrix[5] = 1.0f / tan(fieldOfView * 0.5f);
+	matrix[6] = 0.0f;
+	matrix[7] = 0.0f;
+
+	matrix[8] = 0.0f;
+	matrix[9] = 0.0f;
+	matrix[10] = screenDepth / (screenDepth - screenNear);
+	matrix[11] = 1.0f;
+
+	matrix[12] = 0.0f;
+	matrix[13] = 0.0f;
+	matrix[14] = (-screenNear * screenDepth) / (screenDepth - screenNear);
+	matrix[15] = 0.0f;
 }
 
 bool Scene::Render(Renderer& renderer) {
 	renderer.BeginRender();
-
-	const int columnCount = 4;
-	std::array<Vec4f, columnCount> worldMatrix;
-	std::array<Vec4f, columnCount> viewMatrix;
-	std::array<Vec4f, columnCount> projectionMatrix;
-	for (size_t iRow = 0; iRow < columnCount; iRow++) {
-		worldMatrix.fill(GetWorldMatrix().Row(iRow));
-		viewMatrix.fill(GetViewMatrix().Row(iRow));
-		projectionMatrix.fill(GetProjectionMatrix().Row(iRow));
-	}
-	
-	float diffuseAlbedo[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	float ambientAlbedo[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	float specularAlbedo[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
-	float lightPosition[3] = { 0.0f, 0.0f, 0.0f };
-	float lightDirection[3] = { 0.0f, 0.0f, 0.0f };
-
-	Vec4f diffuseAlbedo = phongLight.GetDiffuseLight();
+	Vec3f diffuseAlbedo = Vec3f(phongLight.GetDiffuseLight().x, phongLight.GetDiffuseLight().y, phongLight.GetDiffuseLight().z);
 	Vec4f ambientAlbedo = phongLight.GetAmbientLight();
-	Vec4f specularAlbedo = phongLight.GetSpecularLight();
+	Vec3f specularAlbedo = Vec3f(phongLight.GetSpecularLight().x, phongLight.GetSpecularLight().y, phongLight.GetSpecularLight().z);
 	Vec3f lightPosition = phongLight.GetPosition();
 	Vec3f lightDirection = phongLight.GetDirection();
+	
+	worldMatrix = Matrix<float, 4, 4>::Identity();
 
+	float fieldOfView = 3.14159265358979323846f / 4.0f;
+	float screenWidth = renderer.GetRenderTargetWidth();
+	float screenHeight = renderer.GetRenderTargetHeight();
+	float screenAspect = (float)screenWidth / (float)screenHeight;
+	BuildPerspectiveFovLHMatrix(projectionMatrix, fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
+
+	Matrix<float, 4, 4> viewMatrix = GetViewMatrix();
 	pShader->SetShader(renderer);
-
-	//pShader->SetShaderParameters(renderer, )
-	//pShader->SetShaderParameters(gl, (float*)worldMatrix.value, (float*)viewMatrix.value, (float*)projectionMatrix.value, 0, lightDirection, diffuseAlbedo, ambientAlbedo, specularAlbedo);
+	pShader->SetShaderParameters(renderer, worldMatrix, viewMatrix, projectionMatrix, lightDirection, diffuseAlbedo, ambientAlbedo, specularAlbedo, 0);
 	pShader->Render(renderer);
 
 	renderer.EndRender();
@@ -98,17 +108,16 @@ void Scene::Shutdown(Renderer& renderer) {
 }
 
 
-const Matrix<float, 4, 4>& Scene::GetWorldMatrix() const {
+Matrix<float, 4, 4> Scene::GetWorldMatrix() const {
 	return worldMatrix;
 }
-
-const Matrix<float, 4, 4>& Scene::GetViewMatrix() const {
+Matrix<float, 4, 4> Scene::GetViewMatrix() const {
 	Matrix<float, 4, 4> viewMatrix;
 	if (pCamera)
 		pCamera->GetViewMatrix(viewMatrix);
 
 	return viewMatrix;
 }
-const Matrix<float, 4, 4>& Scene::GetProjectionMatrix() const {
+Matrix<float, 4, 4> Scene::GetProjectionMatrix() const {
 	return projectionMatrix;
 }

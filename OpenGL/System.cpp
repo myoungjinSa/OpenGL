@@ -124,8 +124,9 @@ void System::Run()
 		else
 		{
 			timer.Tick(0);
+			
 			// Otherwise do the frame processing.
-			result = Frame();
+			result = Frame(timer.GetEalapsedTime());
 			if (!result)
 			{
 				done = true;
@@ -137,11 +138,8 @@ void System::Run()
 	return;
 }
 
-bool System::Frame()
+bool System::Frame(float elapsedTime)
 {
-	bool result;
-
-
 	// Check if the user pressed escape and wants to exit the application.
 	if (Input::IsKeyDown(VK_ESCAPE))
 	{
@@ -149,14 +147,13 @@ bool System::Frame()
 	}
 
 
-	// Do the frame processing for the graphics object.
-	result = pScene->Render(*pRenderer);//pRenderer->Frame();
-	if (!result)
-	{
-		return false;
+	bool result = false;
+	if (pScene) {
+		pScene->Update(elapsedTime);
+		result = pScene->Render(*pRenderer);
 	}
 
-	return true;
+	return result;
 }
 
 LRESULT CALLBACK System::MessageHandler(HWND hwnd, UINT umsg, WPARAM wParam, LPARAM lParam)

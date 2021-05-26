@@ -82,7 +82,7 @@ class OpenGL
 {
 public:
 	OpenGL();
-	OpenGL(const OpenGL&);
+	OpenGL(const OpenGL&) = delete;
 	~OpenGL();
 
 	bool InitializeExtensions(HWND hWnd);
@@ -91,21 +91,15 @@ public:
 
 	void BeginScene(float red, float green, float blue, float alpha);
 	void EndScene();
-
-	void GetWorldMatrix(Matrix<float, 4, 4>& matrix);
-	void GetProjectionMatrix(Matrix<float, 4, 4>& matrix);
-
-
-	void GetWorldMatrix(float* matrix);
-	void GetProjectionMatrix(float* matrix);
 	void GetVideoCardInfo(char* videoCardList);
 
 
-	void BuildIdentityMatrix(Matrix<float, 4, 4>& matrix);
-	void BuildPerspectiveFovLHMatrix(Matrix<float, 4, 4>& matrix, float fieldOfView, float screenAspectRatio, float screenNear, float screenDepth);
 	void MatrixRotationY(Matrix<float, 4, 4>& matrix, float angle);
 	void MatrixTranslation(Matrix<float, 4, 4>& matrix, float x, float y, float z);
 	void MatrixMultiply(Matrix<float, 4, 4>& matrix, const Matrix<float, 4, 4>& matrix1, const Matrix<float, 4, 4>& matrix2);
+
+	float GetScreenWidth() const { return screenWidth; }
+	float GetScreenHeight() const { return screenHeight; }
 private:
 	bool LoadExtensionList();
 
@@ -152,8 +146,8 @@ private:
 	PFNWGLCREATECONTEXTATTRIBSARBPROC wglCreateContextAttribsARB;
 	PFNWGLSWAPINTERVALEXTPROC wglSwapIntervalEXT;
 
-	Matrix<float, 4, 4> worldMatrix;
-	Matrix<float, 4, 4> projectionMatrix;
 	char videoCardDescription[128];
+	float screenWidth;
+	float screenHeight;
 };
 

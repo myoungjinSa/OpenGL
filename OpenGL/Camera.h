@@ -9,12 +9,10 @@ public:
 	Camera(const Camera& other) = delete;
 	~Camera();
 
-
-
 	bool Initialize(Renderer& renderer) override;
 	void Render(Renderer& renderer) override;
 	void Shutdown(Renderer& renderer) override;
-	void Update(float deltaTime = 0.0f) override;
+	void Update(float deltaTime) override;
 	void GetViewMatrix(Matrix<float, 4, 4>& Matrix) const;
 private:
 	void MatrixRotationYawPitchRoll(Matrix<float, 3, 3>& Matrix, float, float, float);

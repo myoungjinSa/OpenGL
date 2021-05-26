@@ -198,7 +198,7 @@ bool ColorShader::Initialize(Renderer& renderer, HWND hWnd) {
 	bool result;
 	result = InitializeShader("color.vs", "color.ps", renderer, hWnd);
 
-	Object* pObject = new Object();
+	Object* pObject = new Cube();
 	objects.emplace_back(pObject);
 
 	for (const auto& obj : objects) {
@@ -218,42 +218,12 @@ void ColorShader::Shutdown(Renderer& renderer) {
 	ShutdownShader(renderer);
 }
 
-void ColorShader::SetShader(Renderer& renderer) {
-	Shader::SetShader(renderer);
-}
-
 void ColorShader::Render(Renderer& renderer) {
 	for (const auto& obj : objects)
 		obj->Render(renderer);
 }
 
 bool ColorShader::InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer, HWND hWnd) {
-	
-	//if (!CompileShader(vsFilename, fsFilename, gl, hWnd))
-	//	return false;
-
-	////Create a shader program object.
-	//shaderProgram = gl.glCreateProgram();
-
-	////Attach the vertex and fragment shader to the program object.
-	//gl.glAttachShader(shaderProgram, vertexShader);
-	//gl.glAttachShader(shaderProgram, fragmentShader);
-
-	////Bind the shader input variables.
-	//gl.glBindAttribLocation(shaderProgram, 0, "inputPosition");
-	//gl.glBindAttribLocation(shaderProgram, 1, "inputColor");
-
-	////Link the shader Program
-	//gl.glLinkProgram(shaderProgram);
-
-	//GLint status;
-	//gl.glGetProgramiv(shaderProgram, GL_LINK_STATUS, &status);
-	//if (status != 1)
-	//{
-	//	OutputLinkErrorMessage(gl, hWnd, shaderProgram);
-	//	return false;
-	//}
-	//return true;
 	shaderProgram = renderer.CreateShader();
 
 	if (!renderer.CompileVertexShader(vsFilename, vertexShader))
@@ -267,7 +237,7 @@ bool ColorShader::InitializeShader(const char* vsFilename, const char* fsFilenam
 	return renderer.BindVertexAttrib(shaderProgram, vertexShader, fragmentShader, 2, inputPosition, inputColor);
 }
 
-bool ColorShader::SetShaderParameters(Renderer& renderer, std::array<Vec4f, 4>& worldMatrix, std::array<Vec4f, 4>& viewMatrix, std::array<Vec4f, 4>& projectionMatrix) {
+bool ColorShader::SetShaderParameters(Renderer& renderer, Matrix<float, 4, 4>& worldMatrix, Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& projectionMatrix) {
 	if (!renderer.SetShaderParameter(shaderProgram, worldMatrix, std::move(String("worldMatrix")))) {
 		return false;
 	}
@@ -280,33 +250,6 @@ bool ColorShader::SetShaderParameters(Renderer& renderer, std::array<Vec4f, 4>& 
 
 	return true;
 }
-
-//bool ColorShader::SetShaderParameters(Renderer& renderer, float* worldMatrix, float* viewMatrix, float* projectionMatrix) {
-//	unsigned int location = gl.glGetUniformLocation(shaderProgram, "worldMatrix");
-//	if (location == -1)
-//		return false;
-//
-//	gl.glUniformMatrix4fv(location, 1, false, worldMatrix);
-//
-//	//Set the view matrix in the vertex shader
-//
-//	location = gl.glGetUniformLocation(shaderProgram, "viewMatrix");
-//	if (location == -1)
-//		return false;
-//	
-//	gl.glUniformMatrix4fv(location, 1, false, viewMatrix);
-//
-//	//Set the projection matrix in the vertex shader
-//	location = gl.glGetUniformLocation(shaderProgram, "projectionMatrix");
-//	if (location == -1)
-//		return false;
-//
-//	gl.glUniformMatrix4fv(location, 1, false, projectionMatrix);
-//
-//	return true;
-//}
-
-
 
 /////////////////////////////Texture Shader//////////////////////////////////////////////////////////////////
 PhongShader::PhongShader() 
@@ -341,9 +284,6 @@ void PhongShader::Render(Renderer& renderer) {
 	for (const auto& obj : objects)
 		obj->Render(renderer);
 }
-void PhongShader::SetShader(Renderer& renderer) {
-	renderer.SetShader(shaderProgram);
-}
 
 void PhongShader::Shutdown(Renderer& renderer) {
 	Shader::Shutdown(renderer);
@@ -351,7 +291,6 @@ void PhongShader::Shutdown(Renderer& renderer) {
 }
 
 bool PhongShader::InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer, HWND hWnd) {
-	//shaderProgram = gl.glCreateProgram();
 	shaderProgram = renderer.CreateShader();
 
 	if (!renderer.CompileVertexShader(vsFilename, vertexShader))
@@ -360,34 +299,14 @@ bool PhongShader::InitializeShader(const char* vsFilename, const char* fsFilenam
 	if (!renderer.CompileFragmentShader(fsFilename, fragmentShader))
 		return false;
 
-	/*if (!CompileShader(vsFilename, fsFilename, gl, hWnd))
-		return false;*/
-
-
-	/*gl.glAttachShader(shaderProgram, vertexShader);
-	gl.glAttachShader(shaderProgram, fragmentShader);
-	
-	gl.glBindAttribLocation(shaderProgram, 0, "inputPosition");
-	gl.glBindAttribLocation(shaderProgram, 1, "inputTexCoord");
-	gl.glBindAttribLocation(shaderProgram, 2, "inputNormal");
-
-	gl.glLinkProgram(shaderProgram);
-
-	GLint status;
-	gl.glGetProgramiv(shaderProgram, GL_LINK_STATUS, &status);
-	if (status != GL_TRUE) {
-		OutputLinkErrorMessage(gl, hWnd, shaderProgram);
-		return false;
-	}
-	return true;*/
 	String inputPosition("inputPosition");
 	String inputTexCoord("inputTexCoord");
 	String inputNormal("inputNormal");
 	return renderer.BindVertexAttrib(shaderProgram, vertexShader, fragmentShader, 3, inputPosition, inputTexCoord, inputNormal);
 }
 
-bool PhongShader::SetShaderParameters(Renderer& renderer, std::array<Vec4f, 4>& worldMatrix, std::array<Vec4f, 4>&viewMatrix,
-	std::array<Vec4f, 4>& projectionMatrix, std::array<Vec3f, 3>& lightDirection, std::array<Vec3f, 3>& diffuseAlbedo, std::array<Vec4f, 4>& ambientAlbedo, std::array<Vec3f, 3>& specular, int textureUnit) {
+bool PhongShader::SetShaderParameters(Renderer& renderer, Matrix<float, 4, 4>& worldMatrix, Matrix<float, 4, 4>& viewMatrix,
+	Matrix<float, 4, 4>& projectionMatrix, Vec3f& lightDirection, Vec3f& diffuseAlbedo, Vec4f& ambientAlbedo, Vec3f& specular, int textureUnit) {
 
 	if (!renderer.SetShaderParameter(shaderProgram, worldMatrix, std::move(String("worldMatrix")))) {
 		return false;

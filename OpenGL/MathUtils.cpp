@@ -1,4 +1,5 @@
 #include "MathUtils.h"
+#include "Matrix.h"
 #include <cmath>
 
 const float MathUtils::PI = 3.14159265358f;

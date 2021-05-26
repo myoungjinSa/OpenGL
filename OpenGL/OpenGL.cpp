@@ -1,12 +1,11 @@
 #include "OpenGL.h"
 
-OpenGL::OpenGL() {
+OpenGL::OpenGL() 
+	:screenHeight(0.0f),
+	 screenWidth(0.0f)
+{
 	deviceContext = NULL;
 	renderingContext = NULL;
-}
-
-OpenGL::OpenGL(const OpenGL& other) {
-
 }
 
 OpenGL::~OpenGL() {
@@ -54,7 +53,7 @@ bool OpenGL::InitializeExtensions(HWND hWnd) {
 	return true;
 }
 
-bool OpenGL::InitializeOpenGL(HWND hWnd, int screenWidth, int screenHeight, float screenDepth, float screenNear, bool vSync) {
+bool OpenGL::InitializeOpenGL(HWND hWnd, int _screenWidth, int _screenHeight, float screenDepth, float screenNear, bool vSync) {
 	int attributeListInt[19] = { 0, };
 	int pixelFormat[1] = { 0, };
 	unsigned int formatCount = 0;
@@ -69,6 +68,9 @@ bool OpenGL::InitializeOpenGL(HWND hWnd, int screenWidth, int screenHeight, floa
 	if (!deviceContext)
 		return false;
 
+
+	screenWidth = _screenWidth;
+	screenHeight = _screenHeight;
 	//Support for OpenGL rendering
 	attributeListInt[0] = WGL_SUPPORT_OPENGL_ARB;
 	attributeListInt[1] = TRUE;
@@ -150,17 +152,6 @@ bool OpenGL::InitializeOpenGL(HWND hWnd, int screenWidth, int screenHeight, floa
 	//Enable back face culling.
 	glEnable(GL_CULL_FACE);
 	glCullFace(GL_BACK);
-
-
-	//Initialize the world/model matrix to the identity matrix.
-	BuildIdentityMatrix(worldMatrix);
-
-	//Set the field of view and screen aspect ratio.
-	fieldOfView = 3.14159265358979323846f / 4.0f;
-	screenAspect = (float)screenWidth / (float)screenHeight;
-
-	//Build the perspective projection matrix.
-	BuildPerspectiveFovLHMatrix(projectionMatrix, fieldOfView, screenAspect, screenNear, screenDepth);
 
 	//Get the name of the video card.
 	venderString = (char*)glGetString(GL_VENDOR);
@@ -430,114 +421,10 @@ bool OpenGL::LoadExtensionList() {
 	return true;
 }
 
-void OpenGL::GetWorldMatrix(Matrix<float, 4, 4>& matrix) {
-	for (size_t iVal = 0; iVal < matrix.rows * matrix.cols; iVal++) {
-		matrix[iVal] = worldMatrix[iVal];
-	}
-}
-
-void OpenGL::GetProjectionMatrix(Matrix<float, 4, 4>& matrix) {
-	for (size_t iVal = 0; iVal < matrix.rows * matrix.cols; iVal++) {
-		matrix[iVal] = projectionMatrix[iVal];
-	}
-}
-
-void OpenGL::GetWorldMatrix(float* matrix) {
-	matrix[0] = worldMatrix[0];
-	matrix[1] = worldMatrix[1];
-	matrix[2] = worldMatrix[2];
-	matrix[3] = worldMatrix[3];
-
-	matrix[4] = worldMatrix[4];
-	matrix[5] = worldMatrix[5];
-	matrix[6] = worldMatrix[6];
-	matrix[7] = worldMatrix[7];
-
-	matrix[8] = worldMatrix[8];
-	matrix[9] = worldMatrix[9];
-	matrix[10] = worldMatrix[10];
-	matrix[11] = worldMatrix[11];
-
-	matrix[12] = worldMatrix[12];
-	matrix[13] = worldMatrix[13];
-	matrix[14] = worldMatrix[14];
-	matrix[15] = worldMatrix[15];
-}
-
-
-
-
-void OpenGL::GetProjectionMatrix(float* matrix)
-{
-	matrix[0] = projectionMatrix[0];
-	matrix[1] = projectionMatrix[1];
-	matrix[2] = projectionMatrix[2];
-	matrix[3] = projectionMatrix[3];
-
-	matrix[4] = projectionMatrix[4];
-	matrix[5] = projectionMatrix[5];
-	matrix[6] = projectionMatrix[6];
-	matrix[7] = projectionMatrix[7];
-
-	matrix[8] = projectionMatrix[8];
-	matrix[9] = projectionMatrix[9];
-	matrix[10] = projectionMatrix[10];
-	matrix[11] = projectionMatrix[11];
-
-	matrix[12] = projectionMatrix[12];
-	matrix[13] = projectionMatrix[13];
-	matrix[14] = projectionMatrix[14];
-	matrix[15] = projectionMatrix[15];
-}
 
 void OpenGL::GetVideoCardInfo(char* cardName)
 {
 	strcpy_s(cardName, 128, videoCardDescription);
-}
-
-void OpenGL::BuildIdentityMatrix(Matrix<float, 4, 4>& matrix)
-{
-	matrix[0] = 1.0f;
-	matrix[1] = 0.0f;
-	matrix[2] = 0.0f;
-	matrix[3] = 0.0f;
-
-	matrix[4] = 0.0f;
-	matrix[5] = 1.0f;
-	matrix[6] = 0.0f;
-	matrix[7] = 0.0f;
-
-	matrix[8] = 0.0f;
-	matrix[9] = 0.0f;
-	matrix[10] = 1.0f;
-	matrix[11] = 0.0f;
-
-	matrix[12] = 0.0f;
-	matrix[13] = 0.0f;
-	matrix[14] = 0.0f;
-	matrix[15] = 1.0f;
-}
-void OpenGL::BuildPerspectiveFovLHMatrix(Matrix<float, 4, 4>& matrix, float fieldOfView, float screenAspect, float screenNear, float screenDepth)
-{
-	matrix[0] = 1.0f / (screenAspect * tan(fieldOfView * 0.5f));
-	matrix[1] = 0.0f;
-	matrix[2] = 0.0f;
-	matrix[3] = 0.0f;
-
-	matrix[4] = 0.0f;
-	matrix[5] = 1.0f / tan(fieldOfView * 0.5f);
-	matrix[6] = 0.0f;
-	matrix[7] = 0.0f;
-
-	matrix[8] = 0.0f;
-	matrix[9] = 0.0f;
-	matrix[10] = screenDepth / (screenDepth - screenNear);
-	matrix[11] = 1.0f;
-
-	matrix[12] = 0.0f;
-	matrix[13] = 0.0f;
-	matrix[14] = (-screenNear * screenDepth) / (screenDepth - screenNear);
-	matrix[15] = 0.0f;
 }
 
 void OpenGL::MatrixRotationY(Matrix<float, 4, 4>& matrix, float angle)

@@ -20,7 +20,7 @@ struct VertexMaster {
 };
 typedef unsigned char byte;
 typedef void (VertexCopyCallback)(const VertexMaster& source, byte* destination);
-typedef void (VertexBufferBindCallback)(const OpenGL& gl, void* pVertexBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeofVertex);
+typedef void (VertexBufferBindCallback)(OpenGL& gl, void* pVertexBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeofVertex);
 struct Vertex {
 public:
 	Vertex();
@@ -28,8 +28,6 @@ public:
 	~Vertex();
 
 	Vec3f position;
-
-	static size_t attributeCount;
 };
 struct ColorVertex : public Vertex {
 public:
@@ -40,7 +38,7 @@ public:
 	~ColorVertex();
 
 	static void Copy(const VertexMaster& source, byte* pDestination);
-	static void BindVertexBuffer(const OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeofVertex);
+	static void BindVertexBuffer(OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeofVertex);
 	
 	RGBA color;
 };
@@ -52,7 +50,7 @@ public:
 	~TexturedVertex();
 
 	static void Copy(const VertexMaster& source, byte* pDestination);
-	static void BindVertexBuffer(const OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeOfVertex);
+	static void BindVertexBuffer(OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeOfVertex);
 
 	Vec2f uv0;
 	Vec3f normal;

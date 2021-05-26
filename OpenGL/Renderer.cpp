@@ -43,7 +43,7 @@ void Renderer::Shutdown(unsigned int shaderProgram, unsigned int vertexShader, u
 	TextureLoader::Release();
 }
 
-bool Renderer::AllocateVertexBuffer(unsigned int vertexArrayId, unsigned int vertexBufferId, void* vertexData, VertexBufferBindCallback* pBindFunction, unsigned int numVertices, unsigned int sizeofVertex) {
+bool Renderer::AllocateVertexBuffer(unsigned int& vertexArrayId, unsigned int& vertexBufferId, void* vertexData, VertexBufferBindCallback* pBindFunction, unsigned int numVertices, unsigned int sizeofVertex) {
 	pGL->glGenVertexArrays(1, &vertexArrayId);
 	pGL->glBindVertexArray(vertexArrayId);
 	pGL->glGenBuffers(1, &vertexBufferId);
@@ -53,7 +53,7 @@ bool Renderer::AllocateVertexBuffer(unsigned int vertexArrayId, unsigned int ver
 }
 
 
-bool Renderer::AllocateIndexBuffer(unsigned int indexBufferId, size_t indexCount, unsigned int* indexData) {
+bool Renderer::AllocateIndexBuffer(unsigned int& indexBufferId, size_t indexCount, unsigned int* indexData) {
 	pGL->glGenBuffers(1, &indexBufferId);
 
 	pGL->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferId);
@@ -62,7 +62,7 @@ bool Renderer::AllocateIndexBuffer(unsigned int indexBufferId, size_t indexCount
 }
 
 
-bool Renderer::AllocateTextures(unsigned int textureUnit, unsigned int textureId, unsigned int textureCount) {
+bool Renderer::AllocateTextures(unsigned int textureUnit, unsigned int& textureId, unsigned int textureCount) {
 	//Set the unique texture unit in which to store the data
 	pGL->glActiveTexture(GL_TEXTURE0 + textureUnit);
 
@@ -88,7 +88,7 @@ void Renderer::SetFiltering() {
 
 	pGL->glGenerateMipmap(GL_TEXTURE_2D);
 }
-void Renderer::BindTexture(unsigned int width, unsigned int height, unsigned int textureUnit, unsigned int textureId, unsigned char* pPixelData) {
+void Renderer::BindTexture(unsigned int width, unsigned int height, unsigned int textureId, unsigned char* pPixelData) {
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_2D, textureId);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, pPixelData);
@@ -101,15 +101,15 @@ void Renderer::DisableVertexAttribArray(size_t vertexAttribCount) {
 }
 
 
-void Renderer::ReleaseVertexArray(unsigned int vertexArrayId, size_t arrayCount) {
+void Renderer::ReleaseVertexArray(unsigned int& vertexArrayId, size_t arrayCount) {
 	pGL->glBindVertexArray(0);
 	pGL->glDeleteVertexArrays(arrayCount, &vertexArrayId);
 }
-void Renderer::ReleaseVertexBuffers(unsigned int vertexBufferId, size_t bufferCount) {
+void Renderer::ReleaseVertexBuffers(unsigned int& vertexBufferId, size_t bufferCount) {
 	pGL->glBindBuffer(GL_ARRAY_BUFFER, 0);
 	pGL->glDeleteBuffers(bufferCount, &vertexBufferId);
 }
-void Renderer::ReleaseIndexBuffers(unsigned int indexBufferId, size_t indexCount) {
+void Renderer::ReleaseIndexBuffers(unsigned int& indexBufferId, size_t indexCount) {
 	pGL->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 	pGL->glDeleteBuffers(indexCount, &indexBufferId);
 }
@@ -135,6 +135,13 @@ bool Renderer::BeginRender() {
 
 void Renderer::EndRender() {
 	pGL->EndScene();
+}
+
+float Renderer::GetRenderTargetWidth() const{
+	return pGL->GetScreenWidth();
+}
+float Renderer::GetRenderTargetHeight() const{
+	return pGL->GetScreenHeight();
 }
 
 unsigned int Renderer::CreateShader() {
@@ -189,22 +196,35 @@ bool Renderer::CompileFragmentShader(const char* fsFilename, unsigned int& fragm
 	return true;
 }
 
-bool Renderer::SetShaderParameter(unsigned int shaderProgram, std::array<Vec4f, 4>& matrix, String&& variableName) {
+bool Renderer::SetShaderParameter(unsigned int shaderProgram, Matrix<float, 4, 4>& matrix, String&& variableName) {
 	_ASSERT(pGL);
 	unsigned int location = pGL->glGetUniformLocation(shaderProgram, variableName.c_str());
 	if (location == -1)
 		return false;
 
-	pGL->glUniformMatrix4fv(location, 1, false, matrix.data()->ConvertToValue());
+	pGL->glUniformMatrix4fv(location, 1, false, (float*)&matrix.value);
+	return true;
 }
 
-bool Renderer::SetShaderParameter(unsigned int shaderProgram, std::array<Vec3f, 3>& matrix, String&& variableName) {
+
+bool Renderer::SetShaderParameter(unsigned int shaderProgram, Vec3f& vec3, String&& variableName) {
 	_ASSERT(pGL);
 	unsigned int location = pGL->glGetUniformLocation(shaderProgram, variableName.c_str());
 	if (location == -1)
 		return false;
 
-	pGL->glUniform3fv(location, 1, matrix.data()->ConvertToValue());
+	pGL->glUniform3fv(location, 1, (float*)vec3.ConvertToValue());
+	return true;
+}
+
+bool Renderer::SetShaderParameter(unsigned int shaderProgram, Vec4f& vec4, String&& variableName) {
+	_ASSERT(pGL);
+	unsigned int location = pGL->glGetUniformLocation(shaderProgram, variableName.c_str());
+	if (location == -1)
+		return false;
+
+	pGL->glUniform4fv(location, 1, (float*)vec4.ConvertToValue());
+	return true;
 }
 
 bool Renderer::SetShaderParameter(unsigned int shaderProgram, int integer, String&& variableName) {
@@ -214,25 +234,36 @@ bool Renderer::SetShaderParameter(unsigned int shaderProgram, int integer, Strin
 		return false;
 
 	pGL->glUniform1i(location, integer);
+	return true;
 }
-bool Renderer::SetShaderParameter(unsigned int shaderProgram, std::array<Vec4f, 4>& matrix,const String& variableName) {
+bool Renderer::SetShaderParameter(unsigned int shaderProgram, Matrix<float, 4, 4>& matrix,const String& variableName) {
 	_ASSERT(pGL);
 	unsigned int location = pGL->glGetUniformLocation(shaderProgram, variableName.c_str());
 	if (location == -1)
 		return false;
 
-	pGL->glUniformMatrix4fv(location, 1, false, matrix.data()->ConvertToValue());
+	pGL->glUniformMatrix4fv(location, 1, false, (float*)&matrix.value);
+	return true;
 }
-
-bool Renderer::SetShaderParameter(unsigned int shaderProgram, std::array<Vec3f, 3>& matrix, const String& variableName) {
+bool Renderer::SetShaderParameter(unsigned int shaderProgram, Vec4f& vec4, const String& variableName) {
 	_ASSERT(pGL);
 	unsigned int location = pGL->glGetUniformLocation(shaderProgram, variableName.c_str());
 	if (location == -1)
 		return false;
 
-	pGL->glUniform3fv(location, 1, matrix.data()->ConvertToValue());
+	pGL->glUniform4fv(location, 1, (float*)vec4.ConvertToValue());
+	return true;
 }
 
+bool Renderer::SetShaderParameter(unsigned int shaderProgram, Vec3f& vec3, const String& variableName) {
+	_ASSERT(pGL);
+	unsigned int location = pGL->glGetUniformLocation(shaderProgram, variableName.c_str());
+	if (location == -1)
+		return false;
+
+	pGL->glUniform3fv(location, 1, (float*)vec3.ConvertToValue());
+	return true;
+}
 bool Renderer::SetShaderParameter(unsigned int shaderProgram, int integer, const String& variableName) {
 	_ASSERT(pGL);
 	unsigned int location = pGL->glGetUniformLocation(shaderProgram, variableName.c_str());
@@ -240,6 +271,7 @@ bool Renderer::SetShaderParameter(unsigned int shaderProgram, int integer, const
 		return false;
 
 	pGL->glUniform1i(location, integer);
+	return true;
 }
 bool Renderer::BindVertexAttrib(unsigned int shaderProgram, unsigned int vertexShader, unsigned int fragmentShader, int vertexArgs, ...) {
 	

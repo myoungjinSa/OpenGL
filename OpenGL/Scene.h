@@ -3,6 +3,7 @@
 #include "Light.h"
 #include "Matrix.h"
 
+class ColorShader;
 class PhongShader;
 class Object;
 class Camera;
@@ -14,14 +15,13 @@ public:
 	~Scene();
 
 	bool BuildObject(Renderer& gl, HWND hWnd);
-	void Prepare(Renderer& gl);
 	void Update(const float& elapsedTime);
 	bool Render(Renderer& renderer);
 	void Shutdown(Renderer& gl);
 
-	const Matrix<float, 4, 4>& GetWorldMatrix() const;
-	const Matrix<float, 4, 4>& GetViewMatrix() const;
-	const Matrix<float, 4, 4>& GetProjectionMatrix() const;
+	Matrix<float, 4, 4> GetWorldMatrix() const;
+	Matrix<float, 4, 4> GetViewMatrix() const;
+	Matrix<float, 4, 4> GetProjectionMatrix() const;
 private:
 	Camera* pCamera;
 	PhongShader* pShader;

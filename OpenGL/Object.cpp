@@ -3,8 +3,9 @@
 #include "Texture.h"
 #include "Object.h"
 
+
 Object::Object() 
-	:position(0.0f, 0.0f, 0.0f), rotation(0.0f, 0.0f, 0.0f)
+	:position(0.0f, 0.0f, 0.0f), rotation(0.0f, 0.0f, 0.0f), movingSpeed(0.0f)
 {
 
 }
@@ -29,11 +30,31 @@ void Object::SetRotation(float x, float y, float z) {
 Vec3f Object::GetRotation() const {
 	return rotation;
 }
+
+void Object::Move(const Vec3f& direction, float elapsedTime) {
+	position = direction * elapsedTime * movingSpeed;
+}
+
+Vec3f Object::GetLook() const {
+	Vec3f lookVector(worldMatrix.value[8], worldMatrix.value[9], worldMatrix.value[10]);
+	return Normalize(lookVector);
+}
+
+Vec3f Object::GetRight() const {
+	Vec3f rightVector(worldMatrix.value[4], worldMatrix.value[5], worldMatrix.value[6]);
+	return Normalize(rightVector);
+}
+
+Vec3f Object::GetUp() const {
+	Vec3f upVector(worldMatrix.value[0], worldMatrix.value[1], worldMatrix.value[2]);
+	return Normalize(upVector);
+}
+
 ///////////////////////////////////////////////////////////////
 Cube::Cube()
 	:Object(), pMesh{ nullptr }
 {
-
+	worldMatrix = Matrix<float, 4, 4>::Identity();
 }
 
 Cube::Cube(const Cube& other)
@@ -67,7 +88,7 @@ bool Cube::Initialize(Renderer& renderer) {
 
 	if (!pMesh)
 		return false;
-	//meshBuilder.CopyToMesh(*pGL, pMesh.get(), &ColorVertex::Copy, sizeof(ColorVertex));
+
 	meshBuilder.CopyToMesh(renderer, pMesh.get(), &TexturedVertex::Copy, sizeof(TexturedVertex));
 
 	texture = TextureLoader::GetTexture(renderer, "Capture.bmp");
