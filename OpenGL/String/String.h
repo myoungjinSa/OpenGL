@@ -191,7 +191,7 @@ public:
 	bool				Empty()const;
 	bool				Resize(size_t size);
 	bool				Reserve(size_t reserveSize);
-
+	const wchar_t*		c_str() const;
 	void				Clear();
 
 	wchar_t* begin() const {

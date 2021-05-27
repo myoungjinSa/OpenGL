@@ -29,6 +29,8 @@ public:
 	Vec3f GetRight() const;
 	Vec3f GetUp() const;
 protected:
+	virtual bool CheckIfNeedToKeyProcess() const;
+
 	Vec3f position;
 	Vec3f rotation;
 
@@ -50,8 +52,11 @@ public:
 
 	Cube& operator=(const Cube& other);
 	Cube& operator=(Cube&& other) noexcept;
+protected:
+	bool CheckIfNeedToKeyProcess() const override;
 
 private:
+
 	std::shared_ptr<Mesh> pMesh;
 	std::shared_ptr<Texture> texture;
 };

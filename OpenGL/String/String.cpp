@@ -595,6 +595,10 @@ bool WString::operator!=(const WString& other) {
 	return !Compare(other);
 }
 
+const wchar_t* WString::c_str() const {
+	return &wstring[0];
+}
+
 ///////////////////////////////////////////////////
 std::wostream& operator<<(std::wostream& os, const WString& str) {
 	for (wchar_t& ch : str)

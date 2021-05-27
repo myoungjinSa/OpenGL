@@ -2,6 +2,7 @@
 #include "Mesh.h"
 #include "Texture.h"
 #include "Object.h"
+#include "Input.h"
 
 
 Object::Object() 
@@ -33,6 +34,10 @@ Vec3f Object::GetRotation() const {
 
 void Object::Move(const Vec3f& direction, float elapsedTime) {
 	position = direction * elapsedTime * movingSpeed;
+}
+
+bool Object::CheckIfNeedToKeyProcess() const {
+	return true;
 }
 
 Vec3f Object::GetLook() const {
@@ -109,5 +114,9 @@ void Cube::Render(Renderer& renderer) {
 	pMesh->Render(renderer);
 }
 
+bool Cube::CheckIfNeedToKeyProcess() const {
+	//if(Input::IsKeyDown())
 
+	return false;
+}
 

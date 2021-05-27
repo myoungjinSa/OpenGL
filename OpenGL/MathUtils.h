@@ -2,6 +2,7 @@
 #define BIT(X) (1 << (X))
 class MathUtils
 {
+public:
 	static float Lerp(float fraction, float startValue, float endValue);
 	static float DegreesToRadians(float degree);
 	static float RadiansToDegrees(float radian);
@@ -13,6 +14,7 @@ class MathUtils
 	static float Clamp(float inputValue);
 	static float Clamp(float inputValue, float min, float max);
 	static int Clamp(int inputValue, int min, int max);
+
 
 	static const float PI;
 	static const float TWO_PI;

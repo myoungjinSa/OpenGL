@@ -46,35 +46,21 @@ bool Scene::BuildObject(Renderer& renderer, HWND hWnd) {
 	}
 
 	pCamera = new Camera();
+	if (!pCamera) {
+		assert(0);
+		return false;
+	}
+
 	pCamera->SetPosition(0.0f, 0.0f, -10.0f);
+	pCamera->SetWidth(renderer.GetRenderTargetWidth());
+	pCamera->SetHeight(renderer.GetRenderTargetHeight());
+
 	return true;
 }
 
 void Scene::Update(const float& elapsedTime) {
 	if (pCamera)
 		pCamera->Update(elapsedTime);
-}
-
-void BuildPerspectiveFovLHMatrix(Matrix<float, 4, 4>& matrix, float fieldOfView, float screenAspect, float screenNear, float screenDepth) {
-	matrix[0] = 1.0f / (screenAspect * tan(fieldOfView * 0.5f));
-	matrix[1] = 0.0f;
-	matrix[2] = 0.0f;
-	matrix[3] = 0.0f;
-
-	matrix[4] = 0.0f;
-	matrix[5] = 1.0f / tan(fieldOfView * 0.5f);
-	matrix[6] = 0.0f;
-	matrix[7] = 0.0f;
-
-	matrix[8] = 0.0f;
-	matrix[9] = 0.0f;
-	matrix[10] = screenDepth / (screenDepth - screenNear);
-	matrix[11] = 1.0f;
-
-	matrix[12] = 0.0f;
-	matrix[13] = 0.0f;
-	matrix[14] = (-screenNear * screenDepth) / (screenDepth - screenNear);
-	matrix[15] = 0.0f;
 }
 
 bool Scene::Render(Renderer& renderer) {
@@ -87,11 +73,7 @@ bool Scene::Render(Renderer& renderer) {
 	
 	worldMatrix = Matrix<float, 4, 4>::Identity();
 
-	float fieldOfView = 3.14159265358979323846f / 4.0f;
-	float screenWidth = renderer.GetRenderTargetWidth();
-	float screenHeight = renderer.GetRenderTargetHeight();
-	float screenAspect = (float)screenWidth / (float)screenHeight;
-	BuildPerspectiveFovLHMatrix(projectionMatrix, fieldOfView, screenAspect, SCREEN_NEAR, SCREEN_DEPTH);
+	pCamera->BuildPerspectiveFovLHMatrix(projectionMatrix, SCREEN_NEAR, SCREEN_DEPTH);
 
 	Matrix<float, 4, 4> viewMatrix = GetViewMatrix();
 	pShader->SetShader(renderer);

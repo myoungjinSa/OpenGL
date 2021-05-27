@@ -1,5 +1,7 @@
 #pragma once
 #include "Types.h"
+#include <map>
+#include "String/String.h"
 
 class Input
 {
@@ -20,6 +22,9 @@ public:
 	static float GetXAngle();
 	static float GetYAngle();
 private:
+	static bool LoadKeyCodes(String&& keyFile);
+
+	static std::map<const String, unsigned int> keyCodes;
 	static bool keys[256];
 	static bool dragging;
 	static Point2i mousePoint;

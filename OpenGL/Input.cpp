@@ -1,19 +1,20 @@
 #include "Input.h"
 #include "System.h"
+#include <fstream>
 
 float Input::xAngle = 0.0f;
 float Input::yAngle = 0.0f;
 bool Input::dragging = false;
 Point2i Input::mousePoint;
 bool Input::keys[256];
-
+std::map<const String, unsigned int> keyCodes;
 Input::Input()
 {
 
 }
 
 Input::~Input() {
-
+	keyCodes.clear();
 }
 
 void Input::Initialize() {
@@ -79,4 +80,15 @@ float Input::GetXAngle(){
 
 float Input::GetYAngle(){
 	return yAngle;
+}
+
+bool Input::LoadKeyCodes(String&& keyFileName) {
+	std::ifstream keyFile(keyFileName.c_str(), std::ios::in);
+	if (!keyFile.is_open()) {
+		assert(0);
+		return false;
+	}
+
+
+	return true;
 }

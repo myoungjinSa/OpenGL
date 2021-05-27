@@ -137,3 +137,27 @@ void Camera::GetViewMatrix(Matrix<float, 4, 4>& Matrix) const {
 		Matrix[iVal] = viewMatrix[iVal];
 	}
 }
+
+void Camera::BuildPerspectiveFovLHMatrix(Matrix<float, 4, 4>& matrix, float screenNear, float screenDepth) {
+	float fov = GetFov();
+	matrix[0] = 1.0f / (GetAspectRatio() * tan(fov * 0.5f));
+	matrix[1] = 0.0f;
+	matrix[2] = 0.0f;
+	matrix[3] = 0.0f;
+
+	matrix[4] = 0.0f;
+	matrix[5] = 1.0f / tan(fov * 0.5f);
+	matrix[6] = 0.0f;
+	matrix[7] = 0.0f;
+
+	matrix[8] = 0.0f;
+	matrix[9] = 0.0f;
+	matrix[10] = screenDepth / (screenDepth - screenNear);
+	matrix[11] = 1.0f;
+
+	matrix[12] = 0.0f;
+	matrix[13] = 0.0f;
+	matrix[14] = (-screenNear * screenDepth) / (screenDepth - screenNear);
+	matrix[15] = 0.0f;
+}
+
