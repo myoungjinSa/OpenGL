@@ -277,6 +277,16 @@ inline size_t String::Length()const {
 	return length;
 }
 
+inline bool String::operator<(const String& other) {
+	size_t iChar = 0;
+	while (iChar < length && iChar < other.string[iChar]) {
+		if (string[iChar] != other.string[iChar]) {
+			break;
+		}
+		iChar++;
+	}
+	return string[iChar] < other.string[iChar];
+}
 inline bool String::operator!=(const String& other) {
 	return !Compare(other);
 }
@@ -315,6 +325,24 @@ int StringToInt(String str) {
 
 	return	value * positive;
 }
+
+//int StringToInt(String str) {
+//
+//	size_t lastIndexWithNumber = 0;
+//	for (size_t iChar = 0; iChar < str.Length(); iChar++) {
+//		if (!isdigit(atoi(&str[iChar])))
+//			break;
+//
+//	}
+//	String s;
+//	s.Reserve(lastIndexWithNumber);
+//	for (size_t iIndex = 0; iIndex < lastIndexWithNumber; iIndex++) {
+//		s.Append(str[iIndex]);
+//	}
+//
+//	return atoi(s.c_str());
+//}
+
 
 String IntToString(int num) {
 	String s;
@@ -355,7 +383,26 @@ String IntToString(int num) {
 	return s;
 }
 
-
+std::vector<String> Split(const String& targetString, char token) {
+	std::vector<String> ret;
+	String::iterator iter = targetString.begin();
+	String::iterator tokenIter = targetString.begin();
+	while (iter != targetString.end()) {
+		if ((*iter) == token) {
+			auto dist = std::distance(tokenIter, iter);
+			
+			String s;
+			s.Reserve(dist);
+			for (String::iterator it = tokenIter; it != iter; ++it) {
+				s.Append(*it);
+			}
+			ret.emplace_back(s);
+			tokenIter = iter + 1;
+		}
+		iter++;
+	}
+	return ret;
+}
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //WString
 WString::WString() : wstring{ nullptr }, currentChar{ 0 }, length{ 0 }, capacity{ 0 } {

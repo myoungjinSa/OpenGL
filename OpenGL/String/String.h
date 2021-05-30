@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <vector>
 
 template<typename T>
 class StringIterator {
@@ -13,7 +14,22 @@ public:
 		++p;
 		return *this;
 	}
+
+	StringIterator& operator--() {
+		--p;
+		return *this;
+	}
+
+	StringIterator operator++(int) {
+		p++;
+		return StringIterator(p);
+	}
 	
+	StringIterator operator--(int) {
+		p--;
+		return StringIterator(p);
+	}
+
 	T& operator*() const {
 		return *p;
 	}
@@ -30,7 +46,6 @@ public:
 
 	StringIterator operator+(ptrdiff_t rhs) const { return p + rhs; }
 	StringIterator operator-(ptrdiff_t rhs) const { return p - rhs; }
-	StringIterator operator--() { --p; return *this; }
 };
 
 //String도 iterator_traits 클래스에 " 나도 반복자이고 나는 랜덤반복자입니다. " 라고 자신의 정보를 등록
@@ -65,6 +80,7 @@ class String
 {
 	friend std::ostream& operator<<(std::ostream& os, const String& str);
 	friend int StringToInt(String str);
+	friend std::vector<String> Split(const String& targetString, char token);
 public:
 	String();
 	String(char ch);
@@ -112,6 +128,7 @@ public:
 	void				Clear();  
 	const char*			c_str() const;
 
+	bool				operator<(const String& other);
 	char&				operator[](size_t index);
 	bool				operator!=(const String& other);
 	bool				operator==(const String& other);
@@ -143,6 +160,8 @@ String Format(const String& format, Args ...args) {
 }
 String IntToString(int num);
 
+std::vector<String> Split(const String& targetString, char token);
+//int	StringToInt(String str);
 
 //////////////////////////////////////////////////////////////////////////////////
 

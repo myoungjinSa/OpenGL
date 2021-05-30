@@ -21,10 +21,12 @@ public:
 
 	static float GetXAngle();
 	static float GetYAngle();
+
+
 private:
 	static bool LoadKeyCodes(String&& keyFile);
 
-	static std::map<const String, unsigned int> keyCodes;
+	static std::map<unsigned int, const String> keyCodes;
 	static bool keys[256];
 	static bool dragging;
 	static Point2i mousePoint;

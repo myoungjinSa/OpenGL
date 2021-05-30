@@ -1,13 +1,15 @@
 #include "Input.h"
 #include "System.h"
 #include <fstream>
+#include <sstream>
+
 
 float Input::xAngle = 0.0f;
 float Input::yAngle = 0.0f;
 bool Input::dragging = false;
 Point2i Input::mousePoint;
 bool Input::keys[256];
-std::map<const String, unsigned int> keyCodes;
+std::map<unsigned int, const String> Input::keyCodes;
 Input::Input()
 {
 
@@ -19,6 +21,7 @@ Input::~Input() {
 
 void Input::Initialize() {
 	
+	LoadKeyCodes("keyCodes.txt");
 	// Initialize all the keys to being released and not pressed.
 	for (int iKey = 0; iKey < 256; iKey++) {
 		keys[iKey] = false;
@@ -89,6 +92,18 @@ bool Input::LoadKeyCodes(String&& keyFileName) {
 		return false;
 	}
 
+	std::map<unsigned int, const String>::iterator iter = keyCodes.begin();
+	while (!keyFile.eof()) {
+		char _keyName[128];
+		keyFile.getline(_keyName, 128);
+		
+		String keyName = _keyName;
+		std::vector<String> t = Split(keyName, ' ');
 
+	
+
+		//keyCodes.insert(iter, std::make_pair((unsigned int)StringToInt(keyCode), keyName));
+	}
+	
 	return true;
 }
