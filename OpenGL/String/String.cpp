@@ -387,22 +387,29 @@ std::vector<String> Split(const String& targetString, char token) {
 	std::vector<String> ret;
 	String::iterator iter = targetString.begin();
 	String::iterator tokenIter = targetString.begin();
+	String keyComponents;
 	while (iter != targetString.end()) {
 		if ((*iter) == token) {
 			auto dist = std::distance(tokenIter, iter);
-			
-			String s;
-			s.Reserve(dist);
+			keyComponents.Reserve(dist);
 			for (String::iterator it = tokenIter; it != iter; ++it) {
-				s.Append(*it);
+				keyComponents.Append(*it);
 			}
-			ret.emplace_back(s);
+			ret.emplace_back(keyComponents);
 			tokenIter = iter + 1;
-		}
+		}	
 		iter++;
 	}
+	keyComponents.Clear();
+	for (String::iterator it = tokenIter; it != iter; ++it) {
+		keyComponents.Append(*it);
+	}
+	ret.emplace_back(keyComponents);
+	
 	return ret;
 }
+
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //WString
 WString::WString() : wstring{ nullptr }, currentChar{ 0 }, length{ 0 }, capacity{ 0 } {

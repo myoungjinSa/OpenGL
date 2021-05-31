@@ -98,11 +98,8 @@ bool Input::LoadKeyCodes(String&& keyFileName) {
 		keyFile.getline(_keyName, 128);
 		
 		String keyName = _keyName;
-		std::vector<String> t = Split(keyName, ' ');
-
-	
-
-		//keyCodes.insert(iter, std::make_pair((unsigned int)StringToInt(keyCode), keyName));
+		std::vector<String> keyComponents = Split(keyName, ',');
+		keyCodes.insert(iter, std::make_pair((unsigned int)StringToInt(keyComponents.at(1)), keyComponents.at(0)));
 	}
 	
 	return true;
