@@ -161,6 +161,7 @@ String Format(const String& format, Args ...args) {
 String IntToString(int num);
 
 std::vector<String> Split(const String& targetString, char token);
+
 //int	StringToInt(String str);
 
 //////////////////////////////////////////////////////////////////////////////////

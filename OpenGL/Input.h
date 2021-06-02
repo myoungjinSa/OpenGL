@@ -10,10 +10,9 @@ public:
 	Input(const Input& other) = delete;
 	~Input();
 
-	static void Initialize();
+	static bool Initialize();
 	static void KeyDown(unsigned int key);
 	static void KeyUp(unsigned int key);
-
 	static bool IsKeyDown(unsigned int key);
 	static void ProcessLButtonUp(int x, int y);
 	static void ProcessLButtonDown(int x, int y);
@@ -22,12 +21,11 @@ public:
 	static float GetXAngle();
 	static float GetYAngle();
 
-
+	
 private:
 	static bool LoadKeyCodes(String&& keyFile);
-
-	static std::map<unsigned int, const String> keyCodes;
-	static bool keys[256];
+	
+	static std::map<unsigned int, std::pair<const String, bool>> keyCodes;
 	static bool dragging;
 	static Point2i mousePoint;
 	static float yAngle;

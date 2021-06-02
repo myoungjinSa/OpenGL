@@ -28,32 +28,21 @@ void Camera::Update(float deltaTime) {
 	float yaw, pitch, roll;
 	Matrix<float, 3, 3> rotationMatrix;
 	
-	//Setup the vector that points upwards.
 	up.SetXYZ(0.0f, 1.0f, 0.0f);
-	
-	//Setup the position of the camera in the world
-	pos = GetPosition();
-	
-	//Set the yaw (Y axis), pitch(X axis) and roll(Z axis) roations in radians
 	lookAt.SetXYZ(0.0f, 0.0f, 1.0f);
+	pos = GetPosition();
 
 	const float rotationSpeed = 0.0174532925f;
 	pitch = rotation.x + Input::GetXAngle() * rotationSpeed;
 	yaw = rotation.y + Input::GetYAngle() * rotationSpeed;
 	roll = rotation.z * rotationSpeed;
-	
-	//Create the rotation matrix from the yawm pitch, and roll values
 	MatrixRotationYawPitchRoll(rotationMatrix, yaw, pitch, roll);
 
-	// Transform the lookAt and up vector by the rotation matrix 
-	//so the view is correctly rotated at the origin.
 	TransformCoord(lookAt, rotationMatrix);
 	TransformCoord(up, rotationMatrix);
 
-	//Translate the rotated camera position to the location of the viewer.
 	lookAt.SetXYZ(pos.x + lookAt.x, pos.y + lookAt.y, pos.z + lookAt.z);
 
-	//Finally create the view matrix from the three updated vectors.
 	BuildViewMatrix(pos, lookAt, up);
 }
 

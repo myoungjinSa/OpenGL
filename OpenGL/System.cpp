@@ -34,7 +34,10 @@ bool System::Initialize() {
 		return false;
 	}
 
-	Input::Initialize();
+	if (!Input::Initialize()) {
+		MessageBox(hWnd, L"Failed load KeyCodes.txt", L"Error", MB_OK);
+		return false;
+	}
 
 	timer.Start();
 

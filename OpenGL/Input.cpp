@@ -8,8 +8,7 @@ float Input::xAngle = 0.0f;
 float Input::yAngle = 0.0f;
 bool Input::dragging = false;
 Point2i Input::mousePoint;
-bool Input::keys[256];
-std::map<unsigned int, const String> Input::keyCodes;
+std::map<unsigned int, std::pair<const String, bool>> Input::keyCodes;
 Input::Input()
 {
 
@@ -19,34 +18,27 @@ Input::~Input() {
 	keyCodes.clear();
 }
 
-void Input::Initialize() {
-	
-	LoadKeyCodes("keyCodes.txt");
-	// Initialize all the keys to being released and not pressed.
-	for (int iKey = 0; iKey < 256; iKey++) {
-		keys[iKey] = false;
-	}
+bool Input::Initialize() {
+	return LoadKeyCodes("keyCodes.txt");
 }
 
 
 void Input::KeyDown(unsigned int input)
 {
-	// If a key is pressed then save that state in the key array.
-	keys[input] = true;
+	keyCodes[input].second = true;
 }
 
 
 void Input::KeyUp(unsigned int input)
 {
-	// If a key is released then clear that state in the key array.
-	keys[input] = false;
+	keyCodes[input].second = false;
 }
 
 
-bool Input::IsKeyDown(unsigned int key)
+bool Input::IsKeyDown(unsigned int input)
 {
 	// Return what state the key is in (pressed/not pressed).
-	return keys[key];
+	return keyCodes[input].second;
 }
 
 
@@ -92,15 +84,15 @@ bool Input::LoadKeyCodes(String&& keyFileName) {
 		return false;
 	}
 
-	std::map<unsigned int, const String>::iterator iter = keyCodes.begin();
+	std::map<unsigned int, std::pair<const String, bool>>::iterator iter = keyCodes.begin();
 	while (!keyFile.eof()) {
 		char _keyName[128];
 		keyFile.getline(_keyName, 128);
 		
 		String keyName = _keyName;
 		std::vector<String> keyComponents = Split(keyName, ',');
-		keyCodes.insert(iter, std::make_pair((unsigned int)StringToInt(keyComponents.at(1)), keyComponents.at(0)));
+		keyCodes.insert(iter, std::make_pair((unsigned int)StringToInt(keyComponents.at(1)), std::make_pair(keyComponents.at(0), false)));
 	}
-	
+
 	return true;
 }
