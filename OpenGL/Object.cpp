@@ -6,7 +6,7 @@
 
 
 Object::Object() 
-	:position(0.0f, 0.0f, 0.0f), rotation(0.0f, 0.0f, 0.0f), movingSpeed(0.0f)
+	:position(0.0f, 0.0f, 0.0f), rotation(0.0f, 0.0f, 0.0f), movingSpeed(1.0f)
 {
 
 }

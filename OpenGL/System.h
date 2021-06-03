@@ -2,6 +2,7 @@
 #include <Windows.h>
 #include "Timer.h"
 #include "GL/glut.h"
+#include "KeyCode.h"
 
 #pragma comment(lib,"freeglut.lib")
 

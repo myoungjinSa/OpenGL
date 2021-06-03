@@ -11,10 +11,14 @@ public:
 	void Stop();
 	void Reset();
 
-	long long GetEalapsedTime();
+
+	float GetEalapsedTime();
+	long long GetTotalTime() const;
 public:
 	std::chrono::steady_clock::time_point startTime;
 	std::chrono::steady_clock::time_point endTime;
+
+	std::chrono::steady_clock::time_point previousTimePoint;
 
 	bool bStopped;
 	long long elapsedTime;

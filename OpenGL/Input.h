@@ -2,6 +2,7 @@
 #include "Types.h"
 #include <map>
 #include "String/String.h"
+#include "KeyCode.h"
 
 class Input
 {

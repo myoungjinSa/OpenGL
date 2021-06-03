@@ -32,6 +32,11 @@ void Camera::Update(float deltaTime) {
 	lookAt.SetXYZ(0.0f, 0.0f, 1.0f);
 	pos = GetPosition();
 
+	if (Input::IsKeyDown(KEY_RIGHT)) {
+		pos.x += movingSpeed * deltaTime;
+	}
+
+
 	const float rotationSpeed = 0.0174532925f;
 	pitch = rotation.x + Input::GetXAngle() * rotationSpeed;
 	yaw = rotation.y + Input::GetYAngle() * rotationSpeed;

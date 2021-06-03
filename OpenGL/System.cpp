@@ -126,7 +126,7 @@ void System::Run()
 		}
 		else
 		{
-			timer.Tick(0);
+			timer.Tick(60.0f);
 			
 			// Otherwise do the frame processing.
 			result = Frame(timer.GetEalapsedTime());
@@ -144,7 +144,7 @@ void System::Run()
 bool System::Frame(float elapsedTime)
 {
 	// Check if the user pressed escape and wants to exit the application.
-	if (Input::IsKeyDown(VK_ESCAPE))
+	if (Input::IsKeyDown(KEY_ESCAPE))
 	{
 		return false;
 	}
