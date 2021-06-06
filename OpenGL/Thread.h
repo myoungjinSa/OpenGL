@@ -44,15 +44,16 @@ namespace Concurrent {
 
 		void Clear() {
 			std::unique_lock<std::mutex> lock(m);
-
+			
 			while (!q.empty()) {
-				Try_pop();
+				T value;
+				Try_pop(value);
 			}
 		}
 
 		bool Try_pop(T& value) {
 			std::unique_lock<std::mutex> lock(m);
-			if (!c.wait_for(lock, std::chrono::microseconds{1}, [this] {return !q.empty()})) {
+			if (!c.wait_for(lock, std::chrono::microseconds{ 1 }, [this] { return !q.empty(); })) {
 				return false;
 			}
 			value = std::move(q.front());

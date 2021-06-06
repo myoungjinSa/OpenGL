@@ -226,6 +226,9 @@ void String::Clear() {
 		string[iChar] = ' ';
 	}
 
+	delete[] string;
+	string = nullptr;
+	capacity = 0;
 	length = 0;
 	currentChar = 0;
 }
@@ -540,24 +543,32 @@ void WString::Clear() {
 		wstring[iChar] = ' ';
 	}
 
+	delete[] wstring;
+	wstring = nullptr;
 	length = 0;
 	currentChar = 0;
+	capacity = 0;
 }
 bool WString::Resize(size_t size) {
 	wchar_t* tempString = nullptr;
-	tempString = wstring;
-
+	bool doCopy = false;
+	if (wstring != nullptr) {
+		tempString = wstring;
+		doCopy = true;
+	}
 	length = size;
 	capacity = length + 1;
 	wstring = (wchar_t*)realloc(wstring, sizeof(wchar_t) * capacity);
 	if (wstring == NULL) {
 		return false;
 	}
-	memset(wstring, 0, length);
+	
+	memset(wstring, 0, sizeof(wchar_t) * capacity);
 
-	memcpy_s(wstring, sizeof(wchar_t) * length, tempString, sizeof(wchar_t) * wcslen(tempString));
+	if (doCopy) {
+		memcpy_s(wstring, sizeof(wchar_t) * capacity, tempString, sizeof(wchar_t) * capacity);
+	}
 	wstring[length] = '\0';
-
 	return true;
 }
 

@@ -1,28 +1,31 @@
 #pragma once
 #include <iostream>
 #include <functional>
-#include <consoleapi2.h>
 #include "String/String.h"
 #include "Thread.h"
 
-//template<typename Func>
-//class Logger {
-//public:
-//	Logger(const Func& _func, const WString& _content) 
-//		:func{_func}, content{_content}
-//	{
-//
-//	}
-//
-//	void operator()() const {
-//		std::cout << content << std::endl;
-//		func();
-//	}
-//private:
-//	Func func;
-//	WString content;
-//};
-//
+#if defined(_WIN64) || defined(_WIN32)
+#include <Windows.h>
+#endif
+
+#define LogDebug(fmt)\
+GeneralLogger::Logger::GetInstance().Debug(fmt);
+
+#define LogDebug(fmt, ...)\
+GeneralLogger::Logger::GetInstance().Debug(fmt, ##__VA_ARGS__);
+
+#define LogInfo(fmt, ...)\
+GeneralLogger::Logger::GetInstance().Info(fmt, ##__VA_ARGS__);
+
+#define LogInfo(color, fmt, ...)\
+GeneralLogger::Logger::GetInstance().Info(color, fmt, ##__VA_ARGS__);
+
+#define LogWarning(fmt, ...)\
+GeneralLogger::Logger::GetInstance().Warning(fmt, ##__VA_ARGS__);
+
+#define LogError(fmt, ...)\
+GeneralLogger::Logger::GetInstance().Error(fmt, ##__VA_ARGS__);
+
 namespace GeneralLogger {
 	enum {
 		MAX_LOG_PREFIX_SIZE = 256,
@@ -98,6 +101,8 @@ namespace GeneralLogger {
 			: Level(level)
 			, Category(category)
 			, Color(color)
+			, PrefixBuffer()
+			, Buffer()
 		{}
 		~LogData()
 		{
@@ -120,6 +125,20 @@ namespace GeneralLogger {
 		virtual void WriteLog(const std::shared_ptr<LogData>& logData) {}
 	};
 	
+	class ConsoleLogger : public ILogger {
+	public:
+		ConsoleLogger();
+		ConsoleLogger(bool showLevel, bool showLocation);
+		virtual ~ConsoleLogger();
+
+	public:
+		bool showLevel;
+		LogType showLogLevels;
+		bool showLocation;
+	public:
+		void WriteLog(const std::shared_ptr<LogData>& logData) override;
+	};
+
 	class Logger final {
 	public:
 		enum {

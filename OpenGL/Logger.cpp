@@ -1,4 +1,5 @@
 #include "Logger.h"
+#include <iomanip>
 #include <stdarg.h>
 
 namespace GeneralLogger {
@@ -97,7 +98,7 @@ void GeneralLogger::Logger::Start() {
 }
 
 void GeneralLogger::Logger::End() {
-	if (this->active)
+	if (this->active == false)
 		return;
 
 	active = false;
@@ -168,5 +169,45 @@ void GeneralLogger::Logger::Write(const std::shared_ptr<LogData>& logData, const
 	vswprintf_s(DeclspecLogBuffer, format, args);
 
 	logData->PrefixBuffer.Assign(DeclspecPrefixBuffer);
+	logData->PrefixBuffer.Append(L"\t");
 	logData->Buffer.Assign(DeclspecLogBuffer);
+	logData->Buffer.Append(L"\n");
+
+#if defined(_WIN64) || defined(_WIN32)
+	OutputDebugString((LPCTSTR)logData->PrefixBuffer.c_str());
+	OutputDebugString((LPCTSTR)logData->Buffer.c_str());
+#endif
 }
+
+GeneralLogger::ConsoleLogger::ConsoleLogger() 
+	: showLevel(false)
+	, showLocation(false)
+	, showLogLevels(LogType())
+{
+	std::wcout.imbue(std::locale("korean"));
+}
+
+GeneralLogger::ConsoleLogger::ConsoleLogger(bool showLevel, bool showLocation) {
+	std::wcout.imbue(std::locale("korean"));
+
+	this->showLevel = showLevel;
+	this->showLocation = showLocation;
+	showLogLevels = LogType();
+}
+
+GeneralLogger::ConsoleLogger::~ConsoleLogger() {
+
+}
+
+void GeneralLogger::ConsoleLogger::WriteLog(const std::shared_ptr<LogData>& logData) {
+	std::wcout << "[" << logData->PrefixBuffer.c_str() << " ]";
+	std::wcout.setf(std::ios::left);
+	std::wcout << "[" << std::setw(7) << logData->Level << " ]";
+	std::wcout << logData->Buffer.c_str();
+	if (std::wcout.fail())
+	{
+		std::wcout.clear();
+	}
+	std::wcout << std::endl;
+}
+

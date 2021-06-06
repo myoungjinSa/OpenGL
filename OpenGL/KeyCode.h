@@ -1,5 +1,5 @@
 #pragma once
-#ifdef _WIN64 || _WIN32
+#if defined(_WIN64) || defined(_WIN32)
 #include <Windows.h>
 #define KEY_LEFT	VK_LEFT
 #define KEY_RIGHT	VK_RIGHT

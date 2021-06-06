@@ -1,5 +1,6 @@
 #include "Camera.h"
 #include "Input.h"
+#include "Logger.h"
 
 Camera::Camera()
 	:Object()
@@ -58,6 +59,8 @@ void Camera::Update(float deltaTime) {
 	std::clog << "s" << std::endl;
 	BuildViewMatrix(pos, lookAt, up);
 	SetPosition(pos);
+
+	LogInfo(L"Camera Pos : x = %3f, y = %3f, z = %3f", pos.x, pos.y, pos.z);
 }
 
 void Camera::MatrixRotationYawPitchRoll(Matrix<float, 3, 3>& matrix, float yaw, float pitch, float roll) {
