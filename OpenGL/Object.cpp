@@ -10,6 +10,10 @@ Object::Object()
 {
 
 }
+
+void Object::SetPosition(const Vec3f& _position) {
+	position = _position;
+}
 void Object::SetPosition(float x, float y, float z) {
 	position = Vec3f(x, y, z);
 }

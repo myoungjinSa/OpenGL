@@ -3,6 +3,9 @@
 #include <string.h>
 #include <stdarg.h>
 
+#define Min(a, b) (a > b) ? a : b
+#define Max(a, b) (a < b) ? a : b
+
 //using namespace MJCore;
 
 String::String() :string{ nullptr }, length{ 0 }, currentChar{ 0 }, capacity{ 0 } {}
@@ -561,6 +564,7 @@ bool WString::Resize(size_t size) {
 bool WString::Reserve(size_t reserveSize) {
 	wchar_t* tempString = nullptr;
 	capacity = reserveSize;
+	length = Max(capacity - 1, 0);
 	wstring = (wchar_t*)realloc(wstring, sizeof(wchar_t) * capacity);
 
 	if (!wstring) {
@@ -571,7 +575,22 @@ bool WString::Reserve(size_t reserveSize) {
 	memset(&wstring[length], 0, capacity - length);
 	return true;
 }
+bool WString::Assign(const wchar_t* _wstr) {
+	WString wstr(_wstr);
+	return Assign(wstr);
+}
 
+bool WString::Assign(const WString& wstr) {
+	if (!Resize(wstr.length)) {
+		return false;
+	}
+	for (size_t iChar = 0; iChar < length; iChar++) {
+		wstring[iChar] = wstr.wstring[iChar];
+	}
+	wstring[length] = '\0';
+
+	return true;
+}
 bool WString::Append(const WString& wstr) {
 	size_t tempLength = length;
 	length = length + wstr.length;

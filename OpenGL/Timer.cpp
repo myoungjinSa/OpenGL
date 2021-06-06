@@ -35,7 +35,7 @@ long long Timer::GetTotalTime() const {
 	return std::chrono::duration_cast<std::chrono::milliseconds>(endTime - startTime).count();
 }
 float Timer::GetEalapsedTime(){
-	return std::chrono::duration_cast<std::chrono::milliseconds>(endTime - previousTimePoint).count() / 1000;
+	return (float)std::chrono::duration_cast<std::chrono::milliseconds>(endTime - previousTimePoint).count() / 1000.0f;
 }
 
 void Timer::Tick(float fLockFps) {

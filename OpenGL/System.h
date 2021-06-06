@@ -1,10 +1,10 @@
 #pragma once
 #include <Windows.h>
 #include "Timer.h"
-#include "GL/glut.h"
+//#include "GL/glut.h"
 #include "KeyCode.h"
 
-#pragma comment(lib,"freeglut.lib")
+//#pragma comment(lib,"freeglut.lib")
 
 #define GET_X_LPARAM(lp)	((int)(short)LOWORD(lp))
 #define GET_Y_LPARAM(lp)	((int)(short)HIWORD(lp))

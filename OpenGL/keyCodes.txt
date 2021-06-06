@@ -1,12 +1,12 @@
 Alt,18
 F5,116
-Arrow Down,28
+Arrow Down,40
 F6,117
-Arrow Left,25
+Arrow Left,37
 F7,118
-Arrow Right,27
+Arrow Right,39
 F8,119
-Arrow Up,26
+Arrow Up,38
 F9,120
 Backspace,8
 F10,121

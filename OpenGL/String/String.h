@@ -120,6 +120,7 @@ public:
 	bool				Compare(const String& other) const;
 	String				SubString(size_t stringPos, size_t count);
 	void				Replace(size_t index, size_t count, const String& str);
+	bool				Assign(const char* str);
 	bool				Append(const String& str);
 	bool				Append(const char* str);
 	String				Format(String fmt, ...);
@@ -203,6 +204,8 @@ public:
 	bool				operator!=(const WString& other);
 	bool				operator==(const WString& other);
 
+	bool				Assign(const wchar_t* wstr);
+	bool				Assign(const WString& wstr);
 	bool				Append(const WString& str);
 	bool				Append(const wchar_t* str);
 	WString				SubString(size_t stringPos, size_t count);

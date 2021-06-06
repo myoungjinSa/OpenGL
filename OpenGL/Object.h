@@ -16,6 +16,7 @@ public:
 	virtual void Render(Renderer& renderer) {}
 	virtual void Update(float deltaTime){}
 
+	void SetPosition(const Vec3f& position);
 	void SetPosition(float x, float y, float z);
 	Vec3f GetPosition() const;
 	void GetPosition(std::array<float, 4>& position);
