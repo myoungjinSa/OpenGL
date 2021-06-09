@@ -3,7 +3,7 @@
 #include "Texture.h"
 #include "Object.h"
 #include "Input.h"
-
+#include "Material.h"
 
 Object::Object() 
 	:position(0.0f, 0.0f, 0.0f), rotation(0.0f, 0.0f, 0.0f), movingSpeed(1.0f)
@@ -38,10 +38,6 @@ Vec3f Object::GetRotation() const {
 
 void Object::Move(const Vec3f& direction, float elapsedTime) {
 	position = direction * elapsedTime * movingSpeed;
-}
-
-bool Object::CheckIfNeedToKeyProcess() const {
-	return true;
 }
 
 Vec3f Object::GetLook() const {
@@ -101,6 +97,12 @@ bool Cube::Initialize(Renderer& renderer) {
 	meshBuilder.CopyToMesh(renderer, pMesh.get(), &TexturedVertex::Copy, sizeof(TexturedVertex));
 
 	texture = TextureLoader::GetTexture(renderer, "Capture.bmp");
+
+	Vec3f diffuseColor(1.0f, 0.9f, 0.9f);
+	Vec4f ambientColor(0.15f, 0.15f, 0.15f, 1.0f);
+	Vec3f specularColor(1.0f, 1.0f, 0.5f);
+	material = std::make_shared<Material>(diffuseColor, ambientColor, specularColor, texture->GetTextureID());
+
 	return true;
 }
 
@@ -116,11 +118,5 @@ void Cube::Update(float deltaTime) {
 void Cube::Render(Renderer& renderer) {
 	Object::Render(renderer);
 	pMesh->Render(renderer);
-}
-
-bool Cube::CheckIfNeedToKeyProcess() const {
-	//if(Input::IsKeyDown())
-
-	return false;
 }
 

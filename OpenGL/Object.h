@@ -2,6 +2,7 @@
 #include <memory>
 #include "Matrix.h"
 
+class Material;
 class OpenGL;
 class Mesh;
 class Texture;
@@ -29,9 +30,10 @@ public:
 	Vec3f GetLook() const;
 	Vec3f GetRight() const;
 	Vec3f GetUp() const;
-protected:
-	virtual bool CheckIfNeedToKeyProcess() const;
 
+public:
+	std::shared_ptr<Material> material;
+protected:
 	Vec3f position;
 	Vec3f rotation;
 
@@ -53,9 +55,6 @@ public:
 
 	Cube& operator=(const Cube& other);
 	Cube& operator=(Cube&& other) noexcept;
-protected:
-	bool CheckIfNeedToKeyProcess() const override;
-
 private:
 
 	std::shared_ptr<Mesh> pMesh;

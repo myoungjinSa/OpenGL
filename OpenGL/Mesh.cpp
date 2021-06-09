@@ -74,7 +74,6 @@ void TexturedVertex::Copy(const VertexMaster& source, byte* pDestination) {
 	pColorVertex->position = source.position;
 	pColorVertex->uv0 = source.uv0;
 	pColorVertex->normal = source.normal;
-
 }
 
 void TexturedVertex::BindVertexBuffer(OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeofVertex) {

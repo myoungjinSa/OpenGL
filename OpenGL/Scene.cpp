@@ -25,13 +25,6 @@ Scene::~Scene() {
 }
 
 bool Scene::BuildObject(Renderer& renderer, HWND hWnd) {	
-	Vec4f diffuseColor(1.0f, 0.9f, 0.9f, 1.0f);
-	Vec4f ambientColor(0.15f, 0.15f, 0.15f, 1.0f);
-	Vec4f specularColor(1.0f, 1.0f, 0.5f, 1.0f);
-
-	phongLight.SetDiffuseColor(diffuseColor);
-	phongLight.SetAmbientLight(ambientColor);
-	phongLight.SetSpecularLight(specularColor);
 	phongLight.SetPosition(0.0f, 0.0f, -20.0f);
 	phongLight.SetDirection(Vec3f::FORWARD);
 
@@ -65,9 +58,10 @@ void Scene::Update(const float& elapsedTime) {
 
 bool Scene::Render(Renderer& renderer) {
 	renderer.BeginRender();
-	Vec3f diffuseAlbedo = Vec3f(phongLight.GetDiffuseLight().x, phongLight.GetDiffuseLight().y, phongLight.GetDiffuseLight().z);
+	/*Vec3f diffuseAlbedo = Vec3f(phongLight.GetDiffuseLight().x, phongLight.GetDiffuseLight().y, phongLight.GetDiffuseLight().z);
 	Vec4f ambientAlbedo = phongLight.GetAmbientLight();
 	Vec3f specularAlbedo = Vec3f(phongLight.GetSpecularLight().x, phongLight.GetSpecularLight().y, phongLight.GetSpecularLight().z);
+	*/
 	Vec3f lightPosition = phongLight.GetPosition();
 	Vec3f lightDirection = phongLight.GetDirection();
 	
@@ -76,9 +70,7 @@ bool Scene::Render(Renderer& renderer) {
 	pCamera->BuildPerspectiveFovLHMatrix(projectionMatrix, SCREEN_NEAR, SCREEN_DEPTH);
 
 	Matrix<float, 4, 4> viewMatrix = GetViewMatrix();
-	pShader->SetShader(renderer);
-	pShader->SetShaderParameters(renderer, worldMatrix, viewMatrix, projectionMatrix, lightDirection, diffuseAlbedo, ambientAlbedo, specularAlbedo, 0);
-	pShader->Render(renderer);
+	pShader->Render(renderer, viewMatrix, projectionMatrix, lightPosition, lightDirection);
 
 	renderer.EndRender();
 	return true;
