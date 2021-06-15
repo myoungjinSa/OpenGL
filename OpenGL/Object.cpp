@@ -98,9 +98,9 @@ bool Cube::Initialize(Renderer& renderer) {
 
 	texture = TextureLoader::GetTexture(renderer, "Capture.bmp");
 
-	Vec3f diffuseColor(1.0f, 0.9f, 0.9f);
-	Vec4f ambientColor(0.15f, 0.15f, 0.15f, 1.0f);
-	Vec3f specularColor(1.0f, 1.0f, 0.5f);
+	Vec3f diffuseColor(0.8f, 0.85f, 0.85f);
+	Vec4f ambientColor(0.3f, 0.3f, 0.3f, 1.0f);
+	Vec3f specularColor(1.0f, 1.0f, 1.0f);
 	material = std::make_shared<Material>(diffuseColor, ambientColor, specularColor, texture->GetTextureID());
 
 	return true;

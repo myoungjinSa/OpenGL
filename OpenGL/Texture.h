@@ -55,7 +55,7 @@ public:
 
 	unsigned int GetTextureID() const { return textureID; }
 private:
-	bool LoadBMP(Renderer& renderer, const String& fileName, unsigned int textureUnit, bool wrap);
+	bool LoadBMP(Renderer& renderer, const String& fileName, unsigned int textureUnit, bool wrap, int& genTextureID);
 
 	bool loaded;
 	unsigned int textureID;

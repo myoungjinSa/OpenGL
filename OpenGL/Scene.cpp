@@ -25,7 +25,7 @@ Scene::~Scene() {
 }
 
 bool Scene::BuildObject(Renderer& renderer, HWND hWnd) {	
-	phongLight.SetPosition(0.0f, 0.0f, -20.0f);
+	phongLight.SetPosition(0.0f, 0.0f, -100.0f);
 	phongLight.SetDirection(Vec3f::FORWARD);
 
 	pShader = new PhongShader();
@@ -58,10 +58,7 @@ void Scene::Update(const float& elapsedTime) {
 
 bool Scene::Render(Renderer& renderer) {
 	renderer.BeginRender();
-	/*Vec3f diffuseAlbedo = Vec3f(phongLight.GetDiffuseLight().x, phongLight.GetDiffuseLight().y, phongLight.GetDiffuseLight().z);
-	Vec4f ambientAlbedo = phongLight.GetAmbientLight();
-	Vec3f specularAlbedo = Vec3f(phongLight.GetSpecularLight().x, phongLight.GetSpecularLight().y, phongLight.GetSpecularLight().z);
-	*/
+
 	Vec3f lightPosition = phongLight.GetPosition();
 	Vec3f lightDirection = phongLight.GetDirection();
 	
@@ -70,7 +67,8 @@ bool Scene::Render(Renderer& renderer) {
 	pCamera->BuildPerspectiveFovLHMatrix(projectionMatrix, SCREEN_NEAR, SCREEN_DEPTH);
 
 	Matrix<float, 4, 4> viewMatrix = GetViewMatrix();
-	pShader->Render(renderer, viewMatrix, projectionMatrix, lightPosition, lightDirection);
+	Vec3f cameraPosition = pCamera->GetPosition();
+	pShader->Render(renderer, viewMatrix, projectionMatrix, lightPosition, cameraPosition);
 
 	renderer.EndRender();
 	return true;

@@ -9,12 +9,11 @@ in VS_OUT{
 
 uniform sampler2D shaderTexture;
 
-uniform float shininess = 128.0;
+uniform float shininess = 256.0;
 uniform float rimPower = 1.0;
-uniform vec4 ambientAlbedo;
-uniform vec3 specularAlbedo;
 uniform vec3 diffuseAlbedo;
-
+uniform vec3 specularAlbedo;
+uniform vec3 ambientAlbedo;
 out vec4 out_color;
 
 vec3 rimLight(vec3 N, vec3 V){
@@ -38,11 +37,8 @@ void main(){
 
     vec4 textureColor = texture(shaderTexture, fs_in.TEXCOORD);
 
+    vec3 diffuse = max(dot(normal, lightDir), 0.0) * diffuseAlbedo ;
+    vec3 specular = pow(max(dot(reflection, viewDir), 0.0), shininess) * specularAlbedo;
 
-    vec3 diffuse = max(dot(normal, lightDir), 0.0) * diffuseAlbedo;
-    vec3 specular = vec3(0.0);
-
-    specular = pow(max(dot(reflection, viewDir), 0.0), shininess) * specularAlbedo;
-
-    out_color = ambientAlbedo + vec4(diffuse + specular, 1.0) * textureColor;
+    out_color = vec4(diffuse + specular + ambientAlbedo, 1.0) * textureColor;
 }

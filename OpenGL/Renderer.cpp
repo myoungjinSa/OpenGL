@@ -62,10 +62,7 @@ bool Renderer::AllocateIndexBuffer(unsigned int& indexBufferId, size_t indexCoun
 }
 
 
-bool Renderer::AllocateTextures(unsigned int textureUnit, unsigned int& textureId, unsigned int textureCount) {
-	//Set the unique texture unit in which to store the data
-	pGL->glActiveTexture(GL_TEXTURE0 + textureUnit);
-
+bool Renderer::AllocateTextures(unsigned int& textureId, unsigned int textureCount) {
 	//Generate an ID for the texture.
 	glGenTextures(textureCount, &textureId);
 	return true;
@@ -90,6 +87,9 @@ void Renderer::SetFiltering() {
 }
 void Renderer::BindTexture(unsigned int width, unsigned int height, unsigned int textureId, unsigned char* pPixelData) {
 	glEnable(GL_TEXTURE_2D);
+	//Set the unique texture unit in which to store the data
+	pGL->glActiveTexture(GL_TEXTURE0 + textureId);
+
 	glBindTexture(GL_TEXTURE_2D, textureId);
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, pPixelData);
 }

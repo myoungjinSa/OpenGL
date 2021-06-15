@@ -7,8 +7,8 @@ layout (location = 2) in vec3 inputNormal;
 uniform mat4 worldMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
-
-uniform vec3 lightDirection;
+uniform vec3 lightPosition;
+uniform vec3 worldCameraPosition;
 
 out VS_OUT {
 	vec2 TEXCOORD;
@@ -18,13 +18,12 @@ out VS_OUT {
 } vs_out;
 
 void main(){
-	mat4 worldViewMatrix = viewMatrix * worldMatrix;
-	vec4 P = worldViewMatrix * vec4(inputPosition, 1.0);
+	gl_Position = projectionMatrix * viewMatrix * worldMatrix * vec4(inputPosition, 1.0);
 
-	gl_Position = projectionMatrix * P;
+	vec4 worldPosition = worldMatrix * vec4(inputPosition, 1.0);
 
 	vs_out.TEXCOORD = inputTexCoord;
-	vs_out.N = mat3(worldViewMatrix) * inputNormal;
-	vs_out.L = lightDirection - P.xyz;
-	vs_out.V = -P.xyz;
+	vs_out.N = mat3(worldMatrix) * inputNormal;
+	vs_out.L = lightPosition - worldPosition.xyz;
+	vs_out.V = worldCameraPosition - worldPosition.xyz;
 }

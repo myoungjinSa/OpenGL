@@ -32,7 +32,7 @@ public:
 	virtual bool Initialize(Renderer& renderer, HWND hWnd) = 0;
 	virtual void Shutdown(Renderer& renderer);
 	virtual void Render(Renderer& renderer) = 0;
-	virtual void Render(Renderer& renderer, Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& projectionMatrix, Vec3f& lightPosition, Vec3f& lightDirection) = 0;
+	virtual void Render(Renderer& renderer, Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& projectionMatrix, Vec3f& lightPosition, Vec3f& cameraPosition) = 0;
 	void SetShader(Renderer& renderer);
 protected:
 	virtual bool InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer, HWND hWnd) = 0;
@@ -78,9 +78,9 @@ public:
 	bool Initialize(Renderer& renderer, HWND hWnd) override;
 	void Shutdown(Renderer& renderer) override;
 	void Render(Renderer& renderer) override {};
-	void Render(Renderer& gl, Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& projectionMatrix, Vec3f& lightPosition, Vec3f& lightDirection) override;
+	void Render(Renderer& gl, Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& projectionMatrix, Vec3f& lightPosition, Vec3f& cameraPosition) override;
 	
-	bool SetShaderParameters(Renderer& renderer, Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& projectionMatrix, Vec3f& lightDirection, int objectIndex);
+	bool SetShaderParameters(Renderer& renderer, Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& projectionMatrix, Vec3f& lightPosition, Vec3f& cameraPosition,int objectIndex);
 protected:
 	bool InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer, HWND hWnd);
 };

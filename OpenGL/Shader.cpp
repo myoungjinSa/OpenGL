@@ -151,11 +151,11 @@ bool PhongShader::Initialize(Renderer& renderer, HWND hWnd) {
 	return true;
 }
 
-void PhongShader::Render(Renderer& renderer, Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& projectionMatrix ,Vec3f& lightPosition, Vec3f& lightDirection) {
+void PhongShader::Render(Renderer& renderer, Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& projectionMatrix ,Vec3f& lightPosition, Vec3f& cameraPosition) {
 	SetShader(renderer);
-	
+	//SetShaderParameters(renderer, viewMatrix, projectionMatrix, lightDirection, 0);
 	for (size_t iObj = 0; iObj < objects.size(); iObj++) {
-		SetShaderParameters(renderer, viewMatrix, projectionMatrix, lightDirection, iObj);
+		SetShaderParameters(renderer, viewMatrix, projectionMatrix, lightPosition, cameraPosition,iObj);
 		objects[iObj]->Render(renderer);
 	}
 }
@@ -180,7 +180,7 @@ bool PhongShader::InitializeShader(const char* vsFilename, const char* fsFilenam
 	return renderer.BindVertexAttrib(shaderProgram, vertexShader, fragmentShader, 3, inputPosition, inputTexCoord, inputNormal);
 }
 
-bool PhongShader::SetShaderParameters(Renderer& renderer, Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& projectionMatrix, Vec3f& lightDirection, int objectIndex) {
+bool PhongShader::SetShaderParameters(Renderer& renderer, Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& projectionMatrix, Vec3f& lightPosition, Vec3f& cameraPosition, int objectIndex) {
 	if (objects.size() <= objectIndex) {
 		LogError(L"오브젝트 인덱스 오류%d", objectIndex);
 		assert(0);
@@ -190,37 +190,53 @@ bool PhongShader::SetShaderParameters(Renderer& renderer, Matrix<float, 4, 4>& v
 	Matrix<float, 4, 4> worldMatrix;
 	MakeWorldMatrix(objects[objectIndex]->GetPosition(), objects[objectIndex]->GetLook(), objects[objectIndex]->GetRight(), objects[objectIndex]->GetUp(), worldMatrix);
 	if (!renderer.SetShaderParameter(shaderProgram, worldMatrix, std::move(String("worldMatrix")))) {
+		assert(0);
 		return false;
 	}
 
 	if (!renderer.SetShaderParameter(shaderProgram, viewMatrix, std::move(String("viewMatrix")))) {
+		assert(0);
 		return false;
 	}
 
 	if (!renderer.SetShaderParameter(shaderProgram, projectionMatrix, std::move(String("projectionMatrix")))) {
+		assert(0);
 		return false;
 	}
 
-	if (!renderer.SetShaderParameter(shaderProgram, lightDirection, std::move(String("lightDirection")))) {
+	if (!renderer.SetShaderParameter(shaderProgram, lightPosition, std::move(String("lightPosition")))) {
+		assert(0);
 		return false;
 	}
-	
-	Vec4f diffuseAlbedo = Vec4f(objects[objectIndex]->material->GetDiffuseAlbedo(), 1.0f);
-	Vec4f ambientAlbedo = objects[objectIndex]->material->GetAmbientAlbedo();
-	Vec4f specular = Vec4f(objects[objectIndex]->material->GetSpecularAlbedo(), 1.0f);
-	
+
+	if (!renderer.SetShaderParameter(shaderProgram, cameraPosition, std::move(String("worldCameraPosition")))) {
+		assert(0);
+		return false;
+	}
+
+
+	Vec3f diffuseAlbedo = objects[objectIndex]->material->GetDiffuseAlbedo();
+	Vec3f ambientAlbedo = Vec3f(objects[objectIndex]->material->GetAmbientAlbedo().x, objects[objectIndex]->material->GetAmbientAlbedo().y, objects[objectIndex]->material->GetAmbientAlbedo().z);
+	Vec3f specular = objects[objectIndex]->material->GetSpecularAlbedo();
+
 	if (!renderer.SetShaderParameter(shaderProgram, diffuseAlbedo, std::move(String("diffuseAlbedo")))) {
-		return false;
-	}
-	if (!renderer.SetShaderParameter(shaderProgram, ambientAlbedo, std::move(String("ambientAlbedo")))) {
+		assert(0);
 		return false;
 	}
 	if (!renderer.SetShaderParameter(shaderProgram, specular, std::move(String("specularAlbedo")))) {
+		assert(0);
 		return false;
 	}
+	if (!renderer.SetShaderParameter(shaderProgram, ambientAlbedo, std::move(String("ambientAlbedo")))) {
+		assert(0);
+		return false;
+	}
+
 	if (!renderer.SetShaderParameter(shaderProgram, (int)objects[objectIndex]->material->GetTextureUnit(), std::move(String("shaderTexture")))) {
+		assert(0);
 		return false;
 	}
+
 	return true;
 }
 

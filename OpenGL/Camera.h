@@ -28,7 +28,6 @@ private:
 	void TransformCoord(Vec3f& Vec, Matrix<float, 3, 3>& Matrix);
 	void BuildViewMatrix(Vec3f, Vec3f, Vec3f);
 	
-	float fov;
 	float width;
 	float height;
 	Matrix<float, 4, 4> viewMatrix;

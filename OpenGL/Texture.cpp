@@ -17,11 +17,14 @@ Texture::~Texture() {
 bool Texture::Initialize(Renderer& renderer, const String& fileName, unsigned int textureUnit, bool wrap) {
 	bool result;
 
+	int texID = 0;
 	//Load the targa file.
-	result = LoadBMP(renderer, fileName, textureUnit, wrap);
+	result = LoadBMP(renderer, fileName, textureUnit, wrap, texID);
 	if (!result) {
 		return false;
 	}
+	
+	textureID = (unsigned int)texID;
 
 	return true;
 }
@@ -34,7 +37,7 @@ void Texture::Shutdown() {
 	return;
 }
 
-bool Texture::LoadBMP(Renderer& renderer, const String& fileName, unsigned int textureUnit, bool wrap) {
+bool Texture::LoadBMP(Renderer& renderer, const String& fileName, unsigned int textureUnit, bool wrap, int& genTextureID) {
 	std::ifstream fin(fileName.c_str(), std::ios::in | std::ios::binary);
 	if (fin.fail())
 		return false;
@@ -63,12 +66,12 @@ bool Texture::LoadBMP(Renderer& renderer, const String& fileName, unsigned int t
 	fin.read(reinterpret_cast<char*>(pPixelData), imageSize);
 	fin.close();
 
-	renderer.AllocateTextures(textureUnit, textureID, 1);
+	renderer.AllocateTextures(textureID, 1);
 	renderer.BindTexture(width, height, textureID, pPixelData);
 	renderer.SetSampleMode(true);
 	renderer.SetFiltering();
 
-
+	genTextureID = textureID;
 	delete[] pPixelData;
 	pPixelData = nullptr;
 
@@ -113,7 +116,7 @@ bool TextureLoader::Load(Renderer& renderer, const String& filename) {
 	if (!texture)
 		return false;
 
-	if(!texture->Initialize(renderer, filename, 0, true))
+	if(!texture->Initialize(renderer, filename, 0,  true))
 		return false;
 
 	textures.emplace_back(std::make_pair(filename, texture));
