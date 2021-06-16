@@ -54,10 +54,21 @@ bool Renderer::AllocateVertexBuffer(unsigned int& vertexArrayId, unsigned int& v
 
 
 bool Renderer::AllocateIndexBuffer(unsigned int& indexBufferId, size_t indexCount, unsigned int* indexData) {
+	if (indexCount == 0)
+		return false;
+	
 	pGL->glGenBuffers(1, &indexBufferId);
 
 	pGL->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferId);
 	pGL->glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * sizeof(unsigned int), indexData, GL_STATIC_DRAW);
+	return true;
+}
+
+bool Renderer::AllocateFrameBuffer(unsigned int& colorBuffer, unsigned int& depthBuffer, unsigned int& fbo) {
+
+	pGL->glGenFramebuffers(1, &fbo);
+	pGL->glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+
 	return true;
 }
 

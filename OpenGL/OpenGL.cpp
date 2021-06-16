@@ -244,6 +244,7 @@ bool OpenGL::LoadExtensionList() {
 		return false;
 	}
 
+
 	glCompileShader = (PFNGLCOMPILESHADERPROC)wglGetProcAddress("glCompileShader");
 	if (!glCompileShader)
 	{
@@ -294,6 +295,17 @@ bool OpenGL::LoadExtensionList() {
 
 	glEnableVertexAttribArray = (PFNGLENABLEVERTEXATTRIBARRAYPROC)wglGetProcAddress("glEnableVertexAttribArray");
 	if (!glEnableVertexAttribArray)
+	{
+		return false;
+	}
+
+	glGenFramebuffers = (PFNGLGENFRAMEBUFFERSPROC)wglGetProcAddress("glGenFramebuffers");
+	if (!glGenFramebuffers) {
+		return false;
+	}
+
+	glBindFramebuffer = (PFNGLBINDFRAMEBUFFERPROC)wglGetProcAddress("glBindFramebuffer");
+	if (!glBindFramebuffer)
 	{
 		return false;
 	}

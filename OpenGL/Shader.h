@@ -85,4 +85,3 @@ protected:
 	bool InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer, HWND hWnd);
 };
 
-

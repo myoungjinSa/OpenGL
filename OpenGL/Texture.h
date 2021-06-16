@@ -75,3 +75,15 @@ private:
 	static std::vector<std::pair<String&&, std::shared_ptr<Texture>>> textures;
 	//std::vector<std::shared_ptr<Texture>> textures;
 };
+
+class OffScreenRenderTarget {
+public:
+	OffScreenRenderTarget();
+	~OffScreenRenderTarget();
+
+
+	bool Create(Renderer& renderer, size_t fboCount);
+private:
+	unsigned int* frameBufferObjects;
+
+};

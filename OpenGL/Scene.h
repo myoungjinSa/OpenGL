@@ -27,6 +27,8 @@ private:
 	PhongShader* pShader;
 	Light phongLight;
 
+
+
 	Matrix<float, 4, 4> worldMatrix;
 	Matrix<float, 4, 4> projectionMatrix;
 };

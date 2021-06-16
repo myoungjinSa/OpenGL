@@ -60,8 +60,8 @@ public:
 
 	bool AllocateVertexBuffer(unsigned int& vertexArrayId, unsigned int& vertexBufferId, void* vertexData, VertexBufferBindCallback* pBindFunction, unsigned int numVertices, unsigned int sizeofVertex);
 	bool AllocateIndexBuffer(unsigned int& indexBufferId, size_t indexCount, unsigned int* indexData);
-	bool AllocateFrameBuffer(unsigned int& colorBuffer, unsigned int& depthBuffer, unsigned int& fbo);
 	bool AllocateTextures(unsigned int& textureID, unsigned int textureCount);
+	bool AllocateFrameBuffer(unsigned int& colorBuffer, unsigned int& depthBuffer, unsigned int& fbo);
 	void BindTexture(unsigned int width, unsigned int height, unsigned int textureId, unsigned char* pPixelData);
 	void SetSampleMode(bool wrapMode);
 	void SetFiltering();

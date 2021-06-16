@@ -1,11 +1,16 @@
 #pragma once
 
+#pragma comment(lib, "../OpenGL_Lib/glew/lib/glew32s.lib")
 #pragma comment(lib, "opengl32.lib")
+
 #include <Windows.h>
 #include <math.h>
 #include "Matrix.h"
 
+#include "../OpenGL_Lib/glew/include/glew.h"
 #include "../OpenGL_Lib/gl/GL.h"
+
+
 
 /////////////
 // DEFINES //
@@ -55,6 +60,7 @@ typedef void (APIENTRY* PFNGLDELETESHADERPROC) (GLuint shader);
 typedef void (APIENTRY* PFNGLDELETEVERTEXARRAYSPROC) (GLsizei n, const GLuint* arrays);
 typedef void (APIENTRY* PFNGLDETACHSHADERPROC) (GLuint program, GLuint shader);
 typedef void (APIENTRY* PFNGLENABLEVERTEXATTRIBARRAYPROC) (GLuint index);
+typedef void (APIENTRY* PFNGLGENFRAMEBUFFERSPROC) (GLsizei n, GLuint* fboBuffers);
 typedef void (APIENTRY* PFNGLGENBUFFERSPROC) (GLsizei n, GLuint* buffers);
 typedef void (APIENTRY* PFNGLGENVERTEXARRAYSPROC) (GLsizei n, GLuint* arrays);
 typedef GLint(APIENTRY* PFNGLGETATTRIBLOCATIONPROC) (GLuint program, const char* name);
@@ -63,7 +69,7 @@ typedef void (APIENTRY* PFNGLGETPROGRAMIVPROC) (GLuint program, GLenum pname, GL
 typedef void (APIENTRY* PFNGLGETSHADERINFOLOGPROC) (GLuint shader, GLsizei bufSize, GLsizei* length, char* infoLog);
 typedef void (APIENTRY* PFNGLGETSHADERIVPROC) (GLuint shader, GLenum pname, GLint* params);
 typedef void (APIENTRY* PFNGLLINKPROGRAMPROC) (GLuint program);
-typedef void (APIENTRY* PFNGLSHADERSOURCEPROC) (GLuint shader, GLsizei count, const char** string, const GLint* length);
+typedef void (APIENTRY* PFNGLSHADERSOURCEPROC) (GLuint shader, GLsizei count, const GLchar* const* string, const GLint* length);
 typedef void (APIENTRY* PFNGLUSEPROGRAMPROC) (GLuint program);
 typedef void (APIENTRY* PFNGLVERTEXATTRIBPOINTERPROC) (GLuint index, GLint size, GLenum type, GLboolean normalized, GLsizei stride,
     const GLvoid* pointer);
@@ -76,6 +82,10 @@ typedef void (APIENTRY* PFNGLGENERATEMIPMAPPROC) (GLenum target);
 typedef void (APIENTRY* PFNGLDISABLEVERTEXATTRIBARRAYPROC) (GLuint index);
 typedef void (APIENTRY* PFNGLUNIFORM3FVPROC) (GLint location, GLsizei count, const GLfloat* value);
 typedef void (APIENTRY* PFNGLUNIFORM4FVPROC) (GLint location, GLsizei count, const GLfloat* value);
+
+//glew
+typedef void (GLAPIENTRY* PFNGLGENFRAMEBUFFERSPROC) (GLsizei n, GLuint* framebuffers);
+typedef void (GLAPIENTRY* PFNGLBINDFRAMEBUFFERPROC) (GLenum target, GLuint framebuffer);
 
 
 class OpenGL
@@ -118,6 +128,8 @@ public:
 	PFNGLDETACHSHADERPROC glDetachShader;
 	PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
 	PFNGLGENBUFFERSPROC glGenBuffers;
+	PFNGLGENFRAMEBUFFERSPROC glGenFramebuffers;
+	PFNGLBINDFRAMEBUFFERPROC glBindFramebuffer;
 	PFNGLGENVERTEXARRAYSPROC glGenVertexArrays;
 	PFNGLGETATTRIBLOCATIONPROC glGetAttribLocation;
 	PFNGLGETPROGRAMINFOLOGPROC glGetProgramInfoLog;

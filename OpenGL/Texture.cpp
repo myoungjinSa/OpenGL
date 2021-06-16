@@ -123,3 +123,22 @@ bool TextureLoader::Load(Renderer& renderer, const String& filename) {
 	return true;
 }
 
+////////////////////////////////////////////////////////////////////////
+OffScreenRenderTarget::OffScreenRenderTarget() 
+	: frameBufferObjects(0)
+{
+
+}
+
+OffScreenRenderTarget::~OffScreenRenderTarget() {
+
+}
+
+
+bool OffScreenRenderTarget::Create(Renderer& renderer, size_t fboCount) {
+	if (fboCount == 0)
+		return false;
+
+	
+	return true;
+}
