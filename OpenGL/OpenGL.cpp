@@ -1,5 +1,6 @@
 #include "OpenGL.h"
-
+#include "String/String.h"
+#include "Logger.h"
 OpenGL::OpenGL() 
 	:screenHeight(0.0f),
 	 screenWidth(0.0f)
@@ -299,13 +300,13 @@ bool OpenGL::LoadExtensionList() {
 		return false;
 	}
 
-	glGenFramebuffers = (PFNGLGENFRAMEBUFFERSPROC)wglGetProcAddress("glGenFramebuffers");
-	if (!glGenFramebuffers) {
+	glGenFramebuffersEXT = (PFNGLGENFRAMEBUFFERSPROC)wglGetProcAddress("glGenFramebuffersEXT");
+	if (!glGenFramebuffersEXT) {
 		return false;
 	}
 
-	glBindFramebuffer = (PFNGLBINDFRAMEBUFFERPROC)wglGetProcAddress("glBindFramebuffer");
-	if (!glBindFramebuffer)
+	glBindFramebufferEXT = (PFNGLBINDFRAMEBUFFEREXTPROC)wglGetProcAddress("glBindFramebufferEXT");
+	if (!glBindFramebufferEXT)
 	{
 		return false;
 	}
@@ -509,3 +510,19 @@ void OpenGL::MatrixMultiply(Matrix<float, 4, 4>& result, const Matrix<float, 4, 
 	result[15] = (matrix1[12] * matrix2[3]) + (matrix1[13] * matrix2[7]) + (matrix1[14] * matrix2[11]) + (matrix1[15] * matrix2[15]);
 }
 
+
+void OpenGL::CheckError() {
+	GLenum error(glGetError());
+
+	while (error != GL_NO_ERROR) {
+
+		switch (error) {
+		case GL_INVALID_OPERATION:				LogError(L"GL-INVALID_OPERATION");	break;
+		case GL_INVALID_ENUM:					LogError(L"GL-INVALID_ENUM");		break;
+		case GL_INVALID_VALUE:					LogError(L"GL-INVALID_VALUD");		break;
+		case GL_OUT_OF_MEMORY:					LogError(L"GL-OUT_OF_MEMORY");		break;
+		case GL_INVALID_FRAMEBUFFER_OPERATION:	LogError(L"GL-INVALID_FRAMEBUFFER_OPERATION"); break;
+		}
+		error = glGetError();
+	}
+}

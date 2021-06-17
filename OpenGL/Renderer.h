@@ -2,6 +2,8 @@
 #include "Common.h"
 #include "OpenGL.h"
 #include "Mesh.h"
+#include "Types.h"
+
 /////////////
 // GLOBALS //
 /////////////
@@ -13,9 +15,12 @@ const float SCREEN_NEAR = 0.1f;
 class OpenGL;
 class Object;
 class PhongShader;
+class RenderTarget;
 class ColorShader;
 class Camera;
 class String;
+class Texture;
+template<typename> class Size;
 class Renderer
 {
 public:
@@ -38,6 +43,9 @@ public:
 	void Shutdown(unsigned int shaderProgram, unsigned int vertexShader, unsigned int fragmentShader);
 
 	unsigned int CreateShader();
+	bool CreateRenderTarget(RenderTarget& renderTarget, const Size2u& screenSize, bool downSamplingTarget);
+	bool CreateTexture(Texture& texture, const Size2u& size, bool managed);
+
 	void SetShader(unsigned int shaderProgram);
 	bool CompileVertexShader(const char* vsFilename, unsigned int& vertexShader);
 	bool CompileFragmentShader(const char* fsFilename, unsigned int& fragmentShader);
@@ -62,6 +70,8 @@ public:
 	bool AllocateIndexBuffer(unsigned int& indexBufferId, size_t indexCount, unsigned int* indexData);
 	bool AllocateFrameBuffer(unsigned int& colorBuffer, unsigned int& depthBuffer, unsigned int& fbo);
 	bool AllocateTextures(unsigned int& textureID, unsigned int textureCount);
+	
+	
 	void BindTexture(unsigned int width, unsigned int height, unsigned int textureId, unsigned char* pPixelData);
 	void SetSampleMode(bool wrapMode);
 	void SetFiltering();

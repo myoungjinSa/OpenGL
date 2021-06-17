@@ -254,10 +254,11 @@ bool operator !=(const Size<T>& left, const Size<T>& right) {
 	return !(left == right);
 }
 
-//template class Size<int>;
-//template class Size<long long>;
-//template class Size<float>;
-//template class Size<double>;
+template class Size<int>;
+template class Size<long long>;
+template class Size<float>;
+template class Size<double>;
+template class Size<unsigned int>;
 
 
 ///////////////////////Rect //////////////////////////////////

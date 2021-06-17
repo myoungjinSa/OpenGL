@@ -1,6 +1,8 @@
 #pragma once
-#include <vector>
+#include "Common.h"
+#include "Types.h"
 #include "./String/String.h"
+
 
 class Renderer;
 class TextureLoader;
@@ -53,12 +55,14 @@ public:
 	bool Initialize(Renderer& renderer, const String& fileName, unsigned int textureUnit, bool wrap);
 	void Shutdown();
 
-	unsigned int GetTextureID() const { return textureID; }
+	bool IsNull()const { return textureID == 0; }
+
+public:
+	unsigned int textureID;
 private:
 	bool LoadBMP(Renderer& renderer, const String& fileName, unsigned int textureUnit, bool wrap, int& genTextureID);
 
 	bool loaded;
-	unsigned int textureID;
 };
 
 
@@ -73,17 +77,24 @@ private:
 	static bool Load(Renderer& renderer, const String& filename);
 
 	static std::vector<std::pair<String&&, std::shared_ptr<Texture>>> textures;
-	//std::vector<std::shared_ptr<Texture>> textures;
 };
 
-class OffScreenRenderTarget {
+class RenderTarget {
 public:
-	OffScreenRenderTarget();
-	~OffScreenRenderTarget();
-
+	RenderTarget();
+	~RenderTarget();
 
 	bool Create(Renderer& renderer, size_t fboCount);
-private:
-	unsigned int* frameBufferObjects;
+	
+	void SetSize(const Size2u& _size);
+	void SetSize(size_t width, size_t height);
+	Size2u GetSize() const;
 
+	bool IsNull() const { return iFrameBuffer == 0; }
+
+public:
+	unsigned int iFrameBuffer;
+
+private:
+	Size2u size;
 };

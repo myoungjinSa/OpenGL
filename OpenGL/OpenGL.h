@@ -84,9 +84,8 @@ typedef void (APIENTRY* PFNGLUNIFORM3FVPROC) (GLint location, GLsizei count, con
 typedef void (APIENTRY* PFNGLUNIFORM4FVPROC) (GLint location, GLsizei count, const GLfloat* value);
 
 //glew
-typedef void (GLAPIENTRY* PFNGLGENFRAMEBUFFERSPROC) (GLsizei n, GLuint* framebuffers);
-typedef void (GLAPIENTRY* PFNGLBINDFRAMEBUFFERPROC) (GLenum target, GLuint framebuffer);
-
+typedef void (GLAPIENTRY* PFNGLGENFRAMEBUFFERSEXTPROC) (GLsizei n, GLuint* framebuffers);
+typedef void (GLAPIENTRY* PFNGLBINDFRAMEBUFFEREXTPROC) (GLenum target, GLuint framebuffer);
 
 class OpenGL
 {
@@ -108,6 +107,8 @@ public:
 	void MatrixTranslation(Matrix<float, 4, 4>& matrix, float x, float y, float z);
 	void MatrixMultiply(Matrix<float, 4, 4>& matrix, const Matrix<float, 4, 4>& matrix1, const Matrix<float, 4, 4>& matrix2);
 
+	static void CheckError();
+
 	float GetScreenWidth() const { return screenWidth; }
 	float GetScreenHeight() const { return screenHeight; }
 private:
@@ -128,8 +129,8 @@ public:
 	PFNGLDETACHSHADERPROC glDetachShader;
 	PFNGLENABLEVERTEXATTRIBARRAYPROC glEnableVertexAttribArray;
 	PFNGLGENBUFFERSPROC glGenBuffers;
-	PFNGLGENFRAMEBUFFERSPROC glGenFramebuffers;
-	PFNGLBINDFRAMEBUFFERPROC glBindFramebuffer;
+	PFNGLGENFRAMEBUFFERSEXTPROC glGenFramebuffersEXT;
+	PFNGLBINDFRAMEBUFFERPROC glBindFramebufferEXT;
 	PFNGLGENVERTEXARRAYSPROC glGenVertexArrays;
 	PFNGLGETATTRIBLOCATIONPROC glGetAttribLocation;
 	PFNGLGETPROGRAMINFOLOGPROC glGetProgramInfoLog;

@@ -66,6 +66,7 @@ typedef Size<int> Size2i;
 typedef Size<long long> Size2l;
 typedef Size<float> Size2f;
 typedef Size<double> Size2d;
+typedef Size<unsigned int> Size2u;
 
 template<typename T> class Rect {
 public:

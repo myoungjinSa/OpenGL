@@ -66,8 +66,8 @@ bool Renderer::AllocateIndexBuffer(unsigned int& indexBufferId, size_t indexCoun
 
 bool Renderer::AllocateFrameBuffer(unsigned int& colorBuffer, unsigned int& depthBuffer, unsigned int& fbo) {
 
-	pGL->glGenFramebuffers(1, &fbo);
-	pGL->glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+	pGL->glGenFramebuffersEXT(1, &fbo);
+	pGL->glBindFramebufferEXT(GL_FRAMEBUFFER, fbo);
 
 	return true;
 }
@@ -76,6 +76,8 @@ bool Renderer::AllocateFrameBuffer(unsigned int& colorBuffer, unsigned int& dept
 bool Renderer::AllocateTextures(unsigned int& textureId, unsigned int textureCount) {
 	//Generate an ID for the texture.
 	glGenTextures(textureCount, &textureId);
+
+	OpenGL::CheckError();
 	return true;
 }
 
@@ -158,6 +160,41 @@ float Renderer::GetRenderTargetHeight() const{
 unsigned int Renderer::CreateShader() {
 	return pGL->glCreateProgram();
 }
+
+bool Renderer::CreateRenderTarget(RenderTarget& renderTarget, const Size2u& screenSize, bool downSamplingTarget) {
+	if (screenSize.Empty())
+		return false;
+
+	renderTarget.SetSize(screenSize);
+	int iPreviousFrameBuffer = 0;
+
+	if (renderTarget.IsNull()) {
+		pGL->glGenFramebuffersEXT(1, &(renderTarget.iFrameBuffer));
+		OpenGL::CheckError();
+	}
+	pGL->glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, renderTarget.iFrameBuffer);
+	OpenGL::CheckError();
+
+
+
+
+	return true;
+}
+
+bool Renderer::CreateTexture(Texture& texture, const Size2u& size, bool managed) {
+	if (size.Empty())
+		return false;
+
+	if (texture.IsNull()) {
+		AllocateTextures(texture.textureID, 1);
+	}
+
+	glBindTexture(GL_TEXTURE_2D, texture.textureID);
+	OpenGL::CheckError();
+
+}
+
+
 void Renderer::SetShader(unsigned int shaderPrgram) {
 	pGL->glUseProgram(shaderPrgram);
 }

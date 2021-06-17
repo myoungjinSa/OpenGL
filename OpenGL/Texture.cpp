@@ -1,5 +1,6 @@
-#include "Renderer.h"
 #include "Texture.h"
+#include "Renderer.h"
+#include "Types.h"
 #include <fstream>
 #include <cassert>
 #include "TGAReader/tga_reader.h"
@@ -124,21 +125,36 @@ bool TextureLoader::Load(Renderer& renderer, const String& filename) {
 }
 
 ////////////////////////////////////////////////////////////////////////
-OffScreenRenderTarget::OffScreenRenderTarget() 
-	: frameBufferObjects(0)
+RenderTarget::RenderTarget() 
+	: iFrameBuffer(0)
+	, size()
 {
 
 }
 
-OffScreenRenderTarget::~OffScreenRenderTarget() {
+RenderTarget::~RenderTarget() {
 
 }
 
 
-bool OffScreenRenderTarget::Create(Renderer& renderer, size_t fboCount) {
+bool RenderTarget::Create(Renderer& renderer, size_t fboCount) {
 	if (fboCount == 0)
 		return false;
 
 	
 	return true;
+}
+
+
+void RenderTarget::SetSize(const Size2u& _size) {
+	size = _size;
+}
+
+void RenderTarget::SetSize(size_t width, size_t height) {
+	size.width = width;
+	size.height = height;
+}
+
+Size2u RenderTarget::GetSize() const {
+	return size;
 }

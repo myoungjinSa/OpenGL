@@ -101,7 +101,7 @@ bool Cube::Initialize(Renderer& renderer) {
 	Vec3f diffuseColor(0.8f, 0.85f, 0.85f);
 	Vec4f ambientColor(0.3f, 0.3f, 0.3f, 1.0f);
 	Vec3f specularColor(1.0f, 1.0f, 1.0f);
-	material = std::make_shared<Material>(diffuseColor, ambientColor, specularColor, texture->GetTextureID());
+	material = std::make_shared<Material>(diffuseColor, ambientColor, specularColor, texture->textureID);
 
 	return true;
 }
