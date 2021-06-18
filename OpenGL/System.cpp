@@ -284,8 +284,8 @@ bool System::InitializeWindows(OpenGL* pOpenGL, int& screenWidth, int& screenHei
 	}
 	else {
 		//If windowed then set it to 800x600 resolution
-		screenWidth  = 800;
-		screenHeight = 600;
+		screenWidth  = 1280;
+		screenHeight = 960;
 
 		// Place the window in the middle of the screen.
 		posX = (GetSystemMetrics(SM_CXSCREEN) - screenWidth) / 2;

@@ -178,6 +178,7 @@ bool Renderer::CreateRenderTarget(RenderTarget& renderTarget, const Size2u& scre
 
 
 
+
 	return true;
 }
 
@@ -192,6 +193,10 @@ bool Renderer::CreateTexture(Texture& texture, const Size2u& size, bool managed)
 	glBindTexture(GL_TEXTURE_2D, texture.textureID);
 	OpenGL::CheckError();
 
+	if (managed) {
+		//texture.Initialize()
+	}
+	return true;
 }
 
 

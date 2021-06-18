@@ -556,6 +556,8 @@ Vector3<T>::Vector3(T v0, T v1, T v2)
 	: x(v0), y(v1), z(v2) {
 
 }
+
+
 template<typename T> inline
 Vector3<T>::Vector3(const Matrix<T, 1, 3>& mat) {
 	x = mat.Row(0).Col(0);

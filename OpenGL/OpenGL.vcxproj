@@ -151,6 +151,7 @@
     <ClCompile Include="Matrix.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Object.cpp" />
+    <ClCompile Include="RayCast.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Input.cpp" />
     <ClCompile Include="OpenGL.cpp" />
@@ -177,6 +178,7 @@
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="RayCast.h" />
     <ClInclude Include="Renderer.h" />
     <ClInclude Include="Input.h" />
     <ClInclude Include="OpenGL.h" />

@@ -189,27 +189,27 @@ bool PhongShader::SetShaderParameters(Renderer& renderer, Matrix<float, 4, 4>& v
 
 	Matrix<float, 4, 4> worldMatrix;
 	MakeWorldMatrix(objects[objectIndex]->GetPosition(), objects[objectIndex]->GetLook(), objects[objectIndex]->GetRight(), objects[objectIndex]->GetUp(), worldMatrix);
-	if (!renderer.SetShaderParameter(shaderProgram, worldMatrix, std::move(String("worldMatrix")))) {
+	if (!renderer.SetShaderParameter(shaderProgram, worldMatrix, String("worldMatrix"))) {
 		assert(0);
 		return false;
 	}
 
-	if (!renderer.SetShaderParameter(shaderProgram, viewMatrix, std::move(String("viewMatrix")))) {
+	if (!renderer.SetShaderParameter(shaderProgram, viewMatrix, String("viewMatrix"))) {
 		assert(0);
 		return false;
 	}
 
-	if (!renderer.SetShaderParameter(shaderProgram, projectionMatrix, std::move(String("projectionMatrix")))) {
+	if (!renderer.SetShaderParameter(shaderProgram, projectionMatrix, String("projectionMatrix"))) {
 		assert(0);
 		return false;
 	}
 
-	if (!renderer.SetShaderParameter(shaderProgram, lightPosition, std::move(String("lightPosition")))) {
+	if (!renderer.SetShaderParameter(shaderProgram, lightPosition, String("lightPosition"))) {
 		assert(0);
 		return false;
 	}
 
-	if (!renderer.SetShaderParameter(shaderProgram, cameraPosition, std::move(String("worldCameraPosition")))) {
+	if (!renderer.SetShaderParameter(shaderProgram, cameraPosition, String("worldCameraPosition"))) {
 		assert(0);
 		return false;
 	}
@@ -219,20 +219,20 @@ bool PhongShader::SetShaderParameters(Renderer& renderer, Matrix<float, 4, 4>& v
 	Vec3f ambientAlbedo = Vec3f(objects[objectIndex]->material->GetAmbientAlbedo().x, objects[objectIndex]->material->GetAmbientAlbedo().y, objects[objectIndex]->material->GetAmbientAlbedo().z);
 	Vec3f specular = objects[objectIndex]->material->GetSpecularAlbedo();
 
-	if (!renderer.SetShaderParameter(shaderProgram, diffuseAlbedo, std::move(String("diffuseAlbedo")))) {
+	if (!renderer.SetShaderParameter(shaderProgram, diffuseAlbedo, String("diffuseAlbedo"))) {
 		assert(0);
 		return false;
 	}
-	if (!renderer.SetShaderParameter(shaderProgram, specular, std::move(String("specularAlbedo")))) {
+	if (!renderer.SetShaderParameter(shaderProgram, specular, String("specularAlbedo"))) {
 		assert(0);
 		return false;
 	}
-	if (!renderer.SetShaderParameter(shaderProgram, ambientAlbedo, std::move(String("ambientAlbedo")))) {
+	if (!renderer.SetShaderParameter(shaderProgram, ambientAlbedo, String("ambientAlbedo"))) {
 		assert(0);
 		return false;
 	}
 
-	if (!renderer.SetShaderParameter(shaderProgram, (int)objects[objectIndex]->material->GetTextureUnit(), std::move(String("shaderTexture")))) {
+	if (!renderer.SetShaderParameter(shaderProgram, (int)objects[objectIndex]->material->GetTextureUnit(), String("shaderTexture"))) {
 		assert(0);
 		return false;
 	}
