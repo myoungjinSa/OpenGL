@@ -1,5 +1,8 @@
 #pragma once
 #define BIT(X) (1 << (X))
+
+#define MAX(a, b) ((a < b) ? b : a)
+#define MIN(a, b) ((a > b) ? b : a)
 class MathUtils
 {
 public:
@@ -15,6 +18,7 @@ public:
 	static float Clamp(float inputValue, float min, float max);
 	static int Clamp(int inputValue, int min, int max);
 
+	
 
 	static const float PI;
 	static const float TWO_PI;

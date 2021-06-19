@@ -54,7 +54,6 @@ public :
 	diag_type Diagonal()const;
 
 	Matrix<T, n, m> Transpose() const;
-
 	//Matrix<T, n, m> Inverse(int method, bool* p_is_ok = NULL) const;
 
 	Matrix<T, m, n> Multiply(const Matrix<T, m, n>& a) const;

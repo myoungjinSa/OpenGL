@@ -4,6 +4,8 @@
 #include "Scene.h"
 #include "Object.h"
 #include "Renderer.h"
+#include "RayCast.h"
+#include "Logger.h"
 
 Scene::Scene() 
 	:pCamera(nullptr),
@@ -24,7 +26,7 @@ Scene::~Scene() {
 	}
 }
 
-bool Scene::BuildObject(Renderer& renderer, HWND hWnd) {	
+bool Scene::BuildObject(Renderer& renderer) {	
 	phongLight.SetPosition(0.0f, 0.0f, -100.0f);
 	phongLight.SetDirection(Vec3f::FORWARD);
 
@@ -32,9 +34,9 @@ bool Scene::BuildObject(Renderer& renderer, HWND hWnd) {
 	if (!pShader)
 		return false;
 
-	bool result = pShader->Initialize(renderer, hWnd);
+	bool result = pShader->Initialize(renderer);
 	if (!result) {
-		MessageBox(hWnd, L"Could not initialize the shader object.", L"Error", MB_OK);
+		LogError(L"Could not initialize the shader object.");
 		return false;
 	}
 
@@ -92,4 +94,13 @@ Matrix<float, 4, 4> Scene::GetViewMatrix() const {
 }
 Matrix<float, 4, 4> Scene::GetProjectionMatrix() const {
 	return projectionMatrix;
+}
+
+void Scene::Picking(int x, int y) {
+	RayCast rayCast(*this);
+
+	Object* pHitObject = rayCast.HitTest(x, y);
+	if (pHitObject) {
+
+	}
 }

@@ -49,7 +49,7 @@ bool System::Initialize() {
 	}
 	
 	// Initialize the graphics object.
-	result = pRenderer->Initialize(pOpenGL, hWnd);
+	result = pRenderer->Initialize(pOpenGL);
 	if (!result)
 	{
 		return false;
@@ -60,7 +60,7 @@ bool System::Initialize() {
 	{
 		return false;
 	}
-	if (!pScene->BuildObject(*pRenderer, hWnd)) {
+	if (!pScene->BuildObject(*pRenderer)) {
 		return false;
 	}
 	return true;

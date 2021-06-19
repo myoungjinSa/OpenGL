@@ -14,7 +14,7 @@ public:
 	Scene();
 	~Scene();
 
-	bool BuildObject(Renderer& gl, HWND hWnd);
+	bool BuildObject(Renderer& gl);
 	void Update(const float& elapsedTime);
 	bool Render(Renderer& renderer);
 	void Shutdown(Renderer& gl);
@@ -22,6 +22,8 @@ public:
 	Matrix<float, 4, 4> GetWorldMatrix() const;
 	Matrix<float, 4, 4> GetViewMatrix() const;
 	Matrix<float, 4, 4> GetProjectionMatrix() const;
+
+	void Picking(int x, int y);
 private:
 	Camera* pCamera;
 	PhongShader* pShader;

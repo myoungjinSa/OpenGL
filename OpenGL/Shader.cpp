@@ -22,7 +22,6 @@ void MakeWorldMatrix(const Vec3f& position, const Vec3f& look, const Vec3f& righ
 	worldMatrix.value[9] = look.y;
 	worldMatrix.value[10] = look.z;
 
-
 	//Position
 	worldMatrix.value[12] = position.x;
 	worldMatrix.value[13] = position.y;
@@ -65,16 +64,16 @@ ColorShader::~ColorShader() {
 
 }
 
-bool ColorShader::Initialize(Renderer& renderer, HWND hWnd) {
+bool ColorShader::Initialize(Renderer& renderer) {
 	bool result;
-	result = InitializeShader("color.vs", "color.ps", renderer, hWnd);
+	result = InitializeShader("color.vs", "color.ps", renderer);
 
 	Object* pObject = new Cube();
 	objects.emplace_back(pObject);
 
 	for (const auto& obj : objects) {
 		if (!obj->Initialize(renderer)) {
-			MessageBox(hWnd, L"Could not initialize the model object", L"Error", MB_OK);
+			LogError(L"Could not initialize the model object");
 			return false;
 		}
 	}
@@ -94,7 +93,7 @@ void ColorShader::Render(Renderer& renderer) {
 		obj->Render(renderer);
 }
 
-bool ColorShader::InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer, HWND hWnd) {
+bool ColorShader::InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer) {
 	shaderProgram = renderer.CreateShader();
 
 	if (!renderer.CompileVertexShader(vsFilename, vertexShader))
@@ -133,9 +132,9 @@ PhongShader::~PhongShader() {
 
 }
 
-bool PhongShader::Initialize(Renderer& renderer, HWND hWnd) {
+bool PhongShader::Initialize(Renderer& renderer) {
 	bool result;
-	result = InitializeShader("PhongLight.vs", "PhongLight.ps", renderer, hWnd);
+	result = InitializeShader("PhongLight.vs", "PhongLight.ps", renderer);
 	if (!result)
 		return false;
 
@@ -144,7 +143,7 @@ bool PhongShader::Initialize(Renderer& renderer, HWND hWnd) {
 
 	for (const auto& obj : objects) {
 		if (!obj->Initialize(renderer)) {
-			MessageBox(hWnd, L"Could not initialize the model object", L"Error", MB_OK);
+			LogError(L"Could not initialize the model object");
 			return false;
 		}
 	}
@@ -153,9 +152,8 @@ bool PhongShader::Initialize(Renderer& renderer, HWND hWnd) {
 
 void PhongShader::Render(Renderer& renderer, Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& projectionMatrix ,Vec3f& lightPosition, Vec3f& cameraPosition) {
 	SetShader(renderer);
-	//SetShaderParameters(renderer, viewMatrix, projectionMatrix, lightDirection, 0);
 	for (size_t iObj = 0; iObj < objects.size(); iObj++) {
-		SetShaderParameters(renderer, viewMatrix, projectionMatrix, lightPosition, cameraPosition,iObj);
+		SetShaderParameters(renderer, viewMatrix, projectionMatrix, lightPosition, cameraPosition, iObj);
 		objects[iObj]->Render(renderer);
 	}
 }
@@ -165,7 +163,7 @@ void PhongShader::Shutdown(Renderer& renderer) {
 	ShutdownShader(renderer);
 }
 
-bool PhongShader::InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer, HWND hWnd) {
+bool PhongShader::InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer) {
 	shaderProgram = renderer.CreateShader();
 
 	if (!renderer.CompileVertexShader(vsFilename, vertexShader))

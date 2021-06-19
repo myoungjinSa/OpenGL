@@ -39,7 +39,7 @@ public:
 	Renderer(const Renderer&) = delete;
 	~Renderer();
 
-	bool Initialize(OpenGL* pOpenGL, HWND hWnd); 
+	bool Initialize(OpenGL* pOpenGL); 
 	void Shutdown(unsigned int shaderProgram, unsigned int vertexShader, unsigned int fragmentShader);
 
 	unsigned int CreateShader();

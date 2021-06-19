@@ -19,13 +19,11 @@ Renderer::~Renderer() {
 
 }
 
-bool Renderer::Initialize(OpenGL* pOpenGL, HWND _hWnd) {
+bool Renderer::Initialize(OpenGL* pOpenGL) {
 	//Store a pointer to ther OpenGL class object.
 	pGL = pOpenGL;
 	if (!pGL)
 		return false;
-	
-	hWnd = _hWnd;
 
 	return true;
 }
