@@ -19,6 +19,8 @@ Vec3f RayCast::Ray::CalculateRay(float x, float y, int screenWidth, int screenHe
 	Vec2f normalizedCoords = GetNormalizedDeviceCoords(x, y, screenWidth, screenHeight);
 	Vec4f clipCoords = Vec4f(normalizedCoords.x, normalizedCoords.y, -1.0f, 1.0f);
 	
+	//temp Code...
+	return Vec3f(0.0f, 0.0f, 0.0f);
 }
 
 Vec2f RayCast::Ray::GetNormalizedDeviceCoords(float x, float y, int screenWidth, int screenHeight) {
@@ -31,6 +33,8 @@ Vec4f RayCast::Ray::ConvertToEyeCoords(const Vec4f& clipCoords, const Matrix<flo
 	Matrix<float, 4, 4> projectionMatrix = _projectionMatrix;
 	//Matrix<float, 4, 4> invertedProjection = 
 
+	//temp Code..
+	return Vec4f(0.0f, 0.0f, 0.0f, 1.0f);
 }
 
 RayCast::RayCast(Scene& _targetScene)
@@ -46,7 +50,7 @@ RayCast::~RayCast() {
 Object* RayCast::HitTest(float x, float y) {
 	Matrix<float, 4, 4> viewMatrix = targetScene.GetViewMatrix();
 	Matrix<float, 4, 4> projectionMatrix = targetScene.GetProjectionMatrix();
-
+	
 	return nullptr;
 }
 

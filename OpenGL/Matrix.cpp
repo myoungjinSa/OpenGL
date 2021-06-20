@@ -1,5 +1,43 @@
 #include "Matrix.h"
 
+double GetDeterminant(const Matrix<float, 2, 2>& other){
+	return (double)(other.value[0] * other.value[3] - other.value[2] * other.value[3]);
+}
+
+double GetDeterminant(const Matrix<float, 3, 3>& other){
+/*
+	*	a	b	c
+	*	d	e	f
+	*	g	h	i
+	*
+	*	a	b	c	a	b	c
+	*	d	e	f	d	e	f
+	*	g	h	i	g	h	i
+	*
+	*	det(A) = aei + bfg + cdh - afh - bdi - ceg
+	*
+	*/
+
+	float a = other.value[0];
+	float b = other.value[1];
+	float c = other.value[2];
+
+	float d = other.value[3];
+	float e = other.value[4];
+	float f = other.value[5];
+
+	float g = other.value[6];
+	float h = other.value[7];
+	float i = other.value[8];
+
+	double det = ((a * e * i) + (b * f * g) + (c * d * h));
+	det = det - a * f * h;
+	det = det - b * d * i;
+	det = det - c * e * g;
+
+	return (double)det;
+}
+
 
 
 template<typename T>

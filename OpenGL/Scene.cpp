@@ -69,6 +69,11 @@ bool Scene::Render(Renderer& renderer) {
 	pCamera->BuildPerspectiveFovLHMatrix(projectionMatrix, SCREEN_NEAR, SCREEN_DEPTH);
 
 	Matrix<float, 4, 4> viewMatrix = GetViewMatrix();
+	Matrix<float, 2, 2> v;
+
+	double invView = GetDeterminant(v);
+	LogDebug(L"invView - %5lf", invView);
+
 	Vec3f cameraPosition = pCamera->GetPosition();
 	pShader->Render(renderer, viewMatrix, projectionMatrix, lightPosition, cameraPosition);
 

@@ -54,6 +54,9 @@ public :
 	diag_type Diagonal()const;
 
 	Matrix<T, n, m> Transpose() const;
+
+	
+	//Matrix<T, m, n> GetCofactor() const;
 	//Matrix<T, n, m> Inverse(int method, bool* p_is_ok = NULL) const;
 
 	Matrix<T, m, n> Multiply(const Matrix<T, m, n>& a) const;
@@ -72,8 +75,69 @@ public :
 	T value[m * n];
 };
 
-/*Utility Method*/
-//template<typename _Tp, int m> static double determinant(const Matx<_Tp, m, m>& a);
+double GetDeterminant(const Matrix<float, 2, 2>& other);
+double GetDeterminant(const Matrix<float, 3, 3>& other);
+
+
+//template<typename T, int m = 3, int n = 3> inline
+//double Matrix<T, m, n>::GetDeterminant() const{
+//	double det = 0.0;
+//	switch (rows) {
+//	case 2:
+//	{
+//		det = value[0] * value[3] - value[2] * value[3];
+//		return det;
+//	}
+//	break;
+//	case 3:
+//	{
+//		/*
+//		*	a	b	c
+//		*	d	e	f
+//		*	g	h	i
+//		* 
+//		*	a	b	c	a	b	c
+//		*	d	e	f	d	e	f
+//		*	g	h	i	g	h	i
+//		* 
+//		*	det(A) = aei + bfg + cdh - afh - bdi - ceg
+//		* 
+//		*/
+//
+//		T a = value[0];
+//		T b = value[1];
+//		T c = value[2];
+//			  
+//		T d = value[3];
+//		T e = value[4];
+//		T f = value[5];
+//			  
+//		T g = value[6];
+//		T h = value[7];
+//		T i = value[8];
+//
+//		T det = ((a * e * i) + (b * f * g) + (c * d * h));
+//		det = det - a * f * h;
+//		det = det - b * d * i;
+//		det = det - c * e * g;
+//
+//		return (double)det;
+//	}
+//	break;
+//	case 4:
+//	{
+//		static_assert(0, "GetDeterminant() : The row count 4 is not ready.");
+//		break;
+//	}
+//	default:
+//		static_assert(0, "GetDeterminant() : The row count over the 4 is don't care.");
+//		break;
+//	}
+//	return 0;
+//}
+//
+
+
 //template<typename T, int m, int n> static double Normalize(const Matrix<T, m, n>& mat);
 //template<typename T, int m, int n> static double Normalize(const Matrix<T, m, n>& mat, int normType);
 
@@ -246,6 +310,76 @@ Matrix<T, n, m> Matrix<T, m, n>::Transpose() const
 	return Matrix<T, n, m>(*this);
 }
 
+//template<typename T, int m, int n> inline
+//Matrix<T, m, n> Matrix<T, m, n>::GetCofactor() const {
+//	Matrix<T, m, n> cofactor();
+//
+//	if (rows != cols)
+//		return cofactor;
+//
+//	if (rows < 2)
+//		return cofactor;
+//	else if (rows == 2) {
+//		cofactor.value[0][0] = value[1][1];
+//		cofactor.value[0][1] = -value[1][0];
+//		cofactor.value[1][0] = -value[0][1];
+//		cofactor.value[1][1] = value[0][0];
+//		return cofactor;
+//	}else if (3 <= row) {
+//		int DIM = rows;
+//		Matrix<T, DIM, DIM> ***temp= new Matrix **[DIM];
+//		for (int iRow = 0; iRow < DIM; iRow++) {
+//			temp[iRow] = new Matrix * [DIM];
+//		}
+//		for (int iRow = 0; iRow < DIM; iRow++) {
+//			for (int iCol = 0; iCol < DIM; iCol++) {
+//				temp[iRow][iCol] = new Matrix<T, DIM - 1, DIM - 1>();
+//			}
+//		}
+//
+//		for (int element1 = 0; element1 < DIM; element1++) {
+//			for (int element2 = 0; element2 < DIM; element2++) {
+//				int i1 = 0;
+//				for (int i = 0; i < DIM; i++) {
+//					int j1 = 0;
+//					for (int j = 0; j < DIM; j++) {
+//						if (element1 == i || element2 == j)
+//							continue;
+//
+//						temp[element1][element2]->value[i1][j1++] = value[i][j];
+//					}
+//					if (element1 != i)
+//						i1++;
+//				}
+//			}
+//		}
+//
+//		bool flagPositive = true;
+//		for (int element1 = 0; element1 < DIM; element1++) {
+//			flagPositive = ((element1 % 2) == 0);
+//			for (int element2 = 0; element2 < DIM; element2++) {
+//				if (flagPositive == true) {
+//					cofactor.value[element1][element2] = temp[element1][element2].GetDeterminant();
+//					flagPositive = false;
+//				}
+//				else {
+//					GetDeterminant(cofactor.value[element1][element2]);
+//					flagPositive = true;
+//				}
+//			}
+//		}
+//		for (int i = 0; i < DIM; i++) {
+//			for (int j = 0; j < DIM; j++) {
+//				delete temp[i][j];
+//			}
+//		}
+//		for (int i = 0; i < DIM; i++)
+//			delete[] temp[i];
+//
+//		delete[] temp;
+//	}
+//	return cofactor;
+//}
 //template<typename T, int m, int n> inline
 //Matrix<T, n, m> Matrix<T, m, n>::Inverse() const {
 //
