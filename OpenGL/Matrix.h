@@ -72,70 +72,20 @@ public :
 	const T& operator[](size_t idx) const;
 	T& operator[](size_t idx);
 
+	void operator*(T val) const;
+	
 	T value[m * n];
 };
 
+Matrix<float, 3, 3> GetCofactor(const Matrix<float, 4, 4>& mat, int iRow, int iCol);
 double GetDeterminant(const Matrix<float, 2, 2>& other);
 double GetDeterminant(const Matrix<float, 3, 3>& other);
+double GetDeterminant(const Matrix<float, 4, 4>& other);
 
+Matrix<float, 2, 2> Inverse(const Matrix<float, 2, 2>& mat);
+Matrix<float, 3, 3> Inverse(const Matrix<float, 3, 3>& mat);
+Matrix<float, 4, 4> Inverse(const Matrix<float, 4, 4>& mat);
 
-//template<typename T, int m = 3, int n = 3> inline
-//double Matrix<T, m, n>::GetDeterminant() const{
-//	double det = 0.0;
-//	switch (rows) {
-//	case 2:
-//	{
-//		det = value[0] * value[3] - value[2] * value[3];
-//		return det;
-//	}
-//	break;
-//	case 3:
-//	{
-//		/*
-//		*	a	b	c
-//		*	d	e	f
-//		*	g	h	i
-//		* 
-//		*	a	b	c	a	b	c
-//		*	d	e	f	d	e	f
-//		*	g	h	i	g	h	i
-//		* 
-//		*	det(A) = aei + bfg + cdh - afh - bdi - ceg
-//		* 
-//		*/
-//
-//		T a = value[0];
-//		T b = value[1];
-//		T c = value[2];
-//			  
-//		T d = value[3];
-//		T e = value[4];
-//		T f = value[5];
-//			  
-//		T g = value[6];
-//		T h = value[7];
-//		T i = value[8];
-//
-//		T det = ((a * e * i) + (b * f * g) + (c * d * h));
-//		det = det - a * f * h;
-//		det = det - b * d * i;
-//		det = det - c * e * g;
-//
-//		return (double)det;
-//	}
-//	break;
-//	case 4:
-//	{
-//		static_assert(0, "GetDeterminant() : The row count 4 is not ready.");
-//		break;
-//	}
-//	default:
-//		static_assert(0, "GetDeterminant() : The row count over the 4 is don't care.");
-//		break;
-//	}
-//	return 0;
-//}
-//
 
 
 //template<typename T, int m, int n> static double Normalize(const Matrix<T, m, n>& mat);
@@ -440,6 +390,13 @@ template<typename T, int m, int n> inline
 T& Matrix<T, m, n>::operator[](size_t idx) {
 	assert((unsigned)idx < (unsigned)m * n);
 	return this->value[idx];
+}
+
+template<typename T, int m, int n> inline
+void Matrix<T, m, n>::operator*(T val) const{
+	for (size_t iVal = 0; iVal < rows * cols; iVal++) {
+		this->value[iVal] *= val;
+	}
 }
 
 ////////////////////////////////////////////////////////////////////

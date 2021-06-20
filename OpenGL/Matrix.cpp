@@ -1,7 +1,7 @@
 #include "Matrix.h"
 
 double GetDeterminant(const Matrix<float, 2, 2>& other){
-	return (double)(other.value[0] * other.value[3] - other.value[2] * other.value[3]);
+	return (double)(other.value[0] * other.value[3] - other.value[1] * other.value[2]);
 }
 
 double GetDeterminant(const Matrix<float, 3, 3>& other){
@@ -39,7 +39,52 @@ double GetDeterminant(const Matrix<float, 3, 3>& other){
 }
 
 
+double GetDeterminant(const Matrix<float, 4, 4>& other) {
+	double det = 0.0;
+	int indexI = 1;
+	for (int iCol = 1; iCol < other.cols + 1; iCol++) {
+		if ((indexI + iCol) % 2 == 0) {
+			det += (double)other.value[(indexI - 1) + (iCol - 1)] * GetDeterminant(GetCofactor(other, indexI, iCol));
+		}else {
+			det -= (double)other.value[(indexI - 1) + (iCol - 1)] * GetDeterminant(GetCofactor(other, indexI, iCol));
+		}
+	}
 
+	return det;
+}
+
+Matrix<float, 2, 2> Inverse(const Matrix<float, 2, 2>& mat) {
+	double det = GetDeterminant(mat);
+
+	if (det == 0)
+		return Matrix<float, 2, 2>::Identity();
+
+	Matrix<float, 2, 2> inversedMatrix;
+	inversedMatrix.value[0] = mat.value[3] / det;
+	inversedMatrix.value[1] = -mat.value[1] / det;
+	inversedMatrix.value[2] = -mat.value[2] / det;
+	inversedMatrix.value[3] = mat.value[0] / det;
+
+	return inversedMatrix;
+}
+Matrix<float, 3, 3> GetCofactor(const Matrix<float, 4, 4>& mat, int iRow, int iCol) {
+	Matrix<float, 3, 3> cofactor;
+
+	int k = 0;
+	for (int i = 1; i < mat.rows + 1; i++) {
+		if (i == iRow)
+			continue;
+
+		for (int j = 1; j < mat.cols + 1; j++) {
+			if (j == iCol)
+				continue;
+
+			cofactor[k++] = mat.value[((i - 1) * 4) + (j - 1)];
+		}
+	}
+
+	return cofactor;
+}
 template<typename T>
 Vector2<T> Vector2<T>::GetMidPoint(const Vector2<T>& start, const Vector2<T>& end) {
 	Vector2<T> midPoint;
