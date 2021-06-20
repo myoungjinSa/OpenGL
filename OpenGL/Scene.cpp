@@ -70,34 +70,25 @@ bool Scene::Render(Renderer& renderer) {
 
 	Matrix<float, 4, 4> viewMatrix = GetViewMatrix();
 
-	Matrix<float, 2, 2> testMatrix;
-	testMatrix.value[0] = 2;
-	testMatrix.value[1] = 4;
-	testMatrix.value[2] = -4;
-	testMatrix.value[3] = -10;
-	//Matrix<float, 4, 4> testMatrix;
-	//testMatrix.value[0] = 2;
-	//testMatrix.value[1] = 0;
-	//testMatrix.value[2] = 0;
-	//testMatrix.value[3] = 5;
-	//testMatrix.value[4] = -1;
-	//testMatrix.value[5] = 2;
-	//testMatrix.value[6] = 4;
-	//testMatrix.value[7] = 1;
-	//testMatrix.value[8] = 3;
-	//testMatrix.value[9] = 0;
-	//testMatrix.value[10] = 0;
-	//testMatrix.value[11] = 3;
-	//testMatrix.value[12] = 8;
-	//testMatrix.value[13] = 6;
-	//testMatrix.value[14] = 0;
-	//testMatrix.value[15] = 0;
+	Matrix<float, 4, 4> testMatrix;
+	testMatrix.value[0] = 1;
+	testMatrix.value[1] = 0;
+	testMatrix.value[2] = 3;
+	testMatrix.value[3] = 7;
+	testMatrix.value[4] = 4;
+	testMatrix.value[5] = 2;
+	testMatrix.value[6] = 0;
+	testMatrix.value[7] = 1;
+	testMatrix.value[8] = 7;
+	testMatrix.value[9] = 7;
+	testMatrix.value[10] = 3;
+	testMatrix.value[11] = 0;
+	testMatrix.value[12] = 5;
+	testMatrix.value[13] = 0;
+	testMatrix.value[14] = 6;
+	testMatrix.value[15] = 8;
 
-	//위 testMatrix의 역행렬이 -216이여야 함
-	//double invView = GetDeterminant(testMatrix);
-	//LogDebug(L"invView - %5lf", invView);
-
-	Matrix<float, 2, 2> invView = Inverse(testMatrix);
+	Matrix<float, 4, 4> invView = Inverse(testMatrix);
 	
 	Vec3f cameraPosition = pCamera->GetPosition();
 	pShader->Render(renderer, viewMatrix, projectionMatrix, lightPosition, cameraPosition);

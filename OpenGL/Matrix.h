@@ -76,7 +76,7 @@ public :
 	
 	T value[m * n];
 };
-
+Matrix<float, 2, 2> GetCofactor(const Matrix<float, 3, 3>& mat, int iRow, int iCol);
 Matrix<float, 3, 3> GetCofactor(const Matrix<float, 4, 4>& mat, int iRow, int iCol);
 double GetDeterminant(const Matrix<float, 2, 2>& other);
 double GetDeterminant(const Matrix<float, 3, 3>& other);
