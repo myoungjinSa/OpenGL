@@ -95,7 +95,7 @@ Matrix<float, 4, 4> Inverse(const Matrix<float, 4, 4>& mat) {
 		return Matrix<float, 4, 4>::Identity();
 
 	Matrix<float, 4, 4> inversedMatrix;
-	//GetAdjMatrix
+	inversedMatrix = GetAdjMatrix(mat) / det;
 
 	return inversedMatrix;
 }
@@ -136,7 +136,22 @@ Matrix<float, 3, 3> GetCofactor(const Matrix<float, 4, 4>& mat, int iRow, int iC
 
 	return cofactor;
 }
+Matrix<float, 4, 4> GetAdjMatrix(const Matrix<float, 4, 4>& mat) {
+	Matrix<float, 4, 4> adjMatrix;
 
+	for (int iRow = 1; iRow < mat.rows + 1; iRow++) {
+		for (int iCol = 1; iCol < mat.cols + 1; iCol++) {
+			if ((iRow + iCol) % 2 == 0)
+				adjMatrix.value[(iRow - 1) + ((iCol - 1) * 4)] = GetDeterminant(GetCofactor(mat, iRow, iCol));
+			else
+				adjMatrix.value[(iRow - 1) + ((iCol - 1) * 4)] = -1.0f * GetDeterminant(GetCofactor(mat, iRow, iCol));
+		}
+	}
+
+	adjMatrix = adjMatrix.Transpose();
+
+	return adjMatrix;
+}
 
 template<typename T>
 Vector2<T> Vector2<T>::GetMidPoint(const Vector2<T>& start, const Vector2<T>& end) {

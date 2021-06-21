@@ -73,11 +73,17 @@ public :
 	T& operator[](size_t idx);
 
 	void operator*(T val) const;
+	Matrix<T, m, n>& operator/(T val);
+
 	
 	T value[m * n];
 };
+
+
 Matrix<float, 2, 2> GetCofactor(const Matrix<float, 3, 3>& mat, int iRow, int iCol);
 Matrix<float, 3, 3> GetCofactor(const Matrix<float, 4, 4>& mat, int iRow, int iCol);
+Matrix<float, 4, 4> GetAdjMatrix(const Matrix<float, 4, 4>& mat);
+
 double GetDeterminant(const Matrix<float, 2, 2>& other);
 double GetDeterminant(const Matrix<float, 3, 3>& other);
 double GetDeterminant(const Matrix<float, 4, 4>& other);
@@ -257,7 +263,29 @@ typename Matrix<T, m, n>::diag_type Matrix<T, m, n>::Diagonal() const
 template<typename T, int m, int n> inline
 Matrix<T, n, m> Matrix<T, m, n>::Transpose() const
 {
-	return Matrix<T, n, m>(*this);
+	Matrix<T, n, m> transposeMatrix;
+	
+	T val;
+	int i = 0, col = 0;
+	while (col < n) {
+		if (i == col) {
+			i++;
+			continue;
+		}
+
+		if (rows <= i) {
+			i = 0;
+			col++;
+		}
+		else {
+			i++;
+		}
+		transposeMatrix[col * m + i] = value[i * n + col];
+	}
+
+
+	
+	return transposeMatrix;
 }
 
 //template<typename T, int m, int n> inline
@@ -397,6 +425,18 @@ void Matrix<T, m, n>::operator*(T val) const{
 	for (size_t iVal = 0; iVal < rows * cols; iVal++) {
 		this->value[iVal] *= val;
 	}
+}
+
+template<typename T, int m, int n> inline
+Matrix<T, m, n>& Matrix<T, m, n>::operator/(T val) {
+	if (val == T(0))
+		return *this;
+
+	for (size_t iVal = 0; iVal < rows * cols; iVal++) {
+		this->value[iVal] /= val;
+	}
+
+	return *this;
 }
 
 ////////////////////////////////////////////////////////////////////
