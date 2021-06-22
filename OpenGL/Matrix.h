@@ -55,10 +55,6 @@ public :
 
 	Matrix<T, n, m> Transpose() const;
 
-	
-	//Matrix<T, m, n> GetCofactor() const;
-	//Matrix<T, n, m> Inverse(int method, bool* p_is_ok = NULL) const;
-
 	Matrix<T, m, n> Multiply(const Matrix<T, m, n>& a) const;
 
 	Matrix<T, m, n> Divide(const Matrix<T, m, n>& a)const;
@@ -91,11 +87,6 @@ double GetDeterminant(const Matrix<float, 4, 4>& other);
 Matrix<float, 2, 2> Inverse(const Matrix<float, 2, 2>& mat);
 Matrix<float, 3, 3> Inverse(const Matrix<float, 3, 3>& mat);
 Matrix<float, 4, 4> Inverse(const Matrix<float, 4, 4>& mat);
-
-
-
-//template<typename T, int m, int n> static double Normalize(const Matrix<T, m, n>& mat);
-//template<typename T, int m, int n> static double Normalize(const Matrix<T, m, n>& mat, int normType);
 
 template<typename T, int m, int n> inline
 Matrix<T, m, n>::Matrix()
@@ -264,105 +255,14 @@ template<typename T, int m, int n> inline
 Matrix<T, n, m> Matrix<T, m, n>::Transpose() const
 {
 	Matrix<T, n, m> transposeMatrix;
-	
-	T val;
-	int i = 0, col = 0;
-	while (col < n) {
-		if (i == col) {
-			i++;
-			continue;
+	for (int iRow = 0; iRow < rows; iRow++) {
+		for (int iCol = 0; iCol < cols; iCol++) {
+			transposeMatrix[iCol * m + iRow] = value[iRow * n + iCol];
 		}
-
-		if (rows <= i) {
-			i = 0;
-			col++;
-		}
-		else {
-			i++;
-		}
-		transposeMatrix[col * m + i] = value[i * n + col];
 	}
-
-
 	
 	return transposeMatrix;
 }
-
-//template<typename T, int m, int n> inline
-//Matrix<T, m, n> Matrix<T, m, n>::GetCofactor() const {
-//	Matrix<T, m, n> cofactor();
-//
-//	if (rows != cols)
-//		return cofactor;
-//
-//	if (rows < 2)
-//		return cofactor;
-//	else if (rows == 2) {
-//		cofactor.value[0][0] = value[1][1];
-//		cofactor.value[0][1] = -value[1][0];
-//		cofactor.value[1][0] = -value[0][1];
-//		cofactor.value[1][1] = value[0][0];
-//		return cofactor;
-//	}else if (3 <= row) {
-//		int DIM = rows;
-//		Matrix<T, DIM, DIM> ***temp= new Matrix **[DIM];
-//		for (int iRow = 0; iRow < DIM; iRow++) {
-//			temp[iRow] = new Matrix * [DIM];
-//		}
-//		for (int iRow = 0; iRow < DIM; iRow++) {
-//			for (int iCol = 0; iCol < DIM; iCol++) {
-//				temp[iRow][iCol] = new Matrix<T, DIM - 1, DIM - 1>();
-//			}
-//		}
-//
-//		for (int element1 = 0; element1 < DIM; element1++) {
-//			for (int element2 = 0; element2 < DIM; element2++) {
-//				int i1 = 0;
-//				for (int i = 0; i < DIM; i++) {
-//					int j1 = 0;
-//					for (int j = 0; j < DIM; j++) {
-//						if (element1 == i || element2 == j)
-//							continue;
-//
-//						temp[element1][element2]->value[i1][j1++] = value[i][j];
-//					}
-//					if (element1 != i)
-//						i1++;
-//				}
-//			}
-//		}
-//
-//		bool flagPositive = true;
-//		for (int element1 = 0; element1 < DIM; element1++) {
-//			flagPositive = ((element1 % 2) == 0);
-//			for (int element2 = 0; element2 < DIM; element2++) {
-//				if (flagPositive == true) {
-//					cofactor.value[element1][element2] = temp[element1][element2].GetDeterminant();
-//					flagPositive = false;
-//				}
-//				else {
-//					GetDeterminant(cofactor.value[element1][element2]);
-//					flagPositive = true;
-//				}
-//			}
-//		}
-//		for (int i = 0; i < DIM; i++) {
-//			for (int j = 0; j < DIM; j++) {
-//				delete temp[i][j];
-//			}
-//		}
-//		for (int i = 0; i < DIM; i++)
-//			delete[] temp[i];
-//
-//		delete[] temp;
-//	}
-//	return cofactor;
-//}
-//template<typename T, int m, int n> inline
-//Matrix<T, n, m> Matrix<T, m, n>::Inverse() const {
-//
-//
-//}
 
 template<typename T, int m, int n> inline
 Matrix<T, m, n> Matrix<T, m, n>::Multiply(const Matrix<T, m, n>& a) const
@@ -899,6 +799,9 @@ public:
 	Vector4& operator=(const Vector2<T>& rhs);
 	Vector4& operator=(const Vector3<T>& rhs);
 
+	const T& operator[](size_t idx)const;
+	T& operator[](size_t idx);
+
 	T x; T y; T z; T w;
 };
 
@@ -1023,13 +926,31 @@ Vector4<T>& Vector4<T>::operator=(const Vector3<T>& rhs) {
 	this->w = 0.0f;
 	return *this;
 }
+template<typename T> inline
+const T& Vector4<T>::operator[](size_t index) const{
+	assert((unsigned)index < (unsigned)4);
 
+	switch (index) {
+	case 0: return x;
+	case 1: return y;
+	case 2: return z;
+	case 3: return w;
+	}
 
+	return x;
+}
+template<typename T> inline
+T& Vector4<T>::operator[](size_t index) {
+	assert((unsigned)index < (unsigned)4);
 
-//Global Functions
-template<typename T, typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr>
-T Dot(const Vector4<T>& v1, const Vector4<T>& v2) {
-	return T((v1.x * v2.x) + (v1.y * v2.y) + (v1.z * v2.z));
+	switch (index) {
+	case 0: return x;
+	case 1: return y;
+	case 2: return z;
+	case 3: return w;
+	}
+
+	return x;
 }
 
 typedef Vector4<unsigned char> Vec4b;
@@ -1040,3 +961,22 @@ typedef Vector4<double> Vec4d;
 typedef Vector4<float> Vec4f;
 
 
+//Global Functions
+template<typename T, typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr>
+T Dot(const Vector4<T>& v1, const Vector4<T>& v2) {
+	return T((v1.x * v2.x) + (v1.y * v2.y) + (v1.z * v2.z));
+}
+
+template<typename T>
+Vector4<T> Transform(const Matrix<T, 4, 4>& transformMatrix, const Vector4<T>& targetVector) {
+	Vector4<T> transformedVector;
+	int iCol = 0;
+	while(iCol < 4){
+		T val(0);
+		for (int iRow = 0; iRow < 4; iRow++) {
+			val += targetVector[iCol] * transformMatrix[(iRow * 4) + iCol];
+		}
+		transformedVector[iCol++] = val;
+	}
+	return transformedVector;
+}
