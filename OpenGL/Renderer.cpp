@@ -46,6 +46,7 @@ bool Renderer::AllocateVertexBuffer(unsigned int& vertexArrayId, unsigned int& v
 	pGL->glBindVertexArray(vertexArrayId);
 	pGL->glGenBuffers(1, &vertexBufferId);
 
+
 	pBindFunction(*pGL, vertexData, vertexBufferId, numVertices, sizeofVertex);
 	return true;
 }

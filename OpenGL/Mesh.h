@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <array>
 #include "Matrix.h"
 #include "RGBA.h"
 
@@ -20,39 +21,68 @@ struct VertexMaster {
 typedef unsigned char byte;
 typedef void (VertexCopyCallback)(const VertexMaster& source, byte* destination);
 typedef void (VertexBufferBindCallback)(OpenGL& gl, void* pVertexBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeofVertex);
-struct Vertex {
+//struct Vertex {
+//public:
+//	Vertex();
+//	Vertex(const Vec3f& pos);
+//	~Vertex();
+//
+//	Vec3f position;
+//};
+//struct ColorVertex : public Vertex {
+//public:
+//	typedef unsigned int GLuint;
+//
+//	ColorVertex();
+//	ColorVertex(const Vec3f& pos, const RGBA& color);
+//	~ColorVertex();
+//
+//	static void Copy(const VertexMaster& source, byte* pDestination);
+//	static void BindVertexBuffer(OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeofVertex);
+//	
+//	RGBA color;
+//};
+
+struct Vertex{
 public:
 	Vertex();
-	Vertex(const Vec3f& pos);
+	Vertex(const Vec3f& pos, const Vec2f& uv, const Vec3f& normal);
 	~Vertex();
-
-	Vec3f position;
-};
-struct ColorVertex : public Vertex {
-public:
-	typedef unsigned int GLuint;
-
-	ColorVertex();
-	ColorVertex(const Vec3f& pos, const RGBA& color);
-	~ColorVertex();
-
-	static void Copy(const VertexMaster& source, byte* pDestination);
-	static void BindVertexBuffer(OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeofVertex);
-	
-	RGBA color;
-};
-
-struct TexturedVertex : public Vertex {
-public:
-	TexturedVertex();
-	TexturedVertex(const Vec3f& pos, const Vec2f& uv, const Vec3f& normal);
-	~TexturedVertex();
 
 	static void Copy(const VertexMaster& source, byte* pDestination);
 	static void BindVertexBuffer(OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeOfVertex);
-
+	static byte* ReadBufferData(byte* pBuffer, size_t targetDataSize);
+	Vec3f position;
 	Vec2f uv0;
 	Vec3f normal;
+};
+
+struct Triangle {
+public:
+	Triangle();
+	~Triangle();
+
+	void Set(const Vertex& v0, const Vertex& v1, const Vertex& v2);
+	Vertex* Get(size_t index);
+
+	void SetPosition(size_t index, float posX, float posY, float posZ);
+	void SetPosition(size_t index, const Vec3f& pos);
+	Vec3f GetPosition(size_t index) const;
+
+	void SetNormal(size_t index, float normalX, float normalY, float normalZ);
+	void SetNormal(size_t index, const Vec3f& normal);
+	Vec3f GetNormal(size_t index) const;
+
+	void SetUV(size_t index, float u, float v);
+	void SetUV(size_t index, const Vec2f& uv);
+	Vec2f GetUV(size_t index) const;
+
+	std::array<Vertex, 3> vertices;
+};
+
+struct Triangles : public std::vector<Triangle> {
+public:
+
 };
 
 class Mesh
@@ -69,16 +99,16 @@ public:
 	void Shutdown(Renderer& renderer);
 	void Render(Renderer& renderer);
 
+
 	Mesh& operator=(const Mesh& other) = delete;
 	Mesh& operator=(Mesh&& other) = delete;
 protected:
-	//bool InitializeBuffers(const OpenGL& gl);
-	//void ShutdownBuffers(const OpenGL& gl);
-	//void RenderBuffers(const OpenGL& gl);
-	
+	Triangle tri;
 	int vertexCount, indexCount;
 	unsigned int vertexArrayId, vertexBufferId, indexBufferId;
 };
+
+
 
 //
 //class DiffuseMesh : public Mesh {

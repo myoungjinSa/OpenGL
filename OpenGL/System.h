@@ -36,6 +36,9 @@ private:
 	HINSTANCE hInstance;
 	HWND hWnd;
 
+	int screenWidth;
+	int screenHeight;
+
 	OpenGL* pOpenGL;
 	Input* pInput;
 	Renderer* pRenderer;

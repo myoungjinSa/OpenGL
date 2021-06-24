@@ -20,8 +20,8 @@ public:
 	Point2(const Size<T>& size);
 	//Point2(const Vector2<T>& vec);
 	
-	Point2& operator =(const Point2& pt);
-	Point2& operator =(Point2&& pt) noexcept;
+	Point2& operator=(const Point2& pt);
+	Point2& operator=(Point2&& pt) noexcept;
 
 	T Dot(const Point2& pt) const;
 	double DDot(const Point2& pt) const;
@@ -37,6 +37,32 @@ typedef Point2<long long> Point2l;
 typedef Point2<float> Point2f;
 typedef Point2<double> Point2d;
 
+template<typename T> class Point3
+{
+public:
+	typedef T value_type;
+
+	Point3();
+	Point3(T x, T y, T z);
+	Point3(const Point3<T>& pt);
+	Point3(Point3<T>&& pt) noexcept;
+	
+	Point3& operator=(const Point3<T>& pt);
+	Point3& operator=(Point3<T>&& pt) noexcept;
+
+	T Dot(const Point3<T>& pt) const;
+	double DDot(const Point3<T>& pt) const;
+	double Cross(const Point3<T>& pt) const;
+
+	T x;
+	T y;
+	T z;
+};
+
+typedef Point3<int> Point3i;
+typedef Point3<long long> Point3l;
+typedef Point3<float> Point3f;
+typedef Point3<double> Point3d;
 
 template<typename T> class Size
 {

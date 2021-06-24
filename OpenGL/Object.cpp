@@ -94,7 +94,7 @@ bool Cube::Initialize(Renderer& renderer) {
 	if (!pMesh)
 		return false;
 
-	meshBuilder.CopyToMesh(renderer, pMesh.get(), &TexturedVertex::Copy, sizeof(TexturedVertex));
+	meshBuilder.CopyToMesh(renderer, pMesh.get(), &Vertex::Copy, sizeof(Vertex));
 
 	texture = TextureLoader::GetTexture(renderer, "Capture.bmp");
 

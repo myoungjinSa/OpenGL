@@ -8,7 +8,9 @@ System::System()
 	: pOpenGL(nullptr),
 	pScene(nullptr),
 	pInput(nullptr),
-	pRenderer(nullptr)
+	pRenderer(nullptr),
+	screenHeight(0),
+	screenWidth(0)
 {
 
 }
@@ -22,7 +24,6 @@ System::~System() {
 }
 
 bool System::Initialize() {
-	int screenWidth, screenHeight;
 	bool result;
 
 	pOpenGL = new OpenGL();
@@ -183,7 +184,9 @@ LRESULT CALLBACK System::MessageHandler(HWND hwnd, UINT umsg, WPARAM wParam, LPA
 		
 		Input::ProcessLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		SetCapture(hWnd);
-		
+		if (pScene) {
+			pScene->Picking(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), screenWidth, screenHeight);
+		}
 		return 0;
 	}
 	case WM_MOUSEMOVE:

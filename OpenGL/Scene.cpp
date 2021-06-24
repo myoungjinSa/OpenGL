@@ -96,10 +96,10 @@ Matrix<float, 4, 4> Scene::GetProjectionMatrix() const {
 	return projectionMatrix;
 }
 
-void Scene::Picking(int x, int y) {
+void Scene::Picking(int x, int y, int screenWidth, int screenHeight) {
 	RayCast rayCast(*this);
 
-	Object* pHitObject = rayCast.HitTest(x, y);
+	Object* pHitObject = rayCast.HitTest(x, y, screenWidth, screenHeight);
 	if (pHitObject) {
 
 	}

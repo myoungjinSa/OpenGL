@@ -136,6 +136,72 @@ template class Point2<long long>;
 template class Point2<float>;
 template class Point2<double>;
 
+////////////////////////////////////////////////////////////////////////
+template<typename T> inline
+Point3<T>::Point3() 
+	:x(0), y(0), z(0)
+{
+
+}
+
+template<typename T> inline
+Point3<T>::Point3(T _x, T _y, T _z) 
+	: x(_x), y(_y), z(_z)
+{
+
+}
+
+template<typename T> inline
+Point3<T>::Point3(const Point3<T>& pt) 
+	: x(pt.x), y(pt.y), z(pt.z)
+{
+	
+}
+template<typename T> inline
+Point3<T>::Point3(Point3<T>&& pt) noexcept 
+	: x(std::move(pt.x)), y(std::move(pt.y)), z(std::move(pt.z))
+{
+
+}
+
+
+template<typename T> inline
+Point3<T>& Point3<T>::operator=(const Point3<T>& pt) {
+	x = pt.x;
+	y = pt.y;
+	z = pt.z;
+	return *this;
+}
+
+template<typename T> inline
+Point3<T>& Point3<T>::operator=(Point3<T>&& pt) noexcept {
+	x = std::move(pt.x);
+	y = std::move(pt.y);
+	z = std::move(pt.z);
+	return *this;
+}
+template<typename T> inline
+T Point3<T>::Dot(const Point3& pt) const {
+	return x * pt.x + y * pt.y + z * pt.z;			//need to saturate cast
+}
+
+
+template<typename T> inline
+double Point3<T>::DDot(const Point3& pt) const {
+	return (double)x * pt.x + (double)y * pt.y + (double)z * pt.z;
+}
+
+template<typename T> inline
+double Point3<T>::Cross(const Point3& pt) const {
+	return (double)y * pt.z - (double)x * pt.z; + (double)x * pt.y;
+}
+
+
+//명시적 템플릿 인스턴스화 선언
+template class Point3<int>;
+template class Point3<long long>;
+template class Point3<float>;
+template class Point3<double>;
 
 ///////////////////////////////Size////////////////////////////////////
 template<typename T> inline

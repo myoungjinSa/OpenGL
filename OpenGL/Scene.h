@@ -23,7 +23,7 @@ public:
 	Matrix<float, 4, 4> GetViewMatrix() const;
 	Matrix<float, 4, 4> GetProjectionMatrix() const;
 
-	void Picking(int x, int y);
+	void Picking(int x, int y, int screenWidth, int screenHeight);
 private:
 	Camera* pCamera;
 	PhongShader* pShader;
