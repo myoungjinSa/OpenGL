@@ -110,9 +110,43 @@ byte* Vertex::ReadBufferData(byte* pBuffer, size_t targetDataSize) {
 	return pReturn;
 }
 
+VertexList::VertexList() {
+
+}
+
+VertexList::VertexList(size_t size) {
+	vertexList.reserve(size);
+}
+
+VertexList::~VertexList() {
+	vertexList.clear();
+}
+
+
+void VertexList::Add(IComponent& obj) {
+	vertexList.push_back(&obj);
+}
+
+bool VertexList::Remove(IComponent& obj) {
+	size_t oldCount = vertexList.size();
+	vertexList.erase(std::remove(std::begin(vertexList), std::end(vertexList), &obj), std::end(vertexList));
+	if (oldCount = vertexList.size())
+		return false;
+
+	return true;
+}
+
+IComponent* VertexList::GetChild(size_t nth) {
+	if (vertexList.size() <= nth)
+		return nullptr;
+
+	return vertexList[nth];
+}
+
 //////////////////////////////////////////////////////////////////////////////////////////////////
-Triangle::Triangle() {
-	
+Triangle::Triangle(const Vertex& v0, const Vertex& v1, const Vertex& v2)
+{
+	Set(v0, v1, v2);
 }
 
 Triangle::~Triangle() {
@@ -209,44 +243,55 @@ Vec2f Triangle::GetUV(size_t index) const {
 	return vertices[index].uv0;
 }
 
+Triangles::Triangles(size_t size)
+{
+	triangles.reserve(size);
+}
+
+Triangles::~Triangles() {
+	triangles.clear();
+}
+
+void Triangles::Add(IComponent& obj) {
+	triangles.push_back(&obj);
+}
+
+bool Triangles::Remove(IComponent& obj) {
+	size_t oldCount = triangles.size();
+	triangles.erase(std::remove(std::begin(triangles), std::end(triangles), &obj), std::end(triangles));
+	if (oldCount == triangles.size())
+		return false;
+
+	return true;
+}
+
+IComponent* Triangles::GetChild(size_t index) {
+	if (triangles.size() <= index)
+		return nullptr;
+
+	return triangles[index];
+}
+
 
 Mesh::Mesh()
-	:tri(), vertexCount(0), vertexArrayId(0), vertexBufferId(0), indexCount(0), indexBufferId(0)
+	:meshes(1), vertexCount(0), vertexArrayId(0), vertexBufferId(0), indexCount(0), indexBufferId(0)
 {
 
 }
 
 Mesh::~Mesh() {
-
+	
 }
 
 bool Mesh::Initialize(Renderer& renderer, VertexBufferBindCallback* pBindFuction, void* vertexData, unsigned int numVertices, unsigned int sizeofVertex, unsigned int* indexData, unsigned int numIndices) {
 	vertexCount = numVertices;
 	indexCount = numIndices;
 
-	Vec3f* pPosBuffer = reinterpret_cast<Vec3f*>(Vertex::ReadBufferData(static_cast<byte*>(vertexData), sizeof(Vec3f)));
-	if (!pPosBuffer)
-		return false;
+	BuildVertexList(vertexData);
+	BuildIndexList(indexData);
+
+	BuildTriangleMeshes();
 	
-	LogDebug(L"Vertex Position : %5lf, %5lf, %5lf\n", pPosBuffer->x, pPosBuffer->y, pPosBuffer->z);;
-
-	free(pPosBuffer); pPosBuffer = nullptr;
-
-	Vec2f* pUVBuffer = reinterpret_cast<Vec2f*>(Vertex::ReadBufferData(static_cast<byte*>(vertexData), sizeof(Vec3f) + sizeof(Vec2f)));
-	if (!pUVBuffer)
-		return false;
-
-	LogDebug(L"UV Position : %5lf, %5lf\n", pUVBuffer->x, pUVBuffer->y);;
-	
-	free(pUVBuffer); pUVBuffer = nullptr;
-
-	Vec3f* pNormalBuffer = reinterpret_cast<Vec3f*>(Vertex::ReadBufferData(static_cast<byte*>(vertexData), sizeof(Vec3f) + sizeof(Vec2f) + sizeof(Vec3f)));
-	if (!pNormalBuffer)
-		return false;
-
-	LogDebug(L"UV Position : %5lf, %5lf\n", pNormalBuffer->x, pNormalBuffer->y);;
-	free(pNormalBuffer); pNormalBuffer = nullptr;
-
 	renderer.AllocateVertexBuffer(vertexArrayId, vertexBufferId, vertexData, pBindFuction, numVertices, sizeofVertex);
 	renderer.AllocateIndexBuffer(indexBufferId, indexCount, indexData);
 
@@ -265,9 +310,63 @@ void Mesh::Shutdown(Renderer& renderer) {
 }
 
 void Mesh::Render(Renderer& renderer) {
-	//renderer.DrawVertexBuffer(vertexArrayId, 0, vertexCount);
 	renderer.DrawIndexBuffer(vertexArrayId, indexCount);
 }
+bool Mesh::BuildTriangleMeshes() {
+
+	for (size_t iIndex = 0; iIndex < indexCount; iIndex++) {
+
+	}
+	Triangle* meshTriangle = new Triangle(v0, v1, v2);
+
+	meshes.Add(*meshTriangle);
+
+
+
+	return true;
+}
+bool Mesh::BuildVertexList(void* vertexDatas) {
+	size_t offset = 0;
+	for (size_t iVertex = 0; iVertex < vertexCount; iVertex++) {
+		offset += sizeof(Vec3f);
+		Vec3f* pPosBuffer = reinterpret_cast<Vec3f*>(Vertex::ReadBufferData(static_cast<byte*>(vertexDatas) + offset, sizeof(Vec3f)));
+		if (!pPosBuffer)
+			return false;
+
+		LogDebug(L"Vertex Position : %5lf, %5lf, %5lf\n", pPosBuffer->x, pPosBuffer->y, pPosBuffer->z);
+
+		offset += sizeof(Vec2f);
+		Vec2f* pUVBuffer = reinterpret_cast<Vec2f*>(Vertex::ReadBufferData(static_cast<byte*>(vertexDatas) + offset, sizeof(Vec3f) + sizeof(Vec2f)));
+		if (!pUVBuffer)
+			return false;
+
+		LogDebug(L"UV Position : %5lf, %5lf\n", pUVBuffer->x, pUVBuffer->y);
+
+		offset += sizeof(Vec3f);
+		Vec3f* pNormalBuffer = reinterpret_cast<Vec3f*>(Vertex::ReadBufferData(static_cast<byte*>(vertexDatas) + offset, sizeof(Vec3f) + sizeof(Vec2f) + sizeof(Vec3f)));
+		if (!pNormalBuffer)
+			return false;
+
+		LogDebug(L"UV Position : %5lf, %5lf\n", pNormalBuffer->x, pNormalBuffer->y);
+
+
+		Vertex v(pPosBuffer[iVertex], pUVBuffer[iVertex], pNormalBuffer[iVertex]);
+		vertexList.Add(v);
+
+		free(pPosBuffer); pPosBuffer = nullptr;
+		free(pUVBuffer); pUVBuffer = nullptr;
+		free(pNormalBuffer); pNormalBuffer = nullptr;
+	}
+	return true;
+}
+
+bool Mesh::BuildIndexList(unsigned int* indicesData) {
+	size_t offset = 0;
+	for (size_t iIndices = 0; iIndices < indexCount; iIndices++) {
+		indexList.push_back(indicesData[indexCount]);
+	}
+}
+
 
 ///////////////////////////////// Mesh Builder /////////////////////////////
 MeshBuilder::MeshBuilder() 

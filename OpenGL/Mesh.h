@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <array>
+#include "Compositor.h"
 #include "Matrix.h"
 #include "RGBA.h"
 
@@ -43,7 +44,7 @@ typedef void (VertexBufferBindCallback)(OpenGL& gl, void* pVertexBuffer, unsigne
 //	RGBA color;
 //};
 
-struct Vertex{
+struct Vertex : public IComponent{
 public:
 	Vertex();
 	Vertex(const Vec3f& pos, const Vec2f& uv, const Vec3f& normal);
@@ -57,9 +58,22 @@ public:
 	Vec3f normal;
 };
 
-struct Triangle {
+struct VertexList : public ICompositor {
 public:
-	Triangle();
+	VertexList() = delete;
+	VertexList(size_t size);
+	~VertexList();
+	void Add(IComponent& obj);
+	bool Remove(IComponent& obj);
+	IComponent* GetChild(size_t nth);
+private:
+	std::vector<IComponent*> vertexList;
+};
+
+struct Triangle : public IComponent {
+public:
+	Triangle() = delete;
+	Triangle(const Vertex& v0, const Vertex& v1, const Vertex& v2);
 	~Triangle();
 
 	void Set(const Vertex& v0, const Vertex& v1, const Vertex& v2);
@@ -80,9 +94,18 @@ public:
 	std::array<Vertex, 3> vertices;
 };
 
-struct Triangles : public std::vector<Triangle> {
+struct Triangles : public ICompositor {
 public:
+	Triangles() = delete;
+	Triangles(size_t size);
+	~Triangles();
 
+	void Add(IComponent& obj);
+	bool Remove(IComponent& obj);
+	IComponent* GetChild(size_t nth);
+
+private:
+	std::vector<IComponent*> triangles;
 };
 
 class Mesh
@@ -99,11 +122,17 @@ public:
 	void Shutdown(Renderer& renderer);
 	void Render(Renderer& renderer);
 
+	bool BuildVertexList(void* vertexData);
+	bool BuildIndexList(unsigned int* indicesData);
+	bool BuildTriangleMeshes();
 
 	Mesh& operator=(const Mesh& other) = delete;
 	Mesh& operator=(Mesh&& other) = delete;
 protected:
-	Triangle tri;
+	VertexList vertexList;
+	std::vector<unsigned int> indexList;
+
+	Triangles meshes;
 	int vertexCount, indexCount;
 	unsigned int vertexArrayId, vertexBufferId, indexBufferId;
 };
