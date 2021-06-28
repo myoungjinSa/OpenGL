@@ -3,6 +3,7 @@
 #include "Renderer.h"
 #include "Logger.h"
 
+#include <tuple>
 #include <string>
 
 //
@@ -98,7 +99,7 @@ void Vertex::BindVertexBuffer(OpenGL& gl, void* pBuffer, unsigned int vertexBuff
 }
 
 //함수 외부에서 free를 해줘야함
-byte* Vertex::ReadBufferData(byte* pBuffer, size_t targetDataSize) {
+byte* Vertex::ReadBufferData(void* pBuffer, size_t targetDataSize) {
 	if (!pBuffer)
 		return nullptr;
 
@@ -106,44 +107,19 @@ byte* Vertex::ReadBufferData(byte* pBuffer, size_t targetDataSize) {
 	if (!pReturn)
 		return nullptr;
 
+	memset(pReturn, 0, targetDataSize * sizeof(byte));
 	memcpy_s(pReturn, targetDataSize * sizeof(byte), pBuffer, targetDataSize * sizeof(byte));
 	return pReturn;
 }
 
-VertexList::VertexList() {
-
-}
-
-VertexList::VertexList(size_t size) {
-	vertexList.reserve(size);
-}
-
-VertexList::~VertexList() {
-	vertexList.clear();
-}
-
-
-void VertexList::Add(IComponent& obj) {
-	vertexList.push_back(&obj);
-}
-
-bool VertexList::Remove(IComponent& obj) {
-	size_t oldCount = vertexList.size();
-	vertexList.erase(std::remove(std::begin(vertexList), std::end(vertexList), &obj), std::end(vertexList));
-	if (oldCount = vertexList.size())
-		return false;
-
-	return true;
-}
-
-IComponent* VertexList::GetChild(size_t nth) {
-	if (vertexList.size() <= nth)
-		return nullptr;
-
-	return vertexList[nth];
-}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
+Triangle::Triangle()
+{
+	
+}
+
+
 Triangle::Triangle(const Vertex& v0, const Vertex& v1, const Vertex& v2)
 {
 	Set(v0, v1, v2);
@@ -243,38 +219,8 @@ Vec2f Triangle::GetUV(size_t index) const {
 	return vertices[index].uv0;
 }
 
-Triangles::Triangles(size_t size)
-{
-	triangles.reserve(size);
-}
-
-Triangles::~Triangles() {
-	triangles.clear();
-}
-
-void Triangles::Add(IComponent& obj) {
-	triangles.push_back(&obj);
-}
-
-bool Triangles::Remove(IComponent& obj) {
-	size_t oldCount = triangles.size();
-	triangles.erase(std::remove(std::begin(triangles), std::end(triangles), &obj), std::end(triangles));
-	if (oldCount == triangles.size())
-		return false;
-
-	return true;
-}
-
-IComponent* Triangles::GetChild(size_t index) {
-	if (triangles.size() <= index)
-		return nullptr;
-
-	return triangles[index];
-}
-
-
 Mesh::Mesh()
-	:meshes(1), vertexCount(0), vertexArrayId(0), vertexBufferId(0), indexCount(0), indexBufferId(0)
+	:meshes(), vertexList(), vertexCount(0), vertexArrayId(0), vertexBufferId(0), indexCount(0), indexBufferId(0)
 {
 
 }
@@ -287,14 +233,13 @@ bool Mesh::Initialize(Renderer& renderer, VertexBufferBindCallback* pBindFuction
 	vertexCount = numVertices;
 	indexCount = numIndices;
 
+	renderer.AllocateVertexBuffer(vertexArrayId, vertexBufferId, vertexData, pBindFuction, numVertices, sizeofVertex);
+	renderer.AllocateIndexBuffer(indexBufferId, indexCount, indexData);
+
 	BuildVertexList(vertexData);
 	BuildIndexList(indexData);
 
 	BuildTriangleMeshes();
-	
-	renderer.AllocateVertexBuffer(vertexArrayId, vertexBufferId, vertexData, pBindFuction, numVertices, sizeofVertex);
-	renderer.AllocateIndexBuffer(indexBufferId, indexCount, indexData);
-
 	
 	return true;
 }
@@ -313,45 +258,42 @@ void Mesh::Render(Renderer& renderer) {
 	renderer.DrawIndexBuffer(vertexArrayId, indexCount);
 }
 bool Mesh::BuildTriangleMeshes() {
-
-	for (size_t iIndex = 0; iIndex < indexCount; iIndex++) {
-
+	for (size_t iIndex = 0; iIndex < indexCount; iIndex += 3) {
+		Vertex v = vertexList.at(indexList[iIndex]);
+		std::tuple<const Vertex&, const Vertex&, const Vertex&> vTuple = std::make_tuple(vertexList.at(indexList[iIndex]), vertexList.at(indexList[iIndex + 1]), vertexList.at(indexList[iIndex + 2]));
+		meshes.push_back(Triangle(std::get<0>(vTuple), std::get<1>(vTuple), std::get<2>(vTuple)));
 	}
-	Triangle* meshTriangle = new Triangle(v0, v1, v2);
-
-	meshes.Add(*meshTriangle);
-
-
-
 	return true;
 }
 bool Mesh::BuildVertexList(void* vertexDatas) {
 	size_t offset = 0;
 	for (size_t iVertex = 0; iVertex < vertexCount; iVertex++) {
-		offset += sizeof(Vec3f);
 		Vec3f* pPosBuffer = reinterpret_cast<Vec3f*>(Vertex::ReadBufferData(static_cast<byte*>(vertexDatas) + offset, sizeof(Vec3f)));
 		if (!pPosBuffer)
 			return false;
 
+		offset += sizeof(Vec3f);
 		LogDebug(L"Vertex Position : %5lf, %5lf, %5lf\n", pPosBuffer->x, pPosBuffer->y, pPosBuffer->z);
 
-		offset += sizeof(Vec2f);
-		Vec2f* pUVBuffer = reinterpret_cast<Vec2f*>(Vertex::ReadBufferData(static_cast<byte*>(vertexDatas) + offset, sizeof(Vec3f) + sizeof(Vec2f)));
+
+		Vec2f* pUVBuffer = reinterpret_cast<Vec2f*>(Vertex::ReadBufferData(static_cast<byte*>(vertexDatas) + offset, sizeof(Vec2f)));
 		if (!pUVBuffer)
 			return false;
 
-		LogDebug(L"UV Position : %5lf, %5lf\n", pUVBuffer->x, pUVBuffer->y);
+		offset += sizeof(Vec2f);
+		LogDebug(L"UV  : %5lf, %5lf\n", pUVBuffer->x, pUVBuffer->y);
 
-		offset += sizeof(Vec3f);
-		Vec3f* pNormalBuffer = reinterpret_cast<Vec3f*>(Vertex::ReadBufferData(static_cast<byte*>(vertexDatas) + offset, sizeof(Vec3f) + sizeof(Vec2f) + sizeof(Vec3f)));
+
+		Vec3f* pNormalBuffer = reinterpret_cast<Vec3f*>(Vertex::ReadBufferData(static_cast<byte*>(vertexDatas) + offset, sizeof(Vec3f)));
 		if (!pNormalBuffer)
 			return false;
 
-		LogDebug(L"UV Position : %5lf, %5lf\n", pNormalBuffer->x, pNormalBuffer->y);
+		offset += sizeof(Vec3f);
+		LogDebug(L"Normal : %5lf, %5lf, %5lf\n", pNormalBuffer->x, pNormalBuffer->y, pNormalBuffer->z);
 
 
-		Vertex v(pPosBuffer[iVertex], pUVBuffer[iVertex], pNormalBuffer[iVertex]);
-		vertexList.Add(v);
+		Vertex v(*pPosBuffer, *pUVBuffer, *pNormalBuffer);
+		vertexList.push_back(v);
 
 		free(pPosBuffer); pPosBuffer = nullptr;
 		free(pUVBuffer); pUVBuffer = nullptr;
@@ -361,10 +303,10 @@ bool Mesh::BuildVertexList(void* vertexDatas) {
 }
 
 bool Mesh::BuildIndexList(unsigned int* indicesData) {
-	size_t offset = 0;
 	for (size_t iIndices = 0; iIndices < indexCount; iIndices++) {
-		indexList.push_back(indicesData[indexCount]);
+		indexList.push_back(indicesData[iIndices]);
 	}
+	return true;
 }
 
 

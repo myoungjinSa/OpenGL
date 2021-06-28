@@ -27,11 +27,10 @@ RayCast::~RayCast() {
 }
 
 Object* RayCast::HitTest(float x, float y, int screenWidth, int screenHeight) {
-	Vec3f rayDirection = CalculateRay(targetScene, x, y, screenWidth, screenHeight);
-	Ray ray(rayDirection, 1000.0f);
+	Vec3f worldRayDirection = CalculateRay(targetScene, x, y, screenWidth, screenHeight);
+	Ray ray(worldRayDirection, 1000.0f);
 	
-
-
+	
 	return nullptr;
 }
 Vec2f RayCast::GetNormalizedDeviceCoords(float x, float y, int screenWidth, int screenHeight) {

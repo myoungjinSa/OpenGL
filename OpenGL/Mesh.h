@@ -44,7 +44,7 @@ typedef void (VertexBufferBindCallback)(OpenGL& gl, void* pVertexBuffer, unsigne
 //	RGBA color;
 //};
 
-struct Vertex : public IComponent{
+struct Vertex{
 public:
 	Vertex();
 	Vertex(const Vec3f& pos, const Vec2f& uv, const Vec3f& normal);
@@ -52,27 +52,16 @@ public:
 
 	static void Copy(const VertexMaster& source, byte* pDestination);
 	static void BindVertexBuffer(OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeOfVertex);
-	static byte* ReadBufferData(byte* pBuffer, size_t targetDataSize);
+	static byte* ReadBufferData(void* pBuffer, size_t targetDataSize);
+
 	Vec3f position;
 	Vec2f uv0;
 	Vec3f normal;
 };
 
-struct VertexList : public ICompositor {
+struct Triangle{
 public:
-	VertexList() = delete;
-	VertexList(size_t size);
-	~VertexList();
-	void Add(IComponent& obj);
-	bool Remove(IComponent& obj);
-	IComponent* GetChild(size_t nth);
-private:
-	std::vector<IComponent*> vertexList;
-};
-
-struct Triangle : public IComponent {
-public:
-	Triangle() = delete;
+	Triangle();
 	Triangle(const Vertex& v0, const Vertex& v1, const Vertex& v2);
 	~Triangle();
 
@@ -94,19 +83,6 @@ public:
 	std::array<Vertex, 3> vertices;
 };
 
-struct Triangles : public ICompositor {
-public:
-	Triangles() = delete;
-	Triangles(size_t size);
-	~Triangles();
-
-	void Add(IComponent& obj);
-	bool Remove(IComponent& obj);
-	IComponent* GetChild(size_t nth);
-
-private:
-	std::vector<IComponent*> triangles;
-};
 
 class Mesh
 {
@@ -129,10 +105,10 @@ public:
 	Mesh& operator=(const Mesh& other) = delete;
 	Mesh& operator=(Mesh&& other) = delete;
 protected:
-	VertexList vertexList;
+	std::vector<Vertex> vertexList;
 	std::vector<unsigned int> indexList;
 
-	Triangles meshes;
+	std::vector<Triangle> meshes;
 	int vertexCount, indexCount;
 	unsigned int vertexArrayId, vertexBufferId, indexBufferId;
 };
