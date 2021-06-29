@@ -96,6 +96,11 @@ Matrix<float, 4, 4> Scene::GetProjectionMatrix() const {
 	return projectionMatrix;
 }
 
+
+
+size_t Scene::GetObjectCount() const {
+	return pShader->GetObjectCount();
+}
 void Scene::Picking(int x, int y, int screenWidth, int screenHeight) {
 	RayCast rayCast(*this);
 
@@ -104,3 +109,10 @@ void Scene::Picking(int x, int y, int screenWidth, int screenHeight) {
 
 	}
 }
+
+
+bool Scene::IntersectObjects(const Ray& ray) const {
+	return pShader->IntersectObjects(ray);
+}
+
+

@@ -104,6 +104,9 @@ public:
 
 	Mesh& operator=(const Mesh& other) = delete;
 	Mesh& operator=(Mesh&& other) = delete;
+
+	size_t	GetTriangleMeshCount() const;
+	const Triangle& GetTriangleMesh(size_t index) const;
 protected:
 	std::vector<Vertex> vertexList;
 	std::vector<unsigned int> indexList;

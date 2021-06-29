@@ -8,6 +8,7 @@ class PhongShader;
 class Object;
 class Camera;
 class Renderer;
+class Ray;
 class Scene final
 {
 public:
@@ -23,7 +24,9 @@ public:
 	Matrix<float, 4, 4> GetViewMatrix() const;
 	Matrix<float, 4, 4> GetProjectionMatrix() const;
 
-	void Picking(int x, int y, int screenWidth, int screenHeight);
+	size_t	GetObjectCount() const;
+	void	Picking(int x, int y, int screenWidth, int screenHeight);
+	bool	IntersectObjects(const Ray& ray) const;
 private:
 	Camera* pCamera;
 	PhongShader* pShader;

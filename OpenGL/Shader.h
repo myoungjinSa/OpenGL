@@ -8,6 +8,7 @@ class OpenGL;
 class Object;
 class ShaderVisitor;
 class Renderer;
+class Ray;
 struct ShaderParameter {
 	Matrix<float, 4, 4> worldMatrix;
 	Matrix<float, 4, 4> viewMatrix;
@@ -34,19 +35,18 @@ public:
 	virtual void Render(Renderer& renderer) = 0;
 	virtual void Render(Renderer& renderer, Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& projectionMatrix, Vec3f& lightPosition, Vec3f& cameraPosition) = 0;
 	void SetShader(Renderer& renderer);
+
+	size_t GetObjectCount() const;
+	
+	bool IntersectObjects(const Ray& ray) const;
 protected:
 	virtual bool InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer) = 0;
 	void ShutdownShader(Renderer& gl);
 
-	/*void OutputShaderErrorMessage(OpenGL& gl, HWND hWnd, unsigned int shaderId, char*);
-	void OutputLinkErrorMessage(OpenGL& gl, HWND hWnd, unsigned int programId);
-	char* LoadShaderSourceFile(const char* filename);
-	
-	bool CompileShader(const char* vsFilename, const char* fsFilename, OpenGL& pGL, HWND hWnd);*/
-
 	unsigned int vertexShader;
 	unsigned int fragmentShader;
 	unsigned int shaderProgram;
+
 	std::vector<Object*> objects;
 };
 

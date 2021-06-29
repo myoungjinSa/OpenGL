@@ -7,6 +7,7 @@ class OpenGL;
 class Mesh;
 class Texture;
 class Renderer;
+class Ray;
 class Object
 {
 public:
@@ -31,6 +32,7 @@ public:
 	Vec3f GetRight() const;
 	Vec3f GetUp() const;
 
+	bool Intersect(const Ray& ray, double& distance);
 public:
 	std::shared_ptr<Material> material;
 protected:
@@ -39,6 +41,11 @@ protected:
 
 	Matrix<float, 4, 4> worldMatrix;
 	float movingSpeed;
+
+	std::shared_ptr<Mesh> pMesh;
+	std::shared_ptr<Texture> texture;
+
+	bool IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, double& distance);
 };
 
 class Cube : public Object {
@@ -55,9 +62,6 @@ public:
 
 	Cube& operator=(const Cube& other);
 	Cube& operator=(Cube&& other) noexcept;
-private:
 
-	std::shared_ptr<Mesh> pMesh;
-	std::shared_ptr<Texture> texture;
 };
 

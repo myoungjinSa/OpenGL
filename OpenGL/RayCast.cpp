@@ -30,6 +30,9 @@ Object* RayCast::HitTest(float x, float y, int screenWidth, int screenHeight) {
 	Vec3f worldRayDirection = CalculateRay(targetScene, x, y, screenWidth, screenHeight);
 	Ray ray(worldRayDirection, 1000.0f);
 	
+	for (size_t iObj = 0; iObj < targetScene.GetObjectCount(); iObj++) {
+		targetScene.IntersectObjects(ray);
+	}
 	
 	return nullptr;
 }

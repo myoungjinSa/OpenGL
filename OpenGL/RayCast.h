@@ -23,7 +23,6 @@ public:
 	~RayCast();
 
 	Object* HitTest(float x, float y, int screenWidth, int screenHeight);
-	bool	IntersectObjects(const Ray& ray, const Object& object) const;
 private:
 	Vec3f CalculateRay(const Scene& targetScene, float x, float y, int screenWidth, int screenHeight);
 	Vec2f GetNormalizedDeviceCoords(float x, float y, int screenWidth, int screenHeight);

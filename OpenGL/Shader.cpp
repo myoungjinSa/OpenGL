@@ -4,6 +4,7 @@
 #include "Renderer.h"
 #include "String/String.h"
 #include "Logger.h"
+#include "RayCast.h"
 #include <fstream>
 
 void MakeWorldMatrix(const Vec3f& position, const Vec3f& look, const Vec3f& right, const Vec3f& up, Matrix<float, 4, 4>& worldMatrix) {
@@ -53,6 +54,21 @@ void Shader::SetShader(Renderer& renderer) {
 
 void Shader::ShutdownShader(Renderer& renderer) {
 	renderer.Shutdown(shaderProgram, vertexShader, fragmentShader);
+}
+
+
+
+size_t Shader::GetObjectCount() const {
+	return objects.size();
+}
+
+bool Shader::IntersectObjects(const Ray& ray) const {
+	double distance = 0.0;
+	for (size_t iObj = 0; iObj < objects.size(); iObj++) {
+		objects[iObj]->Intersect(ray, distance);
+	}
+
+	return true;
 }
 
 ColorShader::ColorShader() 

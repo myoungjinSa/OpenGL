@@ -309,6 +309,17 @@ bool Mesh::BuildIndexList(unsigned int* indicesData) {
 	return true;
 }
 
+size_t Mesh::GetTriangleMeshCount() const {
+	return meshes.size();
+}
+const Triangle& Mesh::GetTriangleMesh(size_t index) const {
+	if (meshes.size() <= index) {
+		LogError(L"Triangle::GetTriangleMesh() - Index is out of range");
+		assert(0);
+		return *meshes.end();
+	}
+	return meshes.at(index);
+}
 
 ///////////////////////////////// Mesh Builder /////////////////////////////
 MeshBuilder::MeshBuilder() 

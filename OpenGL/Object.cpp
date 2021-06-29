@@ -4,9 +4,10 @@
 #include "Object.h"
 #include "Input.h"
 #include "Material.h"
+#include "RayCast.h"
 
 Object::Object() 
-	:position(0.0f, 0.0f, 0.0f), rotation(0.0f, 0.0f, 0.0f), movingSpeed(1.0f)
+	: pMesh{ nullptr }, texture{ nullptr }, position(0.0f, 0.0f, 0.0f), rotation(0.0f, 0.0f, 0.0f), movingSpeed(1.0f)
 {
 
 }
@@ -55,9 +56,22 @@ Vec3f Object::GetUp() const {
 	return Normalize(upVector);
 }
 
+bool Object::Intersect(const Ray& ray, double& distance) {
+	bool bIntersect = false;
+	for (size_t iTriangle = 0; iTriangle < pMesh->GetTriangleMeshCount(); iTriangle++) {
+		Triangle triangleMesh = pMesh->GetTriangleMesh(iTriangle);
+		bIntersect = IntersectTriangle(ray, triangleMesh.vertices[0].position, triangleMesh.vertices[1].position, triangleMesh.vertices[2].position, distance);
+	}
+	
+	return bIntersect;
+}
+bool Object::IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, double& distance) {
+
+	return true;
+}
 ///////////////////////////////////////////////////////////////
 Cube::Cube()
-	:Object(), pMesh{ nullptr }
+	:Object()
 {
 	worldMatrix = Matrix<float, 4, 4>::Identity();
 }
