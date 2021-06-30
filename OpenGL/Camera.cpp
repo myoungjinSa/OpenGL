@@ -63,7 +63,7 @@ void Camera::Update(float deltaTime) {
 	BuildViewMatrix(pos, lookAt, up);
 	SetPosition(pos);
 
-	LogInfo(L"Camera Pos : x = %3f, y = %3f, z = %3f", pos.x, pos.y, pos.z);
+	
 }
 
 void Camera::MatrixRotationYawPitchRoll(Matrix<float, 3, 3>& matrix, float yaw, float pitch, float roll) {
@@ -114,9 +114,9 @@ void Camera::BuildViewMatrix(Vec3f pos, Vec3f lookAt, Vec3f up) {
 
 	yAxis = Cross(zAxis, xAxis);
 
-	float xPos = Dot(xAxis, position) * -1.0f;
-	float yPos = Dot(yAxis, position) * -1.0f;
-	float zPos = Dot(zAxis, position) * -1.0f;
+	float xPos = DotProduct(xAxis, position) * -1.0f;
+	float yPos = DotProduct(yAxis, position) * -1.0f;
+	float zPos = DotProduct(zAxis, position) * -1.0f;
 
 	viewMatrix.value[0] = xAxis.x;
 	viewMatrix.value[1] = yAxis.x;

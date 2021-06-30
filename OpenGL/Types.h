@@ -23,8 +23,8 @@ public:
 	Point2& operator=(const Point2& pt);
 	Point2& operator=(Point2&& pt) noexcept;
 
-	T Dot(const Point2& pt) const;
-	double DDot(const Point2& pt) const;
+	T DotProduct(const Point2& pt) const;
+	double DDotProduct(const Point2& pt) const;
 	double Cross(const Point2& pt) const;
 	bool Inside(const Rect<T>& rect) const;
 
@@ -50,8 +50,8 @@ public:
 	Point3& operator=(const Point3<T>& pt);
 	Point3& operator=(Point3<T>&& pt) noexcept;
 
-	T Dot(const Point3<T>& pt) const;
-	double DDot(const Point3<T>& pt) const;
+	T DotProduct(const Point3<T>& pt) const;
+	double DDotProduct(const Point3<T>& pt) const;
 	double Cross(const Point3<T>& pt) const;
 
 	T x;

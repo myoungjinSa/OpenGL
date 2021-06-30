@@ -241,7 +241,11 @@ bool System::InitializeWindows(OpenGL* pOpenGL, int& screenWidth, int& screenHei
 	wc.cbSize = sizeof(WNDCLASSEX);
 
 	// Register the window class.
-	RegisterClassEx(&wc);
+	if (!RegisterClassEx(&wc)) {
+		MessageBox(NULL, L"Failed To Register The Window Class.", L"ERROR",
+			MB_OK | MB_ICONEXCLAMATION);
+		return FALSE; // Exit And Return FALSE
+	}
 
 	// Create a temporary window for the OpenGL extension setup.
 	hWnd = CreateWindowEx(WS_EX_APPWINDOW, applicationName, applicationName, WS_POPUP,
@@ -312,7 +316,7 @@ bool System::InitializeWindows(OpenGL* pOpenGL, int& screenWidth, int& screenHei
 	SetFocus(hWnd);
 
 	// Hide the mouse cursor.
-	ShowCursor(false);
+	ShowCursor(true);
 	return true;
 }
 

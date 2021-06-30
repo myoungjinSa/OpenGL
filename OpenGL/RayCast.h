@@ -12,6 +12,9 @@ public:
 
 	void SetLength(float _length) { length = _length; }
 	float GetLength() const { return length; }
+
+	Vec3f GetDirection() const { return direction; }
+	void SetDirection(const Vec3f& dir) { direction = dir; }
 private:
 	float length;
 	Vec3f direction;

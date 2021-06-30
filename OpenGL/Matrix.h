@@ -37,9 +37,9 @@ public :
 	static Matrix Eyes();
 	static Matrix Diagonal(const diag_type& d);
 
-	T Dot(const Matrix<T, m, n>& v)const;
+	T DotProduct(const Matrix<T, m, n>& v)const;
 
-	double DDot(const Matrix<T, m, n>& v)const;
+	double DDotProduct(const Matrix<T, m, n>& v)const;
 
 	//Change the matrix shape
 	template<int m1, int n1> Matrix<T, m1, n1> Reshape() const;
@@ -186,7 +186,7 @@ Matrix<T, m, n> Matrix<T, m, n>::Eyes() {
 
 
 template<typename T, int m, int n> inline
-T Matrix<T, m, n>::Dot(const Matrix<T, m, n>& mat)const {
+T Matrix<T, m, n>::DotProduct(const Matrix<T, m, n>& mat)const {
 	T s = 0;
 	for (int i = 0; i < channels; i++)
 		s += value[i] * mat.value[i];
@@ -194,7 +194,7 @@ T Matrix<T, m, n>::Dot(const Matrix<T, m, n>& mat)const {
 }
 
 template<typename T, int m, int n> inline
-double Matrix<T, m, n>::DDot(const Matrix<T, m, n>& mat) const {
+double Matrix<T, m, n>::DDotProduct(const Matrix<T, m, n>& mat) const {
 	double s = 0;
 	for (int i = 0; i < channels; i++)
 		s += (double)value[i] * mat.value[i];
@@ -470,7 +470,7 @@ Vector2<T> Normalize(const Vector2<T>& v) {
 }
 
 template<typename T, typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr>
-T Dot(const Vector2<T>& v1, const Vector2<T>& v2) {
+T DotProduct(const Vector2<T>& v1, const Vector2<T>& v2) {
 	return T((v1.x * v2.x) + (v1.y * v2.y));
 }
 
@@ -555,6 +555,7 @@ public:
 	void SetXYZ(T x, T y, T z);
 
 	Vector3 Cross(const Vector3& v) const;
+	T DotProduct(const Vector3& v)const;
 	void Normalize();
 	T CalculateMagnitude() const;
 	static Vector3 GetMidPoint(const Vector3& start, const Vector3& end);
@@ -614,6 +615,11 @@ Vector3<T>::operator Vector3<T2>() const
 template<typename T> inline
 Vector3<T> Vector3<T>::Cross(const Vector3<T>& v) const {
 	return Vector3<T>(y * z - z * y, z * x - x * z, x * y - y * x);
+}
+
+template<typename T> inline
+T Vector3<T>::DotProduct(const Vector3<T>& v) const {
+	return T((x * v.x) + (y * v.y) + (z * v.z));
 }
 
 template<typename T>
@@ -766,7 +772,7 @@ Vector3<T> Normalize(const Vector3<T>& v) {
 
 
 template<typename T, typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr>
-T Dot(const Vector3<T>& v1, const Vector3<T>& v2) {
+T DotProduct(const Vector3<T>& v1, const Vector3<T>& v2) {
 	return T((v1.x * v2.x) + (v1.y * v2.y) + (v1.z * v2.z));
 }
 
@@ -963,7 +969,7 @@ typedef Vector4<float> Vec4f;
 
 //Global Functions
 template<typename T, typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr>
-T Dot(const Vector4<T>& v1, const Vector4<T>& v2) {
+T DotProduct(const Vector4<T>& v1, const Vector4<T>& v2) {
 	return T((v1.x * v2.x) + (v1.y * v2.y) + (v1.z * v2.z));
 }
 

@@ -46,13 +46,13 @@ Point2<T>& Point2<T>::operator=(Point2&& pt) noexcept {
 }
 
 template<typename T> inline
-T Point2<T>::Dot(const Point2& pt) const {
+T Point2<T>::DotProduct(const Point2& pt) const {
 	return x * pt.x + y * pt.y;			//need to saturate cast
 }
 
 
 template<typename T> inline
-double Point2<T>::DDot(const Point2& pt) const {
+double Point2<T>::DDotProduct(const Point2& pt) const {
 	return (double)x * pt.x + (double)y * pt.y;
 }
 
@@ -181,13 +181,13 @@ Point3<T>& Point3<T>::operator=(Point3<T>&& pt) noexcept {
 	return *this;
 }
 template<typename T> inline
-T Point3<T>::Dot(const Point3& pt) const {
+T Point3<T>::DotProduct(const Point3& pt) const {
 	return x * pt.x + y * pt.y + z * pt.z;			//need to saturate cast
 }
 
 
 template<typename T> inline
-double Point3<T>::DDot(const Point3& pt) const {
+double Point3<T>::DDotProduct(const Point3& pt) const {
 	return (double)x * pt.x + (double)y * pt.y + (double)z * pt.z;
 }
 

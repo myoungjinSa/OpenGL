@@ -60,12 +60,34 @@ bool Object::Intersect(const Ray& ray, double& distance) {
 	bool bIntersect = false;
 	for (size_t iTriangle = 0; iTriangle < pMesh->GetTriangleMeshCount(); iTriangle++) {
 		Triangle triangleMesh = pMesh->GetTriangleMesh(iTriangle);
-		bIntersect = IntersectTriangle(ray, triangleMesh.vertices[0].position, triangleMesh.vertices[1].position, triangleMesh.vertices[2].position, distance);
+		bIntersect = IntersectTriangle(ray, triangleMesh.vertices[0].position, triangleMesh.vertices[1].position, triangleMesh.vertices[2].position, false, distance);
 	}
 	
 	return bIntersect;
 }
-bool Object::IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, double& distance) {
+bool Object::IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, bool bFrontOnly, double& distance) {
+	Vec3f edge1 = v1 - v0;
+	Vec3f edge2 = v2 - v0;
+
+	Vec3f pVec = ray.GetDirection().Cross(edge2);
+
+	float det = edge1.DotProduct(pVec);
+
+	Vec3f tVec;
+	if (det > 0) {
+
+	}else {
+		//BackFace 
+		if (bFrontOnly)
+			return false;
+
+
+	}
+
+	if (det < 0.0001f)
+		return false;
+
+
 
 	return true;
 }

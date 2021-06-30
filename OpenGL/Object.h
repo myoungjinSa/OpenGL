@@ -45,7 +45,7 @@ protected:
 	std::shared_ptr<Mesh> pMesh;
 	std::shared_ptr<Texture> texture;
 
-	bool IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, double& distance);
+	bool IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, bool bFrontOnly, double& distance);
 };
 
 class Cube : public Object {

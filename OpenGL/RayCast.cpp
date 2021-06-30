@@ -2,10 +2,11 @@
 #include "MathUtils.h"
 #include "Scene.h"
 #include "Object.h"
+#include "Logger.h"
 
 
 Ray::Ray(const Vec3f& _direction, float _length) 
-	: direction(_direction),length(_length)
+	: direction(_direction), length(_length)
 {
 
 }
@@ -27,8 +28,9 @@ RayCast::~RayCast() {
 }
 
 Object* RayCast::HitTest(float x, float y, int screenWidth, int screenHeight) {
-	Vec3f worldRayDirection = CalculateRay(targetScene, x, y, screenWidth, screenHeight);
-	Ray ray(worldRayDirection, 1000.0f);
+	Vec3f worldRay = CalculateRay(targetScene, x, y, screenWidth, screenHeight);
+	LogInfo(L"Ray: x = %5lf, y = %5lf, z = %5lf", worldRay.x, worldRay.y, worldRay.z);
+	Ray ray(worldRay, 1000.0f);
 	
 	for (size_t iObj = 0; iObj < targetScene.GetObjectCount(); iObj++) {
 		targetScene.IntersectObjects(ray);
