@@ -614,7 +614,7 @@ Vector3<T>::operator Vector3<T2>() const
 }
 template<typename T> inline
 Vector3<T> Vector3<T>::Cross(const Vector3<T>& v) const {
-	return Vector3<T>(y * z - z * y, z * x - x * z, x * y - y * x);
+	return Vector3<T>(v.y * z - v.z * y, v.z * x - v.x * z, v.x * y - v.y * x);
 }
 
 template<typename T> inline

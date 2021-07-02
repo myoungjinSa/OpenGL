@@ -75,19 +75,31 @@ bool Object::IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1,
 
 	Vec3f tVec;
 	if (det > 0) {
-
+		tVec = v0 - ray.GetPosition();
 	}else {
 		//BackFace 
 		if (bFrontOnly)
 			return false;
 
-
+		tVec = v0 - ray.GetPosition();
+		det = -det;
 	}
 
 	if (det < 0.0001f)
 		return false;
 
 
+	float u = tVec.DotProduct(pVec);
+	if (u < 0 || u > det)
+		return false;
+
+	Vec3f qVec = tVec.Cross(edge1);
+
+	float v = ray.GetDirection().DotProduct(qVec);
+	if (v < 0 || u + v > det)
+		return false;
+
+	distance = edge2.DotProduct(qVec) / det;
 
 	return true;
 }

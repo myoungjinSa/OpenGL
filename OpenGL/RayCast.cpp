@@ -5,8 +5,8 @@
 #include "Logger.h"
 
 
-Ray::Ray(const Vec3f& _direction, float _length) 
-	: direction(_direction), length(_length)
+Ray::Ray(const Vec3f& _position, const Vec3f& _direction, float _length) 
+	: position(_position), direction(_direction), length(_length)
 {
 
 }
@@ -30,7 +30,13 @@ RayCast::~RayCast() {
 Object* RayCast::HitTest(float x, float y, int screenWidth, int screenHeight) {
 	Vec3f worldRay = CalculateRay(targetScene, x, y, screenWidth, screenHeight);
 	LogInfo(L"Ray: x = %5lf, y = %5lf, z = %5lf", worldRay.x, worldRay.y, worldRay.z);
-	Ray ray(worldRay, 1000.0f);
+	Matrix<float, 4, 4> inversedViewMatrix = Inverse(targetScene.GetViewMatrix());
+	Vec3f rayWorldPos = Vec3f();
+	rayWorldPos.x = inversedViewMatrix.value[12];
+	rayWorldPos.y = inversedViewMatrix.value[13];
+	rayWorldPos.z = inversedViewMatrix.value[14];
+
+	Ray ray(rayWorldPos, worldRay, 1000.0f);
 	
 	for (size_t iObj = 0; iObj < targetScene.GetObjectCount(); iObj++) {
 		targetScene.IntersectObjects(ray);
