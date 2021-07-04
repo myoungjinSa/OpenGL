@@ -23,11 +23,18 @@ public:
 	Vec3f GetPosition() const;
 	void GetPosition(std::array<float, 4>& position);
 
-	void SetRotation(float x, float y, float z);
-	Vec3f GetRotation() const;
+	Matrix<float, 3, 3> GetRotationMatrix() const;
 
 	void Move(const Vec3f& direction,float elapsedTime);
 	void Rotate(float pitch, float yaw, float roll);
+
+	void SetLook(const Vec3f& look);
+	void SetRight(const Vec3f& right);
+	void SetUp(const Vec3f& up);
+
+	void SetLook(Vec3f&& look) noexcept;
+	void SetRight(Vec3f&& right) noexcept;
+	void SetUp(Vec3f&& up) noexcept;
 
 	Vec3f GetLook() const;
 	Vec3f GetRight() const;

@@ -29,13 +29,25 @@ void Object::GetPosition(std::array<float, 4>& _position) {
 	_position[3] = 1.0f;
 }
 
-void Object::SetRotation(float x, float y, float z) {
-	rotation = Vec3f(x, y, z);
+
+Matrix<float, 3, 3> Object::GetRotationMatrix() const {
+	Matrix<float, 3, 3> rotationMatrix;
+	rotationMatrix.value[0] = worldMatrix.value[0];
+	rotationMatrix.value[1] = worldMatrix.value[1];
+	rotationMatrix.value[2] = worldMatrix.value[2];
+
+	rotationMatrix.value[3] = worldMatrix.value[4];
+	rotationMatrix.value[4] = worldMatrix.value[5];
+	rotationMatrix.value[5] = worldMatrix.value[6];
+
+	rotationMatrix.value[6] = worldMatrix.value[8];
+	rotationMatrix.value[7] = worldMatrix.value[9];
+	rotationMatrix.value[8] = worldMatrix.value[10];
+
+	return rotationMatrix;
 }
 
-Vec3f Object::GetRotation() const {
-	return rotation;
-}
+
 
 void Object::Rotate(float pitch, float yaw, float roll) {
 	float cYaw, cPitch, cRoll, sYaw, sPitch, sRoll;
@@ -75,6 +87,42 @@ void Object::Rotate(float pitch, float yaw, float roll) {
 
 void Object::Move(const Vec3f& direction, float elapsedTime) {
 	position = direction * elapsedTime * movingSpeed;
+}
+
+void Object::SetLook(const Vec3f& look) {
+	worldMatrix.value[8] = look.x;
+	worldMatrix.value[9] = look.y;
+	worldMatrix.value[10] = look.z;
+}
+
+void Object::SetLook(Vec3f&& look) noexcept{
+	worldMatrix.value[8] = look.x;
+	worldMatrix.value[9] = look.y;
+	worldMatrix.value[10] = look.z;
+}
+void Object::SetUp(const Vec3f& up)  {
+	worldMatrix.value[0] = up.x;
+	worldMatrix.value[1] = up.y;
+	worldMatrix.value[2] = up.z;
+}
+
+
+void Object::SetUp(Vec3f&& up) noexcept{
+	worldMatrix.value[0] = up.x;
+	worldMatrix.value[1] = up.y;
+	worldMatrix.value[2] = up.z;
+}
+
+void Object::SetRight(const Vec3f& right) {
+	worldMatrix.value[4] = right.x;
+	worldMatrix.value[5] = right.y;
+	worldMatrix.value[6] = right.z;
+}
+
+void Object::SetRight(Vec3f&& right) noexcept {
+	worldMatrix.value[4] = right.x;
+	worldMatrix.value[5] = right.y;
+	worldMatrix.value[6] = right.z;
 }
 
 Vec3f Object::GetLook() const {

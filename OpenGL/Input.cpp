@@ -65,9 +65,9 @@ void Input::ProcessMouseMove(int x, int y) {
 }
 
 void Input::ProcessLButtonUp(int x, int y) {
-	if (dragging) 
+	if (dragging) {
 		dragging = false;
-
+	}
 }
 
 float Input::GetXAngle(){

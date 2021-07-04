@@ -8,7 +8,7 @@ Camera::Camera()
 	,height(0)
 	,viewMatrix()
 {
-
+	worldMatrix = Matrix<float, 4, 4>::Identity();
 }
 Camera::~Camera() {
 
@@ -30,18 +30,18 @@ void Camera::Shutdown(Renderer& renderer) {
 void Camera::Update(float deltaTime) {
 	Vec3f up, lookAt;
 	float yaw, pitch, roll;
-	Matrix<float, 3, 3> rotationMatrix;
 	
 	up.SetXYZ(0.0f, 1.0f, 0.0f);
 	lookAt.SetXYZ(0.0f, 0.0f, 1.0f);
-
+	
 	const float rotationSpeed = 0.0174532925f;
 	pitch = rotation.x + Input::GetXAngle() * rotationSpeed;
 	yaw = rotation.y + Input::GetYAngle() * rotationSpeed;
 	roll = rotation.z * rotationSpeed;
-	MatrixRotationYawPitchRoll(rotationMatrix, yaw, pitch, roll);
 	//Rotate(pitch, yaw, roll);
 
+	Matrix<float, 3, 3> rotationMatrix = GetRotationMatrix();
+	MatrixRotationYawPitchRoll(rotationMatrix, yaw, pitch, roll);
 	TransformCoord(lookAt, rotationMatrix);
 	TransformCoord(up, rotationMatrix);
 	Vec3f moveOffset;
@@ -59,10 +59,10 @@ void Camera::Update(float deltaTime) {
 	}
 	Vec3f pos = GetPosition();
 	pos += moveOffset;
+
 	lookAt.SetXYZ(pos.x + lookAt.x, pos.y + lookAt.y, pos.z + lookAt.z);
-	std::clog << "s" << std::endl;
-	BuildViewMatrix(pos, lookAt, up);
 	SetPosition(pos);
+	BuildViewMatrix(pos, lookAt, up);
 }
 
 void Camera::MatrixRotationYawPitchRoll(Matrix<float, 3, 3>& matrix, float yaw, float pitch, float roll) {
