@@ -40,6 +40,7 @@ void Camera::Update(float deltaTime) {
 	yaw = rotation.y + Input::GetYAngle() * rotationSpeed;
 	roll = rotation.z * rotationSpeed;
 	MatrixRotationYawPitchRoll(rotationMatrix, yaw, pitch, roll);
+	//Rotate(pitch, yaw, roll);
 
 	TransformCoord(lookAt, rotationMatrix);
 	TransformCoord(up, rotationMatrix);
@@ -62,8 +63,6 @@ void Camera::Update(float deltaTime) {
 	std::clog << "s" << std::endl;
 	BuildViewMatrix(pos, lookAt, up);
 	SetPosition(pos);
-
-	
 }
 
 void Camera::MatrixRotationYawPitchRoll(Matrix<float, 3, 3>& matrix, float yaw, float pitch, float roll) {

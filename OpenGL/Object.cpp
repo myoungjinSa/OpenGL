@@ -37,6 +37,42 @@ Vec3f Object::GetRotation() const {
 	return rotation;
 }
 
+void Object::Rotate(float pitch, float yaw, float roll) {
+	float cYaw, cPitch, cRoll, sYaw, sPitch, sRoll;
+
+	cYaw = cosf(yaw);
+	cPitch = cosf(pitch);
+	cRoll = cosf(roll);
+
+	sYaw = sinf(yaw);
+	sPitch = sinf(pitch);
+	sRoll = sinf(roll);
+
+	Matrix<float, 4, 4> rotationMatrix;
+	//Calculate the yaw, pitch , roll rotation matrix.
+	rotationMatrix[0] = (cRoll * cYaw) + (sRoll * sPitch * sYaw);
+	rotationMatrix[1] = (sRoll * cPitch);
+	rotationMatrix[2] = (cRoll * -sYaw) + (sRoll * sPitch * cYaw);
+	rotationMatrix[3] = 0.0f;
+
+	rotationMatrix[4] = (-sRoll * cYaw) + (cRoll * sPitch * sYaw);
+	rotationMatrix[5] = (cRoll * cPitch);
+	rotationMatrix[6] = (sRoll * sYaw) + (cRoll * sPitch * cYaw);
+	rotationMatrix[7] = 0.0f;
+
+	rotationMatrix[8] = (cPitch * sYaw);
+	rotationMatrix[9] = -sPitch;
+	rotationMatrix[10] = (cPitch * cYaw);
+	rotationMatrix[11] = 0.0f;
+
+	rotationMatrix[12] = 0.0f;
+	rotationMatrix[13] = 0.0f;
+	rotationMatrix[14] = 0.0f;
+	rotationMatrix[15] = 1.0f;
+
+	worldMatrix.Multiply(rotationMatrix);
+}
+
 void Object::Move(const Vec3f& direction, float elapsedTime) {
 	position = direction * elapsedTime * movingSpeed;
 }

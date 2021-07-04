@@ -27,6 +27,7 @@ public:
 	Vec3f GetRotation() const;
 
 	void Move(const Vec3f& direction,float elapsedTime);
+	void Rotate(float pitch, float yaw, float roll);
 
 	Vec3f GetLook() const;
 	Vec3f GetRight() const;

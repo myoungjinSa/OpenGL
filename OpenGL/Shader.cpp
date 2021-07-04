@@ -103,7 +103,9 @@ void ColorShader::Shutdown(Renderer& renderer) {
 	Shader::Shutdown(renderer);
 	ShutdownShader(renderer);
 }
+void ColorShader::Update(float elapsedTime) {
 
+}
 void ColorShader::Render(Renderer& renderer) {
 	for (const auto& obj : objects)
 		obj->Render(renderer);
@@ -166,6 +168,11 @@ bool PhongShader::Initialize(Renderer& renderer) {
 	return true;
 }
 
+void PhongShader::Update(float elapsedTime) {
+	for (const auto& obj : objects) {
+		obj->Rotate(0.0f, 2.0f * elapsedTime, 0.0f);
+	}
+}
 void PhongShader::Render(Renderer& renderer, Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& projectionMatrix ,Vec3f& lightPosition, Vec3f& cameraPosition) {
 	SetShader(renderer);
 	for (size_t iObj = 0; iObj < objects.size(); iObj++) {

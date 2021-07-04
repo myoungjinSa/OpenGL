@@ -45,9 +45,10 @@ Object* RayCast::HitTest(float x, float y, int screenWidth, int screenHeight) {
 	return nullptr;
 }
 Vec2f RayCast::GetNormalizedDeviceCoords(float x, float y, int screenWidth, int screenHeight) {
-	float newX = (2.0f * x) / MAX(screenWidth - 1, 1);
-	float newY = (2.0f * y) / MAX(screenHeight - 1, 1);
-	return Vec2f(newX, -newY);
+	float newX = (2.0f * x) / screenWidth - 1.0f;
+	float newY = 1.0f - (2.0f * y) / screenHeight;
+	//LogInfo(L"newX = %5lf, newY = %5lf\n", newX, newY);
+	return Vec2f(newX, newY);
 }
 
 Vec3f RayCast::CalculateRay(const Scene& targetScene, float x, float y, int screenWidth, int screenHeight) {

@@ -55,7 +55,7 @@ public :
 
 	Matrix<T, n, m> Transpose() const;
 
-	Matrix<T, m, n> Multiply(const Matrix<T, m, n>& a) const;
+	void Multiply(const Matrix<T, m, n>& a);
 
 	Matrix<T, m, n> Divide(const Matrix<T, m, n>& a)const;
 
@@ -265,9 +265,19 @@ Matrix<T, n, m> Matrix<T, m, n>::Transpose() const
 }
 
 template<typename T, int m, int n> inline
-Matrix<T, m, n> Matrix<T, m, n>::Multiply(const Matrix<T, m, n>& a) const
+void Matrix<T, m, n>::Multiply(const Matrix<T, m, n>& a)
 {
-	return Matrix<T, m, n>(*this, a);
+	assert((unsigned)n == (unsigned)m);
+	T sum = 0;
+	for (int iRow = 0; iRow < rows; iRow++) {
+		for (int iCol = 0; iCol < cols; iCol++) {
+			for (int k = 0; k < rows; k++) {
+				sum += value[iRow * m + k] * a.value[k * n + iCol];
+			}
+			value[iRow * m + iCol] = sum;
+			sum = 0;
+		}
+	}
 }
 
 
@@ -762,7 +772,7 @@ Vector3<T> Cross(const Vector3<T>& v1, const Vector3<T>& v2) {
 template<typename T, typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr>
 Vector3<T> Normalize(const Vector3<T>& v) {
 	Vector3<T> ret;
-	T length = sqrt(v.x * v.x) + (v.y * v.y) + (v.z * v.z);
+	T length = sqrt((v.x * v.x) + (v.y * v.y) + (v.z * v.z));
 	ret.x = v.x / length;
 	ret.y = v.y / length;
 	ret.z = v.z / length;

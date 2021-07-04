@@ -32,6 +32,7 @@ public:
 
 	virtual bool Initialize(Renderer& renderer) = 0;
 	virtual void Shutdown(Renderer& renderer);
+	virtual void Update(float elapsedTime) = 0;
 	virtual void Render(Renderer& renderer) = 0;
 	virtual void Render(Renderer& renderer, Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& projectionMatrix, Vec3f& lightPosition, Vec3f& cameraPosition) = 0;
 	void SetShader(Renderer& renderer);
@@ -60,6 +61,7 @@ public:
 
 	bool Initialize(Renderer& renderer) override;
 	void Shutdown(Renderer& renderer) override;
+	void Update(float elapsedTime) override;
 	void Render(Renderer& renderer) override;
 	void Render(Renderer& renderer, Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& projectionMatrix, Vec3f& lightPosition, Vec3f& lightDirection) override {}
 	bool SetShaderParameters(Renderer& renderer, Matrix<float, 4, 4>& worldMatrix, Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& projectionMatrix);
@@ -77,6 +79,7 @@ public:
 
 	bool Initialize(Renderer& renderer) override;
 	void Shutdown(Renderer& renderer) override;
+	void Update(float elapsedTime) override;
 	void Render(Renderer& renderer) override {};
 	void Render(Renderer& gl, Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& projectionMatrix, Vec3f& lightPosition, Vec3f& cameraPosition) override;
 	

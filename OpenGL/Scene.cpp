@@ -56,6 +56,10 @@ bool Scene::BuildObject(Renderer& renderer) {
 void Scene::Update(const float& elapsedTime) {
 	if (pCamera)
 		pCamera->Update(elapsedTime);
+
+	if (pShader) {
+		pShader->Update(elapsedTime);
+	}
 }
 
 bool Scene::Render(Renderer& renderer) {

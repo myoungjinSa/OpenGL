@@ -1,5 +1,6 @@
 #include "Input.h"
 #include "System.h"
+#include "Logger.h"
 #include <fstream>
 #include <sstream>
 
