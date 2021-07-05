@@ -337,6 +337,7 @@ void MeshBuilder::End() {
 		startIndex = vertices.size();
 }
 
+//Pivot¿Ã øﬁ¬  æ∆∑°
 void MeshBuilder::AddQuad(const Vec3f& bottomLeft, const Vec3f& up, float upLength, const Vec3f& right, float rightLength, const Vec3f& normal, const RGBA& color, const Vec2f& uvOffset, float uvStepSize) {
 	unsigned int currentVert = vertices.size();
 
@@ -363,6 +364,38 @@ void MeshBuilder::AddQuad(const Vec3f& bottomLeft, const Vec3f& up, float upLeng
 	AddIndex(1 + currentVert);	
 }
 
+//Pivot¿Ã ¡ﬂæ”
+void MeshBuilder::AddQuad(const Vec3f& center, const Vec3f& extent, const Vec3f& normal, const RGBA& color, const Vec2f& uvOffset, float uvStepSize) {
+	unsigned int currentVert = vertices.size();
+	SetColor(color);
+	SetNormal(normal);
+
+	//Left Top
+	SetUV(Vec2f(center.x - extent.x, center.y + extent.y));
+	AddVertex(Vec3f(center.x - extent.x, center.y + extent.y, center.z - extent.z));
+
+
+	//Right Top
+	SetUV(Vec2f(center.x + extent.x, center.y + extent.y));
+	AddVertex(Vec3f(center.x + extent.x, center.y + extent.y, center.z + extent.z));
+
+	//LeftBottom
+	SetUV(Vec2f(center.x - extent.x, center.y - extent.y));
+	AddVertex(Vec3f(center.x - extent.x, center.y - extent.y, center.z - extent.z));
+
+
+	//Right Bottom
+	SetUV(Vec2f(center.x + extent.x, center.y - extent.y));
+	AddVertex(Vec3f(center.x + extent.x, center.y - extent.y, center.z + extent.z));
+
+	AddIndex(2 + currentVert);
+	AddIndex(3 + currentVert);
+	AddIndex(0 + currentVert);
+	AddIndex(0 + currentVert);
+	AddIndex(3 + currentVert);
+	AddIndex(1 + currentVert);
+}
+
 void MeshBuilder::AddCube(float sideLength, const RGBA& color) {
 	const float halfSideLength = sideLength / 2.0f;
 
@@ -372,6 +405,10 @@ void MeshBuilder::AddCube(float sideLength, const RGBA& color) {
 	AddQuad(Vec3f::FORWARD * sideLength + Vec3f::RIGHT * sideLength, Vec3f::UP, sideLength, Vec3f::FORWARD * -1.0f, sideLength, Vec3f::FORWARD, RGBA::GREEN, Vec2f::ZERO, 1.0f);	//NORTH
 	AddQuad(Vec3f::FORWARD * sideLength, Vec3f::UP, sideLength, Vec3f::FORWARD * -1.0f, sideLength, Vec3f::RIGHT * -1.0f, RGBA::VAPORWAVE, Vec2f::ZERO, 1.0f);						//WEST
 	AddQuad(Vec3f::RIGHT * sideLength, Vec3f::UP, sideLength, Vec3f::FORWARD, sideLength, Vec3f::RIGHT, RGBA::YELLOW, Vec2f::ZERO, 1.0f);										//EAST
+}
+
+void MeshBuilder::AddCube(const Vec3f& center, const Vec3f& extent, const RGBA& color) {
+
 }
 
 void MeshBuilder::AddVertex(const Vec3f& _position) {

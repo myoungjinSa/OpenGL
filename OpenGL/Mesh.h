@@ -183,7 +183,9 @@ public:
 	void CopyToMesh(Renderer& renderers, Mesh* mesh, VertexCopyCallback* copyFunction, unsigned int sizeofVertex);
 
 	void AddCube(float sideLength, const RGBA& color);
+	void AddCube(const Vec3f& center, const Vec3f& extent, const RGBA& color);
 	void AddQuad(const Vec3f& bottomLeft, const Vec3f& up, float upLength, const Vec3f& right, float rightLength, const Vec3f& normal, const RGBA& color = RGBA::WHITE, const Vec2f& uvOffset = Vec2f::ZERO, float uvStepSize = 1.0f);
+	void AddQuad(const Vec3f& center, const Vec3f& extent, const Vec3f& normal, const RGBA& color = RGBA::WHITE, const Vec2f& uvOffset = Vec2f::ZERO, float uvStepSize = 1.0f);
 	void AddVertex(const Vec3f& position);
 	void AddIndex(int index);
 
