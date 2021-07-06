@@ -365,35 +365,44 @@ void MeshBuilder::AddQuad(const Vec3f& bottomLeft, const Vec3f& up, float upLeng
 }
 
 //Pivot¿Ã ¡ﬂæ”
-void MeshBuilder::AddQuad(const Vec3f& center, const Vec3f& extent, const Vec3f& normal, const RGBA& color, const Vec2f& uvOffset, float uvStepSize) {
+void MeshBuilder::AddQuad(const Vec3f& center, const Vec3f& extent, const Vec3f& _normal, const RGBA& color, const Vec2f& uvOffset, float uvStepSize, bool bReversed) {
 	unsigned int currentVert = vertices.size();
 	SetColor(color);
+	Vec3f normal = bReversed ? _normal * -1.0f : _normal;
 	SetNormal(normal);
 
 	//Left Top
-	SetUV(Vec2f(center.x - extent.x, center.y + extent.y));
+	SetUV(bReversed ? Vec2f(1.0f, 1.0f) : Vec2f(0.0f, 1.0f));
 	AddVertex(Vec3f(center.x - extent.x, center.y + extent.y, center.z - extent.z));
 
-
 	//Right Top
-	SetUV(Vec2f(center.x + extent.x, center.y + extent.y));
+	SetUV(bReversed ? Vec2f(0.0f, 1.0f) : Vec2f(1.0f, 1.0f));
 	AddVertex(Vec3f(center.x + extent.x, center.y + extent.y, center.z + extent.z));
 
 	//LeftBottom
-	SetUV(Vec2f(center.x - extent.x, center.y - extent.y));
+	SetUV(bReversed ? Vec2f(1.0f, 0.0f) : Vec2f(0.0f, 0.0f));
 	AddVertex(Vec3f(center.x - extent.x, center.y - extent.y, center.z - extent.z));
 
-
 	//Right Bottom
-	SetUV(Vec2f(center.x + extent.x, center.y - extent.y));
+	SetUV(bReversed ? Vec2f(0.0f, 0.0f) : Vec2f(1.0f, 0.0f));
 	AddVertex(Vec3f(center.x + extent.x, center.y - extent.y, center.z + extent.z));
 
-	AddIndex(2 + currentVert);
-	AddIndex(3 + currentVert);
-	AddIndex(0 + currentVert);
-	AddIndex(0 + currentVert);
-	AddIndex(3 + currentVert);
-	AddIndex(1 + currentVert);
+	if (bReversed) {
+		AddIndex(1 + currentVert);
+		AddIndex(0 + currentVert);
+		AddIndex(2 + currentVert);
+		AddIndex(1 + currentVert);
+		AddIndex(2 + currentVert);
+		AddIndex(3 + currentVert);
+	}
+	else {
+		AddIndex(0 + currentVert);
+		AddIndex(3 + currentVert);
+		AddIndex(2 + currentVert);
+		AddIndex(0 + currentVert);
+		AddIndex(1 + currentVert);
+		AddIndex(3 + currentVert);
+	}
 }
 
 void MeshBuilder::AddCube(float sideLength, const RGBA& color) {
@@ -408,7 +417,20 @@ void MeshBuilder::AddCube(float sideLength, const RGBA& color) {
 }
 
 void MeshBuilder::AddCube(const Vec3f& center, const Vec3f& extent, const RGBA& color) {
+	//Front
+	AddQuad(Vec3f(center.x, center.y, center.z - extent.z), Vec3f(extent.x, extent.y, 0.0f), Vec3f::FORWARD * -1.0f, color, Vec2f::ZERO, 1.0f);
+	//Right
+	AddQuad(Vec3f(center.x + extent.x, center.y, center.z), Vec3f(0.0f, extent.y, extent.z), Vec3f::RIGHT, color, Vec2f::ZERO, 1.0f);
 
+	//Left
+	AddQuad(Vec3f(center.x - extent.x, center.y, center.z), Vec3f(0.0f, extent.y, extent.z ), Vec3f::RIGHT, color, Vec2f::ZERO, 1.0f, true);
+	//Back
+	AddQuad(Vec3f(center.x, center.y, center.z + extent.z), Vec3f(extent.x, extent.y, 0.0f), Vec3f::FORWARD * -1.0f, color, Vec2f::ZERO, 1.0f, true);
+
+	//Top
+	//AddQuad(Vec3f(center.x, center.y, center.z), Vec3f(extent.x, extent.y, extent.z), Vec3f::UP, color, Vec2f::ZERO, 1.0f);
+	
+	
 }
 
 void MeshBuilder::AddVertex(const Vec3f& _position) {
