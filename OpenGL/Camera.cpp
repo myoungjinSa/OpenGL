@@ -8,7 +8,7 @@ Camera::Camera()
 	,height(0)
 	,viewMatrix()
 {
-	worldMatrix = Matrix<float, 4, 4>::Identity();
+	
 }
 Camera::~Camera() {
 
@@ -35,16 +35,18 @@ void Camera::Update(float deltaTime) {
 	lookAt.SetXYZ(0.0f, 0.0f, 1.0f);
 	
 	const float rotationSpeed = 0.0174532925f;
+	Vec3f rotation = transform.get()->GetRotation();
+
 	pitch = rotation.x + Input::GetXAngle() * rotationSpeed;
 	yaw = rotation.y + Input::GetYAngle() * rotationSpeed;
 	roll = rotation.z * rotationSpeed;
-	//Rotate(pitch, yaw, roll);
 
-	Matrix<float, 3, 3> rotationMatrix = GetRotationMatrix();
+	Matrix<float, 3, 3> rotationMatrix = transform.get()->GetRotationMatrix();
 	MatrixRotationYawPitchRoll(rotationMatrix, yaw, pitch, roll);
 	TransformCoord(lookAt, rotationMatrix);
 	TransformCoord(up, rotationMatrix);
 	Vec3f moveOffset;
+	float movingSpeed = transform.get()->GetMovingSpeed();
 	if (Input::IsKeyDown(KEY_D)) {
 		moveOffset.x += movingSpeed * deltaTime;
 	}
@@ -61,7 +63,7 @@ void Camera::Update(float deltaTime) {
 	pos += moveOffset;
 
 	lookAt.SetXYZ(pos.x + lookAt.x, pos.y + lookAt.y, pos.z + lookAt.z);
-	SetPosition(pos);
+	transform.get()->SetPosition(pos);
 	BuildViewMatrix(pos, lookAt, up);
 }
 
@@ -106,6 +108,7 @@ void Camera::TransformCoord(Vec3f& vec, Matrix<float, 3, 3>& matrix) {
 
 void Camera::BuildViewMatrix(Vec3f pos, Vec3f lookAt, Vec3f up) {
 	Vec3f xAxis, yAxis, zAxis;
+	Vec3f position = transform.get()->GetPosition();
 	zAxis = Normalize(lookAt - position);
 
 	xAxis = Cross(up, zAxis);

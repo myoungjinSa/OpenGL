@@ -1,6 +1,9 @@
 #pragma once
 #include <memory>
+#include <vector>
 #include "Matrix.h"
+#include "Component.h"
+#include "Transform.h"
 
 class Material;
 class OpenGL;
@@ -11,44 +14,50 @@ class Ray;
 class Object
 {
 public:
-	Object();
+	explicit Object();
 	virtual ~Object() {}
-	virtual bool Initialize(Renderer& renderer) { return true; }
+	virtual bool Initialize(Renderer& renderer);
 	virtual void Shutdown(Renderer& renderer) {}
 	virtual void Render(Renderer& renderer) {}
 	virtual void Update(float deltaTime){}
 
-	void SetPosition(const Vec3f& position);
+	bool Intersect(const Ray& ray, double& distance);
+
+	template<typename T> std::shared_ptr<T> AddComponent() {
+		static_assert(std::is_base_of<Component, T>::value, "T must derive from Component");
+		for (auto& component : components) {
+			if (std::dynamic_pointer_cast<T>(component)) {
+				return std::dynamic_pointer_cast<T>(component);
+			}
+		}
+
+		std::shared_ptr<T> newComponent = std::make_shared<T>(this);
+		components.push_back(newComponent);
+		return newComponent;
+	}
+	template<typename T> std::shared_ptr<T> GetComponent() {
+		static_assert(std::is_base_of<Component, T>::value, "T must derive from Component");
+
+		for (auto& component : components) {
+			if (std::dynamic_pointer_cast<T>(component)) {
+				return std::dynamic_pointer_cast<T>(component);
+			}
+		}
+		return nullptr;
+	}
 	void SetPosition(float x, float y, float z);
+	void SetPosition(const Vec3f& _position);
 	Vec3f GetPosition() const;
-	void GetPosition(std::array<float, 4>& position);
-
-	Matrix<float, 3, 3> GetRotationMatrix() const;
-
-	void Move(const Vec3f& direction,float elapsedTime);
-	void Rotate(float pitch, float yaw, float roll);
-
-	void SetLook(const Vec3f& look);
-	void SetRight(const Vec3f& right);
-	void SetUp(const Vec3f& up);
-
-	void SetLook(Vec3f&& look) noexcept;
-	void SetRight(Vec3f&& right) noexcept;
-	void SetUp(Vec3f&& up) noexcept;
-
 	Vec3f GetLook() const;
 	Vec3f GetRight() const;
 	Vec3f GetUp() const;
 
-	bool Intersect(const Ray& ray, double& distance);
+	void Rotate(float pitch, float yaw, float roll);
 public:
+	std::shared_ptr<class Transform> transform;
 	std::shared_ptr<Material> material;
 protected:
-	Vec3f position;
-	Vec3f rotation;
-
-	Matrix<float, 4, 4> worldMatrix;
-	float movingSpeed;
+	std::vector<std::shared_ptr<Component>> components;
 
 	std::shared_ptr<Mesh> pMesh;
 	std::shared_ptr<Texture> texture;

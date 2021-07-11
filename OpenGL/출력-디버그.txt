@@ -1,0 +1,189 @@
+﻿'OpenGL.exe'(Win32): 'D:\OpenGL\OpenGL\OpenGL\x64\Debug\OpenGL.exe'을(를) 로드했습니다. 기호가 로드되었습니다.
+'OpenGL.exe'(Win32): 'C:\Windows\System32\ntdll.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\kernel32.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\KernelBase.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\user32.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\win32u.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\gdi32.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\gdi32full.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\msvcp_win.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\ucrtbase.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\msvcp140d.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\vcruntime140d.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\vcruntime140_1d.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\opengl32.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\msvcrt.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\advapi32.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\sechost.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\ucrtbased.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\ucrtbased.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\ucrtbased.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\ucrtbased.dll'을(를) 언로드했습니다.
+'OpenGL.exe'(Win32): 'C:\Windows\System32\ucrtbased.dll'을(를) 언로드했습니다.
+'OpenGL.exe'(Win32): 'C:\Windows\System32\rpcrt4.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\combase.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\glu32.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\imm32.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\kernel.appcore.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\uxtheme.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\msctf.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\oleaut32.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\bcryptprimitives.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\clbcatq.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\AppXDeploymentClient.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\AppXDeploymentClient.dll'을(를) 언로드했습니다.
+'OpenGL.exe'(Win32): 'C:\Windows\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_1c83a5d7cffd7bff\nvoglv64.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\shell32.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\setupapi.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\cfgmgr32.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\bcrypt.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\ole32.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\version.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\wtsapi32.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\msasn1.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\cryptnet.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\crypt32.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\cryptbase.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\devobj.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\wintrust.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\ntmarta.dll'을(를) 로드했습니다. 
+0xb2c 스레드가 종료되었습니다(코드: 0 (0x0)).
+0x40ac 스레드가 종료되었습니다(코드: 0 (0x0)).
+0x2154 스레드가 종료되었습니다(코드: 0 (0x0)).
+'OpenGL.exe'(Win32): 'C:\Windows\System32\DXCore.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\windows.storage.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\wldp.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\SHCore.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\shlwapi.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\dwmapi.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\powrprof.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\umpdc.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\winsta.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\TextInputFramework.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\CoreMessaging.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\CoreUIComponents.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\ws2_32.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\WinTypes.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\WinTypes.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\WinTypes.dll'을(를) 언로드했습니다.
+'OpenGL.exe'(Win32): 'C:\Windows\System32\WinTypes.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\WinTypes.dll'을(를) 언로드했습니다.
+'OpenGL.exe'(Win32): 'C:\Windows\System32\IME\IMEKR\imkrtip.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\propsys.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\IME\SHARED\IMETIP.DLL'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\oleacc.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\dui70.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\IME\IMEKR\imkrapi.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\policymanager.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\msvcp110_win.dll'을(를) 로드했습니다. 
+'OpenGL.exe'(Win32): 'C:\Windows\System32\IME\SHARED\IMJKAPI.DLL'을(를) 로드했습니다. 
+2021-07-11 21:33:37	Vertex Position : -1.000000, 1.000000, -1.000000
+
+2021-07-11 21:33:37	UV  : 0.000000, 1.000000
+
+2021-07-11 21:33:37	Normal : -0.000000, -0.000000, -1.000000
+
+2021-07-11 21:33:37	Vertex Position : 1.000000, 1.000000, -1.000000
+
+2021-07-11 21:33:37	UV  : 1.000000, 1.000000
+
+2021-07-11 21:33:37	Normal : -0.000000, -0.000000, -1.000000
+
+2021-07-11 21:33:37	Vertex Position : -1.000000, -1.000000, -1.000000
+
+2021-07-11 21:33:37	UV  : 0.000000, 0.000000
+
+2021-07-11 21:33:37	Normal : -0.000000, -0.000000, -1.000000
+
+2021-07-11 21:33:37	Vertex Position : 1.000000, -1.000000, -1.000000
+
+2021-07-11 21:33:37	UV  : 1.000000, 0.000000
+
+2021-07-11 21:33:37	Normal : -0.000000, -0.000000, -1.000000
+
+2021-07-11 21:33:37	Vertex Position : 1.000000, 1.000000, -1.000000
+
+2021-07-11 21:33:37	UV  : 0.000000, 1.000000
+
+2021-07-11 21:33:37	Normal : 1.000000, 0.000000, 0.000000
+
+2021-07-11 21:33:37	Vertex Position : 1.000000, 1.000000, 1.000000
+
+2021-07-11 21:33:37	UV  : 1.000000, 1.000000
+
+2021-07-11 21:33:37	Normal : 1.000000, 0.000000, 0.000000
+
+2021-07-11 21:33:37	Vertex Position : 1.000000, -1.000000, -1.000000
+
+2021-07-11 21:33:37	UV  : 0.000000, 0.000000
+
+2021-07-11 21:33:37	Normal : 1.000000, 0.000000, 0.000000
+
+2021-07-11 21:33:37	Vertex Position : 1.000000, -1.000000, 1.000000
+
+2021-07-11 21:33:37	UV  : 1.000000, 0.000000
+
+2021-07-11 21:33:37	Normal : 1.000000, 0.000000, 0.000000
+
+2021-07-11 21:33:37	Vertex Position : -1.000000, 1.000000, -1.000000
+
+2021-07-11 21:33:37	UV  : 1.000000, 1.000000
+
+2021-07-11 21:33:37	Normal : -1.000000, -0.000000, -0.000000
+
+2021-07-11 21:33:37	Vertex Position : -1.000000, 1.000000, 1.000000
+
+2021-07-11 21:33:37	UV  : 0.000000, 1.000000
+
+2021-07-11 21:33:37	Normal : -1.000000, -0.000000, -0.000000
+
+2021-07-11 21:33:37	Vertex Position : -1.000000, -1.000000, -1.000000
+
+2021-07-11 21:33:37	UV  : 1.000000, 0.000000
+
+2021-07-11 21:33:37	Normal : -1.000000, -0.000000, -0.000000
+
+2021-07-11 21:33:37	Vertex Position : -1.000000, -1.000000, 1.000000
+
+2021-07-11 21:33:37	UV  : 0.000000, 0.000000
+
+2021-07-11 21:33:37	Normal : -1.000000, -0.000000, -0.000000
+
+2021-07-11 21:33:37	Vertex Position : -1.000000, 1.000000, 1.000000
+
+2021-07-11 21:33:37	UV  : 1.000000, 1.000000
+
+2021-07-11 21:33:37	Normal : 0.000000, 0.000000, 1.000000
+
+2021-07-11 21:33:37	Vertex Position : 1.000000, 1.000000, 1.000000
+
+2021-07-11 21:33:37	UV  : 0.000000, 1.000000
+
+2021-07-11 21:33:37	Normal : 0.000000, 0.000000, 1.000000
+
+2021-07-11 21:33:37	Vertex Position : -1.000000, -1.000000, 1.000000
+
+2021-07-11 21:33:37	UV  : 1.000000, 0.000000
+
+2021-07-11 21:33:37	Normal : 0.000000, 0.000000, 1.000000
+
+2021-07-11 21:33:37	Vertex Position : 1.000000, -1.000000, 1.000000
+
+2021-07-11 21:33:37	UV  : 0.000000, 0.000000
+
+2021-07-11 21:33:37	Normal : 0.000000, 0.000000, 1.000000
+
+'OpenGL.exe'(Win32): 'C:\Windows\System32\IME\IMEKR\imkrtip.dll'을(를) 언로드했습니다.
+'OpenGL.exe'(Win32): 'C:\Windows\System32\oleacc.dll'을(를) 언로드했습니다.
+'OpenGL.exe'(Win32): 'C:\Windows\System32\dui70.dll'을(를) 언로드했습니다.
+'OpenGL.exe'(Win32): 'C:\Windows\System32\IME\SHARED\IMETIP.DLL'을(를) 언로드했습니다.
+0x22b0 스레드가 종료되었습니다(코드: 0 (0x0)).
+0x3894 스레드가 종료되었습니다(코드: 0 (0x0)).
+0x7e8 스레드가 종료되었습니다(코드: 0 (0x0)).
+0x4a4 스레드가 종료되었습니다(코드: 0 (0x0)).
+0x6a8 스레드가 종료되었습니다(코드: 0 (0x0)).
+0x2e48 스레드가 종료되었습니다(코드: 0 (0x0)).
+0x28a8 스레드가 종료되었습니다(코드: 0 (0x0)).
+0x1e20 스레드가 종료되었습니다(코드: 0 (0x0)).
+0x4704 스레드가 종료되었습니다(코드: 0 (0x0)).
+'[2536] OpenGL.exe' 프로그램이 종료되었습니다(코드: 0 (0x0)).

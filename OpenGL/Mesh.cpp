@@ -2,7 +2,7 @@
 #include "OpenGL.h"
 #include "Renderer.h"
 #include "Logger.h"
-
+#include "Transform.h"
 #include <tuple>
 #include <string>
 
@@ -417,6 +417,9 @@ void MeshBuilder::AddCube(float sideLength, const RGBA& color) {
 }
 
 void MeshBuilder::AddCube(const Vec3f& center, const Vec3f& extent, const RGBA& color) {
+	std::shared_ptr<class Transform> transform = std::make_shared<class Transform>(nullptr);
+	transform.get()->Rotate(90.0f, 0.0f, 0.0f);
+
 	//Front
 	AddQuad(Vec3f(center.x, center.y, center.z - extent.z), Vec3f(extent.x, extent.y, 0.0f), Vec3f::FORWARD * -1.0f, color, Vec2f::ZERO, 1.0f);
 	//Right
