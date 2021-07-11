@@ -418,20 +418,21 @@ void MeshBuilder::AddCube(float sideLength, const RGBA& color) {
 
 void MeshBuilder::AddCube(const Vec3f& center, const Vec3f& extent, const RGBA& color) {
 	std::shared_ptr<class Transform> transform = std::make_shared<class Transform>(nullptr);
-	transform.get()->Rotate(90.0f, 0.0f, 0.0f);
+	Vec3f pivot(center);
 
 	//Front
 	AddQuad(Vec3f(center.x, center.y, center.z - extent.z), Vec3f(extent.x, extent.y, 0.0f), Vec3f::FORWARD * -1.0f, color, Vec2f::ZERO, 1.0f);
 	//Right
-	AddQuad(Vec3f(center.x + extent.x, center.y, center.z), Vec3f(0.0f, extent.y, extent.z), Vec3f::RIGHT, color, Vec2f::ZERO, 1.0f);
+	//AddQuad(Vec3f(center.x + extent.x, center.y, center.z), Vec3f(0.0f, extent.y, extent.z), Vec3f::RIGHT, color, Vec2f::ZERO, 1.0f);
 
 	//Left
-	AddQuad(Vec3f(center.x - extent.x, center.y, center.z), Vec3f(0.0f, extent.y, extent.z ), Vec3f::RIGHT, color, Vec2f::ZERO, 1.0f, true);
+	//AddQuad(Vec3f(center.x - extent.x, center.y, center.z), Vec3f(0.0f, extent.y, extent.z ), Vec3f::RIGHT, color, Vec2f::ZERO, 1.0f, true);
 	//Back
-	AddQuad(Vec3f(center.x, center.y, center.z + extent.z), Vec3f(extent.x, extent.y, 0.0f), Vec3f::FORWARD * -1.0f, color, Vec2f::ZERO, 1.0f, true);
+	//AddQuad(Vec3f(center.x, center.y, center.z + extent.z), Vec3f(extent.x, extent.y, 0.0f), Vec3f::FORWARD * -1.0f, color, Vec2f::ZERO, 1.0f, true);
+	Vec4f rotatedVertex = transform.get()->Rotate(Vec4f(center.x, center.y, center.z, 1.0f), pivot, 90.0f, 0.0f, 0.0f);
 
 	//Top
-	//AddQuad(Vec3f(center.x, center.y, center.z), Vec3f(extent.x, extent.y, extent.z), Vec3f::UP, color, Vec2f::ZERO, 1.0f);
+	AddQuad(Vec3f(rotatedVertex.x, rotatedVertex.y, rotatedVertex.z), Vec3f(extent.x, extent.y, extent.z), Vec3f::UP, color, Vec2f::ZERO, 1.0f);
 	
 	
 }
