@@ -579,6 +579,9 @@ public:
 	Vector3& operator*=(const float& scalarConstant);
 	Vector3& operator=(const Vector2<T>& rhs);
 
+	Vector3 operator-()const;
+	Vector3 operator/(double d) const;
+
 	static const Vector3 ZERO;
 	static const Vector3 ONE;
 	static const Vector3 FORWARD;
@@ -695,6 +698,16 @@ Vector3<T>& Vector3<T>::operator=(const Vector2<T>& rhs) {
 	y += rhs.y;
 	z += T(0);
 	return *this;
+}
+
+template<typename T> inline
+Vector3<T> Vector3<T>::operator-() const {
+	return Vector3<T>(-x, -y, -z);
+}
+template<typename T> inline
+Vector3<T> Vector3<T>::operator/(double d) const {
+	static_assert((d == 0), "dividng by 0.");
+	return Vector3<T>(x / d, y / d, z / d);
 }
 
 

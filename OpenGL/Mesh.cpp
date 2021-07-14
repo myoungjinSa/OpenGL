@@ -422,18 +422,17 @@ void MeshBuilder::AddCube(const Vec3f& center, const Vec3f& extent, const RGBA& 
 
 	//Front
 	AddQuad(Vec3f(center.x, center.y, center.z - extent.z), Vec3f(extent.x, extent.y, 0.0f), Vec3f::FORWARD * -1.0f, color, Vec2f::ZERO, 1.0f);
-	//Right
-	//AddQuad(Vec3f(center.x + extent.x, center.y, center.z), Vec3f(0.0f, extent.y, extent.z), Vec3f::RIGHT, color, Vec2f::ZERO, 1.0f);
+	for (size_t iVertex = 0; iVertex < vertices.size(); iVertex++) {
+		Vec4f rotatedPos = transform.get()->Rotate(Vec4f(vertices[iVertex].position.x, vertices[iVertex].position.y, vertices[iVertex].position.z, 1.0f), pivot, MathUtils::DegreesToRadians(0.0f), MathUtils::DegreesToRadians(30.0f), MathUtils::DegreesToRadians(0.0f));
+		vertices[iVertex].position.x = rotatedPos.x;
+		vertices[iVertex].position.y = rotatedPos.y;
+		vertices[iVertex].position.z = rotatedPos.z;
+	}
 
-	//Left
-	//AddQuad(Vec3f(center.x - extent.x, center.y, center.z), Vec3f(0.0f, extent.y, extent.z ), Vec3f::RIGHT, color, Vec2f::ZERO, 1.0f, true);
-	//Back
-	//AddQuad(Vec3f(center.x, center.y, center.z + extent.z), Vec3f(extent.x, extent.y, 0.0f), Vec3f::FORWARD * -1.0f, color, Vec2f::ZERO, 1.0f, true);
-	Vec4f rotatedVertex = transform.get()->Rotate(Vec4f(center.x, center.y, center.z, 1.0f), pivot, 90.0f, 0.0f, 0.0f);
+	//Vec4f rotatedVertex = transform.get()->Rotate(Vec4f(center.x, center.y, center.z, 1.0f), pivot, 45.0f, 0.0f, 0.0f);
 
 	//Top
-	AddQuad(Vec3f(rotatedVertex.x, rotatedVertex.y, rotatedVertex.z), Vec3f(extent.x, extent.y, extent.z), Vec3f::UP, color, Vec2f::ZERO, 1.0f);
-	
+	//AddQuad(Vec3f(rotatedVertex.x, rotatedVertex.y, rotatedVertex.z), Vec3f(extent.x, extent.y, extent.z), Vec3f::UP, color, Vec2f::ZERO, 1.0f);
 	
 }
 
