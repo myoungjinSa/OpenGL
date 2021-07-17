@@ -706,7 +706,7 @@ Vector3<T> Vector3<T>::operator-() const {
 }
 template<typename T> inline
 Vector3<T> Vector3<T>::operator/(double d) const {
-	static_assert((d == 0), "dividng by 0.");
+	//static_assert((d == 0), "dividng by 0.");
 	return Vector3<T>(x / d, y / d, z / d);
 }
 

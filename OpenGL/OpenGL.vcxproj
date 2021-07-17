@@ -153,7 +153,6 @@
     <ClCompile Include="Matrix.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Object.cpp" />
-    <ClCompile Include="Quaternion.cpp" />
     <ClCompile Include="RayCast.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="Input.cpp" />

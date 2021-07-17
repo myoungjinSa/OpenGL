@@ -417,24 +417,113 @@ void MeshBuilder::AddCube(float sideLength, const RGBA& color) {
 }
 
 void MeshBuilder::AddCube(const Vec3f& center, const Vec3f& extent, const RGBA& color) {
-	std::shared_ptr<class Transform> transform = std::make_shared<class Transform>(nullptr);
-	Vec3f pivot(center);
+	
+	//front
+	Vec3f leftTopFront = Vec3f(center.x - extent.x, center.y + extent.y, center.z - extent.z);
+	Vec3f rightTopFront = Vec3f(center.x + extent.x, center.y + extent.y, center.z - extent.z);
+	Vec3f leftBottomFront = Vec3f(center.x - extent.x, center.y - extent.y, center.z - extent.z);
+	Vec3f rightBottomFront = Vec3f(center.x + extent.x, center.y - extent.y, center.z - extent.z);
 
+
+	//Back
+	Vec3f leftTopBack = Vec3f(center.x - extent.x, center.y + extent.y, center.z + extent.z);
+	Vec3f rightTopBack = Vec3f(center.x + extent.x, center.y + extent.y, center.z + extent.z);
+	Vec3f leftBottomBack = Vec3f(center.x - extent.x, center.y - extent.y, center.z + extent.z);
+	Vec3f rightBottomBack = Vec3f(center.x + extent.x, center.y - extent.y, center.z + extent.z);
+
+	SetColor(color);
+	
 	//Front
-	AddQuad(Vec3f(center.x, center.y, center.z - extent.z), Vec3f(extent.x, extent.y, 0.0f), Vec3f::FORWARD * -1.0f, color, Vec2f::ZERO, 1.0f);
-	for (size_t iVertex = 0; iVertex < vertices.size(); iVertex++) {
-		Vec4f rotatedPos = transform.get()->Rotate(Vec4f(vertices[iVertex].position.x, vertices[iVertex].position.y, vertices[iVertex].position.z, 1.0f), pivot, MathUtils::DegreesToRadians(0.0f), MathUtils::DegreesToRadians(30.0f), MathUtils::DegreesToRadians(0.0f));
-		vertices[iVertex].position.x = rotatedPos.x;
-		vertices[iVertex].position.y = rotatedPos.y;
-		vertices[iVertex].position.z = rotatedPos.z;
-	}
+	//Left Top Front
+	SetUV(Vec2f(0.0f, 1.0f));
+	Vec3f sumNormals = ((Vec3f::FORWARD * -1) + (Vec3f::RIGHT * -1) + (Vec3f::UP)) / 3;
+	sumNormals.Normalize();
 
-	//Vec4f rotatedVertex = transform.get()->Rotate(Vec4f(center.x, center.y, center.z, 1.0f), pivot, 45.0f, 0.0f, 0.0f);
+	SetNormal(sumNormals);
+	AddVertex(leftTopFront);
+
+	//RightTop Front
+	SetUV(Vec2f(1.0f, 1.0f));
+
+	sumNormals = ((Vec3f::FORWARD * -1) + (Vec3f::RIGHT) + (Vec3f::UP)) / 3;
+	sumNormals.Normalize();
+	SetNormal(sumNormals);
+	AddVertex(rightTopFront);
+
+	//left Bottom Front
+	SetUV(Vec2f(0.0f, 0.0f));
+
+	sumNormals = ((Vec3f::FORWARD * -1) + (Vec3f::RIGHT * -1) + (Vec3f::UP * -1)) / 3;
+	sumNormals.Normalize();
+	SetNormal(sumNormals);
+	AddVertex(leftBottomFront);
+
+	//right Bottom Front
+	SetUV(Vec2f(1.0f, 0.0f));
+
+	sumNormals = ((Vec3f::FORWARD * -1) + (Vec3f::RIGHT) + (Vec3f::UP * -1)) / 3;
+	sumNormals.Normalize();
+	SetNormal(sumNormals);
+	AddVertex(rightBottomFront);
+
+
+	//Left Top Back
+	SetUV(Vec2f(1.0f, 1.0f));
+
+	sumNormals = ((Vec3f::FORWARD)+(Vec3f::RIGHT * -1.0f) + (Vec3f::UP)) / 3;
+	sumNormals.Normalize();
+	SetNormal(sumNormals);
+	AddVertex(leftTopBack);
+
+	//Right Top Back
+	SetUV(Vec2f(0.0f, 1.0f));
+
+	sumNormals = ((Vec3f::FORWARD)+(Vec3f::RIGHT)+(Vec3f::UP)) / 3;
+	sumNormals.Normalize();
+	SetNormal(sumNormals);
+	AddVertex(rightTopBack);
+
+	//left Bottom Back
+	SetUV(Vec2f(1.0f, 0.0f));
+
+	sumNormals = ((Vec3f::FORWARD)+(Vec3f::RIGHT * -1.0f) + (Vec3f::UP * -1.0f));
+	sumNormals.Normalize();
+	SetNormal(sumNormals);
+	AddVertex(leftBottomBack);
+
+	//right Bottom Back
+	SetUV(Vec2f(0.0f, 0.0f));
+
+	sumNormals = ((Vec3f::FORWARD)+(Vec3f::RIGHT)+(Vec3f::UP * -1.0f));
+	sumNormals.Normalize();
+	SetNormal(sumNormals);
+	AddVertex(rightBottomBack);
+	
+	//Front
+	AddIndex(0); AddIndex(1); AddIndex(2);
+	AddIndex(1); AddIndex(3); AddIndex(2);
+
+	//Left
+	AddIndex(4); AddIndex(0); AddIndex(6);
+	AddIndex(0); AddIndex(2); AddIndex(6);
+
+	//Right
+	AddIndex(5); AddIndex(7); AddIndex(3);
+	AddIndex(5); AddIndex(3); AddIndex(1);
+
+	//Back
+	AddIndex(6); AddIndex(5); AddIndex(4);
+	AddIndex(6); AddIndex(7); AddIndex(5);
 
 	//Top
-	//AddQuad(Vec3f(rotatedVertex.x, rotatedVertex.y, rotatedVertex.z), Vec3f(extent.x, extent.y, extent.z), Vec3f::UP, color, Vec2f::ZERO, 1.0f);
-	
+	AddIndex(0); AddIndex(4); AddIndex(1);
+	AddIndex(4); AddIndex(5); AddIndex(1);
+
+	//Bottom
+	AddIndex(6); AddIndex(2); AddIndex(3);
+	AddIndex(6); AddIndex(3); AddIndex(7);
 }
+
 
 void MeshBuilder::AddVertex(const Vec3f& _position) {
 	stamp.position = _position;
