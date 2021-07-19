@@ -79,6 +79,6 @@ public:
 
 	Cube& operator=(const Cube& other);
 	Cube& operator=(Cube&& other) noexcept;
-
 };
+
 

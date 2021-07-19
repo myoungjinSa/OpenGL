@@ -404,6 +404,61 @@ void MeshBuilder::AddQuad(const Vec3f& center, const Vec3f& extent, const Vec3f&
 		AddIndex(3 + currentVert);
 	}
 }
+void MeshBuilder::AddSphere(float radius, int sectorCount, int stackCount) {
+	const float PI = acos(-1);
+
+	float nx, ny, nz, lengthInv = 1.0f / radius;
+
+	// build vertices of sphere with smooth shading using parametric equation
+	// x = r * cos(u) * cos(v)
+	// y = r * cos(u) * sin(v)
+	// z = r * sin(u)
+	//u: stack(latitude) angle(-90 <= u <= 90)
+	//v: sector(longitude) angle(0 <= v <= 360)
+	
+	float sectorStep = 2 * PI / sectorCount;				// starting from pi/2 to -pi/2
+	float stackStep = PI / stackCount;
+	float sectorAngle, stackAngle;
+
+	for (int iStack = 0; iStack <= stackCount; iStack++) {
+		stackAngle = PI / 2 - iStack * stackStep;
+		float yz = radius * cosf(stackAngle);
+		float x = radius * sinf(stackAngle);
+		float y = 0.0f, z = 0.0f;
+
+		// add (sectorCount+1) vertices per stack
+		// the first and last vertices have same position and normal, but different tex coords
+		for (int iSector = 0; iSector <= sectorCount; iSector++) {
+			sectorAngle = iSector * sectorStep;
+			//Vertex position
+			y = yz * cosf(sectorAngle);
+			z = yz * sinf(sectorAngle);
+			SetPosition(x, y, z);
+
+			//normalized vertex normal
+			float nx = x * lengthInv;
+			float ny = y * lengthInv;
+			float nz = z * lengthInv;
+			SetNormal(nx, ny, nz);
+
+			// vertex tex coord between [0, 1]
+			float s = (float)iSector / sectorCount;
+			float t = (float)iStack / stackCount;
+			SetUV(s, t);
+			
+			vertices.emplace_back(stamp);
+		}
+	}
+
+	// indices
+//  k1--k1+1
+//  |  / |
+//  | /  |
+//  k2--k2+1
+
+
+
+}
 
 void MeshBuilder::AddCube(float sideLength, const RGBA& color) {
 	const float halfSideLength = sideLength / 2.0f;

@@ -166,10 +166,13 @@ public:
 
 	//SETTERS///////////////////////////////////////////////////////////////////
 	inline void SetColor(const RGBA& color) { stamp.color = color; SetMaskBit(COLOR_BIT); };
+
+	inline void SetPosition(const Vec3f& pos) { stamp.position = pos; SetMaskBit(POSITION_BIT); }
+	inline void SetPosition(float x, float y, float z) { stamp.position = Vec3f(x, y, z); SetMaskBit(POSITION_BIT); }
 	inline void SetUV(const Vec2f& uv) { stamp.uv0 = uv; SetMaskBit(UV0_BIT); };
 	inline void SetUV(float u, float v) { stamp.uv0 = Vec2f(u, v); SetMaskBit(UV0_BIT); };
 	inline void SetNormal(const Vec3f& normal) { stamp.normal = normal, SetMaskBit(NORMAL_BIT); };
-
+	inline void SetNormal(float nx, float ny, float nz) { stamp.normal = Vec3f(nx, ny, nz), SetMaskBit(NORMAL_BIT); }
 	inline void SetMaskBit(const MeshDataFlag flag) {
 		dataMask |= (1 << flag);
 	};
@@ -182,6 +185,7 @@ public:
 
 	void CopyToMesh(Renderer& renderers, Mesh* mesh, VertexCopyCallback* copyFunction, unsigned int sizeofVertex);
 
+	void AddSphere(float radius, int sectorCount, int stackCount);
 	void AddCube(float sideLength, const RGBA& color);
 	void AddCube(const Vec3f& center, const Vec3f& extent, const RGBA& color);
 	void AddQuad(const Vec3f& bottomLeft, const Vec3f& up, float upLength, const Vec3f& right, float rightLength, const Vec3f& normal, const RGBA& color = RGBA::WHITE, const Vec2f& uvOffset = Vec2f::ZERO, float uvStepSize = 1.0f);

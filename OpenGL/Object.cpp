@@ -125,7 +125,7 @@ bool Cube::Initialize(Renderer& renderer) {
 	//MeshBuilder Call
 	MeshBuilder meshBuilder;
 	meshBuilder.AddCube(transform.get()->GetPosition(), Vec3f(1.0f, 1.0f, 1.0f), RGBA::BLUE);
-	//meshBuilder.AddCube(2.0f, RGBA::BLUE);
+
 	if (!pMesh)
 		pMesh = std::make_shared<Mesh>();
 
