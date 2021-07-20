@@ -27,7 +27,7 @@ Scene::~Scene() {
 }
 
 bool Scene::BuildObject(Renderer& renderer) {	
-	phongLight.SetPosition(0.0f, 0.0f, -100.0f);
+	phongLight.SetPosition(0.0f, 0.0f, -10.0f);
 	phongLight.SetDirection(Vec3f::FORWARD);
 
 	pShader = new PhongShader();

@@ -82,3 +82,23 @@ public:
 };
 
 
+class Sphere : public Object {
+public:
+	explicit Sphere(float _radius, int _stackCount, int _sectorCount);
+	Sphere(const Sphere& other);
+	Sphere(Sphere&& other) noexcept;
+	~Sphere() override;
+
+	bool Initialize(Renderer& renderer) override;
+	void Shutdown(Renderer& renderer) override;
+	void Render(Renderer& renderer) override;
+	void Update(float deltaTime) override;
+
+	Sphere& operator=(const Sphere& other);
+	Sphere& operator=(Sphere&& other) noexcept;
+
+private:
+	float radius;
+	int stackCount;
+	int sectorCount;
+};

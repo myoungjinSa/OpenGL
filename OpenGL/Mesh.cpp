@@ -404,7 +404,7 @@ void MeshBuilder::AddQuad(const Vec3f& center, const Vec3f& extent, const Vec3f&
 		AddIndex(3 + currentVert);
 	}
 }
-void MeshBuilder::AddSphere(float radius, int sectorCount, int stackCount) {
+void MeshBuilder::AddSphere(const Vec3f& center, float radius, int sectorCount, int stackCount) {
 	const float PI = acos(-1);
 
 	float nx, ny, nz, lengthInv = 1.0f / radius;
@@ -433,13 +433,11 @@ void MeshBuilder::AddSphere(float radius, int sectorCount, int stackCount) {
 			//Vertex position
 			y = yz * cosf(sectorAngle);
 			z = yz * sinf(sectorAngle);
-			SetPosition(x, y, z);
+			SetPosition(x + center.x, y + center.y, z + center.z);
 
 			//normalized vertex normal
-			float nx = x * lengthInv;
-			float ny = y * lengthInv;
-			float nz = z * lengthInv;
-			SetNormal(nx, ny, nz);
+			Vec3f n = Normalize(center - Vec3f(x, y, z));
+			SetNormal(n);
 
 			// vertex tex coord between [0, 1]
 			float s = (float)iSector / sectorCount;
@@ -451,13 +449,26 @@ void MeshBuilder::AddSphere(float radius, int sectorCount, int stackCount) {
 	}
 
 	// indices
-//  k1--k1+1
-//  |  / |
-//  | /  |
-//  k2--k2+1
+	//  k1------k1+1
+	//  |	 /	|
+	//  |  /	|
+	//  k2----- k2+1
 
+	unsigned int k1, k2, k3, k4;
 
+	for (int iStack = 0; iStack < stackCount; iStack++) {
+		k1 = iStack * (sectorCount + 1);     // beginning of current stack
+		k2 = k1 + sectorCount + 1;
+		for (int iSector = 0; iSector < sectorCount; iSector++, k1++, k2++) {
+			if (iStack != 0) {
+				AddIndex(k1); AddIndex(k1 + 1); AddIndex(k2);
+			}
 
+			if (iStack != (stackCount - 1)) {
+				AddIndex(k2), AddIndex(k1 + 1); AddIndex(k2 + 1);
+			}
+		}
+	}
 }
 
 void MeshBuilder::AddCube(float sideLength, const RGBA& color) {
@@ -525,7 +536,7 @@ void MeshBuilder::AddCube(const Vec3f& center, const Vec3f& extent, const RGBA& 
 	//Left Top Back
 	SetUV(Vec2f(1.0f, 1.0f));
 
-	sumNormals = ((Vec3f::FORWARD)+(Vec3f::RIGHT * -1.0f) + (Vec3f::UP)) / 3;
+	sumNormals = ((Vec3f::FORWARD) + (Vec3f::RIGHT * -1.0f) + (Vec3f::UP)) / 3;
 	sumNormals.Normalize();
 	SetNormal(sumNormals);
 	AddVertex(leftTopBack);
@@ -533,7 +544,7 @@ void MeshBuilder::AddCube(const Vec3f& center, const Vec3f& extent, const RGBA& 
 	//Right Top Back
 	SetUV(Vec2f(0.0f, 1.0f));
 
-	sumNormals = ((Vec3f::FORWARD)+(Vec3f::RIGHT)+(Vec3f::UP)) / 3;
+	sumNormals = ((Vec3f::FORWARD) + (Vec3f::RIGHT) + (Vec3f::UP)) / 3;
 	sumNormals.Normalize();
 	SetNormal(sumNormals);
 	AddVertex(rightTopBack);
@@ -541,7 +552,7 @@ void MeshBuilder::AddCube(const Vec3f& center, const Vec3f& extent, const RGBA& 
 	//left Bottom Back
 	SetUV(Vec2f(1.0f, 0.0f));
 
-	sumNormals = ((Vec3f::FORWARD)+(Vec3f::RIGHT * -1.0f) + (Vec3f::UP * -1.0f));
+	sumNormals = ((Vec3f::FORWARD) + (Vec3f::RIGHT * -1.0f) + (Vec3f::UP * -1.0f)) / 3;
 	sumNormals.Normalize();
 	SetNormal(sumNormals);
 	AddVertex(leftBottomBack);
@@ -549,7 +560,7 @@ void MeshBuilder::AddCube(const Vec3f& center, const Vec3f& extent, const RGBA& 
 	//right Bottom Back
 	SetUV(Vec2f(0.0f, 0.0f));
 
-	sumNormals = ((Vec3f::FORWARD)+(Vec3f::RIGHT)+(Vec3f::UP * -1.0f));
+	sumNormals = ((Vec3f::FORWARD) + (Vec3f::RIGHT) + (Vec3f::UP * -1.0f)) / 3;
 	sumNormals.Normalize();
 	SetNormal(sumNormals);
 	AddVertex(rightBottomBack);

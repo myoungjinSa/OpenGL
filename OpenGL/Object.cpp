@@ -158,3 +158,70 @@ void Cube::Render(Renderer& renderer) {
 	pMesh->Render(renderer);
 }
 
+
+Sphere::Sphere(float _radius, int _stackCount, int _sectorCount)
+	:Object(), radius(_radius), stackCount(_stackCount), sectorCount(_sectorCount)
+{
+
+}
+
+Sphere::Sphere(const Sphere& other)
+{
+	operator=(other);
+}
+
+
+
+Sphere::~Sphere() {
+
+}
+Sphere& Sphere::operator=(const Sphere& other) {
+	if (this == &other)
+		return *this;
+
+	if (0 < other.pMesh.use_count()) {
+		pMesh = other.pMesh;
+	}
+
+	return *this;
+}
+
+bool Sphere::Initialize(Renderer& renderer) {
+	Object::Initialize(renderer);
+
+	//MeshBuilder Call
+	MeshBuilder meshBuilder;
+	meshBuilder.AddSphere(transform.get()->GetPosition(), radius, sectorCount, stackCount);
+
+	if (!pMesh)
+		pMesh = std::make_shared<Mesh>();
+
+	if (!pMesh)
+		return false;
+
+	meshBuilder.CopyToMesh(renderer, pMesh.get(), &Vertex::Copy, sizeof(Vertex));
+
+	texture = TextureLoader::GetTexture(renderer, "Capture.bmp");
+
+	Vec3f diffuseColor(0.8f, 0.85f, 0.85f);
+	Vec4f ambientColor(0.3f, 0.3f, 0.3f, 1.0f);
+	Vec3f specularColor(1.0f, 1.0f, 1.0f);
+	material = std::make_shared<Material>(diffuseColor, ambientColor, specularColor, texture->textureID);
+
+	return true;
+}
+
+void Sphere::Shutdown(Renderer& renderer) {
+	Object::Shutdown(renderer);
+	pMesh->Shutdown(renderer);
+}
+
+void Sphere::Update(float deltaTime) {
+
+}
+
+void Sphere::Render(Renderer& renderer) {
+	Object::Render(renderer);
+	pMesh->Render(renderer);
+}
+

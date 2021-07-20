@@ -9,7 +9,7 @@ in VS_OUT{
 
 uniform sampler2D shaderTexture;
 
-uniform float shininess = 256.0;
+uniform float shininess = 64.0;
 uniform float rimPower = 1.0;
 uniform vec3 diffuseAlbedo;
 uniform vec3 specularAlbedo;
@@ -33,7 +33,7 @@ void main(){
     vec3 lightDir = normalize(fs_in.L);
     vec3 viewDir = normalize(fs_in.V);
 
-    vec3 reflection = reflect(-lightDir, normal);
+    vec3 reflection = reflect(normal, lightDir);
 
     vec4 textureColor = texture(shaderTexture, fs_in.TEXCOORD);
 

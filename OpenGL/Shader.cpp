@@ -156,7 +156,7 @@ bool PhongShader::Initialize(Renderer& renderer) {
 	if (!result)
 		return false;
 
-	Object* pObject = new Cube();
+	Object* pObject = new Sphere(2.0f, 36, 36);
 	objects.emplace_back(pObject);
 
 	for (const auto& obj : objects) {
