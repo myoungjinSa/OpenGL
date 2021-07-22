@@ -83,7 +83,7 @@ bool Texture::LoadBMP(Renderer& renderer, const String& fileName, unsigned int t
 /////////////////////////////////////////////////////////////////////////////
 std::vector<std::pair<String&&, std::shared_ptr<Texture>>> TextureLoader::textures;
 TextureLoader::TextureLoader() {
-	
+	textures.clear();
 }
 
 TextureLoader::~TextureLoader() {
@@ -93,6 +93,8 @@ TextureLoader::~TextureLoader() {
 void TextureLoader::Release() {
 	for (auto& tex : textures)
 		tex.second->Shutdown();
+
+	textures.clear();
 }
 const std::shared_ptr<Texture>& TextureLoader::GetTexture(Renderer& renderer, const String& filename) {
 	bool bFind = false;

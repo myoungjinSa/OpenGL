@@ -60,7 +60,8 @@ protected:
 	std::vector<std::shared_ptr<Component>> components;
 
 	std::shared_ptr<Mesh> pMesh;
-	std::shared_ptr<Texture> texture;
+	std::shared_ptr<Texture> albedoMap;
+	std::shared_ptr<Texture> normalMap;
 
 	bool IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, bool bFrontOnly, double& distance);
 };

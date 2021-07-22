@@ -156,7 +156,7 @@ bool PhongShader::Initialize(Renderer& renderer) {
 	if (!result)
 		return false;
 
-	Object* pObject = new Sphere(2.0f, 36, 36);
+	Object* pObject = new Cube();//new Sphere(2.0f, 36, 36);
 	objects.emplace_back(pObject);
 
 	for (const auto& obj : objects) {
@@ -253,7 +253,7 @@ bool PhongShader::SetShaderParameters(Renderer& renderer, Matrix<float, 4, 4>& v
 		return false;
 	}
 
-	if (!renderer.SetShaderParameter(shaderProgram, (int)objects[objectIndex]->material->GetTextureUnit(), String("shaderTexture"))) {
+	if (!renderer.SetShaderParameter(shaderProgram, (int)objects[objectIndex]->material->GetTextureUnit(Material::TextureType::TEXTURE_ALBEDO), String("shaderTexture"))) {
 		assert(0);
 		return false;
 	}

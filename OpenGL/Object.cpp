@@ -5,9 +5,10 @@
 #include "Input.h"
 #include "Material.h"
 #include "RayCast.h"
+#include "Logger.h"
 
 Object::Object() 
-	: pMesh{ nullptr }, texture{ nullptr }
+	: pMesh(nullptr), albedoMap(nullptr), normalMap(nullptr)
 {
 	transform = AddComponent<class Transform>();
 }
@@ -50,6 +51,8 @@ bool Object::Intersect(const Ray& ray, double& distance) {
 	for (size_t iTriangle = 0; iTriangle < pMesh->GetTriangleMeshCount(); iTriangle++) {
 		Triangle triangleMesh = pMesh->GetTriangleMesh(iTriangle);
 		bIntersect = IntersectTriangle(ray, triangleMesh.vertices[0].position, triangleMesh.vertices[1].position, triangleMesh.vertices[2].position, false, distance);
+		if (bIntersect)
+			LogDebug(L"Hit\n");
 	}
 	
 	return bIntersect;
@@ -134,12 +137,14 @@ bool Cube::Initialize(Renderer& renderer) {
 
 	meshBuilder.CopyToMesh(renderer, pMesh.get(), &Vertex::Copy, sizeof(Vertex));
 
-	texture = TextureLoader::GetTexture(renderer, "Capture.bmp");
+	albedoMap = TextureLoader::GetTexture(renderer, "Capture.bmp");
+	//normalMap = TextureLoader::GetTexture(renderer, "Resource\\Texture\\BMP\\NormalMap.bmp");
 
 	Vec3f diffuseColor(0.8f, 0.85f, 0.85f);
 	Vec4f ambientColor(0.3f, 0.3f, 0.3f, 1.0f);
 	Vec3f specularColor(1.0f, 1.0f, 1.0f);
-	material = std::make_shared<Material>(diffuseColor, ambientColor, specularColor, texture->textureID);
+	material = std::make_shared<Material>(diffuseColor, ambientColor, specularColor, std::make_pair(Material::TextureType::TEXTURE_ALBEDO, albedoMap->textureID));
+	//material.get()->SetTextureMap(std::make_pair(Material::TextureType::TEXTURE_NORMAL, normalMap->textureID));
 
 	return true;
 }
@@ -201,12 +206,12 @@ bool Sphere::Initialize(Renderer& renderer) {
 
 	meshBuilder.CopyToMesh(renderer, pMesh.get(), &Vertex::Copy, sizeof(Vertex));
 
-	texture = TextureLoader::GetTexture(renderer, "Capture.bmp");
+	albedoMap = TextureLoader::GetTexture(renderer, "Capture.bmp");
 
 	Vec3f diffuseColor(0.8f, 0.85f, 0.85f);
 	Vec4f ambientColor(0.3f, 0.3f, 0.3f, 1.0f);
 	Vec3f specularColor(1.0f, 1.0f, 1.0f);
-	material = std::make_shared<Material>(diffuseColor, ambientColor, specularColor, texture->textureID);
+	material = std::make_shared<Material>(diffuseColor, ambientColor, specularColor, std::make_pair(Material::TextureType::TEXTURE_ALBEDO, albedoMap->textureID));
 
 	return true;
 }
