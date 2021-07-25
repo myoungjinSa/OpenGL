@@ -8,15 +8,15 @@
 #include <fstream>
 
 void MakeWorldMatrix(const Vec3f& position, const Vec3f& look, const Vec3f& right, const Vec3f& up, Matrix<float, 4, 4>& worldMatrix) {
-	//Up
-	worldMatrix.value[0] = up.x;
-	worldMatrix.value[1] = up.y;
-	worldMatrix.value[2] = up.z;
-
 	//Right
-	worldMatrix.value[4] = right.x;
-	worldMatrix.value[5] = right.y;
-	worldMatrix.value[6] = right.z;
+	worldMatrix.value[0] = right.x;
+	worldMatrix.value[1] = right.y;
+	worldMatrix.value[2] = right.z;
+
+	//Up
+	worldMatrix.value[4] = up.x;
+	worldMatrix.value[5] = up.y;
+	worldMatrix.value[6] = up.z;
 
 	//Look
 	worldMatrix.value[8] = look.x;

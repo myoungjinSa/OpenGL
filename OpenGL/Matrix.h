@@ -997,15 +997,38 @@ T DotProduct(const Vector4<T>& v1, const Vector4<T>& v2) {
 }
 
 template<typename T>
-Vector4<T> Transform(const Matrix<T, 4, 4>& transformMatrix, const Vector4<T>& targetVector) {
-	Vector4<T> transformedVector;
-	int iCol = 0;
-	while(iCol < 4){
-		T val(0);
-		for (int iRow = 0; iRow < 4; iRow++) {
-			val += targetVector[iCol] * transformMatrix[(iRow * 4) + iCol];
-		}
-		transformedVector[iCol++] = val;
-	}
+Vector4<T> Transform(const Matrix<T, 4, 4>& matrix, const Vector4<T>& vec) {
+	//Vector4<T> transformedVector;
+	//int iCol = 0;
+	//while(iCol < 4){
+	//	T val(0);
+	//	for (int iRow = 0; iRow < 4; iRow++) {
+	//		val += targetVector[iCol] * transformMatrix[(iRow * 4) + iCol];
+	//	}
+	//	transformedVector[iCol++] = val;
+	//}
+
+	float x, y, z, w;
+
+	x = (vec.x * matrix[0]) + (vec.y * matrix[4]) + (vec.z * matrix[8]) + (vec.w * matrix[12]);
+	y = (vec.x * matrix[1]) + (vec.y * matrix[5]) + (vec.z * matrix[9]) + (vec.w * matrix[13]);
+	z = (vec.x * matrix[2]) + (vec.y * matrix[6]) + (vec.z * matrix[10]) + (vec.w * matrix[14]);
+	w = (vec.x * matrix[3]) + (vec.y * matrix[7]) + (vec.z * matrix[11]) + (vec.w * matrix[15]);
+
+	Vector4<T> transformedVector(x, y, z, w);
+
+
 	return transformedVector;
+}
+
+template<typename T, typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr>
+Vector4<T> Normalize(const Vector4<T>& v) {
+	Vector4<T> ret;
+	T length = sqrt((v.x * v.x) + (v.y * v.y) + (v.z * v.z) + (v.w * v.w));
+	ret.x = v.x / length;
+	ret.y = v.y / length;
+	ret.z = v.z / length;
+	ret.w = v.w / length;
+
+	return ret;
 }

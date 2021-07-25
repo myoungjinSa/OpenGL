@@ -106,6 +106,8 @@ void Camera::TransformCoord(Vec3f& vec, Matrix<float, 3, 3>& matrix) {
 }
 
 
+
+
 void Camera::BuildViewMatrix(Vec3f pos, Vec3f lookAt, Vec3f up) {
 	Vec3f xAxis, yAxis, zAxis;
 	Vec3f position = transform.get()->GetPosition();
@@ -120,18 +122,18 @@ void Camera::BuildViewMatrix(Vec3f pos, Vec3f lookAt, Vec3f up) {
 	float yPos = DotProduct(yAxis, position) * -1.0f;
 	float zPos = DotProduct(zAxis, position) * -1.0f;
 
-	viewMatrix.value[0] = xAxis.x;
-	viewMatrix.value[1] = yAxis.x;
-	viewMatrix.value[2] = zAxis.x;
-	viewMatrix.value[3] = 0.0f;
+	viewMatrix.value[0]  = xAxis.x;
+	viewMatrix.value[1]  = yAxis.x;
+	viewMatrix.value[2]  = zAxis.x;
+	viewMatrix.value[3]  = 0.0f;
+						 
+	viewMatrix.value[4]  = xAxis.y;
+	viewMatrix.value[5]  = yAxis.y;
+	viewMatrix.value[6]  = zAxis.y;
+	viewMatrix.value[7]  = 0.0f;
 
-	viewMatrix.value[4] = xAxis.y;
-	viewMatrix.value[5] = yAxis.y;
-	viewMatrix.value[6] = zAxis.y;
-	viewMatrix.value[7] = 0.0f;
-
-	viewMatrix.value[8] = xAxis.z;
-	viewMatrix.value[9] = yAxis.z;
+	viewMatrix.value[8]  = xAxis.z;
+	viewMatrix.value[9]  = yAxis.z;
 	viewMatrix.value[10] = zAxis.z;
 	viewMatrix.value[11] = 0.0f;
 
@@ -151,7 +153,7 @@ void Camera::GetViewMatrix(Matrix<float, 4, 4>& Matrix) const {
 
 void Camera::BuildPerspectiveFovLHMatrix(Matrix<float, 4, 4>& matrix, float screenNear, float screenDepth) {
 	float fov = GetFov();
-	matrix[0] = 1.0f / (GetAspectRatio() * tan(fov * 0.5f));
+	matrix[0] = GetAspectRatio() * (1.0f / (tan(fov * 0.5f)));
 	matrix[1] = 0.0f;
 	matrix[2] = 0.0f;
 	matrix[3] = 0.0f;

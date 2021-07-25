@@ -142,28 +142,28 @@ void Transform::SetLook(Vec3f&& look) noexcept {
 }
 
 void Transform::SetUp(const Vec3f& up) {
-	worldMatrix.value[0] = up.x;
-	worldMatrix.value[1] = up.y;
-	worldMatrix.value[2] = up.z;
+	worldMatrix.value[4] = up.x;
+	worldMatrix.value[5] = up.y;
+	worldMatrix.value[6] = up.z;
 }
 
 
 void Transform::SetUp(Vec3f&& up) noexcept {
-	worldMatrix.value[0] = up.x;
-	worldMatrix.value[1] = up.y;
-	worldMatrix.value[2] = up.z;
+	worldMatrix.value[4] = up.x;
+	worldMatrix.value[5] = up.y;
+	worldMatrix.value[6] = up.z;
 }
 
 void Transform::SetRight(const Vec3f& right) {
-	worldMatrix.value[4] = right.x;
-	worldMatrix.value[5] = right.y;
-	worldMatrix.value[6] = right.z;
+	worldMatrix.value[0] = right.x;
+	worldMatrix.value[1] = right.y;
+	worldMatrix.value[2] = right.z;
 }
 
 void Transform::SetRight(Vec3f&& right) noexcept {
-	worldMatrix.value[4] = right.x;
-	worldMatrix.value[5] = right.y;
-	worldMatrix.value[6] = right.z;
+	worldMatrix.value[0] = right.x;
+	worldMatrix.value[1] = right.y;
+	worldMatrix.value[2] = right.z;
 }
 
 
@@ -174,12 +174,12 @@ Vec3f Transform::GetLook() const {
 }
 
 Vec3f Transform::GetRight() const {
-	Vec3f rightVector(worldMatrix.value[4], worldMatrix.value[5], worldMatrix.value[6]);
+	Vec3f rightVector(worldMatrix.value[0], worldMatrix.value[1], worldMatrix.value[2]);
 	return Normalize(rightVector);
 }
 
 Vec3f Transform::GetUp() const {
-	Vec3f upVector(worldMatrix.value[0], worldMatrix.value[1], worldMatrix.value[2]);
+	Vec3f upVector(worldMatrix.value[4], worldMatrix.value[5], worldMatrix.value[6]);
 	return Normalize(upVector);
 }
 
