@@ -15,19 +15,26 @@ public:
 	void Update(float deltaTime) override;
 
 	void GetViewMatrix(Matrix<float, 4, 4>& Matrix) const;
-	void BuildPerspectiveFovLHMatrix(Matrix<float, 4, 4>& matrix, float screenNear, float screenDepth);
+	void BuildPerspectiveFovLHMatrix(Matrix<float, 4, 4>& matrix, const Rect2f& viewport, float screenNear, float screenDepth);
 	
+	void SetViewport(const Rect2f& _viewPort);
 	void SetWidth(float _width) { width = _width; }
 	void SetHeight(float _height) { height = _height; }
+
+	const Rect2f& GetViewport() const { return viewport; }
 	float GetFov() const { return MathUtils::PI / 4.0f; }
 	float GetWidth() const { return width; }
 	float GetHeight() const { return height; }
 	float GetAspectRatio() const { return width / height; }
+
 private:
 	void MatrixRotationYawPitchRoll(Matrix<float, 3, 3>& Matrix, float, float, float);
 	void TransformCoord(Vec3f& Vec, Matrix<float, 3, 3>& Matrix);
 	void BuildViewMatrix(Vec3f, Vec3f, Vec3f);
+
+	Size2f CalculateNearPlaneSize(const Size2f& viewportSize) const;
 	
+	Rect2f viewport;
 	float width;
 	float height;
 	Matrix<float, 4, 4> viewMatrix;

@@ -105,8 +105,15 @@ void Camera::TransformCoord(Vec3f& vec, Matrix<float, 3, 3>& matrix) {
 	vec.z = z;
 }
 
+void Camera::SetViewport(const Rect2f& _viewport) {
+	if (_viewport.Empty())
+		return;
 
 
+	SetWidth(_viewport.width);
+	SetHeight(_viewport.height);
+	viewport = _viewport;
+}
 
 void Camera::BuildViewMatrix(Vec3f pos, Vec3f lookAt, Vec3f up) {
 	Vec3f xAxis, yAxis, zAxis;
@@ -151,9 +158,20 @@ void Camera::GetViewMatrix(Matrix<float, 4, 4>& Matrix) const {
 	}
 }
 
-void Camera::BuildPerspectiveFovLHMatrix(Matrix<float, 4, 4>& matrix, float screenNear, float screenDepth) {
+Size2f Camera::CalculateNearPlaneSize(const Size2f& viewportSize) const {
+	Size2f Size;
+
+	return Size;
+}
+
+void Camera::BuildPerspectiveFovLHMatrix(Matrix<float, 4, 4>& matrix, const Rect2f& viewport, float screenNear, float screenDepth) {
+	
+	Size2f NearPlaneSize = CalculateNearPlaneSize(Size2f(viewport.width, viewport.height));
+	
+	
+	
 	float fov = GetFov();
-	matrix[0] = GetAspectRatio() * (1.0f / (tan(fov * 0.5f)));
+	matrix[0] = (1.0f / (GetAspectRatio() * tan(fov * 0.5f)));
 	matrix[1] = 0.0f;
 	matrix[2] = 0.0f;
 	matrix[3] = 0.0f;

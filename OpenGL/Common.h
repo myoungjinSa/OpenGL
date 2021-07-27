@@ -1,7 +1,9 @@
 #pragma once
 #include <array>
 #include <vector>
-#include<math.h>
+#include <math.h>
 #include "MathUtils.h"
+#include "Types.h"
+
 
 

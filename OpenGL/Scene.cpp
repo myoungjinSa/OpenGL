@@ -47,9 +47,8 @@ bool Scene::BuildObject(Renderer& renderer) {
 	}
 
 	pCamera->SetPosition(0.0f, 0.0f, -10.0f);
-	pCamera->SetWidth(renderer.GetRenderTargetWidth());
-	pCamera->SetHeight(renderer.GetRenderTargetHeight());
-
+	pCamera->SetViewport(Rect2f(0.0f, 0.0f, renderer.GetRenderTargetWidth(), renderer.GetRenderTargetHeight()));
+	
 	return true;
 }
 
@@ -70,7 +69,7 @@ bool Scene::Render(Renderer& renderer) {
 	
 	worldMatrix = Matrix<float, 4, 4>::Identity();
 
-	pCamera->BuildPerspectiveFovLHMatrix(projectionMatrix, SCREEN_NEAR, SCREEN_DEPTH);
+	pCamera->BuildPerspectiveFovLHMatrix(projectionMatrix, pCamera->GetViewport(), SCREEN_NEAR, SCREEN_DEPTH);
 
 	Matrix<float, 4, 4> viewMatrix = GetViewMatrix();
 	Vec3f cameraPosition = pCamera->GetPosition();

@@ -1,6 +1,7 @@
 #include "Types.h"
 #include <algorithm>
 
+
 template<typename T> 
 Point2<T>::Point2()
 	: x(0), y(0)
@@ -181,19 +182,19 @@ Point3<T>& Point3<T>::operator=(Point3<T>&& pt) noexcept {
 	return *this;
 }
 template<typename T> inline
-T Point3<T>::DotProduct(const Point3& pt) const {
+T Point3<T>::DotProduct(const Point3<T>& pt) const {
 	return x * pt.x + y * pt.y + z * pt.z;			//need to saturate cast
 }
 
 
 template<typename T> inline
-double Point3<T>::DDotProduct(const Point3& pt) const {
+double Point3<T>::DDotProduct(const Point3<T>& pt) const {
 	return (double)x * pt.x + (double)y * pt.y + (double)z * pt.z;
 }
 
 template<typename T> inline
-double Point3<T>::Cross(const Point3& pt) const {
-	return (double)y * pt.z - (double)x * pt.z; + (double)x * pt.y;
+double Point3<T>::Cross(const Point3<T>& pt) const {
+	return (double)y * pt.z - (double)x * pt.z + (double)x * pt.y;
 }
 
 
@@ -329,6 +330,12 @@ template class Size<unsigned int>;
 
 ///////////////////////Rect //////////////////////////////////
 
+
+
+template class Rect<int>;
+template class Rect<float>;
+template class Rect<double>;
+
 template<typename T> inline
 Rect<T>::Rect() 
 	:x(0), y(0), width(0), height(0)
@@ -388,7 +395,7 @@ Point2<T> Rect<T>::BottomRight() const {
 }
 
 template<typename T> inline
-Size<T> Rect<T>::Size() const {
+Size<T> Rect<T>::GetSize() const {
 	return Size<T>(width, height);
 }
 

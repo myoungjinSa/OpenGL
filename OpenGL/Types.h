@@ -110,7 +110,7 @@ public:
 	Point2<T> TopLeft() const;
 	Point2<T> BottomRight() const;
 
-	Size<T> Size() const;
+	Size<T> GetSize() const;
 	T Area() const;
 	bool Empty() const;
 
