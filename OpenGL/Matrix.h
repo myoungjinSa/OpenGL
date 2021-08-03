@@ -995,30 +995,27 @@ template<typename T, typename std::enable_if<std::is_floating_point<T>::value>::
 T DotProduct(const Vector4<T>& v1, const Vector4<T>& v2) {
 	return T((v1.x * v2.x) + (v1.y * v2.y) + (v1.z * v2.z));
 }
+template<typename T>
+Vector3<T> Transform(const Matrix<T, 3, 3>& matrix, const Vector3<T>& vec) {
+	float x, y, z = 0.0f;
+
+	x = (vec.x * matrix[0]) + (vec.y * matrix[3]) + (vec.z * matrix[6]);
+	y = (vec.x * matrix[1]) + (vec.y * matrix[4]) + (vec.z * matrix[7]);
+	z = (vec.x * matrix[2]) + (vec.y * matrix[5]) + (vec.z * matrix[8]);
+
+	return Vector3<T>(x, y, z);
+}
 
 template<typename T>
 Vector4<T> Transform(const Matrix<T, 4, 4>& matrix, const Vector4<T>& vec) {
-	//Vector4<T> transformedVector;
-	//int iCol = 0;
-	//while(iCol < 4){
-	//	T val(0);
-	//	for (int iRow = 0; iRow < 4; iRow++) {
-	//		val += targetVector[iCol] * transformMatrix[(iRow * 4) + iCol];
-	//	}
-	//	transformedVector[iCol++] = val;
-	//}
-
-	float x, y, z, w;
+	float x, y, z, w = 0.0f;
 
 	x = (vec.x * matrix[0]) + (vec.y * matrix[4]) + (vec.z * matrix[8]) + (vec.w * matrix[12]);
 	y = (vec.x * matrix[1]) + (vec.y * matrix[5]) + (vec.z * matrix[9]) + (vec.w * matrix[13]);
 	z = (vec.x * matrix[2]) + (vec.y * matrix[6]) + (vec.z * matrix[10]) + (vec.w * matrix[14]);
 	w = (vec.x * matrix[3]) + (vec.y * matrix[7]) + (vec.z * matrix[11]) + (vec.w * matrix[15]);
 
-	Vector4<T> transformedVector(x, y, z, w);
-
-
-	return transformedVector;
+	return Vector4<T>(x, y, z, w);
 }
 
 template<typename T, typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr>

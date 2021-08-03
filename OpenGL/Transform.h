@@ -18,7 +18,7 @@ public:
 	void GetPosition(std::array<float, 4>& position);
 	Matrix<float, 3, 3> GetRotationMatrix() const;
 
-	Vec4f Rotate(const Vec4f& pos, const Vec3f& pivot, float pitch, float yaw, float roll);
+	//Vec4f Rotate(const Vec4f& pos, const Vec3f& pivot, float pitch, float yaw, float roll);
 	Vec4f Rotate(const Vec3f& pos, const Vec3f& pivot, float pitch, float yaw, float roll);
 	void Rotate(float pitch, float yaw, float roll);
 	void Move(const Vec3f& direction, float elapsedTime);

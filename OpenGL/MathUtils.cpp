@@ -2,6 +2,8 @@
 #include "Matrix.h"
 #include <cmath>
 
+
+
 const float MathUtils::PI = 3.14159265358f;
 const float MathUtils::TWO_PI = 3.14159265358f * 2.0f;
 const float MathUtils::HALF_PI = 3.14159265358f / 2.0f;
@@ -60,3 +62,8 @@ float MathUtils::Clamp(float inputValue)
 	return Clamp(inputValue, 0.0f, 1.0f);
 }
 
+double MathUtils::Saturate(double v) {
+	if (v < 0.0) return 0.0;
+	if (v > 1.0) return 1.0;
+	return v;
+}

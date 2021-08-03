@@ -29,22 +29,27 @@ void Camera::Shutdown(Renderer& renderer) {
 
 void Camera::Update(float deltaTime) {
 	Vec3f up, lookAt;
-	float yaw, pitch, roll;
+	float yaw = 0.0f, pitch = 0.0f, roll = 0.0f;
 	
 	up.SetXYZ(0.0f, 1.0f, 0.0f);
 	lookAt.SetXYZ(0.0f, 0.0f, 1.0f);
 	
 	const float rotationSpeed = 0.0174532925f;
-	Vec3f rotation = transform.get()->GetRotation();
+	//Vec3f rotation = transform.get()->GetRotation();
 
-	pitch = rotation.x + Input::GetXAngle() * rotationSpeed;
-	yaw = rotation.y + Input::GetYAngle() * rotationSpeed;
-	roll = rotation.z * rotationSpeed;
+	pitch = Input::GetXAngle() * rotationSpeed;
+	yaw = Input::GetYAngle() * rotationSpeed;
+	roll = 0.0f;
 
-	Matrix<float, 3, 3> rotationMatrix = transform.get()->GetRotationMatrix();
-	MatrixRotationYawPitchRoll(rotationMatrix, yaw, pitch, roll);
-	TransformCoord(lookAt, rotationMatrix);
-	TransformCoord(up, rotationMatrix);
+	Matrix<float, 3, 3> rotationMatrix = Matrix<float, 3, 3>::Identity();//transform.get()->GetRotationMatrix();
+	MatrixRotationYawPitchRoll(rotationMatrix, 1.0f, 0.0f, roll);
+	LogDebug(L"Before: lookAt - %.8lf, %.8lf, %.8lf", lookAt.x, lookAt.y, lookAt.z);
+	lookAt = Transform(rotationMatrix, lookAt);
+	up = Transform(rotationMatrix, up);
+
+	LogDebug(L"After: lookAt - %.8lf, %.8lf, %.8lf", lookAt.x, lookAt.y, lookAt.z);
+	LogDebug(L"up - %.8lf, %.8lf, %.8lf", up.x, up.y, up.z);
+
 	Vec3f moveOffset;
 	float movingSpeed = transform.get()->GetMovingSpeed();
 	if (Input::IsKeyDown(KEY_D)) {
@@ -62,7 +67,7 @@ void Camera::Update(float deltaTime) {
 	Vec3f pos = GetPosition();
 	pos += moveOffset;
 
-	lookAt.SetXYZ(pos.x + lookAt.x, pos.y + lookAt.y, pos.z + lookAt.z);
+	//lookAt.SetXYZ(pos.x + lookAt.x, pos.y + lookAt.y, pos.z + lookAt.z);
 	transform.get()->SetPosition(pos);
 	BuildViewMatrix(pos, lookAt, up);
 }
@@ -92,18 +97,6 @@ void Camera::MatrixRotationYawPitchRoll(Matrix<float, 3, 3>& matrix, float yaw, 
 	matrix[8] = (cPitch * cYaw);
 }
 
-void Camera::TransformCoord(Vec3f& vec, Matrix<float, 3, 3>& matrix) {
-	float x, y, z;
-
-	//Transform the vector by the 3x3 matrix.
-	x = (vec.x * matrix[0]) + (vec.y * matrix[3]) + (vec.z * matrix[6]);
-	y = (vec.x * matrix[1]) + (vec.y * matrix[4]) + (vec.z * matrix[7]);
-	z = (vec.x * matrix[2]) + (vec.y * matrix[5]) + (vec.z * matrix[8]);
-
-	vec.x = x;
-	vec.y = y;
-	vec.z = z;
-}
 
 void Camera::SetViewport(const Rect2f& _viewport) {
 	if (_viewport.Empty())
@@ -158,18 +151,7 @@ void Camera::GetViewMatrix(Matrix<float, 4, 4>& Matrix) const {
 	}
 }
 
-Size2f Camera::CalculateNearPlaneSize(const Size2f& viewportSize) const {
-	Size2f Size;
-
-	return Size;
-}
-
 void Camera::BuildPerspectiveFovLHMatrix(Matrix<float, 4, 4>& matrix, const Rect2f& viewport, float screenNear, float screenDepth) {
-	
-	Size2f NearPlaneSize = CalculateNearPlaneSize(Size2f(viewport.width, viewport.height));
-	
-	
-	
 	float fov = GetFov();
 	matrix[0] = (1.0f / (GetAspectRatio() * tan(fov * 0.5f)));
 	matrix[1] = 0.0f;

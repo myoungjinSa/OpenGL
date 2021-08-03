@@ -46,6 +46,7 @@ bool Object::Initialize(Renderer& renderer) {
 	return true;
 }
 
+
 bool Object::Intersect(const Ray& ray, double& distance) {
 	bool bIntersect = false;
 	for (size_t iTriangle = 0; iTriangle < pMesh->GetTriangleMeshCount(); iTriangle++) {

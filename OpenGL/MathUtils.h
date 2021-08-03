@@ -18,7 +18,7 @@ public:
 	static float Clamp(float inputValue, float min, float max);
 	static int Clamp(int inputValue, int min, int max);
 
-	
+	static double Saturate(double v);
 
 	static const float PI;
 	static const float TWO_PI;

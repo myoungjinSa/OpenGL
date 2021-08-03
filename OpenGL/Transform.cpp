@@ -61,27 +61,6 @@ void Transform::Rotate(float pitch, float yaw, float roll) {
 	worldMatrix.Multiply(rotationMatrix);
 }
 
-Vec4f Transform::Rotate(const Vec4f& pos, const Vec3f& pivot, float pitch, float yaw, float roll) {
-	Matrix<float, 4, 4> rotationMatrix = Matrix<float, 4, 4>::Identity();
-	CalculateRotationMatrix(rotationMatrix, pitch, yaw, roll);
-
-	Matrix<float, 4, 4> rotationByPivotMatrix = Matrix<float, 4, 4>::Identity();
-	Vec4f toPivotVector(pivot - Vec3f(pos.x, pos.y, pos.z), 1.0f);
-	rotationByPivotMatrix.value[12] = toPivotVector.x;
-	rotationByPivotMatrix.value[13] = toPivotVector.y;
-	rotationByPivotMatrix.value[14] = toPivotVector.z;
-	
-	rotationByPivotMatrix.Multiply(rotationMatrix);
-	
-	rotationByPivotMatrix.value[12] = -toPivotVector.x;
-	rotationByPivotMatrix.value[13] = -toPivotVector.y;
-	rotationByPivotMatrix.value[14] = -toPivotVector.z;
-
-	Vec4f rotatedVectorByPivot(pos);
-	rotatedVectorByPivot = ::Transform(rotationByPivotMatrix, rotatedVectorByPivot);
-	return rotatedVectorByPivot;
-}
-
 Vec4f Transform::Rotate(const Vec3f& pos, const Vec3f& pivot, float pitch, float yaw, float roll) {
 	Matrix<float, 4, 4> rotationMatrix = Matrix<float, 4 ,4>::Identity();
 	CalculateRotationMatrix(rotationMatrix, pitch, yaw, roll);

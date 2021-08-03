@@ -3,6 +3,8 @@
 #include <math.h>
 #include "Matrix.h"
 
+#define M_PI   3.14159265358979323846
+
 
 class Quaternion
 {
@@ -128,6 +130,17 @@ public:
 		return Quaternion(GetComplex() / s, GetReal() / s);
 	}
 
+	/*
+		Returns a matrix representation of this quaternion.
+
+		Specifically this is the matrix such that:
+
+		this->matrix() * q.vector() = (*this) * q for any quaternion q.
+
+		Note that this is not the rotation matrix that may be represented by a unit quaternion
+		
+	*/
+
 	Matrix<double, 4, 4> GetMatrix() const {
 		double m[16] = {
 			GetW(), -GetZ(), GetY(), GetX(),
@@ -139,8 +152,45 @@ public:
 		return matrix;
 	}
 
+	Matrix<double, 4, 4> GetRightMatrix() const {
+		double m[16] = {
+			GetW(), -GetZ(), GetY(), -GetX(),
+			GetZ(), GetW(), -GetX(), -GetY(),
+			-GetY(), GetX(), GetW(), -GetZ(),
+			GetX(), GetY(), GetZ(), GetW()
+		};
+
+		Matrix<double, 4, 4> matrix(m);
+		return matrix;
+	}
+
+
+
 	Vector4<double> GetVector() const {
 		return Vector4<double>(value[0], value[1], value[2], value[3]);
+	}
+
+
+	/*
+		Computes the rotation matrix represented by a unit quaternion
+
+		note: This does not check that this quaternion is normalized.
+		it formulaically returns the matrix, which whill not be a rotation if the quaternion is non-unit.
+	*/
+
+
+	Matrix<double, 3, 3> GetRotationMatrix() const {
+		double x = GetX();
+		double y = GetY();
+		double z = GetZ();
+		double w = GetW();
+		double m[9] = {
+			1 - 2 * y * y - 2 * z * z,	2 * x * y - 2 * z * w,		2 * x * z + 2 * y * w,
+			2 * x * y + 2 * z * w,		1 - 2 * x * x - 2 * z * z,	2 * y * z - 2 * x * w,
+			2 * x * z - 2 * y * w,		2 * y * z + 2 * x * w,		1 - 2 * x * x - 2 * y * y
+		};
+		Matrix<double, 3, 3> matrix(m);
+		return matrix;
 	}
 
 	/**
@@ -158,6 +208,92 @@ public:
 						  GetW() * rhs.GetW() - GetX() * rhs.GetX() - GetY() * rhs.GetY() - GetZ() * rhs.GetZ());
 	}
 
+
+	void ScaledAxis(const Vector3<double>& w) {
+		double theta = w.CalculateMagnitude();
+
+		if (theta > 0.0001) {
+			double s = sin(theta / 2.0);
+
+			Vector3<double> W(w / theta * s);
+
+			value[0] = W.x;
+			value[1] = W.y;
+			value[2] = W.z;
+			value[3] = cos(theta / 2.0);
+		}
+		else {
+			value[0] = value[1] = value[2] = 0;
+			value[3] = 1.0;
+		}
+	}
+
+
+	/*
+		Returns a vector rotated by this quaternion.
+
+		Functionally equivalent to: (rotationMatrix() * v) or (q * Quaternion(0, v) * q.inverse())
+
+		@Warning : Conjugate() is used instead of Inverse() for better performance, when this quaternion must be normalized.
+	*/
+	Vector3<double> GetRotatedVector(const Vector3<double>& v) const {
+		return (((*this) * Quaternion(v, 0) * Conjugate())).GetComplex();
+	}
+
+
+	/*
+		Computes the quaternion that is equivalent to a given euler angle rotation.
+
+		@Param euler vector in order : roll - pitch - yaw
+	*/
+	void GetEuler(const Vector3<double>& euler) {
+		double c1 = cos(euler.z * 0.5);
+		double c2 = cos(euler.y * 0.5);
+		double c3 = cos(euler.x * 0.5);
+
+		double s1 = sin(euler.z * 0.5);
+		double s2 = sin(euler.y * 0.5);
+		double s3 = sin(euler.x * 0.5);
+
+		value[0] = c1 * c2 * s3 - s1 * s2 * c3;
+		value[1] = c1 * s2 * c3 + s1 * c2 * s3;
+		value[2] = s1 * c2 * c3 - c1 * s2 * s3;
+		value[3] = c1 * c2 * c3 + s1 * s2 * s3;
+	}
+
+	/*
+		Returns an equivalent euler angle representation of this quaternion.
+
+		@return Euler angles in roll - pitch - yaw order.
+	*/
+	Vector3<double> GetEuler() const {
+		Vector3<double> euler;
+		const static double PI_OVER_2 = M_PI * 0.5;
+		const static double EPSILON = 1e-10;
+		double sqw, sqx, sqy, sqz;
+
+		//quick conversion to Euler angle to give tilt to user
+		sqw = value[3] * value[3];
+		sqx = value[0] * value[0];
+		sqy = value[1] * value[1];
+		sqz = value[2] * value[2];
+
+		euler.y = asin(2.0 * (value[3] * value[1] - value[0] * value[2]));
+		if (PI_OVER_2 - fabs(euler.y) > EPSILON) {
+			euler.z = atan2(2.0 * (value[0] * value[1] + value[3] * value[2]), sqx - sqy - sqz + sqw);
+			euler.x = atan2(2.0 * (value[3] * value[0] + value[1] * value[2]), sqw - sqx - sqy + sqz);
+		}
+		else {
+			//compute heading from local 'down' vector
+			euler.z = atan2(2 * value[1] * value[2] - 2 * value[0] * value[3], 2 * value[0] * value[2] + 2 * value[1] * value[3]);
+			euler.x = 0.0;
+		
+			//if facing down, reverse yaw
+			if (euler.y < 0.0)
+				euler.z = M_PI - euler.z;
+		}
+		return euler;
+	}
 
 
 private:
