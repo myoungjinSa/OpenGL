@@ -268,16 +268,22 @@ template<typename T, int m, int n> inline
 void Matrix<T, m, n>::Multiply(const Matrix<T, m, n>& a)
 {
 	assert((unsigned)n == (unsigned)m);
-	T sum = 0;
-	for (int iRow = 0; iRow < rows; iRow++) {
-		for (int iCol = 0; iCol < cols; iCol++) {
-			for (int k = 0; k < rows; k++) {
-				sum += value[iRow * m + k] * a.value[k * n + iCol];
+	Matrix<float, 4, 4> tempMatrix = Matrix<float, 4, 4>::Identity();
+	for (int i = 0; i < rows * cols; i++) {
+		tempMatrix.value[i] = value[i];
+	}
+
+	T sum = T(0);
+	for (int iRow = 0; iRow < m * rows; iRow += m) {
+		for (int iCol = 0; iCol < cols; iCol ++) {
+			for (int k = 0; k < cols; k++) {
+				sum += tempMatrix.value[iRow + k] * a.value[cols * k + iCol];
 			}
-			value[iRow * m + iCol] = sum;
+			value[iRow + iCol] = sum;
 			sum = 0;
 		}
 	}
+
 }
 
 

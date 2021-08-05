@@ -38,7 +38,7 @@ public:
 
 	float GetMovingSpeed() const;
 private:
-	void CalculateRotationMatrix(Matrix<float, 4, 4>& rotationMatrix, float pitch, float yaw, float roll) const;
+	void CalculateRotationMatrix(Matrix<float, 4, 4>& rotationMatrix, float pitch, float yaw, float roll, bool bUseQuaternion = true) const;
 
 private:
 	Vec3f position;

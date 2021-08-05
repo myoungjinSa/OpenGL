@@ -42,7 +42,6 @@ void Object::Rotate(float pitch, float yaw, float roll) {
 }
 
 bool Object::Initialize(Renderer& renderer) {
-	
 	return true;
 }
 

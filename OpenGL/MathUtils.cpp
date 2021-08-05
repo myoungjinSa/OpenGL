@@ -51,11 +51,10 @@ float MathUtils::Clamp(float inputValue, float min, float max) {
 	{
 		return max;
 	}
-	else
-	{
-		return inputValue;
-	}
+
+	return inputValue;
 }
+
 
 float MathUtils::Clamp(float inputValue)
 {
@@ -66,4 +65,16 @@ double MathUtils::Saturate(double v) {
 	if (v < 0.0) return 0.0;
 	if (v > 1.0) return 1.0;
 	return v;
+}
+double MathUtils::Clamp(double inputValue, int min, int max) {
+	if (inputValue < min)
+	{
+		return min;
+	}
+	else if (inputValue > max)
+	{
+		return max;
+	}
+	
+	return inputValue;
 }

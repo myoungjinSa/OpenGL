@@ -1,5 +1,6 @@
 #include "Transform.h"
 #include "Object.h"
+#include "Quaternion.h"
 
 Transform::Transform(Object* _owner)
 	: Component(_owner), position(0.0f, 0.0f, 0.0f), rotation(0.0f, 0.0f, 0.0f), movingSpeed(1.0f)
@@ -71,37 +72,66 @@ Vec4f Transform::Rotate(const Vec3f& pos, const Vec3f& pivot, float pitch, float
 	return rotatedVector;
 }
 
-void Transform::CalculateRotationMatrix(Matrix<float, 4, 4>& rotationMatrix, float pitch, float yaw, float roll) const {
-	float cYaw, cPitch, cRoll, sYaw, sPitch, sRoll;
+void Transform::CalculateRotationMatrix(Matrix<float, 4, 4>& rotationMatrix, float pitch, float yaw, float roll, bool bUseQuaternion) const {
+	if (bUseQuaternion) {
+		Quaternion q;
+		q.GetEuler(Vec3d(pitch, yaw, roll));
+		q.Normalize();
+		
+		Matrix<double, 3, 3> m = q.GetRotationMatrix();
+		
+		rotationMatrix[0] = m[0];
+		rotationMatrix[1] = m[3];
+		rotationMatrix[2] = m[6];
+		rotationMatrix[3] = 0.0f;
+		
+		rotationMatrix[4] = m[1];
+		rotationMatrix[5] = m[4];
+		rotationMatrix[6] = m[7];
+		rotationMatrix[7] = 0.0f;
+		
+		rotationMatrix[8] = m[2];
+		rotationMatrix[9] = m[5];
+		rotationMatrix[10] = m[8];
+		rotationMatrix[11] = 0.0f;
+		
+		rotationMatrix[12] = 0.0f;
+		rotationMatrix[13] = 0.0f;
+		rotationMatrix[14] = 0.0f;
+		rotationMatrix[15] = 1.0f;
+	}
+	else {
+		float cYaw, cPitch, cRoll, sYaw, sPitch, sRoll;
 
-	cYaw = cosf(yaw);
-	cPitch = cosf(pitch);
-	cRoll = cosf(roll);
+		cYaw = cosf(yaw);
+		cPitch = cosf(pitch);
+		cRoll = cosf(roll);
 
-	sYaw = sinf(yaw);
-	sPitch = sinf(pitch);
-	sRoll = sinf(roll);
+		sYaw = sinf(yaw);
+		sPitch = sinf(pitch);
+		sRoll = sinf(roll);
 
-	//Calculate the yaw, pitch , roll rotation matrix.
-	rotationMatrix[0] = (cRoll * cYaw) + (sRoll * sPitch * sYaw);
-	rotationMatrix[1] = (sRoll * cPitch);
-	rotationMatrix[2] = (cRoll * -sYaw) + (sRoll * sPitch * cYaw);
-	rotationMatrix[3] = 0.0f;
+		//Calculate the yaw, pitch , roll rotation matrix.
+		rotationMatrix[0] = (cRoll * cYaw) + (sRoll * sPitch * sYaw);
+		rotationMatrix[1] = (sRoll * cPitch);
+		rotationMatrix[2] = (cRoll * -sYaw) + (sRoll * sPitch * cYaw);
+		rotationMatrix[3] = 0.0f;
 
-	rotationMatrix[4] = (-sRoll * cYaw) + (cRoll * sPitch * sYaw);
-	rotationMatrix[5] = (cRoll * cPitch);
-	rotationMatrix[6] = (sRoll * sYaw) + (cRoll * sPitch * cYaw);
-	rotationMatrix[7] = 0.0f;
+		rotationMatrix[4] = (-sRoll * cYaw) + (cRoll * sPitch * sYaw);
+		rotationMatrix[5] = (cRoll * cPitch);
+		rotationMatrix[6] = (sRoll * sYaw) + (cRoll * sPitch * cYaw);
+		rotationMatrix[7] = 0.0f;
 
-	rotationMatrix[8] = (cPitch * sYaw);
-	rotationMatrix[9] = -sPitch;
-	rotationMatrix[10] = (cPitch * cYaw);
-	rotationMatrix[11] = 0.0f;
+		rotationMatrix[8] = (cPitch * sYaw);
+		rotationMatrix[9] = -sPitch;
+		rotationMatrix[10] = (cPitch * cYaw);
+		rotationMatrix[11] = 0.0f;
 
-	rotationMatrix[12] = 0.0f;
-	rotationMatrix[13] = 0.0f;
-	rotationMatrix[14] = 0.0f;
-	rotationMatrix[15] = 1.0f;
+		rotationMatrix[12] = 0.0f;
+		rotationMatrix[13] = 0.0f;
+		rotationMatrix[14] = 0.0f;
+		rotationMatrix[15] = 1.0f;
+	}
 }
 
 void Transform::Move(const Vec3f& direction, float elapsedTime) {

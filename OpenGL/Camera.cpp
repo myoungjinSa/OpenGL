@@ -1,6 +1,7 @@
 #include "Camera.h"
 #include "Input.h"
 #include "Logger.h"
+#include "Quaternion.h"
 
 Camera::Camera()
 	:Object()
@@ -42,13 +43,11 @@ void Camera::Update(float deltaTime) {
 	roll = 0.0f;
 
 	Matrix<float, 3, 3> rotationMatrix = Matrix<float, 3, 3>::Identity();//transform.get()->GetRotationMatrix();
-	MatrixRotationYawPitchRoll(rotationMatrix, 1.0f, 0.0f, roll);
-	LogDebug(L"Before: lookAt - %.8lf, %.8lf, %.8lf", lookAt.x, lookAt.y, lookAt.z);
+	MatrixRotationYawPitchRoll(rotationMatrix, yaw, pitch, roll);
+
 	lookAt = Transform(rotationMatrix, lookAt);
 	up = Transform(rotationMatrix, up);
 
-	LogDebug(L"After: lookAt - %.8lf, %.8lf, %.8lf", lookAt.x, lookAt.y, lookAt.z);
-	LogDebug(L"up - %.8lf, %.8lf, %.8lf", up.x, up.y, up.z);
 
 	Vec3f moveOffset;
 	float movingSpeed = transform.get()->GetMovingSpeed();
@@ -67,7 +66,7 @@ void Camera::Update(float deltaTime) {
 	Vec3f pos = GetPosition();
 	pos += moveOffset;
 
-	//lookAt.SetXYZ(pos.x + lookAt.x, pos.y + lookAt.y, pos.z + lookAt.z);
+	lookAt.SetXYZ(pos.x + lookAt.x, pos.y + lookAt.y, pos.z + lookAt.z);
 	transform.get()->SetPosition(pos);
 	BuildViewMatrix(pos, lookAt, up);
 }
@@ -95,6 +94,27 @@ void Camera::MatrixRotationYawPitchRoll(Matrix<float, 3, 3>& matrix, float yaw, 
 	matrix[6] = (cPitch * sYaw);
 	matrix[7] = -sPitch;
 	matrix[8] = (cPitch * cYaw);
+
+	//Quaternion q;
+	//q.GetEuler(Vec3d(roll, pitch, yaw));
+	//q.Normalize();
+
+	//Matrix<double, 3, 3> m = q.GetRotationMatrix();
+
+
+	//matrix[0] = m[0];
+	//matrix[1] = m[1];
+	//matrix[2] = m[2];
+
+
+	//matrix[3] = m[3];
+	//matrix[4] = m[4];
+	//matrix[5] = m[5];
+
+
+	//matrix[6] = m[6];
+	//matrix[7] = m[7];
+	//matrix[8] = m[8];
 }
 
 

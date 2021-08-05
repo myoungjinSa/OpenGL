@@ -295,6 +295,23 @@ public:
 		return euler;
 	}
 
+	Quaternion Slerp(const Quaternion& q1, double t) {
+		return Slerp(*this, q1, t);
+	}
+
+	static Quaternion Slerp(const Quaternion& q0, const Quaternion& q1, double t) {
+		double omega = acos(MathUtils::Clamp(q0.value[0] * q1.value[0] + q0.value[1] * q1.value[1] + q0.value[2] * q1.value[2] + q0.value[3] * q1.value[3], -1, 1));
+
+		if (fabs(omega) < 1e-10) {
+			omega = 1e-10;
+		}
+
+		double som = sin(omega);
+		double st0 = sin((1 - t) * omega) / som;
+		double st1 = sin(t * omega) / som;
+
+		return Quaternion(q0.value[0] * st0 + q1.value[0] * st1, q0.value[1] * st0 + q1.value[1] * st1,	q0.value[2] * st0 + q1.value[2] * st1, q0.value[3] * st0 + q1.value[3] * st1);
+	}
 
 private:
 	double value[4];

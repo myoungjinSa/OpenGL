@@ -17,6 +17,7 @@ public:
 	static float Clamp(float inputValue);
 	static float Clamp(float inputValue, float min, float max);
 	static int Clamp(int inputValue, int min, int max);
+	static double Clamp(double inputValue, int min, int max);
 
 	static double Saturate(double v);
 
