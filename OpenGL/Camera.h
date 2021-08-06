@@ -28,7 +28,8 @@ public:
 	float GetHeight() const { return height; }
 	float GetAspectRatio() const { return width / height; }
 
-	void Listen() override;
+	void ProcessEvent(Event& e) override;
+
 private:
 	void MatrixRotationYawPitchRoll(Matrix<float, 3, 3>& Matrix, float, float, float);
 	void BuildViewMatrix(Vec3f, Vec3f);

@@ -16,7 +16,8 @@ Camera::~Camera() {
 }
 
 bool Camera::Initialize(Renderer& renderer) {
-	Input::Attach(std::make_shared<Observer>(this));
+	MouseInput::Attach(this);
+	KeyboardInput::Attach(this);
 	return true;
 }
 
@@ -25,7 +26,8 @@ void Camera::Render(Renderer& renderer) {
 }
 
 void Camera::Shutdown(Renderer& renderer) {
-	Input::Detach(std::make_shared<Observer>(this));
+	MouseInput::Detach(this);
+	KeyboardInput::Detach(this);
 }
 
 void Camera::Update(float deltaTime) {
@@ -35,8 +37,8 @@ void Camera::Update(float deltaTime) {
 	const float rotationSpeed = 0.0174532925f;
 	//Vec3f rotation = transform.get()->GetRotation();
 
-	pitch = Input::GetXAngle() * rotationSpeed;
-	yaw = Input::GetYAngle() * rotationSpeed;
+	pitch = MouseInput::GetXAngle() * rotationSpeed;
+	yaw = MouseInput::GetYAngle() * rotationSpeed;
 	roll = 0.0f;
 
 	Matrix<float, 3, 3> rotationMatrix = Matrix<float, 3, 3>::Identity();//transform.get()->GetRotationMatrix();
@@ -46,16 +48,16 @@ void Camera::Update(float deltaTime) {
 	up = Transform(rotationMatrix, GetUp());
 
 	float movingSpeed = transform.get()->GetMovingSpeed();
-	if (Input::IsKeyDown(KEY_D)) {
+	if (KeyboardInput::IsKeyDown(KEY_D)) {
 		Move(GetRight(), movingSpeed, deltaTime);
 	}
-	else if (Input::IsKeyDown(KEY_A)) {
+	else if (KeyboardInput::IsKeyDown(KEY_A)) {
 		Move(GetRight() * -1.0f, movingSpeed, deltaTime);
 	}
-	else if (Input::IsKeyDown(KEY_W)) {
+	else if (KeyboardInput::IsKeyDown(KEY_W)) {
 		Move(GetLook(), movingSpeed, deltaTime);
 	}
-	else if (Input::IsKeyDown(KEY_S)) {
+	else if (KeyboardInput::IsKeyDown(KEY_S)) {
 		Move(GetLook() * -1.0f, movingSpeed, deltaTime);
 	}
 
@@ -186,6 +188,14 @@ void Camera::BuildPerspectiveFovLHMatrix(Matrix<float, 4, 4>& matrix, const Rect
 }
 
 
-void Camera::Listen() {
+void Camera::ProcessEvent(Event& e) {
+	if (dynamic_cast<MouseInput::MouseEvent*>(&e)) {
+		LogDebug(L"Mouse Event Occured.\n");
+	}
+
+
+	if (dynamic_cast<KeyboardInput::KeyboardEvent*>(&e)) {
+		LogDebug(L"Keyboard Event Occured.\n");
+	}
 
 }

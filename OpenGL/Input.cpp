@@ -4,89 +4,42 @@
 #include <fstream>
 #include <sstream>
 
-
-float Input::xAngle = 0.0f;
-float Input::yAngle = 0.0f;
-bool Input::dragging = false;
-Point2i Input::mousePoint;
-std::map<unsigned int, std::pair<const String, bool>> Input::keyCodes;
-Input::Input()
-{
-
-}
-
-Input::~Input() {
-	keyCodes.clear();
-}
-
-bool Input::Initialize() {
+std::map<unsigned int, std::pair<const String, bool>> KeyboardInput::keyCodes;
+std::vector<Observer*> KeyboardInput::observers;
+bool KeyboardInput::Initialize() {
 	return LoadKeyCodes("keyCodes.txt");
 }
 
-
-void Input::KeyDown(unsigned int input)
+void KeyboardInput::KeyDown(unsigned int input)
 {
 	keyCodes[input].second = true;
+
+	KeyboardEvent e;
+	Notify(e);
 }
 
 
-void Input::KeyUp(unsigned int input)
+void KeyboardInput::KeyUp(unsigned int input)
 {
 	keyCodes[input].second = false;
+
+	KeyboardEvent e;
+	Notify(e);
 }
 
 
-bool Input::IsKeyDown(unsigned int input)
+bool KeyboardInput::IsKeyDown(unsigned int input)
 {
-	// Return what state the key is in (pressed/not pressed).
-	return keyCodes[input].second;
+	if (!keyCodes[input].second)
+		return false;
+
+	KeyboardEvent e;
+	Notify(e);
+
+	return true;
 }
 
-
-void Input::ProcessLButtonDown(int x, int y) {
-	dragging = !dragging;
-	if (dragging) {
-		mousePoint.x = x;
-		mousePoint.y = y;
-	}
-}
-void Input::ProcessMouseMove(int x, int y) {
-	if (dragging) {
-		int dragX = x;
-		int dragY = y;
-
-		xAngle += (y - mousePoint.y) / 3.6;
-		yAngle += (x - mousePoint.x) / 3.6;
-
-		mousePoint.x = dragX;
-		mousePoint.y = dragY;
-		//dragY = y;
-	}
-}
-
-void Input::ProcessLButtonUp(int x, int y) {
-	if (dragging) {
-		dragging = false;
-	}
-}
-
-float Input::GetXAngle(){
-	return xAngle;
-}
-
-float Input::GetYAngle(){
-	return yAngle;
-}
-
-void Input::Attach(const std::shared_ptr<Observer>& observer) {
-	Attach(observer);
-}
-
-bool Input::Detach(const std::shared_ptr<Observer>& observer) {
-	return Detach(observer);
-}
-
-bool Input::LoadKeyCodes(String&& keyFileName) {
+bool KeyboardInput::LoadKeyCodes(String&& keyFileName) {
 	std::ifstream keyFile(keyFileName.c_str(), std::ios::in);
 	if (!keyFile.is_open()) {
 		assert(0);
@@ -97,11 +50,122 @@ bool Input::LoadKeyCodes(String&& keyFileName) {
 	while (!keyFile.eof()) {
 		char _keyName[128];
 		keyFile.getline(_keyName, 128);
-		
+
 		String keyName = _keyName;
 		std::vector<String> keyComponents = Split(keyName, ',');
 		keyCodes.insert(iter, std::make_pair((unsigned int)StringToInt(keyComponents.at(1)), std::make_pair(keyComponents.at(0), false)));
 	}
 
 	return true;
+}
+
+
+void KeyboardInput::Attach(Observer* pObserver) {
+	observers.push_back(pObserver);;
+}
+
+bool KeyboardInput::Detach(Observer* pObserver) {
+	observers.erase(std::remove_if(observers.begin(), observers.end(), [pObserver](Observer* pOb) {
+		if (pOb == pObserver)
+			return true;
+		else
+			return false;
+		}), observers.end());
+	return true;
+}
+void KeyboardInput::Notify(KeyboardInput::KeyboardEvent& e) {
+	for (auto pObserver : observers) {
+		pObserver->ProcessEvent(e);
+	}
+}
+
+KeyboardInput::KeyboardEvent::KeyboardEvent() {
+
+}
+void KeyboardInput::KeyboardEvent::GetInfo() {
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//MouseInput
+
+
+float MouseInput::xAngle = 0.0f;
+float MouseInput::yAngle = 0.0f;
+bool MouseInput::dragging = false;
+Point2i MouseInput::mousePoint;
+std::vector<Observer*> MouseInput::observers;
+
+bool MouseInput::Initialize() {
+
+	return true;
+}
+void MouseInput::ProcessLButtonDown(int x, int y) {
+	dragging = !dragging;
+	if (dragging) {
+		mousePoint.x = x;
+		mousePoint.y = y;
+
+		MouseEvent e;
+		Notify(e);
+	}
+}
+void MouseInput::ProcessMouseMove(int x, int y) {
+	if (dragging) {
+		int dragX = x;
+		int dragY = y;
+
+		xAngle += (y - mousePoint.y) / 3.6;
+		yAngle += (x - mousePoint.x) / 3.6;
+
+		mousePoint.x = dragX;
+		mousePoint.y = dragY;
+		//dragY = y;
+
+		MouseEvent e;
+		Notify(e);
+	}
+}
+
+float MouseInput::GetXAngle() {
+	return xAngle;
+}
+
+float MouseInput::GetYAngle() {
+	return yAngle;
+}
+
+void MouseInput::ProcessLButtonUp(int x, int y) {
+	if (dragging) {
+		dragging = false;
+		MouseEvent e;
+		Notify(e);
+	}
+}
+
+void MouseInput::Attach(Observer* pObserver) {
+	observers.push_back(pObserver);
+}
+
+bool MouseInput::Detach(Observer* pObserver) {
+	observers.erase(std::remove_if(observers.begin(), observers.end(), [pObserver](Observer* pOb) {
+		if (pOb == pObserver)
+			return true;
+		else
+			return false;
+		}), observers.end());
+	return true;
+}
+
+void MouseInput::Notify(MouseEvent& e) {
+	for (auto pObserver : observers) {
+		pObserver->ProcessEvent(e);
+	}
+}
+
+MouseInput::MouseEvent::MouseEvent() {
+
+}
+void MouseInput::MouseEvent::GetInfo() {
+	
 }

@@ -46,6 +46,7 @@ bool Scene::BuildObject(Renderer& renderer) {
 		return false;
 	}
 
+	pCamera->Initialize(renderer);
 	pCamera->SetPosition(0.0f, 0.0f, -10.0f);
 	pCamera->SetViewport(Rect2f(0.0f, 0.0f, renderer.GetRenderTargetWidth(), renderer.GetRenderTargetHeight()));
 	
@@ -82,6 +83,9 @@ bool Scene::Render(Renderer& renderer) {
 void Scene::Shutdown(Renderer& renderer) {
 	if (pShader)
 		pShader->Shutdown(renderer);
+
+	if (pCamera)
+		pCamera->Shutdown(renderer);
 }
 
 

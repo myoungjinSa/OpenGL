@@ -35,8 +35,13 @@ bool System::Initialize() {
 		return false;
 	}
 
-	if (!Input::Initialize()) {
+	if (!KeyboardInput::Initialize()) {
 		MessageBox(hWnd, L"Failed load KeyCodes.txt", L"Error", MB_OK);
+		return false;
+	}
+
+	if (!MouseInput::Initialize()) {
+		MessageBox(hWnd, L"Failed Initialize Mouse.", L"Error", MB_OK);
 		return false;
 	}
 
@@ -145,7 +150,7 @@ void System::Run()
 bool System::Frame(float elapsedTime)
 {
 	// Check if the user pressed escape and wants to exit the application.
-	if (Input::IsKeyDown(KEY_ESCAPE))
+	if (KeyboardInput::IsKeyDown(KEY_ESCAPE))
 	{
 		return false;
 	}
@@ -168,7 +173,7 @@ LRESULT CALLBACK System::MessageHandler(HWND hwnd, UINT umsg, WPARAM wParam, LPA
 	case WM_KEYDOWN:
 	{
 		// If a key is pressed send it to the input object so it can record that state.
-		Input::KeyDown((unsigned int)wParam);
+		KeyboardInput::KeyDown((unsigned int)wParam);
 		return 0;
 	}
 
@@ -176,13 +181,13 @@ LRESULT CALLBACK System::MessageHandler(HWND hwnd, UINT umsg, WPARAM wParam, LPA
 	case WM_KEYUP:
 	{
 		// If a key is released then send it to the input object so it can unset the state for that key.
-		Input::KeyUp((unsigned int)wParam);
+		KeyboardInput::KeyUp((unsigned int)wParam);
 		return 0;
 	}
 	case WM_LBUTTONDOWN:
 	{
 		
-		Input::ProcessLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		MouseInput::ProcessLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		SetCapture(hWnd);
 		if (pScene) {
 			pScene->Picking(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), screenWidth, screenHeight);
@@ -192,13 +197,13 @@ LRESULT CALLBACK System::MessageHandler(HWND hwnd, UINT umsg, WPARAM wParam, LPA
 	case WM_MOUSEMOVE:
 	{	
 		
-		Input::ProcessMouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		MouseInput::ProcessMouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		return 0;
 	}
 	case WM_LBUTTONUP:
 	{
 
-		Input::ProcessLButtonUp(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		MouseInput::ProcessLButtonUp(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		ReleaseCapture();
 		
 		return 0;
