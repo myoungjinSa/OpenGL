@@ -16,7 +16,7 @@ Camera::~Camera() {
 }
 
 bool Camera::Initialize(Renderer& renderer) {
-
+	Input::Attach(std::make_shared<Observer>(this));
 	return true;
 }
 
@@ -25,16 +25,13 @@ void Camera::Render(Renderer& renderer) {
 }
 
 void Camera::Shutdown(Renderer& renderer) {
-
+	Input::Detach(std::make_shared<Observer>(this));
 }
 
 void Camera::Update(float deltaTime) {
 	Vec3f up, lookAt;
 	float yaw = 0.0f, pitch = 0.0f, roll = 0.0f;
-	
-	up.SetXYZ(0.0f, 1.0f, 0.0f);
-	lookAt.SetXYZ(0.0f, 0.0f, 1.0f);
-	
+
 	const float rotationSpeed = 0.0174532925f;
 	//Vec3f rotation = transform.get()->GetRotation();
 
@@ -45,30 +42,24 @@ void Camera::Update(float deltaTime) {
 	Matrix<float, 3, 3> rotationMatrix = Matrix<float, 3, 3>::Identity();//transform.get()->GetRotationMatrix();
 	MatrixRotationYawPitchRoll(rotationMatrix, yaw, pitch, roll);
 
-	lookAt = Transform(rotationMatrix, lookAt);
-	up = Transform(rotationMatrix, up);
+	lookAt = Transform(rotationMatrix, GetLook());
+	up = Transform(rotationMatrix, GetUp());
 
-
-	Vec3f moveOffset;
 	float movingSpeed = transform.get()->GetMovingSpeed();
 	if (Input::IsKeyDown(KEY_D)) {
-		moveOffset.x += movingSpeed * deltaTime;
+		Move(GetRight(), movingSpeed, deltaTime);
 	}
 	else if (Input::IsKeyDown(KEY_A)) {
-		moveOffset.x -= movingSpeed * deltaTime;
+		Move(GetRight() * -1.0f, movingSpeed, deltaTime);
 	}
 	else if (Input::IsKeyDown(KEY_W)) {
-		moveOffset.y += movingSpeed * deltaTime;
+		Move(GetLook(), movingSpeed, deltaTime);
 	}
 	else if (Input::IsKeyDown(KEY_S)) {
-		moveOffset.y -= movingSpeed * deltaTime;
+		Move(GetLook() * -1.0f, movingSpeed, deltaTime);
 	}
-	Vec3f pos = GetPosition();
-	pos += moveOffset;
 
-	lookAt.SetXYZ(pos.x + lookAt.x, pos.y + lookAt.y, pos.z + lookAt.z);
-	transform.get()->SetPosition(pos);
-	BuildViewMatrix(pos, lookAt, up);
+	BuildViewMatrix(GetPosition() + lookAt, up);
 }
 
 void Camera::MatrixRotationYawPitchRoll(Matrix<float, 3, 3>& matrix, float yaw, float pitch, float roll) {
@@ -128,7 +119,7 @@ void Camera::SetViewport(const Rect2f& _viewport) {
 	viewport = _viewport;
 }
 
-void Camera::BuildViewMatrix(Vec3f pos, Vec3f lookAt, Vec3f up) {
+void Camera::BuildViewMatrix(Vec3f lookAt, Vec3f up) {
 	Vec3f xAxis, yAxis, zAxis;
 	Vec3f position = transform.get()->GetPosition();
 	zAxis = Normalize(lookAt - position);
@@ -194,3 +185,7 @@ void Camera::BuildPerspectiveFovLHMatrix(Matrix<float, 4, 4>& matrix, const Rect
 	matrix[15] = 0.0f;
 }
 
+
+void Camera::Listen() {
+
+}

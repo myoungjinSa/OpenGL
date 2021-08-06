@@ -13,6 +13,10 @@ Object::Object()
 	transform = AddComponent<class Transform>();
 }
 
+Object::~Object() {
+
+}
+
 void Object::SetPosition(float x, float y, float z) {
 	transform.get()->SetPosition(x, y, z);
 }
@@ -35,6 +39,17 @@ Vec3f Object::GetRight() const {
 
 Vec3f Object::GetUp() const {
 	return transform.get()->GetUp();
+}
+
+void Object::Move(const Vec3f& dir, float movingSpeed, float elapsedTime) {
+	std::weak_ptr<class Transform> weak_tr = transform;
+	{
+		std::shared_ptr<class Transform> shared_tr = weak_tr.lock();
+		if (shared_tr) {
+			shared_tr->SetMovingSpeed(movingSpeed);
+			shared_tr->Move(dir, elapsedTime);
+		}
+	}
 }
 
 void Object::Rotate(float pitch, float yaw, float roll) {

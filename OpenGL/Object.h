@@ -15,7 +15,7 @@ class Object
 {
 public:
 	explicit Object();
-	virtual ~Object() {}
+	virtual ~Object();
 	virtual bool Initialize(Renderer& renderer);
 	virtual void Shutdown(Renderer& renderer) {}
 	virtual void Render(Renderer& renderer) {}
@@ -56,6 +56,7 @@ public:
 	Vec3f GetRight() const;
 	Vec3f GetUp() const;
 
+	void Move(const Vec3f& dir, float movingSpeed, float elapsedTime);
 	void Rotate(float pitch, float yaw, float roll);
 public:
 	std::shared_ptr<class Transform> transform;

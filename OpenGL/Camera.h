@@ -1,8 +1,9 @@
 #pragma once
 #include "Common.h"
 #include "Object.h"
+#include "Observer.h"
 
-class Camera : public Object
+class Camera : public Object, public Observer
 {
 public:
 	Camera();
@@ -26,9 +27,12 @@ public:
 	float GetWidth() const { return width; }
 	float GetHeight() const { return height; }
 	float GetAspectRatio() const { return width / height; }
+
+	void Listen() override;
 private:
 	void MatrixRotationYawPitchRoll(Matrix<float, 3, 3>& Matrix, float, float, float);
-	void BuildViewMatrix(Vec3f, Vec3f, Vec3f);
+	void BuildViewMatrix(Vec3f, Vec3f);
+
 
 
 	Rect2f viewport;

@@ -3,8 +3,9 @@
 #include <map>
 #include "String/String.h"
 #include "KeyCode.h"
+#include "Observer.h"
 
-class Input
+class Input : public Observable
 {
 public:
 	Input();
@@ -22,7 +23,8 @@ public:
 	static float GetXAngle();
 	static float GetYAngle();
 
-	
+	static void Attach(const std::shared_ptr<Observer>& observer);
+	static bool Detach(const std::shared_ptr<Observer>& observer);
 private:
 	static bool LoadKeyCodes(String&& keyFile);
 	

@@ -171,6 +171,7 @@ bool PhongShader::Initialize(Renderer& renderer) {
 void PhongShader::Update(float elapsedTime) {
 	for (const auto& obj : objects) {
 		obj->Rotate(MathUtils::DegreesToRadians(0.0f), MathUtils::DegreesToRadians(1.0f), MathUtils::DegreesToRadians(0.0f));
+		//obj->Move(obj->GetLook(), 1.0f, elapsedTime);
 	}
 }
 void PhongShader::Render(Renderer& renderer, Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& projectionMatrix ,Vec3f& lightPosition, Vec3f& cameraPosition) {

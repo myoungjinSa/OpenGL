@@ -183,6 +183,7 @@
     <ClInclude Include="Matrix.h" />
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Object.h" />
+    <ClInclude Include="Observer.h" />
     <ClInclude Include="Quaternion.h" />
     <ClInclude Include="RayCast.h" />
     <ClInclude Include="Renderer.h" />

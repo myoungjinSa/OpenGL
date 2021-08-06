@@ -10,19 +10,23 @@ Transform::Transform(Object* _owner)
 
 void Transform::AddPosition(const Vec3f& _position) {
 	position += _position;
+	SetTransform();
 }
 
 void Transform::AddPosition(float x, float y, float z) {
 	position.x += x;
 	position.y += y;
 	position.z += z;
+	SetTransform();
 }
 void Transform::SetPosition(const Vec3f& _position) {
 	position = _position;
+	SetTransform();
 }
 
 void Transform::SetPosition(float x, float y, float z) {
 	position = Vec3f(x, y, z);
+	SetTransform();
 }
 
 Vec3f Transform::GetPosition() const {
@@ -135,7 +139,8 @@ void Transform::CalculateRotationMatrix(Matrix<float, 4, 4>& rotationMatrix, flo
 }
 
 void Transform::Move(const Vec3f& direction, float elapsedTime) {
-	position = direction * elapsedTime * movingSpeed;
+	position = GetPosition() + Normalize(direction) * elapsedTime * movingSpeed;
+	SetTransform();
 }
 
 void Transform::SetLook(const Vec3f& look) {
@@ -192,6 +197,17 @@ Vec3f Transform::GetUp() const {
 	return Normalize(upVector);
 }
 
+void Transform::SetMovingSpeed(float speed) {
+	movingSpeed = speed;
+}
+
 float Transform::GetMovingSpeed() const {
 	return movingSpeed;
+}
+
+void Transform::SetTransform() {
+	worldMatrix[12] = position.x;
+	worldMatrix[13] = position.y;
+	worldMatrix[14] = position.z;
+	worldMatrix[15] = 1.0f;
 }

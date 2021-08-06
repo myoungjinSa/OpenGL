@@ -78,6 +78,14 @@ float Input::GetYAngle(){
 	return yAngle;
 }
 
+void Input::Attach(const std::shared_ptr<Observer>& observer) {
+	Attach(observer);
+}
+
+bool Input::Detach(const std::shared_ptr<Observer>& observer) {
+	return Detach(observer);
+}
+
 bool Input::LoadKeyCodes(String&& keyFileName) {
 	std::ifstream keyFile(keyFileName.c_str(), std::ios::in);
 	if (!keyFile.is_open()) {

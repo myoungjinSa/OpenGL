@@ -4,6 +4,7 @@
 class Object;
 class Scene;
 
+
 class Ray {
 public:
 	Ray() = delete;
@@ -18,6 +19,8 @@ public:
 	
 	Vec3f GetPosition() const { return position; }
 	void SetPosition(const Vec3f& pos) { position = pos; }
+
+
 private:
 	float length;
 	Vec3f direction;

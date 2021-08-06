@@ -36,10 +36,14 @@ public:
 	Vec3f GetRight() const;
 	Vec3f GetUp() const;
 
+	void  SetMovingSpeed(float speed);
 	float GetMovingSpeed() const;
+
+
 private:
 	void CalculateRotationMatrix(Matrix<float, 4, 4>& rotationMatrix, float pitch, float yaw, float roll, bool bUseQuaternion = true) const;
-
+	
+	void SetTransform();
 private:
 	Vec3f position;
 	Vec3f rotation;

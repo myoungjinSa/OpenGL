@@ -8,7 +8,7 @@
 Ray::Ray(const Vec3f& _position, const Vec3f& _direction, float _length) 
 	: position(_position), direction(_direction), length(_length)
 {
-
+	
 }
 
 Ray::~Ray() {
