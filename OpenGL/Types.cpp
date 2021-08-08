@@ -68,6 +68,26 @@ bool Point2<T>::Inside(const Rect<T>& rect) const {
 }
 
 
+template<typename T> inline
+Point2<T> Point2<T>::operator+(const Point2<T>& other) {
+	return Point2<T>(x + other.x, y + other.y);
+
+}
+template<typename T> inline
+Point2<T> Point2<T>::operator-(const Point2<T>& other) {
+	return Point2<T>(x - other.x, y - other.y);
+
+}
+
+template<typename T> inline
+Point2<T> Point2<T>::operator*(const Point2<T>& other) {
+	return Point2<T>(x * other.x, y * other.y);
+
+}
+
+
+
+
 template<typename T> static inline
 Point2<T>& operator+=(Point2<T>& left, const Point2<T>& right) {
 	left.x += right.x;

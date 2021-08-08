@@ -14,7 +14,9 @@ void KeyboardInput::KeyDown(unsigned int input)
 {
 	keyCodes[input].second = true;
 
-	KeyboardEvent e;
+	std::vector<unsigned int> keys;
+	keys.push_back(input);
+	KeyboardEvent e(KeyboardEvent::KEY_STATE::KEY_STATE_DOWN, keys);
 	Notify(e);
 }
 
@@ -23,7 +25,9 @@ void KeyboardInput::KeyUp(unsigned int input)
 {
 	keyCodes[input].second = false;
 
-	KeyboardEvent e;
+	std::vector<unsigned int> keys;
+	keys.push_back(input);
+	KeyboardEvent e(KeyboardEvent::KEY_STATE::KEY_STATE_UP, keys);
 	Notify(e);
 }
 
@@ -32,9 +36,6 @@ bool KeyboardInput::IsKeyDown(unsigned int input)
 {
 	if (!keyCodes[input].second)
 		return false;
-
-	KeyboardEvent e;
-	Notify(e);
 
 	return true;
 }
@@ -79,8 +80,12 @@ void KeyboardInput::Notify(KeyboardInput::KeyboardEvent& e) {
 	}
 }
 
-KeyboardInput::KeyboardEvent::KeyboardEvent() {
+KeyboardInput::KeyboardEvent::KeyboardEvent(KEY_STATE _keyState, const std::vector<unsigned int>& _keys) {
+	for (unsigned int key : keys) {
+		keys.push_back(key);
+	}
 
+	keyState = _keyState;
 }
 void KeyboardInput::KeyboardEvent::GetInfo() {
 
@@ -106,7 +111,7 @@ void MouseInput::ProcessLButtonDown(int x, int y) {
 		mousePoint.x = x;
 		mousePoint.y = y;
 
-		MouseEvent e;
+		MouseEvent e(MouseEvent::MOUSE_STATE::LBUTTON_DOWN, Point2i(mousePoint.x, mousePoint.y));
 		Notify(e);
 	}
 }
@@ -115,14 +120,14 @@ void MouseInput::ProcessMouseMove(int x, int y) {
 		int dragX = x;
 		int dragY = y;
 
-		xAngle += (y - mousePoint.y) / 3.6;
-		yAngle += (x - mousePoint.x) / 3.6;
+		//xAngle += (y - mousePoint.y) / 3.6;
+		//yAngle += (x - mousePoint.x) / 3.6;
 
 		mousePoint.x = dragX;
 		mousePoint.y = dragY;
 		//dragY = y;
 
-		MouseEvent e;
+		MouseEvent e(MouseEvent::MOUSE_STATE::MOUSE_DRAG, Point2i(mousePoint.x, mousePoint.y));
 		Notify(e);
 	}
 }
@@ -138,7 +143,7 @@ float MouseInput::GetYAngle() {
 void MouseInput::ProcessLButtonUp(int x, int y) {
 	if (dragging) {
 		dragging = false;
-		MouseEvent e;
+		MouseEvent e(MouseEvent::MOUSE_STATE::LBUTTON_UP, Point2i(x, y));
 		Notify(e);
 	}
 }
@@ -157,14 +162,15 @@ bool MouseInput::Detach(Observer* pObserver) {
 	return true;
 }
 
-void MouseInput::Notify(MouseEvent& e) {
+void MouseInput::Notify(MouseInput::MouseEvent& e) {
 	for (auto pObserver : observers) {
 		pObserver->ProcessEvent(e);
 	}
 }
 
-MouseInput::MouseEvent::MouseEvent() {
-
+MouseInput::MouseEvent::MouseEvent(MOUSE_STATE _mouseState, const Point2i& _mousePoint) {
+	mousePoint = _mousePoint;
+	mouseState = _mouseState;
 }
 void MouseInput::MouseEvent::GetInfo() {
 	

@@ -371,8 +371,8 @@ public:
 	float CalculateTheta();
 	void Normalize();
 	Vector2 Multiply(const Vector2<T>& v);	
+	
 	static Vector2 GetMidPoint(const Vector2<T>& start, const Vector2<T>& end);
-
 
 	template<typename T2> operator Vector2<T2>() const;
 	Vector2<T>& operator+=(const Vector2<T>& rhs);

@@ -49,9 +49,6 @@ public:
 	void SetPosition(const Vec3f& _position);
 	Vec3f GetPosition() const;
 
-	void SetRight(const Vec3f& right);
-	void SetUp(const Vec3f& up);
-	void SetLook(const Vec3f& look);
 	Vec3f GetLook() const;
 	Vec3f GetRight() const;
 	Vec3f GetUp() const;

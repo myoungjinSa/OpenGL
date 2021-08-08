@@ -8,6 +8,10 @@ Camera::Camera()
 	,width(0)
 	,height(0)
 	,viewMatrix()
+	,oldMousePoint()
+	,lookDir()
+	,xAngle(0.0f)
+	,yAngle(0.0f)
 {
 	
 }
@@ -31,21 +35,23 @@ void Camera::Shutdown(Renderer& renderer) {
 }
 
 void Camera::Update(float deltaTime) {
-	Vec3f up, lookAt;
 	float yaw = 0.0f, pitch = 0.0f, roll = 0.0f;
 
 	const float rotationSpeed = 0.0174532925f;
-	//Vec3f rotation = transform.get()->GetRotation();
-
-	pitch = MouseInput::GetXAngle() * rotationSpeed;
-	yaw = MouseInput::GetYAngle() * rotationSpeed;
+	
+	pitch = xAngle * rotationSpeed;
+	yaw = yAngle * rotationSpeed;
 	roll = 0.0f;
 
-	Matrix<float, 3, 3> rotationMatrix = Matrix<float, 3, 3>::Identity();//transform.get()->GetRotationMatrix();
+	Vec3f up(0.0f, 1.0f, 0.0f), lookAt(0.0f, 0.0f, 1.0f);
+	
+	Matrix<float, 3, 3> rotationMatrix = Matrix<float, 3, 3>::Identity();
 	MatrixRotationYawPitchRoll(rotationMatrix, yaw, pitch, roll);
 
-	lookAt = Transform(rotationMatrix, GetLook());
-	up = Transform(rotationMatrix, GetUp());
+	lookAt = Transform(rotationMatrix, lookAt);
+	up = Transform(rotationMatrix, up);
+
+	//LogDebug(L"lookAt - (%.8lf, %.8lf, %.8lf) up - (%.8lf, %.8lf, %.8lf)\n", lookAt.x, lookAt.y, lookAt.z, up.x, up.y, up.z);
 
 	float movingSpeed = transform.get()->GetMovingSpeed();
 	if (KeyboardInput::IsKeyDown(KEY_D)) {
@@ -65,49 +71,23 @@ void Camera::Update(float deltaTime) {
 }
 
 void Camera::MatrixRotationYawPitchRoll(Matrix<float, 3, 3>& matrix, float yaw, float pitch, float roll) {
-	float cYaw, cPitch, cRoll, sYaw, sPitch, sRoll;
+	Quaternion q;
+	q.GetEuler(Vec3d(pitch, yaw, roll));
+	q.Normalize();
 
-	cYaw = cosf(yaw);
-	cPitch = cosf(pitch);
-	cRoll = cosf(roll);
+	Matrix<double, 3, 3> m = q.GetRotationMatrix();
 
-	sYaw = sinf(yaw);
-	sPitch = sinf(pitch);
-	sRoll = sinf(roll);
-
-	//Calculate the yaw, pitch , roll rotation matrix.
-	matrix[0] = (cRoll * cYaw) + (sRoll * sPitch * sYaw);
-	matrix[1] = (sRoll * cPitch);
-	matrix[2] = (cRoll * -sYaw) + (sRoll * sPitch * cYaw);
-
-	matrix[3] = (-sRoll * cYaw) + (cRoll * sPitch * sYaw);
-	matrix[4] = (cRoll * cPitch);
-	matrix[5] = (sRoll * sYaw) + (cRoll * sPitch * cYaw);
-
-	matrix[6] = (cPitch * sYaw);
-	matrix[7] = -sPitch;
-	matrix[8] = (cPitch * cYaw);
-
-	//Quaternion q;
-	//q.GetEuler(Vec3d(roll, pitch, yaw));
-	//q.Normalize();
-
-	//Matrix<double, 3, 3> m = q.GetRotationMatrix();
-
-
-	//matrix[0] = m[0];
-	//matrix[1] = m[1];
-	//matrix[2] = m[2];
-
-
-	//matrix[3] = m[3];
-	//matrix[4] = m[4];
-	//matrix[5] = m[5];
-
-
-	//matrix[6] = m[6];
-	//matrix[7] = m[7];
-	//matrix[8] = m[8];
+	matrix[0] = m[0];
+	matrix[1] = m[3];
+	matrix[2] = m[6];
+	
+	matrix[3] = m[1];
+	matrix[4] = m[4];
+	matrix[5] = m[7];
+	
+	matrix[6] = m[2];
+	matrix[7] = m[5];
+	matrix[8] = m[8];
 }
 
 
@@ -134,7 +114,7 @@ void Camera::BuildViewMatrix(Vec3f lookAt, Vec3f up) {
 	float xPos = DotProduct(xAxis, position) * -1.0f;
 	float yPos = DotProduct(yAxis, position) * -1.0f;
 	float zPos = DotProduct(zAxis, position) * -1.0f;
-
+	
 	viewMatrix.value[0]  = xAxis.x;
 	viewMatrix.value[1]  = yAxis.x;
 	viewMatrix.value[2]  = zAxis.x;
@@ -189,13 +169,33 @@ void Camera::BuildPerspectiveFovLHMatrix(Matrix<float, 4, 4>& matrix, const Rect
 
 
 void Camera::ProcessEvent(Event& e) {
-	if (dynamic_cast<MouseInput::MouseEvent*>(&e)) {
-		LogDebug(L"Mouse Event Occured.\n");
+	if (MouseInput::MouseEvent* pMouseEvent = dynamic_cast<MouseInput::MouseEvent*>(&e)) {
+		if (pMouseEvent->mouseState == MouseInput::MouseEvent::MOUSE_STATE::MOUSE_STATE_COUNT)
+			return;
+		
+
+		Point2i newMousePoint = pMouseEvent->mousePoint;
+		Vec2f mouseDelta(newMousePoint.x - oldMousePoint.x, newMousePoint.y - oldMousePoint.y);
+		
+		if (pMouseEvent->mouseState == MouseInput::MouseEvent::MOUSE_STATE::MOUSE_DRAG) {
+			if (sqrtf(newMousePoint.x - oldMousePoint.x + newMousePoint.y - oldMousePoint.y) > 50.0f)
+			{
+				oldMousePoint = newMousePoint;
+				return;
+			}
+			const float rotationSpeed = 0.5f;
+
+			xAngle += (newMousePoint.y - oldMousePoint.y) / 3.6;
+			yAngle += (newMousePoint.x - oldMousePoint.x) / 3.6;
+		}
+
+		oldMousePoint = newMousePoint;
 	}
 
-
 	if (dynamic_cast<KeyboardInput::KeyboardEvent*>(&e)) {
-		LogDebug(L"Keyboard Event Occured.\n");
+		//LogDebug(L"Keyboard Event Occured.\n");
+
+
 	}
 
 }

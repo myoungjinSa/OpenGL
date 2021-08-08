@@ -110,6 +110,9 @@ bool Object::IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1,
 
 	return true;
 }
+
+
+
 ///////////////////////////////////////////////////////////////
 Cube::Cube()
 	:Object()

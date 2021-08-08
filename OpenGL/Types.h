@@ -28,6 +28,11 @@ public:
 	double Cross(const Point2& pt) const;
 	bool Inside(const Rect<T>& rect) const;
 
+	Point2<T> operator+(const Point2<T>& other);
+	Point2<T> operator-(const Point2<T>& other);
+	Point2<T> operator*(const Point2<T>& other);
+	Point2<T> operator/(const Point2<T>& other);
+
 	T x;
 	T y;
 };

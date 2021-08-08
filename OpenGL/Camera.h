@@ -35,10 +35,16 @@ private:
 	void BuildViewMatrix(Vec3f, Vec3f);
 
 
-
 	Rect2f viewport;
 	float width;
 	float height;
 	Matrix<float, 4, 4> viewMatrix;
+
+
+	float xAngle;
+	float yAngle;
+
+	Vec3f lookDir;
+	Point2i oldMousePoint;
 };
 

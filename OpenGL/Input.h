@@ -11,8 +11,16 @@ class KeyboardInput
 public:
 	class KeyboardEvent : public Event {
 	public:
-		KeyboardEvent();
+		enum class KEY_STATE {
+			KEY_STATE_DOWN,
+			KEY_STATE_UP,
+			KEY_STATE_COUNT
+		};
+		KeyboardEvent(KEY_STATE keyState, const std::vector<unsigned int>& keys);
 		void GetInfo() override;
+
+		std::vector<unsigned int> keys;
+		KEY_STATE keyState;
 	};
 
 	KeyboardInput();
@@ -27,7 +35,7 @@ public:
 
 	static void Attach(Observer* observer);
 	static bool Detach(Observer* observer);
-	static void Notify(KeyboardEvent& e);
+	static void Notify(KeyboardInput::KeyboardEvent& e);
 private:
 	static bool LoadKeyCodes(String&& keyFile);
 	static std::map<unsigned int, std::pair<const String, bool>> keyCodes;
@@ -40,8 +48,17 @@ class MouseInput
 public:
 	class MouseEvent : public Event {
 	public:
-		MouseEvent();
+		enum class MOUSE_STATE {
+			LBUTTON_DOWN,
+			LBUTTON_UP,
+			MOUSE_DRAG,
+			MOUSE_STATE_COUNT
+		};
+		MouseEvent(MOUSE_STATE mouseState, const Point2i& mousePos);
 		void GetInfo() override;
+
+		Point2i mousePoint;
+		MOUSE_STATE mouseState;
 	};
 
 	MouseInput();
@@ -59,7 +76,7 @@ public:
 	static void Attach(Observer* observer);
 	static bool Detach(Observer* observer);
 
-	static void Notify(MouseEvent& e);
+	static void Notify(MouseInput::MouseEvent& e);
 private:
 	static bool dragging;
 	static Point2i mousePoint;
