@@ -49,6 +49,7 @@ public:
 	void SetShader(unsigned int shaderProgram);
 	bool CompileVertexShader(const char* vsFilename, unsigned int& vertexShader);
 	bool CompileFragmentShader(const char* fsFilename, unsigned int& fragmentShader);
+	bool CompileGeometryShader(const char* gsFilename, unsigned int& geometryShader);
 	bool BindVertexAttrib(unsigned int shaderProgram, unsigned int vertexShader, unsigned int fragmentShader, int vertexArgs, ...);
 	
 	void SetDrawMode(Renderer::DrawMode drawMode);

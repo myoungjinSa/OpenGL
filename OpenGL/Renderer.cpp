@@ -35,6 +35,8 @@ void Renderer::Shutdown(unsigned int shaderProgram, unsigned int vertexShader, u
 
 	pGL->glDeleteShader(vertexShader);
 	pGL->glDeleteShader(fragmentShader);
+
+
 	
 	pGL->glDeleteProgram(shaderProgram);
 
@@ -129,13 +131,27 @@ void Renderer::ReleaseIndexBuffers(unsigned int& indexBufferId, size_t indexCoun
 void Renderer::DrawVertexBuffer(unsigned int vertexArrayId, size_t startPos, size_t vertexCount) {
 	pGL->glBindVertexArray(vertexArrayId);
 
-	glDrawArrays(GL_TRIANGLES, startPos, vertexCount);
+	switch (drawMode) {
+	case DrawMode::TRIANGLES:
+		glDrawArrays(GL_TRIANGLES, startPos, vertexCount);
+		break;
+	case DrawMode::LINES:
+		glDrawArrays(GL_LINES, startPos, vertexCount);
+		break;
+	}
 }
 
 void Renderer::DrawIndexBuffer(unsigned int vertexArrayId, size_t indexCount) {
 	pGL->glBindVertexArray(vertexArrayId);
 
-	glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
+	switch (drawMode) {
+	case DrawMode::TRIANGLES:
+		glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
+		break;
+	case DrawMode::LINES:
+		glDrawElements(GL_LINES, indexCount, GL_UNSIGNED_INT, 0);
+		break;
+	}
 }
 
 
@@ -245,6 +261,28 @@ bool Renderer::CompileFragmentShader(const char* fsFilename, unsigned int& fragm
 		OutputShaderErrorMessage(*pGL, fragmentShader, const_cast<char*>(fsFilename));
 		return false;
 	}
+	return true;
+}
+
+bool Renderer::CompileGeometryShader(const char* gsFilename, unsigned int& geometryShader) {
+	const char* geometryShaderBuffer;
+	geometryShaderBuffer = LoadShaderSourceFile(gsFilename);
+	if (!geometryShaderBuffer)
+		return false;
+
+	geometryShader = pGL->glCreateShader(GL_GEOMETRY_SHADER);
+	pGL->glShaderSource(geometryShader, 1, &geometryShaderBuffer, NULL);
+	delete geometryShaderBuffer;
+	geometryShaderBuffer = nullptr;
+
+	int status = 0;
+	pGL->glCompileShader(geometryShader);
+	pGL->glGetShaderiv(geometryShader, GL_COMPILE_STATUS, &status);
+	if (status != 1) {
+		OutputShaderErrorMessage(*pGL, geometryShader, const_cast<char*>(gsFilename));
+		return false;
+	}
+
 	return true;
 }
 
@@ -441,4 +479,8 @@ void Renderer::OutputShaderErrorMessage(OpenGL& gl, unsigned int shaderId, char*
 		return;
 
 	MessageBox(hWnd, L"Error compile shader. Check shader-error.txt for message.", newString, MB_OK);
+}
+
+void Renderer::SetDrawMode(Renderer::DrawMode _drawMode) {
+	drawMode = _drawMode;
 }

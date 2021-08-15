@@ -1,5 +1,6 @@
 #pragma once
 #include "Matrix.h"
+#include "Shader.h"
 
 class Object;
 class Scene;
@@ -25,6 +26,7 @@ private:
 	float length;
 	Vec3f direction;
 	Vec3f position;
+
 };
 
 class RayCast {

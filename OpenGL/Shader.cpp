@@ -106,9 +106,13 @@ void ColorShader::Shutdown(Renderer& renderer) {
 void ColorShader::Update(float elapsedTime) {
 
 }
-void ColorShader::Render(Renderer& renderer) {
-	for (const auto& obj : objects)
-		obj->Render(renderer);
+void ColorShader::Render(Renderer& renderer, Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& projectionMatrix) {
+	SetShader(renderer);
+	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
+	for (size_t iObj = 0; iObj < objects.size(); iObj++) {
+		SetShaderParameters(renderer, viewMatrix, projectionMatrix, iObj);
+		objects[iObj]->Render(renderer);
+	}
 }
 
 bool ColorShader::InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer) {
@@ -125,7 +129,16 @@ bool ColorShader::InitializeShader(const char* vsFilename, const char* fsFilenam
 	return renderer.BindVertexAttrib(shaderProgram, vertexShader, fragmentShader, 2, inputPosition, inputColor);
 }
 
-bool ColorShader::SetShaderParameters(Renderer& renderer, Matrix<float, 4, 4>& worldMatrix, Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& projectionMatrix) {
+bool ColorShader::SetShaderParameters(Renderer& renderer, Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& projectionMatrix, int objectIndex) {
+	if (objects.size() <= objectIndex) {
+		LogError(L"오브젝트 인덱스 오류%d", objectIndex);
+		assert(0);
+		return false;
+	}
+
+	Matrix<float, 4, 4> worldMatrix;
+	MakeWorldMatrix(objects[objectIndex]->GetPosition(), objects[objectIndex]->GetLook(), objects[objectIndex]->GetRight(), objects[objectIndex]->GetUp(), worldMatrix);
+
 	if (!renderer.SetShaderParameter(shaderProgram, worldMatrix, std::move(String("worldMatrix")))) {
 		return false;
 	}
@@ -176,6 +189,7 @@ void PhongShader::Update(float elapsedTime) {
 }
 void PhongShader::Render(Renderer& renderer, Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& projectionMatrix ,Vec3f& lightPosition, Vec3f& cameraPosition) {
 	SetShader(renderer);
+	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
 	for (size_t iObj = 0; iObj < objects.size(); iObj++) {
 		SetShaderParameters(renderer, viewMatrix, projectionMatrix, lightPosition, cameraPosition, iObj);
 		objects[iObj]->Render(renderer);

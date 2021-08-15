@@ -573,7 +573,7 @@ bool WString::Resize(size_t size) {
 bool WString::Reserve(size_t reserveSize) {
 	wchar_t* tempString = nullptr;
 	capacity = reserveSize;
-	length = Max(capacity - 1, 0);
+	length = std::max(capacity - 1, 0);
 	wstring = (wchar_t*)realloc(wstring, sizeof(wchar_t) * capacity);
 
 	if (!wstring) {
