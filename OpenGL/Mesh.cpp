@@ -112,6 +112,54 @@ byte* Vertex::ReadBufferData(void* pBuffer, size_t targetDataSize) {
 	return pReturn;
 }
 
+ColorVertex::ColorVertex() 
+	: position(), color()
+{
+
+}
+
+ColorVertex::ColorVertex(const Vec3f& pos, const RGBA& _color) 
+	:position(pos), color(_color)
+{
+
+}
+
+ColorVertex::~ColorVertex() {
+
+}
+
+void ColorVertex::Copy(const VertexMaster& source, byte* pDestination) {
+	ColorVertex* pVertex = (ColorVertex*)(pDestination);
+	pVertex->position = source.position;
+	pVertex->color = source.color;
+}
+
+void ColorVertex::BindVertexBuffer(OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeofVertex) {
+	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
+	gl.glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(ColorVertex), pBuffer, GL_STATIC_DRAW);
+
+	gl.glEnableVertexAttribArray(0); // Position;
+	gl.glEnableVertexAttribArray(1); // Color
+
+	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
+	gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeofVertex, 0);
+
+	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
+	gl.glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, false, sizeofVertex, (unsigned char*)NULL + (3 * sizeof(float)));
+}
+
+byte* ColorVertex::ReadBufferData(void* pBuffer, size_t targetDataSize) {
+	if (!pBuffer)
+		return nullptr;
+
+	byte* pReturn = (byte*)malloc(targetDataSize * sizeof(byte));
+	if (!pReturn)
+		return nullptr;
+
+	memset(pReturn, 0, targetDataSize * sizeof(byte));
+	memcpy_s(pReturn, targetDataSize * sizeof(byte), pBuffer, targetDataSize * sizeof(byte));
+	return pReturn;
+}
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 Triangle::Triangle()
@@ -601,7 +649,7 @@ void MeshBuilder::AddIndex(int index) {
 	indices.emplace_back(index);
 }
 
-void MeshBuilder::CopyToMesh(Renderer& renderer, Mesh* pMesh, VertexCopyCallback* copyFunction, unsigned int sizeofVertex) {
+void MeshBuilder::CopyToMesh(Renderer& renderer, Mesh* pMesh, VertexBufferBindCallback* bindFunction, VertexCopyCallback* copyFunction, unsigned int sizeofVertex) {
 	unsigned int vertexCount = vertices.size();
 	if (vertexCount == 0) {
 		return;
@@ -616,7 +664,7 @@ void MeshBuilder::CopyToMesh(Renderer& renderer, Mesh* pMesh, VertexCopyCallback
 		copyFunction(vertices[vertexIndex], currentBufferIndex);
 		currentBufferIndex += vertexSize;
 	}
-	pMesh->Initialize(renderer, &Vertex::BindVertexBuffer, vertexBuffer, vertexCount, sizeofVertex, indices.data(), indices.size());
+	pMesh->Initialize(renderer, bindFunction, vertexBuffer, vertexCount, sizeofVertex, indices.data(), indices.size());
 
 	delete[] vertexBuffer;
 	vertexBuffer = nullptr;

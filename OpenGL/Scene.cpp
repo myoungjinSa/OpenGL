@@ -10,15 +10,14 @@
 Scene::Scene() 
 	:pCamera(nullptr),
 	 worldMatrix(),
-	 pShader(nullptr),
 	 projectionMatrix()
 {
+	shaders.clear();
 }
 
 Scene::~Scene() {
-	if (pShader) {
-		delete pShader;
-		pShader = nullptr;
+	while (!shaders.empty()) {
+		shaders.pop_back();
 	}
 	if (pCamera) {
 		delete pCamera;
@@ -30,14 +29,14 @@ bool Scene::BuildObject(Renderer& renderer) {
 	phongLight.SetPosition(0.0f, 0.0f, -10.0f);
 	phongLight.SetDirection(Vec3f::FORWARD);
 
-	pShader = new PhongShader();
-	if (!pShader)
-		return false;
+	shaders.push_back(std::make_shared<PhongShader>());
+	shaders.push_back(std::make_shared<ColorShader>());
 
-	bool result = pShader->Initialize(renderer);
-	if (!result) {
-		LogError(L"Could not initialize the shader object.");
-		return false;
+	for (auto shader : shaders) {
+		if (!shader->Initialize(renderer)) {
+			LogError(L"Could not initialize the shader object.");
+			return false;
+		}
 	}
 
 	pCamera = new Camera();
@@ -57,8 +56,8 @@ void Scene::Update(const float& elapsedTime) {
 	if (pCamera)
 		pCamera->Update(elapsedTime);
 
-	if (pShader) {
-		pShader->Update(elapsedTime);
+	for (auto shader : shaders) {
+		shader->Update(elapsedTime);
 	}
 }
 
@@ -74,15 +73,16 @@ bool Scene::Render(Renderer& renderer) {
 
 	Matrix<float, 4, 4> viewMatrix = GetViewMatrix();
 	Vec3f cameraPosition = pCamera->GetPosition();
-	pShader->Render(renderer, viewMatrix, projectionMatrix, lightPosition, cameraPosition);
+	shaders[0]->Render(renderer, viewMatrix, projectionMatrix, lightPosition, cameraPosition);
+	shaders[1]->Render(renderer, viewMatrix, projectionMatrix);
 
 	renderer.EndRender();
 	return true;
 }
 
 void Scene::Shutdown(Renderer& renderer) {
-	if (pShader)
-		pShader->Shutdown(renderer);
+	for (auto shader : shaders)
+		shader->Shutdown(renderer);
 
 	if (pCamera)
 		pCamera->Shutdown(renderer);
@@ -106,7 +106,7 @@ Matrix<float, 4, 4> Scene::GetProjectionMatrix() const {
 
 
 size_t Scene::GetObjectCount() const {
-	return pShader->GetObjectCount();
+	return shaders[0]->GetObjectCount();
 }
 void Scene::Picking(int x, int y, int screenWidth, int screenHeight) {
 	RayCast rayCast(*this);
@@ -119,7 +119,7 @@ void Scene::Picking(int x, int y, int screenWidth, int screenHeight) {
 
 
 bool Scene::IntersectObjects(const Ray& ray) const {
-	return pShader->IntersectObjects(ray);
+	return shaders[0]->IntersectObjects(ray);
 }
 
 

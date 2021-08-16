@@ -3,8 +3,7 @@
 #include "Light.h"
 #include "Matrix.h"
 
-class ColorShader;
-class PhongShader;
+class Shader;
 class Object;
 class Camera;
 class Renderer;
@@ -29,7 +28,7 @@ public:
 	bool	IntersectObjects(const Ray& ray) const;
 private:
 	Camera* pCamera;
-	PhongShader* pShader;
+	std::vector<std::shared_ptr<Shader>> shaders;
 	Light phongLight;
 
 	Matrix<float, 4, 4> worldMatrix;

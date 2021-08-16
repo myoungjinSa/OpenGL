@@ -59,6 +59,20 @@ public:
 	Vec3f normal;
 };
 
+struct ColorVertex {
+public:
+	ColorVertex();
+	ColorVertex(const Vec3f& pos, const RGBA& color);
+	~ColorVertex();
+
+	static void Copy(const VertexMaster& source, byte* pDestination);
+	static void BindVertexBuffer(OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeOfVertex);
+	static byte* ReadBufferData(void* pBuffer, size_t targetDataSize);
+
+	Vec3f position;
+	RGBA color;
+};
+
 struct Triangle{
 public:
 	Triangle();
@@ -183,7 +197,7 @@ public:
 	void Begin();
 	void End();
 
-	void CopyToMesh(Renderer& renderers, Mesh* mesh, VertexCopyCallback* copyFunction, unsigned int sizeofVertex);
+	void CopyToMesh(Renderer& renderers, Mesh* mesh, VertexBufferBindCallback* bindFunction, VertexCopyCallback* copyFunction, unsigned int sizeofVertex);
 
 	void AddSphere(const Vec3f& position, float radius, int sectorCount, int stackCount);
 	void AddCube(float sideLength, const RGBA& color);

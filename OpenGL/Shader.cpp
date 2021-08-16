@@ -5,6 +5,7 @@
 #include "String/String.h"
 #include "Logger.h"
 #include "RayCast.h"
+#include "BoundingVolume.h"
 #include <fstream>
 
 void MakeWorldMatrix(const Vec3f& position, const Vec3f& look, const Vec3f& right, const Vec3f& up, Matrix<float, 4, 4>& worldMatrix) {
@@ -81,9 +82,9 @@ ColorShader::~ColorShader() {
 }
 
 bool ColorShader::Initialize(Renderer& renderer) {
-	bool result;
-	result = InitializeShader("color.vs", "color.ps", renderer);
-
+	if (!InitializeShader("color.vs", "color.ps", renderer))
+		return false;
+	
 	Object* pObject = new Cube();
 	objects.emplace_back(pObject);
 
@@ -92,10 +93,12 @@ bool ColorShader::Initialize(Renderer& renderer) {
 			LogError(L"Could not initialize the model object");
 			return false;
 		}
+		std::shared_ptr<BoundingVolume> volume = obj->GetComponent<BoundingBox>();
+		if(volume)
+			volumes.push_back(volume);
 	}
 
-	if (!result)
-		return false;
+
 	return true;
 }
 
@@ -109,9 +112,14 @@ void ColorShader::Update(float elapsedTime) {
 void ColorShader::Render(Renderer& renderer, Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& projectionMatrix) {
 	SetShader(renderer);
 	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
-	for (size_t iObj = 0; iObj < objects.size(); iObj++) {
+	/*for (size_t iObj = 0; iObj < objects.size(); iObj++) {
 		SetShaderParameters(renderer, viewMatrix, projectionMatrix, iObj);
 		objects[iObj]->Render(renderer);
+	}*/
+
+	for (size_t iVolume = 0; iVolume < volumes.size(); iVolume++) {
+		SetShaderParameters(renderer, viewMatrix, projectionMatrix, iVolume);
+		volumes[iVolume]->Render(renderer);
 	}
 }
 

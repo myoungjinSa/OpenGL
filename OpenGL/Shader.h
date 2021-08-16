@@ -7,7 +7,7 @@ class Object;
 class ShaderVisitor;
 class Renderer;
 class Ray;
-
+class BoundingVolume;
 struct ShaderParameter {
 	Matrix<float, 4, 4> worldMatrix;
 	Matrix<float, 4, 4> viewMatrix;
@@ -64,9 +64,10 @@ public:
 	void Render(Renderer& renderer, Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& projectionMatrix) override;
 	void Render(Renderer& renderer, Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& projectionMatrix, Vec3f& lightPosition, Vec3f& lightDirection) override {}
 	bool SetShaderParameters(Renderer& renderer, Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& projectionMatrix, int objectIndex);
-	//bool SetShaderParameters(Renderer& renderer, float* worldMatrix, float* viewMatrix, float* projectionMatrix);
-protected:
 	bool InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer);
+
+protected:
+	std::vector<std::shared_ptr<BoundingVolume>> volumes;
 };
 
 class PhongShader : public Shader 
@@ -86,15 +87,3 @@ public:
 protected:
 	bool InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer);
 };
-
-//class WireframeShader : public Shader {
-//public:
-//	WireframeShader();
-//	WireframeShader(const WireframeShader& other) = delete;
-//	~WireframeShader() override;
-//
-//	bool Initialize(Renderer& renderer) override;
-//	void Shutdown(Renderer& renderer) override;
-//
-//
-//};

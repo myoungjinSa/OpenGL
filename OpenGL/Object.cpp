@@ -6,6 +6,7 @@
 #include "Material.h"
 #include "RayCast.h"
 #include "Logger.h"
+#include "BoundingVolume.h"
 
 Object::Object() 
 	: pMesh(nullptr), albedoMap(nullptr), normalMap(nullptr)
@@ -114,9 +115,9 @@ bool Object::IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1,
 
 ///////////////////////////////////////////////////////////////
 Cube::Cube()
-	:Object()
+	:Object(), extent(1.0f, 1.0f, 1.0f)
 {
-	
+
 }
 
 Cube::Cube(const Cube& other)
@@ -144,7 +145,7 @@ bool Cube::Initialize(Renderer& renderer) {
 
 	//MeshBuilder Call
 	MeshBuilder meshBuilder;
-	meshBuilder.AddCube(transform.get()->GetPosition(), Vec3f(1.0f, 1.0f, 1.0f), RGBA::BLUE);
+	meshBuilder.AddCube(transform.get()->GetPosition(), extent, RGBA::BLUE);
 
 	if (!pMesh)
 		pMesh = std::make_shared<Mesh>();
@@ -152,7 +153,7 @@ bool Cube::Initialize(Renderer& renderer) {
 	if (!pMesh)
 		return false;
 
-	meshBuilder.CopyToMesh(renderer, pMesh.get(), &Vertex::Copy, sizeof(Vertex));
+	meshBuilder.CopyToMesh(renderer, pMesh.get(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 
 	albedoMap = TextureLoader::GetTexture(renderer, "Capture.bmp");
 	//normalMap = TextureLoader::GetTexture(renderer, "Resource\\Texture\\BMP\\NormalMap.bmp");
@@ -162,6 +163,11 @@ bool Cube::Initialize(Renderer& renderer) {
 	Vec3f specularColor(1.0f, 1.0f, 1.0f);
 	material = std::make_shared<Material>(diffuseColor, ambientColor, specularColor, std::make_pair(Material::TextureType::TEXTURE_ALBEDO, albedoMap->textureID));
 	//material.get()->SetTextureMap(std::make_pair(Material::TextureType::TEXTURE_NORMAL, normalMap->textureID));
+
+	AddComponent<BoundingBox>();
+	std::shared_ptr<BoundingBox> boundingBox = GetComponent<BoundingBox>();
+	boundingBox->Init(renderer);
+
 
 	return true;
 }
@@ -178,6 +184,24 @@ void Cube::Update(float deltaTime) {
 void Cube::Render(Renderer& renderer) {
 	Object::Render(renderer);
 	pMesh->Render(renderer);
+}
+
+Vec3f Cube::GetExtent() const {
+	float maxX = 0.0, maxY = 0.0, maxZ = 0.0;
+
+	for (size_t iMesh = 0; iMesh < pMesh->GetTriangleMeshCount(); iMesh++) {
+		Triangle meshes = pMesh->GetTriangleMesh(iMesh);
+		for (size_t iVertex = 0; iVertex < 3; iVertex++) {
+			Vec3f pos = meshes.GetPosition(iVertex);
+			if (abs(maxX) < abs(pos.x))
+				maxX = pos.x;
+			if (abs(maxY) < abs(pos.y))
+				maxY = pos.y;
+			if (abs(maxZ) < abs(pos.z))
+				maxZ = pos.z;
+		}
+	}
+	return Vec3f(maxX, maxY, maxZ);
 }
 
 
@@ -221,7 +245,7 @@ bool Sphere::Initialize(Renderer& renderer) {
 	if (!pMesh)
 		return false;
 
-	meshBuilder.CopyToMesh(renderer, pMesh.get(), &Vertex::Copy, sizeof(Vertex));
+	meshBuilder.CopyToMesh(renderer, pMesh.get(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 
 	albedoMap = TextureLoader::GetTexture(renderer, "Capture.bmp");
 

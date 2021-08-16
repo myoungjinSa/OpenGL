@@ -55,6 +55,8 @@ public:
 
 	void Move(const Vec3f& dir, float movingSpeed, float elapsedTime);
 	void Rotate(float pitch, float yaw, float roll);
+
+	virtual Vec3f GetExtent() const = 0;
 public:
 	std::shared_ptr<class Transform> transform;
 	std::shared_ptr<Material> material;
@@ -80,8 +82,13 @@ public:
 	void Render(Renderer& renderer) override;
 	void Update(float deltaTime) override;
 
+	Vec3f GetExtent() const override;
+
 	Cube& operator=(const Cube& other);
 	Cube& operator=(Cube&& other) noexcept;
+
+private:
+	Vec3f extent;
 };
 
 
@@ -100,6 +107,7 @@ public:
 	Sphere& operator=(const Sphere& other);
 	Sphere& operator=(Sphere&& other) noexcept;
 
+	Vec3f GetExtent() const override { return Vec3f(radius, radius, radius); }
 private:
 	float radius;
 	int stackCount;

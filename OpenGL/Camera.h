@@ -30,6 +30,8 @@ public:
 
 	void ProcessEvent(Event& e) override;
 
+	Vec3f GetExtent() const { return Vec3f(0.0f, 0.0f, 0.0f); }
+
 private:
 	void MatrixRotationYawPitchRoll(Matrix<float, 3, 3>& Matrix, float, float, float);
 	void BuildViewMatrix(Vec3f, Vec3f);
