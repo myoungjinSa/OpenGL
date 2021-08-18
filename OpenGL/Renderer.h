@@ -52,6 +52,7 @@ public:
 	bool CompileGeometryShader(const char* gsFilename, unsigned int& geometryShader);
 	bool BindVertexAttrib(unsigned int shaderProgram, unsigned int vertexShader, unsigned int fragmentShader, int vertexArgs, ...);
 	
+	void SetDepthTest(bool bEnable);
 	void SetDrawMode(Renderer::DrawMode drawMode);
 	Renderer::DrawMode GetDrawMode() const { return drawMode; }
 

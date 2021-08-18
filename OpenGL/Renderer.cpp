@@ -480,7 +480,9 @@ void Renderer::OutputShaderErrorMessage(OpenGL& gl, unsigned int shaderId, char*
 
 	MessageBox(hWnd, L"Error compile shader. Check shader-error.txt for message.", newString, MB_OK);
 }
-
+void Renderer::SetDepthTest(bool bEnable) {
+	bEnable ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
+}
 void Renderer::SetDrawMode(Renderer::DrawMode _drawMode) {
 	drawMode = _drawMode;
 }

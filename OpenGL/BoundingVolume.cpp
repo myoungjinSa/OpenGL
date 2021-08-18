@@ -32,9 +32,9 @@ bool BoundingBox::Init(Renderer& renderer) {
 }
 bool BoundingBox::IsIn(const Vec3f& pos) {
 
-
 	return true;
 }
+
 
 void BoundingBox::Render(Renderer& renderer) {
 	renderer.SetDrawMode(Renderer::DrawMode::LINES);
