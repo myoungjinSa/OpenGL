@@ -60,5 +60,4 @@ bool BoundingSphere::IsIn(const Vec3f& pos) {
 void BoundingSphere::Render(Renderer& renderer) {
 	renderer.SetDrawMode(Renderer::DrawMode::LINES);
 
-	
 }

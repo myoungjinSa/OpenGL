@@ -11,6 +11,7 @@ class Mesh;
 class Texture;
 class Renderer;
 class Ray;
+class BoundingVolume;
 class Object
 {
 public:
@@ -60,6 +61,7 @@ public:
 public:
 	std::shared_ptr<class Transform> transform;
 	std::shared_ptr<Material> material;
+	std::shared_ptr<BoundingVolume> boundingVolume;
 protected:
 	std::vector<std::shared_ptr<Component>> components;
 

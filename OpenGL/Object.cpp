@@ -165,8 +165,9 @@ bool Cube::Initialize(Renderer& renderer) {
 	//material.get()->SetTextureMap(std::make_pair(Material::TextureType::TEXTURE_NORMAL, normalMap->textureID));
 
 	AddComponent<BoundingBox>();
-	std::shared_ptr<BoundingBox> boundingBox = GetComponent<BoundingBox>();
-	boundingBox->Init(renderer);
+	boundingVolume = GetComponent<BoundingBox>();
+	if(boundingVolume)
+		boundingVolume.get()->Init(renderer);
 
 
 	return true;
