@@ -2,13 +2,16 @@
 #include <vector>
 #include "Light.h"
 #include "Matrix.h"
+#include "Object.h"
 
 class Shader;
-class Object;
+class ShaderParameter;
+
 class Camera;
 class Renderer;
 class Ray;
-class Scene final
+class Material;
+class Scene final : public Object
 {
 public:
 	Scene();
@@ -26,12 +29,15 @@ public:
 	size_t	GetObjectCount() const;
 	void	Picking(int x, int y, int screenWidth, int screenHeight);
 	bool	IntersectObjects(const Ray& ray) const;
+
+	void	FillShaderParameter(const GameObject& gameObject, ShaderParameter& shaderParam);
 private:
 	Camera* pCamera;
-	std::vector<std::shared_ptr<Shader>> shaders;
+	
+	std::shared_ptr<Shader> DefaultShader;
+	std::vector<GameObject*> objects;
 	Light phongLight;
 
-	Matrix<float, 4, 4> worldMatrix;
 	Matrix<float, 4, 4> projectionMatrix;
 };
 

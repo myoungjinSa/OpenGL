@@ -8,45 +8,19 @@
 #include "BoundingVolume.h"
 #include <fstream>
 
-void MakeWorldMatrix(const Vec3f& position, const Vec3f& look, const Vec3f& right, const Vec3f& up, Matrix<float, 4, 4>& worldMatrix) {
-	//Right
-	worldMatrix.value[0] = right.x;
-	worldMatrix.value[1] = right.y;
-	worldMatrix.value[2] = right.z;
-
-	//Up
-	worldMatrix.value[4] = up.x;
-	worldMatrix.value[5] = up.y;
-	worldMatrix.value[6] = up.z;
-
-	//Look
-	worldMatrix.value[8] = look.x;
-	worldMatrix.value[9] = look.y;
-	worldMatrix.value[10] = look.z;
-
-	//Position
-	worldMatrix.value[12] = position.x;
-	worldMatrix.value[13] = position.y;
-	worldMatrix.value[14] = position.z;
-	worldMatrix.value[15] = 1.0f;
-}
 
 Shader::Shader() 
 	:vertexShader(0), fragmentShader(0), shaderProgram(0)
 {
-	objects.clear();
+
 }
 
 Shader::~Shader() {
-	for (auto& obj : objects) {
-		delete obj;
-	}
-	objects.clear();
+
 }
 
 void Shader::Shutdown(Renderer& renderer) {
-	for (const auto& obj : objects)
-		obj->Shutdown(renderer);
+
 }
 
 void Shader::SetShader(Renderer& renderer) {
@@ -57,20 +31,6 @@ void Shader::ShutdownShader(Renderer& renderer) {
 	renderer.Shutdown(shaderProgram, vertexShader, fragmentShader);
 }
 
-
-
-size_t Shader::GetObjectCount() const {
-	return objects.size();
-}
-
-bool Shader::IntersectObjects(const Ray& ray) const {
-	double distance = 0.0;
-	for (size_t iObj = 0; iObj < objects.size(); iObj++) {
-		objects[iObj]->Intersect(ray, distance);
-	}
-
-	return true;
-}
 
 ColorShader::ColorShader() 
 	:Shader()
@@ -84,20 +44,6 @@ ColorShader::~ColorShader() {
 bool ColorShader::Initialize(Renderer& renderer) {
 	if (!InitializeShader("color.vs", "color.ps", renderer))
 		return false;
-	
-	Object* pObject = new Cube();
-	objects.emplace_back(pObject);
-
-	for (const auto& obj : objects) {
-		if (!obj->Initialize(renderer)) {
-			LogError(L"Could not initialize the model object");
-			return false;
-		}
-		std::shared_ptr<BoundingVolume> volume = obj->GetComponent<BoundingBox>();
-		if(volume)
-			volumes.push_back(volume);
-	}
-
 
 	return true;
 }
@@ -109,18 +55,14 @@ void ColorShader::Shutdown(Renderer& renderer) {
 void ColorShader::Update(float elapsedTime) {
 
 }
-void ColorShader::Render(Renderer& renderer, Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& projectionMatrix) {
+void ColorShader::Render(Renderer& renderer, ShaderParameter& shaderParam) {
 	SetShader(renderer);
 	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
+	SetShaderParameters(renderer, shaderParam);
 	/*for (size_t iObj = 0; iObj < objects.size(); iObj++) {
 		SetShaderParameters(renderer, viewMatrix, projectionMatrix, iObj);
 		objects[iObj]->Render(renderer);
 	}*/
-
-	for (size_t iVolume = 0; iVolume < volumes.size(); iVolume++) {
-		SetShaderParameters(renderer, viewMatrix, projectionMatrix, iVolume);
-		volumes[iVolume]->Render(renderer);
-	}
 }
 
 bool ColorShader::InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer) {
@@ -137,23 +79,14 @@ bool ColorShader::InitializeShader(const char* vsFilename, const char* fsFilenam
 	return renderer.BindVertexAttrib(shaderProgram, vertexShader, fragmentShader, 2, inputPosition, inputColor);
 }
 
-bool ColorShader::SetShaderParameters(Renderer& renderer, Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& projectionMatrix, int objectIndex) {
-	if (objects.size() <= objectIndex) {
-		LogError(L"오브젝트 인덱스 오류%d", objectIndex);
-		assert(0);
+bool ColorShader::SetShaderParameters(Renderer& renderer, ShaderParameter& shaderParam) {
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldMatrix, std::move(String("worldMatrix")))) {
 		return false;
 	}
-
-	Matrix<float, 4, 4> worldMatrix;
-	MakeWorldMatrix(objects[objectIndex]->GetPosition(), objects[objectIndex]->GetLook(), objects[objectIndex]->GetRight(), objects[objectIndex]->GetUp(), worldMatrix);
-
-	if (!renderer.SetShaderParameter(shaderProgram, worldMatrix, std::move(String("worldMatrix")))) {
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.viewMatrix, std::move(String("viewMatrix")))) {
 		return false;
 	}
-	if (!renderer.SetShaderParameter(shaderProgram, viewMatrix, std::move(String("viewMatrix")))) {
-		return false;
-	}
-	if (!renderer.SetShaderParameter(shaderProgram, projectionMatrix, std::move(String("projectionMatrix")))) {
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.projectionMatrix, std::move(String("projectionMatrix")))) {
 		return false;
 	}
 
@@ -177,31 +110,16 @@ bool PhongShader::Initialize(Renderer& renderer) {
 	if (!result)
 		return false;
 
-	Object* pObject = new Cube();//new Sphere(2.0f, 36, 36);
-	objects.emplace_back(pObject);
-
-	for (const auto& obj : objects) {
-		if (!obj->Initialize(renderer)) {
-			LogError(L"Could not initialize the model object");
-			return false;
-		}
-	}
 	return true;
 }
 
 void PhongShader::Update(float elapsedTime) {
-	for (const auto& obj : objects) {
-		obj->Rotate(MathUtils::DegreesToRadians(0.0f), MathUtils::DegreesToRadians(1.0f), MathUtils::DegreesToRadians(0.0f));
-		//obj->Move(obj->GetLook(), 1.0f, elapsedTime);
-	}
+
 }
-void PhongShader::Render(Renderer& renderer, Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& projectionMatrix ,Vec3f& lightPosition, Vec3f& cameraPosition) {
+void PhongShader::Render(Renderer& renderer, ShaderParameter& shaderParameter) {
 	SetShader(renderer);
-	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
-	for (size_t iObj = 0; iObj < objects.size(); iObj++) {
-		SetShaderParameters(renderer, viewMatrix, projectionMatrix, lightPosition, cameraPosition, iObj);
-		objects[iObj]->Render(renderer);
-	}
+	
+	SetShaderParameters(renderer, shaderParameter);
 }
 
 void PhongShader::Shutdown(Renderer& renderer) {
@@ -224,44 +142,37 @@ bool PhongShader::InitializeShader(const char* vsFilename, const char* fsFilenam
 	return renderer.BindVertexAttrib(shaderProgram, vertexShader, fragmentShader, 3, inputPosition, inputTexCoord, inputNormal);
 }
 
-bool PhongShader::SetShaderParameters(Renderer& renderer, Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& projectionMatrix, Vec3f& lightPosition, Vec3f& cameraPosition, int objectIndex) {
-	if (objects.size() <= objectIndex) {
-		LogError(L"오브젝트 인덱스 오류%d", objectIndex);
+bool PhongShader::SetShaderParameters(Renderer& renderer, ShaderParameter& shaderParam) {
+
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldMatrix, String("worldMatrix"))) {
 		assert(0);
 		return false;
 	}
 
-	Matrix<float, 4, 4> worldMatrix;
-	MakeWorldMatrix(objects[objectIndex]->GetPosition(), objects[objectIndex]->GetLook(), objects[objectIndex]->GetRight(), objects[objectIndex]->GetUp(), worldMatrix);
-	if (!renderer.SetShaderParameter(shaderProgram, worldMatrix, String("worldMatrix"))) {
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.viewMatrix, String("viewMatrix"))) {
 		assert(0);
 		return false;
 	}
 
-	if (!renderer.SetShaderParameter(shaderProgram, viewMatrix, String("viewMatrix"))) {
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.projectionMatrix, String("projectionMatrix"))) {
 		assert(0);
 		return false;
 	}
 
-	if (!renderer.SetShaderParameter(shaderProgram, projectionMatrix, String("projectionMatrix"))) {
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.lightPosition, String("lightPosition"))) {
 		assert(0);
 		return false;
 	}
 
-	if (!renderer.SetShaderParameter(shaderProgram, lightPosition, String("lightPosition"))) {
-		assert(0);
-		return false;
-	}
-
-	if (!renderer.SetShaderParameter(shaderProgram, cameraPosition, String("worldCameraPosition"))) {
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.cameraPosition, String("worldCameraPosition"))) {
 		assert(0);
 		return false;
 	}
 
 
-	Vec3f diffuseAlbedo = objects[objectIndex]->material->GetDiffuseAlbedo();
-	Vec3f ambientAlbedo = Vec3f(objects[objectIndex]->material->GetAmbientAlbedo().x, objects[objectIndex]->material->GetAmbientAlbedo().y, objects[objectIndex]->material->GetAmbientAlbedo().z);
-	Vec3f specular = objects[objectIndex]->material->GetSpecularAlbedo();
+	Vec3f diffuseAlbedo = Vec3f(shaderParam.diffuseAlbedo.x, shaderParam.diffuseAlbedo.y, shaderParam.diffuseAlbedo.z);
+	Vec3f ambientAlbedo = Vec3f(shaderParam.ambientAlbedo.x, shaderParam.ambientAlbedo.y, shaderParam.ambientAlbedo.z);
+	Vec3f specular = Vec3f(shaderParam.specularAlbedo.x, shaderParam.specularAlbedo.y, shaderParam.specularAlbedo.z);
 
 	if (!renderer.SetShaderParameter(shaderProgram, diffuseAlbedo, String("diffuseAlbedo"))) {
 		assert(0);
@@ -276,7 +187,8 @@ bool PhongShader::SetShaderParameters(Renderer& renderer, Matrix<float, 4, 4>& v
 		return false;
 	}
 
-	if (!renderer.SetShaderParameter(shaderProgram, (int)objects[objectIndex]->material->GetTextureUnit(Material::TextureType::TEXTURE_ALBEDO), String("shaderTexture"))) {
+	int textureUnit = shaderParam.textureUnit;
+	if (!renderer.SetShaderParameter(shaderProgram, textureUnit, String("shaderTexture"))) {
 		assert(0);
 		return false;
 	}

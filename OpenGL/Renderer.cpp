@@ -296,6 +296,16 @@ bool Renderer::SetShaderParameter(unsigned int shaderProgram, Matrix<float, 4, 4
 	return true;
 }
 
+bool Renderer::SetShaderParameter(unsigned int shaderProgram, const Matrix<float, 4, 4>& matrix, String&& variableName) {
+	_ASSERT(pGL);
+	unsigned int location = pGL->glGetUniformLocation(shaderProgram, variableName.c_str());
+	if (location == -1)
+		return false;
+
+	pGL->glUniformMatrix4fv(location, 1, false, (float*)&matrix.value);
+	return true;
+}
+
 
 bool Renderer::SetShaderParameter(unsigned int shaderProgram, Vec3f& vec3, String&& variableName) {
 	_ASSERT(pGL);
@@ -306,6 +316,8 @@ bool Renderer::SetShaderParameter(unsigned int shaderProgram, Vec3f& vec3, Strin
 	pGL->glUniform3fv(location, 1, (float*)vec3.ConvertToValue());
 	return true;
 }
+
+
 
 bool Renderer::SetShaderParameter(unsigned int shaderProgram, Vec4f& vec4, String&& variableName) {
 	_ASSERT(pGL);

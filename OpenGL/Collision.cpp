@@ -11,7 +11,7 @@ CollisionDetector::~CollisionDetector() {
 
 }
 
-bool CollisionDetector::DetectRayCollision(const Ray& ray, const Object& obj) {
+bool CollisionDetector::DetectRayCollision(const Ray& ray, const GameObject& obj) {
 
 	return true;
 }

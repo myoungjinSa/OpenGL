@@ -63,6 +63,9 @@ public:
 
 
 	bool SetShaderParameter(unsigned int shaderProgram, Matrix<float, 4, 4>& matrix, String&& variableName);
+	bool SetShaderParameter(unsigned int shaderProgram, const Matrix<float, 4, 4>& matrix, String&& variableName);
+
+
 	bool SetShaderParameter(unsigned int shaderProgram, Vec4f& vec4, String&& variableName);
 	bool SetShaderParameter(unsigned int shaderProgram, Vec3f& vec3, String&& variableName);
 	bool SetShaderParameter(unsigned int shaderProgram, int integer, String&& variableName);

@@ -27,7 +27,7 @@ RayCast::~RayCast() {
 
 }
 
-Object* RayCast::HitTest(float x, float y, int screenWidth, int screenHeight) {
+GameObject* RayCast::HitTest(float x, float y, int screenWidth, int screenHeight) {
 	Vec3f worldRay = CalculateRay(targetScene, x, y, screenWidth, screenHeight);
 	LogInfo(L"Ray: x = %5lf, y = %5lf, z = %5lf", worldRay.x, worldRay.y, worldRay.z);
 

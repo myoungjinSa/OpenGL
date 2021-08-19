@@ -4,7 +4,7 @@
 #include "Quaternion.h"
 
 Camera::Camera()
-	:Object()
+	:GameObject()
 	,width(0)
 	,height(0)
 	,viewMatrix()

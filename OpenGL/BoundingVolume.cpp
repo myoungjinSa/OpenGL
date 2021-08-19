@@ -10,11 +10,11 @@ BoundingVolume::BoundingVolume(Object* pObject)
 
 
 
-BoundingBox::BoundingBox(Object* pOwner)
+BoundingBox::BoundingBox(Object* pOwner, const Vec3f& _center, const Vec3f& _extent)
 	:BoundingVolume(pOwner), pMesh(nullptr)
 {
-	center = pOwner->GetPosition();
-	extent = pOwner->GetExtent();
+	center = _center;
+	extent = _extent;
 }
 
 bool BoundingBox::Init(Renderer& renderer) {

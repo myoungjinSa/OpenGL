@@ -3,7 +3,7 @@
 #include "Object.h"
 #include "Observer.h"
 
-class Camera : public Object, public Observer
+class Camera : public GameObject, public Observer
 {
 public:
 	Camera();

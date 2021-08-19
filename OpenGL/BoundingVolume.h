@@ -19,7 +19,7 @@ public:
 
 class BoundingBox final : public BoundingVolume {
 public:
-	BoundingBox(Object* pOnwer);
+	BoundingBox(Object* pOnwer, const Vec3f& _center, const Vec3f& _extent);
 
 	bool Init(Renderer& renderer) override;
 	bool IsIn(const Vec3f& pos) override;

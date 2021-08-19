@@ -6,24 +6,15 @@
 #include "Transform.h"
 
 class Material;
-class OpenGL;
 class Mesh;
 class Texture;
 class Renderer;
 class Ray;
 class BoundingVolume;
-class Object
-{
-public:
-	explicit Object();
-	virtual ~Object();
-	virtual bool Initialize(Renderer& renderer);
-	virtual void Shutdown(Renderer& renderer) {}
-	virtual void Render(Renderer& renderer) {}
-	virtual void Update(float deltaTime){}
+class Renderer;
 
-	bool Intersect(const Ray& ray, double& distance);
-
+class Object {
+protected:
 	template<typename T> std::shared_ptr<T> AddComponent() {
 		static_assert(std::is_base_of<Component, T>::value, "T must derive from Component");
 		for (auto& component : components) {
@@ -46,6 +37,24 @@ public:
 		}
 		return nullptr;
 	}
+
+	std::vector<std::shared_ptr<Component>> components;
+
+};
+
+
+class GameObject : public Object
+{
+public:
+	explicit GameObject();
+	virtual ~GameObject();
+	virtual bool Initialize(Renderer& renderer);
+	virtual void Shutdown(Renderer& renderer) {}
+	virtual void Render(Renderer& renderer) {}
+	virtual void Update(float deltaTime){}
+
+	bool Intersect(const Ray& ray, double& distance);
+
 	void SetPosition(float x, float y, float z);
 	void SetPosition(const Vec3f& _position);
 	Vec3f GetPosition() const;
@@ -61,7 +70,7 @@ public:
 public:
 	std::shared_ptr<class Transform> transform;
 	std::shared_ptr<Material> material;
-	std::shared_ptr<BoundingVolume> boundingVolume;
+	//std::shared_ptr<BoundingVolume> boundingVolume;
 protected:
 	std::vector<std::shared_ptr<Component>> components;
 
@@ -72,7 +81,7 @@ protected:
 	bool IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, bool bFrontOnly, double& distance);
 };
 
-class Cube : public Object {
+class Cube : public GameObject {
 public:
 	Cube();
 	Cube(const Cube& other);
@@ -94,7 +103,7 @@ private:
 };
 
 
-class Sphere : public Object {
+class Sphere : public GameObject {
 public:
 	explicit Sphere(float _radius, int _stackCount, int _sectorCount);
 	Sphere(const Sphere& other);

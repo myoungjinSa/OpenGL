@@ -7,42 +7,43 @@
 #include "RayCast.h"
 #include "Logger.h"
 #include "BoundingVolume.h"
+#include "Renderer.h"
 
-Object::Object() 
+GameObject::GameObject() 
 	: pMesh(nullptr), albedoMap(nullptr), normalMap(nullptr)
 {
 	transform = AddComponent<class Transform>();
 }
 
-Object::~Object() {
+GameObject::~GameObject() {
 
 }
 
-void Object::SetPosition(float x, float y, float z) {
+void GameObject::SetPosition(float x, float y, float z) {
 	transform.get()->SetPosition(x, y, z);
 }
 
-void Object::SetPosition(const Vec3f& _position) {
+void GameObject::SetPosition(const Vec3f& _position) {
 	transform.get()->SetPosition(_position);
 }
 
-Vec3f Object::GetPosition() const {
+Vec3f GameObject::GetPosition() const {
 	return transform.get()->GetPosition();
 }
 
-Vec3f Object::GetLook() const {
+Vec3f GameObject::GetLook() const {
 	return transform.get()->GetLook();
 }
 
-Vec3f Object::GetRight() const {
+Vec3f GameObject::GetRight() const {
 	return transform.get()->GetRight();
 }
 
-Vec3f Object::GetUp() const {
+Vec3f GameObject::GetUp() const {
 	return transform.get()->GetUp();
 }
 
-void Object::Move(const Vec3f& dir, float movingSpeed, float elapsedTime) {
+void GameObject::Move(const Vec3f& dir, float movingSpeed, float elapsedTime) {
 	std::weak_ptr<class Transform> weak_tr = transform;
 	{
 		std::shared_ptr<class Transform> shared_tr = weak_tr.lock();
@@ -53,15 +54,15 @@ void Object::Move(const Vec3f& dir, float movingSpeed, float elapsedTime) {
 	}
 }
 
-void Object::Rotate(float pitch, float yaw, float roll) {
+void GameObject::Rotate(float pitch, float yaw, float roll) {
 	transform.get()->Rotate(pitch, yaw, roll);
 }
 
-bool Object::Initialize(Renderer& renderer) {
+bool GameObject::Initialize(Renderer& renderer) {
 	return true;
 }
 
-bool Object::Intersect(const Ray& ray, double& distance) {
+bool GameObject::Intersect(const Ray& ray, double& distance) {
 	bool bIntersect = false;
 	for (size_t iTriangle = 0; iTriangle < pMesh->GetTriangleMeshCount(); iTriangle++) {
 		Triangle triangleMesh = pMesh->GetTriangleMesh(iTriangle);
@@ -72,7 +73,7 @@ bool Object::Intersect(const Ray& ray, double& distance) {
 	
 	return bIntersect;
 }
-bool Object::IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, bool bFrontOnly, double& distance) {
+bool GameObject::IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, bool bFrontOnly, double& distance) {
 	Vec3f edge1 = v1 - v0;
 	Vec3f edge2 = v2 - v0;
 
@@ -115,7 +116,7 @@ bool Object::IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1,
 
 ///////////////////////////////////////////////////////////////
 Cube::Cube()
-	:Object(), extent(1.0f, 1.0f, 1.0f)
+	:GameObject(), extent(1.0f, 1.0f, 1.0f)
 {
 
 }
@@ -141,7 +142,7 @@ Cube& Cube::operator=(const Cube& other) {
 }
 
 bool Cube::Initialize(Renderer& renderer) {
-	Object::Initialize(renderer);
+	GameObject::Initialize(renderer);
 
 	//MeshBuilder Call
 	MeshBuilder meshBuilder;
@@ -162,19 +163,13 @@ bool Cube::Initialize(Renderer& renderer) {
 	Vec4f ambientColor(0.3f, 0.3f, 0.3f, 1.0f);
 	Vec3f specularColor(1.0f, 1.0f, 1.0f);
 	material = std::make_shared<Material>(diffuseColor, ambientColor, specularColor, std::make_pair(Material::TextureType::TEXTURE_ALBEDO, albedoMap->textureID));
-	//material.get()->SetTextureMap(std::make_pair(Material::TextureType::TEXTURE_NORMAL, normalMap->textureID));
-
-	AddComponent<BoundingBox>();
-	boundingVolume = GetComponent<BoundingBox>();
-	if(boundingVolume)
-		boundingVolume.get()->Init(renderer);
 
 
 	return true;
 }
 
 void Cube::Shutdown(Renderer& renderer) {
-	Object::Shutdown(renderer);
+	GameObject::Shutdown(renderer);
 	pMesh->Shutdown(renderer);
 }
 
@@ -183,7 +178,9 @@ void Cube::Update(float deltaTime) {
 }
 
 void Cube::Render(Renderer& renderer) {
-	Object::Render(renderer);
+	GameObject::Render(renderer);
+	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
+
 	pMesh->Render(renderer);
 }
 
@@ -207,7 +204,7 @@ Vec3f Cube::GetExtent() const {
 
 
 Sphere::Sphere(float _radius, int _stackCount, int _sectorCount)
-	:Object(), radius(_radius), stackCount(_stackCount), sectorCount(_sectorCount)
+	:GameObject(), radius(_radius), stackCount(_stackCount), sectorCount(_sectorCount)
 {
 
 }
@@ -234,7 +231,7 @@ Sphere& Sphere::operator=(const Sphere& other) {
 }
 
 bool Sphere::Initialize(Renderer& renderer) {
-	Object::Initialize(renderer);
+	GameObject::Initialize(renderer);
 
 	//MeshBuilder Call
 	MeshBuilder meshBuilder;
@@ -259,7 +256,7 @@ bool Sphere::Initialize(Renderer& renderer) {
 }
 
 void Sphere::Shutdown(Renderer& renderer) {
-	Object::Shutdown(renderer);
+	GameObject::Shutdown(renderer);
 	pMesh->Shutdown(renderer);
 }
 
@@ -268,7 +265,7 @@ void Sphere::Update(float deltaTime) {
 }
 
 void Sphere::Render(Renderer& renderer) {
-	Object::Render(renderer);
+	GameObject::Render(renderer);
 	pMesh->Render(renderer);
 }
 

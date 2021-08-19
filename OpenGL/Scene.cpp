@@ -2,23 +2,50 @@
 #include "Shader.h"
 #include "Camera.h"
 #include "Scene.h"
-#include "Object.h"
 #include "Renderer.h"
 #include "RayCast.h"
 #include "Logger.h"
+#include "Material.h"
+
+
+void MakeWorldMatrix(const Vec3f& position, const Vec3f& look, const Vec3f& right, const Vec3f& up, Matrix<float, 4, 4>& worldMatrix) {
+	//Right
+	worldMatrix.value[0] = right.x;
+	worldMatrix.value[1] = right.y;
+	worldMatrix.value[2] = right.z;
+
+	//Up
+	worldMatrix.value[4] = up.x;
+	worldMatrix.value[5] = up.y;
+	worldMatrix.value[6] = up.z;
+
+	//Look
+	worldMatrix.value[8] = look.x;
+	worldMatrix.value[9] = look.y;
+	worldMatrix.value[10] = look.z;
+
+	//Position
+	worldMatrix.value[12] = position.x;
+	worldMatrix.value[13] = position.y;
+	worldMatrix.value[14] = position.z;
+	worldMatrix.value[15] = 1.0f;
+}
+
 
 Scene::Scene() 
 	:pCamera(nullptr),
-	 worldMatrix(),
 	 projectionMatrix()
 {
-	shaders.clear();
+
 }
 
 Scene::~Scene() {
-	while (!shaders.empty()) {
-		shaders.pop_back();
+
+	for (auto& obj : objects) {
+		delete obj;
 	}
+	objects.clear();
+
 	if (pCamera) {
 		delete pCamera;
 		pCamera = nullptr;
@@ -29,14 +56,24 @@ bool Scene::BuildObject(Renderer& renderer) {
 	phongLight.SetPosition(0.0f, 0.0f, -10.0f);
 	phongLight.SetDirection(Vec3f::FORWARD);
 
-	shaders.push_back(std::make_shared<PhongShader>());
-	shaders.push_back(std::make_shared<ColorShader>());
+	DefaultShader = std::make_shared<PhongShader>();
+	if (!DefaultShader)
+		return false;
 
-	for (auto shader : shaders) {
-		if (!shader->Initialize(renderer)) {
-			LogError(L"Could not initialize the shader object.");
+	if (!DefaultShader->Initialize(renderer)) {
+		LogError(L"Could not initialize the Default Shader\n");
+		return false;
+	}
+
+	GameObject* pObject = new Cube();
+	objects.emplace_back(pObject);
+
+	for (const auto& obj : objects) {
+		if (!obj->Initialize(renderer)) {
+			LogError(L"Could not initialize the model object\n");
 			return false;
 		}
+
 	}
 
 	pCamera = new Camera();
@@ -56,42 +93,41 @@ void Scene::Update(const float& elapsedTime) {
 	if (pCamera)
 		pCamera->Update(elapsedTime);
 
-	for (auto shader : shaders) {
-		shader->Update(elapsedTime);
+
+	for (const auto& obj : objects) {
+		obj->Rotate(MathUtils::DegreesToRadians(0.0f), MathUtils::DegreesToRadians(1.0f), MathUtils::DegreesToRadians(0.0f));
+		//obj->Move(obj->GetLook(), 1.0f, elapsedTime);
 	}
 }
 
 bool Scene::Render(Renderer& renderer) {
 	renderer.BeginRender();
-
-	Vec3f lightPosition = phongLight.GetPosition();
-	Vec3f lightDirection = phongLight.GetDirection();
-	
-	worldMatrix = Matrix<float, 4, 4>::Identity();
-
 	pCamera->BuildPerspectiveFovLHMatrix(projectionMatrix, pCamera->GetViewport(), SCREEN_NEAR, SCREEN_DEPTH);
 
-	Matrix<float, 4, 4> viewMatrix = GetViewMatrix();
-	Vec3f cameraPosition = pCamera->GetPosition();
-	shaders[0]->Render(renderer, viewMatrix, projectionMatrix, lightPosition, cameraPosition);
-	shaders[1]->Render(renderer, viewMatrix, projectionMatrix);
+	Matrix<float, 4, 4> worldMatrix;
+	for (size_t iObj = 0; iObj < objects.size(); iObj++) {
+		ShaderParameter shaderParmaeter;
+		FillShaderParameter(*objects[iObj], shaderParmaeter);
+		DefaultShader->Render(renderer, shaderParmaeter);
+		
+		objects[iObj]->Render(renderer);
+	}
 
 	renderer.EndRender();
 	return true;
 }
 
 void Scene::Shutdown(Renderer& renderer) {
-	for (auto shader : shaders)
-		shader->Shutdown(renderer);
+	if(DefaultShader)
+		DefaultShader->Shutdown(renderer);
+
+	for (const auto& obj : objects)
+		obj->Shutdown(renderer);
 
 	if (pCamera)
 		pCamera->Shutdown(renderer);
 }
 
-
-Matrix<float, 4, 4> Scene::GetWorldMatrix() const {
-	return worldMatrix;
-}
 Matrix<float, 4, 4> Scene::GetViewMatrix() const {
 	Matrix<float, 4, 4> viewMatrix;
 	if (pCamera)
@@ -103,23 +139,41 @@ Matrix<float, 4, 4> Scene::GetProjectionMatrix() const {
 	return projectionMatrix;
 }
 
-
-
 size_t Scene::GetObjectCount() const {
-	return shaders[0]->GetObjectCount();
+	return objects.size();
 }
 void Scene::Picking(int x, int y, int screenWidth, int screenHeight) {
 	RayCast rayCast(*this);
 
-	Object* pHitObject = rayCast.HitTest(x, y, screenWidth, screenHeight);
+	GameObject* pHitObject = rayCast.HitTest(x, y, screenWidth, screenHeight);
 	if (pHitObject) {
 
 	}
 }
 
+void Scene::FillShaderParameter(const GameObject& gameObject, ShaderParameter& shaderParam) {
+	Matrix<float, 4, 4> worldMatrix  = Matrix<float, 4 , 4>::Identity();
+	MakeWorldMatrix(gameObject.GetPosition(), gameObject.GetLook(), gameObject.GetRight(), gameObject.GetUp(), worldMatrix);
+	shaderParam.worldMatrix = worldMatrix;
+	shaderParam.viewMatrix = GetViewMatrix();
+	shaderParam.projectionMatrix = GetProjectionMatrix();
+
+	shaderParam.lightPosition = phongLight.GetPosition();
+	shaderParam.diffuseAlbedo = gameObject.material->GetDiffuseAlbedo();
+	shaderParam.ambientAlbedo = gameObject.material->GetAmbientAlbedo();
+	shaderParam.specularAlbedo = gameObject.material->GetSpecularAlbedo();
+
+	shaderParam.cameraPosition = pCamera->GetPosition();
+
+	shaderParam.textureUnit = gameObject.material->GetTextureUnit(Material::TextureType::TEXTURE_ALBEDO);
+}
 
 bool Scene::IntersectObjects(const Ray& ray) const {
-	return shaders[0]->IntersectObjects(ray);
+	double distance = 0.0;
+	for (size_t iObj = 0; iObj < objects.size(); iObj++) {
+		objects[iObj]->Intersect(ray, distance);
+	}
+	return true;
 }
 
 

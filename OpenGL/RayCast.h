@@ -2,7 +2,7 @@
 #include "Matrix.h"
 #include "Shader.h"
 
-class Object;
+class GameObject;
 class Scene;
 
 
@@ -34,7 +34,7 @@ public:
 	RayCast(Scene& _targetScene);
 	~RayCast();
 
-	Object* HitTest(float x, float y, int screenWidth, int screenHeight);
+	GameObject* HitTest(float x, float y, int screenWidth, int screenHeight);
 private:
 	Vec3f CalculateRay(const Scene& targetScene, float x, float y, int screenWidth, int screenHeight);
 	Vec2f GetNormalizedDeviceCoords(float x, float y, int screenWidth, int screenHeight);
