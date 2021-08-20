@@ -9,6 +9,31 @@
 #include "BoundingVolume.h"
 #include "Renderer.h"
 
+
+void MakeWorldMatrix(const Vec3f& position, const Vec3f& look, const Vec3f& right, const Vec3f& up, Matrix<float, 4, 4>& worldMatrix) {
+	//Right
+	worldMatrix.value[0] = right.x;
+	worldMatrix.value[1] = right.y;
+	worldMatrix.value[2] = right.z;
+
+	//Up
+	worldMatrix.value[4] = up.x;
+	worldMatrix.value[5] = up.y;
+	worldMatrix.value[6] = up.z;
+
+	//Look
+	worldMatrix.value[8] = look.x;
+	worldMatrix.value[9] = look.y;
+	worldMatrix.value[10] = look.z;
+
+	//Position
+	worldMatrix.value[12] = position.x;
+	worldMatrix.value[13] = position.y;
+	worldMatrix.value[14] = position.z;
+	worldMatrix.value[15] = 1.0f;
+}
+
+
 GameObject::GameObject() 
 	: pMesh(nullptr), albedoMap(nullptr), normalMap(nullptr)
 {
@@ -164,6 +189,15 @@ bool Cube::Initialize(Renderer& renderer) {
 	Vec3f specularColor(1.0f, 1.0f, 1.0f);
 	material = std::make_shared<Material>(diffuseColor, ambientColor, specularColor, std::make_pair(Material::TextureType::TEXTURE_ALBEDO, albedoMap->textureID));
 
+	AddComponent<BoundingBox>();
+	auto boundingBox = GetComponent<BoundingBox>();
+	
+	boundingBox->SetCenter(transform->GetPosition());
+	boundingBox->SetExtent(GetExtent());
+
+	boundingVolume = boundingBox;
+	if (!boundingVolume->Init(renderer))
+		return false;
 
 	return true;
 }
@@ -183,6 +217,16 @@ void Cube::Render(Renderer& renderer) {
 
 	pMesh->Render(renderer);
 }
+
+void Cube::Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix) {
+	GameObject::Render(renderer);
+	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
+
+	pMesh->Render(renderer);
+
+	boundingVolume->Render(renderer, viewMatrix, projectionMatrix);
+}
+
 
 Vec3f Cube::GetExtent() const {
 	float maxX = 0.0, maxY = 0.0, maxZ = 0.0;
@@ -269,3 +313,7 @@ void Sphere::Render(Renderer& renderer) {
 	pMesh->Render(renderer);
 }
 
+void Sphere::Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix) {
+	GameObject::Render(renderer);
+	pMesh->Render(renderer);
+}

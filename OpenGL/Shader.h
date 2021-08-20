@@ -1,6 +1,7 @@
 #pragma once
 #include "Common.h"
 #include "OpenGL.h"
+#include "Component.h"
 
 class OpenGL;
 class Object;
@@ -25,9 +26,9 @@ struct ShaderParameter {
 	int textureUnit;
 };
 
-class Shader {
+class Shader : public Component{
 public:
-	Shader();
+	Shader(Object* _pOwner);
 	Shader(const Shader& other) = delete;
 	virtual ~Shader();
 
@@ -52,7 +53,7 @@ protected:
 class ColorShader : public Shader
 {
 public:
-	ColorShader();
+	ColorShader(Object* pOwner);
 	ColorShader(const ColorShader& other) = delete;
 	~ColorShader() override;
 
@@ -69,7 +70,7 @@ protected:
 class PhongShader : public Shader 
 {
 public:
-	PhongShader();
+	PhongShader(Object* pOwner);
 	PhongShader(const PhongShader& other) = delete;
 	~PhongShader() override;
 

@@ -2,7 +2,7 @@
 #include "Object.h"
 
 Component::Component(Object* _owner)
-	:owner(_owner)
+	:pOwner(_owner)
 {
 
 }

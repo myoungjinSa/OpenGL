@@ -8,29 +8,6 @@
 #include "Material.h"
 
 
-void MakeWorldMatrix(const Vec3f& position, const Vec3f& look, const Vec3f& right, const Vec3f& up, Matrix<float, 4, 4>& worldMatrix) {
-	//Right
-	worldMatrix.value[0] = right.x;
-	worldMatrix.value[1] = right.y;
-	worldMatrix.value[2] = right.z;
-
-	//Up
-	worldMatrix.value[4] = up.x;
-	worldMatrix.value[5] = up.y;
-	worldMatrix.value[6] = up.z;
-
-	//Look
-	worldMatrix.value[8] = look.x;
-	worldMatrix.value[9] = look.y;
-	worldMatrix.value[10] = look.z;
-
-	//Position
-	worldMatrix.value[12] = position.x;
-	worldMatrix.value[13] = position.y;
-	worldMatrix.value[14] = position.z;
-	worldMatrix.value[15] = 1.0f;
-}
-
 
 Scene::Scene() 
 	:pCamera(nullptr),
@@ -56,7 +33,7 @@ bool Scene::BuildObject(Renderer& renderer) {
 	phongLight.SetPosition(0.0f, 0.0f, -10.0f);
 	phongLight.SetDirection(Vec3f::FORWARD);
 
-	DefaultShader = std::make_shared<PhongShader>();
+	DefaultShader = std::make_shared<PhongShader>(this);
 	if (!DefaultShader)
 		return false;
 
@@ -110,7 +87,7 @@ bool Scene::Render(Renderer& renderer) {
 		FillShaderParameter(*objects[iObj], shaderParmaeter);
 		DefaultShader->Render(renderer, shaderParmaeter);
 		
-		objects[iObj]->Render(renderer);
+		objects[iObj]->Render(renderer, GetViewMatrix(), GetProjectionMatrix());
 	}
 
 	renderer.EndRender();

@@ -5,6 +5,8 @@
 #include "Component.h"
 #include "Transform.h"
 
+
+void MakeWorldMatrix(const Vec3f& position, const Vec3f& look, const Vec3f& right, const Vec3f& up, Matrix<float, 4, 4>& worldMatrix);
 class Material;
 class Mesh;
 class Texture;
@@ -38,6 +40,8 @@ protected:
 		return nullptr;
 	}
 
+	virtual ~Object() {}
+
 	std::vector<std::shared_ptr<Component>> components;
 
 };
@@ -51,6 +55,8 @@ public:
 	virtual bool Initialize(Renderer& renderer);
 	virtual void Shutdown(Renderer& renderer) {}
 	virtual void Render(Renderer& renderer) {}
+	virtual void Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix) {}
+
 	virtual void Update(float deltaTime){}
 
 	bool Intersect(const Ray& ray, double& distance);
@@ -70,7 +76,7 @@ public:
 public:
 	std::shared_ptr<class Transform> transform;
 	std::shared_ptr<Material> material;
-	//std::shared_ptr<BoundingVolume> boundingVolume;
+	std::shared_ptr<BoundingVolume> boundingVolume;
 protected:
 	std::vector<std::shared_ptr<Component>> components;
 
@@ -91,6 +97,8 @@ public:
 	bool Initialize(Renderer& renderer) override;
 	void Shutdown(Renderer& renderer) override;
 	void Render(Renderer& renderer) override;
+	void Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix) override;
+
 	void Update(float deltaTime) override;
 
 	Vec3f GetExtent() const override;
@@ -113,6 +121,8 @@ public:
 	bool Initialize(Renderer& renderer) override;
 	void Shutdown(Renderer& renderer) override;
 	void Render(Renderer& renderer) override;
+	void Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix) override;
+
 	void Update(float deltaTime) override;
 
 	Sphere& operator=(const Sphere& other);

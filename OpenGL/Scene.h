@@ -22,7 +22,6 @@ public:
 	bool Render(Renderer& renderer);
 	void Shutdown(Renderer& gl);
 
-	Matrix<float, 4, 4> GetWorldMatrix() const;
 	Matrix<float, 4, 4> GetViewMatrix() const;
 	Matrix<float, 4, 4> GetProjectionMatrix() const;
 

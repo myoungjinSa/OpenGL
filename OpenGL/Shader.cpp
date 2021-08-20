@@ -9,8 +9,8 @@
 #include <fstream>
 
 
-Shader::Shader() 
-	:vertexShader(0), fragmentShader(0), shaderProgram(0)
+Shader::Shader(Object* pOwner)
+	:Component(pOwner), vertexShader(0), fragmentShader(0), shaderProgram(0)
 {
 
 }
@@ -32,8 +32,8 @@ void Shader::ShutdownShader(Renderer& renderer) {
 }
 
 
-ColorShader::ColorShader() 
-	:Shader()
+ColorShader::ColorShader(Object* pOwner)
+	:Shader(pOwner)
 {
 
 }
@@ -57,12 +57,7 @@ void ColorShader::Update(float elapsedTime) {
 }
 void ColorShader::Render(Renderer& renderer, ShaderParameter& shaderParam) {
 	SetShader(renderer);
-	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
 	SetShaderParameters(renderer, shaderParam);
-	/*for (size_t iObj = 0; iObj < objects.size(); iObj++) {
-		SetShaderParameters(renderer, viewMatrix, projectionMatrix, iObj);
-		objects[iObj]->Render(renderer);
-	}*/
 }
 
 bool ColorShader::InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer) {
@@ -94,8 +89,8 @@ bool ColorShader::SetShaderParameters(Renderer& renderer, ShaderParameter& shade
 }
 
 /////////////////////////////Texture Shader//////////////////////////////////////////////////////////////////
-PhongShader::PhongShader() 
-	: Shader()
+PhongShader::PhongShader(Object* pOwner) 
+	: Shader(pOwner)
 {
 
 }
