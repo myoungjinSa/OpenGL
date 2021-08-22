@@ -185,8 +185,8 @@ void Camera::ProcessEvent(Event& e) {
 			}
 			const float rotationSpeed = 0.5f;
 
-			xAngle += (newMousePoint.y - oldMousePoint.y) / 3.6;
-			yAngle += (newMousePoint.x - oldMousePoint.x) / 3.6;
+			xAngle += (newMousePoint.y - oldMousePoint.y) / 3.6f;
+			yAngle += (newMousePoint.x - oldMousePoint.x) / 3.6f;
 		}
 
 		oldMousePoint = newMousePoint;

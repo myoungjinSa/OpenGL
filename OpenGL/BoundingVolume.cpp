@@ -3,12 +3,14 @@
 #include "Object.h"
 #include "Shader.h"
 #include "Logger.h"
+#include "RayCast.h"
 
 BoundingVolume::BoundingVolume(Object* pObject)
 	: Component(pObject), pGameObject(nullptr)
 {
 	
 }
+
 
 bool BoundingVolume::Init(Renderer& renderer) {
 	pGameObject = dynamic_cast<GameObject*>(pOwner);
@@ -69,12 +71,82 @@ bool BoundingBox::Init(Renderer& renderer) {
 	meshBuilder.CopyToMesh(renderer, pMesh.get(), &ColorVertex::BindVertexBuffer, &ColorVertex::Copy, sizeof(ColorVertex));
 
 }
+
 bool BoundingBox::IsIn(const Vec3f& pos) {
+
+
+
 
 	return true;
 }
 
+bool BoundingBox::IsIn(const Ray& ray) {
+	return IntersectAABB(ray);
+}
 
+bool BoundingBox::IntersectAABB(const Ray& ray) {
+	Vec3f min, max;
+	GetMinMaxRange(min, max);
+
+	float txMin = (min.x - ray.GetPosition().x) / ray.GetDirection().x;
+	float txMax = (max.x - ray.GetPosition().x) / ray.GetDirection().x;
+
+	if (txMax < txMin)
+	{
+		float temp = 0.0f;
+		temp = txMin;
+		txMin = txMax;
+		txMax = temp;
+	}
+
+	float tyMin = (min.y - ray.GetPosition().y) / ray.GetDirection().y;
+	float tyMax = (max.y - ray.GetPosition().y) / ray.GetDirection().y;
+
+	if (tyMax < tyMin)
+	{
+		float temp = 0.0f;
+		temp = tyMin;
+		tyMin = tyMax;
+		tyMax = temp;
+	}
+
+	if ((tyMax < txMin) || (txMax < tyMin))
+		return false;
+
+	if (txMin < tyMin)
+		txMin = tyMin;
+
+	float tzMin = (min.z - ray.GetPosition().z) / ray.GetDirection().z;
+	float tzMax = (max.z - ray.GetPosition().z) / ray.GetDirection().z;
+
+	if (tzMax < tzMin) {
+		float temp = 0.0f;
+		temp = tzMin;
+		tzMin = tzMax;
+		tzMax = temp;
+	}
+
+	if ((tzMax < txMin) || (txMax < tzMin))
+		return false;
+
+	if (txMin < tzMin)
+		txMin = tzMin;
+
+	if (tzMax < txMax)
+		txMax = tzMax;
+
+	return true;
+}
+
+void BoundingBox::GetMinMaxRange(Vec3f& min, Vec3f& max) {
+	min.x = center.x - fabs(extent.x);		//right
+	min.y = center.y - fabs(extent.y);		//down
+	min.z = center.z - fabs(extent.z);		//back
+
+	max.x = center.x + fabs(extent.x);		//left
+	max.y = center.y + fabs(extent.y);		//up
+	max.z = center.z + fabs(extent.z);		//front
+}
 
 void BoundingBox::Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix) {
 	renderer.SetDrawMode(Renderer::DrawMode::LINES);
@@ -102,6 +174,10 @@ bool BoundingSphere::Init(Renderer& renderer) {
 	return true;
 }
 
+bool BoundingSphere::IsIn(const Ray& ray) {
+
+	return true;
+}
 bool BoundingSphere::IsIn(const Vec3f& pos) {
 
 	return true;

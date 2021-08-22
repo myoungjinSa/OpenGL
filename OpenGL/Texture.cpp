@@ -19,7 +19,7 @@ bool Texture::Initialize(Renderer& renderer, const String& fileName, unsigned in
 	bool result;
 
 	int texID = 0;
-	//Load the targa file.
+	//Load the BMP file.
 	result = LoadBMP(renderer, fileName, textureUnit, wrap, texID);
 	if (!result) {
 		return false;

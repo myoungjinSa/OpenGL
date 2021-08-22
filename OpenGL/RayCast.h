@@ -5,8 +5,7 @@
 class GameObject;
 class Scene;
 
-
-class Ray {
+class Ray{
 public:
 	Ray() = delete;
 	Ray(const Vec3f& position, const Vec3f& direction, float length);
@@ -21,12 +20,10 @@ public:
 	Vec3f GetPosition() const { return position; }
 	void SetPosition(const Vec3f& pos) { position = pos; }
 
-
 private:
 	float length;
 	Vec3f direction;
 	Vec3f position;
-
 };
 
 class RayCast {

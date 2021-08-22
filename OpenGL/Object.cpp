@@ -88,6 +88,13 @@ bool GameObject::Initialize(Renderer& renderer) {
 }
 
 bool GameObject::Intersect(const Ray& ray, double& distance) {
+	if (boundingVolume) {
+		if (boundingVolume->IsIn(ray)) {
+			LogDebug(L"Hit AABB\n");
+			return true;
+		}
+		
+	}
 	bool bIntersect = false;
 	for (size_t iTriangle = 0; iTriangle < pMesh->GetTriangleMeshCount(); iTriangle++) {
 		Triangle triangleMesh = pMesh->GetTriangleMesh(iTriangle);

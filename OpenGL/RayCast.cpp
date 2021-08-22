@@ -8,12 +8,14 @@
 Ray::Ray(const Vec3f& _position, const Vec3f& _direction, float _length) 
 	: position(_position), direction(_direction), length(_length)
 {
-	
+
 }
 
 Ray::~Ray() {
 
 }
+
+
 ///////////////////////////////////////////////////////////////////////////
 //RayCast
 
@@ -40,7 +42,6 @@ GameObject* RayCast::HitTest(float x, float y, int screenWidth, int screenHeight
 	rayWorldPos.z = inversedViewMatrix.value[14];
 
 	Ray ray(rayWorldPos, worldRay, 1000.0f);
-	
 	for (size_t iObj = 0; iObj < targetScene.GetObjectCount(); iObj++) {
 		targetScene.IntersectObjects(ray);
 	}
