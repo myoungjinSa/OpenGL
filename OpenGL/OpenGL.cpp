@@ -15,7 +15,6 @@ OpenGL::~OpenGL() {
 
 
 bool OpenGL::InitializeExtensions(HWND hWnd) {
-	HDC deviceContext;
 	PIXELFORMATDESCRIPTOR pixelFormat;
 	HGLRC renderContext;
 
@@ -69,7 +68,6 @@ bool OpenGL::InitializeOpenGL(HWND hWnd, int _screenWidth, int _screenHeight, fl
 	if (!deviceContext)
 		return false;
 
-
 	screenWidth = _screenWidth;
 	screenHeight = _screenHeight;
 	//Support for OpenGL rendering
@@ -84,9 +82,9 @@ bool OpenGL::InitializeOpenGL(HWND hWnd, int _screenWidth, int _screenHeight, fl
 	attributeListInt[4] = WGL_ACCELERATION_ARB;
 	attributeListInt[5] = WGL_FULL_ACCELERATION_ARB;
 
-	//Support for 24bit color.
+	//Support for 32bit color.
 	attributeListInt[6] = WGL_COLOR_BITS_ARB;
-	attributeListInt[7] = 24;
+	attributeListInt[7] = 32;
 
 	//Support for 24bit depth buffer.
 	attributeListInt[8] = WGL_DEPTH_BITS_ARB;

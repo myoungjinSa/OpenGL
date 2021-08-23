@@ -46,7 +46,6 @@ private:
 	float xAngle;
 	float yAngle;
 
-	Vec3f lookDir;
 	Point2i oldMousePoint;
 };
 

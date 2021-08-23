@@ -33,7 +33,7 @@ public:
 
 	GameObject* HitTest(float x, float y, int screenWidth, int screenHeight);
 private:
-	Vec3f CalculateRay(const Scene& targetScene, float x, float y, int screenWidth, int screenHeight);
+	Vec3f CalculateRayDirection(const Scene& targetScene, float x, float y, int screenWidth, int screenHeight);
 	Vec2f GetNormalizedDeviceCoords(float x, float y, int screenWidth, int screenHeight);
 	Vec4f ConvertToEyeCoords(const Vec4f& clipCoords, const Matrix<float, 4, 4>& projectionMatrix) const;
 	Vec3f ConvertToWorldCoords(const Vec4f& eyeCoords, const Matrix<float, 4, 4>& viewMatrix) const;
