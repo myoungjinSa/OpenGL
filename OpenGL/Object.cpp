@@ -37,7 +37,7 @@ void MakeWorldMatrix(const Vec3f& position, const Vec3f& look, const Vec3f& righ
 GameObject::GameObject() 
 	: pMesh(nullptr), albedoMap(nullptr), normalMap(nullptr)
 {
-	transform = AddComponent<class Transform>();
+	transform = AddComponent<RigidTransform>();
 }
 
 GameObject::~GameObject() {
@@ -69,9 +69,9 @@ Vec3f GameObject::GetUp() const {
 }
 
 void GameObject::Move(const Vec3f& dir, float movingSpeed, float elapsedTime) {
-	std::weak_ptr<class Transform> weak_tr = transform;
+	std::weak_ptr<RigidTransform> weak_tr = transform;
 	{
-		std::shared_ptr<class Transform> shared_tr = weak_tr.lock();
+		std::shared_ptr<RigidTransform> shared_tr = weak_tr.lock();
 		if (shared_tr) {
 			shared_tr->SetMovingSpeed(movingSpeed);
 			shared_tr->Move(dir, elapsedTime);
@@ -321,6 +321,77 @@ void Sphere::Render(Renderer& renderer) {
 }
 
 void Sphere::Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix) {
+	GameObject::Render(renderer);
+	pMesh->Render(renderer);
+}
+
+
+///////////////////////////////////////////////////
+Cylinder::Cylinder(const Vec3f& _axis, const Vec3f& _arm1, const Vec3f& _arm2, uint32_t slices) 
+	: GameObject(), axis(_axis), arm1(_arm1), arm2(_arm2), sliceCount(slices) {
+
+}
+
+Cylinder::Cylinder(const Cylinder& other) {
+	operator=(other);
+}
+
+Cylinder::~Cylinder() {
+
+}
+
+Cylinder& Cylinder::operator=(const Cylinder& other) {
+	if (this == &other)
+		return *this;
+
+	if (0 < other.pMesh.use_count()) {
+		pMesh = other.pMesh;
+	}
+
+	return *this;
+}
+
+bool Cylinder::Initialize(Renderer& renderer) {
+	GameObject::Initialize(renderer);
+
+	//MeshBuilder Call
+	MeshBuilder meshBuilder;
+	meshBuilder.AddCylinder(axis, arm1, arm2, sliceCount, RGBA::BLUE);
+
+	if (!pMesh)
+		pMesh = std::make_shared<Mesh>();
+
+	if (!pMesh)
+		return false;
+
+	meshBuilder.CopyToMesh(renderer, pMesh.get(), &NormalVertex::BindVertexBuffer, &NormalVertex::Copy, sizeof(NormalVertex));
+	
+	albedoMap = TextureLoader::GetTexture(renderer, "Capture.bmp");
+
+	Vec3f diffuseColor(0.8f, 0.85f, 0.85f);
+	Vec4f ambientColor(0.3f, 0.3f, 0.3f, 1.0f);
+	Vec3f specularColor(1.0f, 1.0f, 1.0f);
+	material = std::make_shared<Material>(diffuseColor, ambientColor, specularColor, std::make_pair(Material::TextureType::TEXTURE_ALBEDO, albedoMap->textureID));
+	
+	return true;
+}
+
+
+void Cylinder::Shutdown(Renderer& renderer) {
+	GameObject::Shutdown(renderer);
+	pMesh->Shutdown(renderer);
+}
+
+void Cylinder::Update(float deltaTime) {
+
+}
+
+void Cylinder::Render(Renderer& renderer) {
+	GameObject::Render(renderer);
+	pMesh->Render(renderer);
+}
+
+void Cylinder::Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix) {
 	GameObject::Render(renderer);
 	pMesh->Render(renderer);
 }

@@ -15,6 +15,7 @@ class Ray;
 class BoundingVolume;
 class Renderer;
 
+
 class Object {
 protected:
 	template<typename T> std::shared_ptr<T> AddComponent() {
@@ -72,9 +73,9 @@ public:
 	void Move(const Vec3f& dir, float movingSpeed, float elapsedTime);
 	void Rotate(float pitch, float yaw, float roll);
 
-	virtual Vec3f GetExtent() const = 0;
+	virtual Vec3f GetExtent() const { return Vec3f(); }
 public:
-	std::shared_ptr<class Transform> transform;
+	std::shared_ptr<RigidTransform> transform;
 	std::shared_ptr<Material> material;
 	std::shared_ptr<BoundingVolume> boundingVolume;
 protected:
@@ -91,7 +92,7 @@ class Cube : public GameObject {
 public:
 	Cube();
 	Cube(const Cube& other);
-	Cube(Cube&& other) noexcept;
+	Cube(Cube&& other) noexcept = delete;
 	virtual ~Cube();
 
 	bool Initialize(Renderer& renderer) override;
@@ -104,7 +105,7 @@ public:
 	Vec3f GetExtent() const override;
 
 	Cube& operator=(const Cube& other);
-	Cube& operator=(Cube&& other) noexcept;
+	Cube& operator=(Cube&& other) noexcept = delete;
 
 private:
 	Vec3f extent;
@@ -115,7 +116,7 @@ class Sphere : public GameObject {
 public:
 	explicit Sphere(float _radius, int _stackCount, int _sectorCount);
 	Sphere(const Sphere& other);
-	Sphere(Sphere&& other) noexcept;
+	Sphere(Sphere&& other) noexcept = delete;
 	~Sphere() override;
 
 	bool Initialize(Renderer& renderer) override;
@@ -126,11 +127,35 @@ public:
 	void Update(float deltaTime) override;
 
 	Sphere& operator=(const Sphere& other);
-	Sphere& operator=(Sphere&& other) noexcept;
+	Sphere& operator=(Sphere&& other) noexcept = delete;
 
 	Vec3f GetExtent() const override { return Vec3f(radius, radius, radius); }
 private:
 	float radius;
 	int stackCount;
 	int sectorCount;
+};
+
+class Cylinder : public GameObject {
+public:
+	explicit Cylinder(const Vec3f& _axis, const Vec3f& arm1, const Vec3f& arm2, uint32_t slices);
+	Cylinder(const Cylinder& other);
+	Cylinder(Cylinder&& other) noexcept = delete;
+	~Cylinder() override;
+	
+	bool Initialize(Renderer& renderer) override;
+	void Shutdown(Renderer& renderer) override;
+	void Render(Renderer& renderer) override;
+	void Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix) override;
+	
+	void Update(float deltaTime) override;
+
+	Cylinder& operator=(const Cylinder& other);
+
+	Vec3f GetExtent() const override { return Vec3f(); }
+private:
+	Vec3f axis;
+	Vec3f arm1;
+	Vec3f arm2;
+	float sliceCount;
 };

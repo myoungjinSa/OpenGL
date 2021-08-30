@@ -144,7 +144,7 @@ void Camera::BuildViewMatrix(Vec3f lookAt, Vec3f up) {
 
 
 void Camera::GetViewMatrix(Matrix<float, 4, 4>& Matrix) const {
-	for (size_t iVal = 0; iVal < Matrix.rows * Matrix.cols; iVal++) {
+	for (int iVal = 0; iVal < Matrix.rows * Matrix.cols; iVal++) {
 		Matrix[iVal] = viewMatrix[iVal];
 	}
 }

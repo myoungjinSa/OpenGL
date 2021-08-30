@@ -4,10 +4,10 @@
 #include "Component.h"
 
 class Object;
-class Transform : public Component 
+class RigidTransform : public Component 
 {
 public:
-	Transform(Object* owner);
+	RigidTransform(Object* owner);
 
 	void AddPosition(const Vec3f& position);
 	void AddPosition(float x, float y, float z);

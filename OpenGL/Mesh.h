@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <array>
+#include "Types.h"
 #include "Compositor.h"
 #include "Matrix.h"
 #include "RGBA.h"
@@ -43,33 +44,43 @@ typedef void (VertexBufferBindCallback)(OpenGL& gl, void* pVertexBuffer, unsigne
 //	
 //	RGBA color;
 //};
+byte* ReadBufferData(void* pBuffer, size_t targetDataSize);
 
-struct Vertex{
+struct Vertex final{
 public:
 	Vertex();
 	Vertex(const Vec3f& pos, const Vec2f& uv, const Vec3f& normal);
-	~Vertex();
 
 	static void Copy(const VertexMaster& source, byte* pDestination);
 	static void BindVertexBuffer(OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeOfVertex);
-	static byte* ReadBufferData(void* pBuffer, size_t targetDataSize);
 
 	Vec3f position;
 	Vec2f uv0;
 	Vec3f normal;
 };
 
-struct ColorVertex {
+struct ColorVertex final{
 public:
 	ColorVertex();
 	ColorVertex(const Vec3f& pos, const RGBA& color);
-	~ColorVertex();
 
 	static void Copy(const VertexMaster& source, byte* pDestination);
 	static void BindVertexBuffer(OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeOfVertex);
-	static byte* ReadBufferData(void* pBuffer, size_t targetDataSize);
-
+	
 	Vec3f position;
+	RGBA color;
+};
+
+struct NormalVertex final{
+public:
+	NormalVertex();
+	NormalVertex(const Vec3f& pos, const Vec3f& normal, const RGBA& color);
+
+	static void Copy(const VertexMaster& source, byte* pDestination);
+	static void BindVertexBuffer(OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeOfVertex);
+	
+	Vec3f position;
+	Vec3f normal;
 	RGBA color;
 };
 
@@ -122,31 +133,13 @@ public:
 	size_t	GetTriangleMeshCount() const;
 	const Triangle& GetTriangleMesh(size_t index) const;
 protected:
-	std::vector<Vertex> vertexList;
+	std::vector<Vertex*> vertexList;
 	std::vector<unsigned int> indexList;
 
 	std::vector<Triangle> meshes;
 	int vertexCount, indexCount;
 	unsigned int vertexArrayId, vertexBufferId, indexBufferId;
 };
-
-
-
-//
-//class DiffuseMesh : public Mesh {
-//public:
-//	DiffuseMesh();
-//	~DiffuseMesh() override;
-//
-//protected:
-//	bool InitializeBuffers(const OpenGL& gl) override;
-//	void ShutdownBuffers(const OpenGL& gl) override;
-//	void RenderBuffers(const OpenGL& gl) override;
-//
-//	ColorVertex* vertices;
-//	unsigned int* indices;
-//};
-
 
 
 class MeshBuilder {
@@ -199,14 +192,19 @@ public:
 
 	void CopyToMesh(Renderer& renderers, Mesh* mesh, VertexBufferBindCallback* bindFunction, VertexCopyCallback* copyFunction, unsigned int sizeofVertex);
 
+	void AddCylinder(const Vec3f& axis, const Vec3f& arm1, const Vec3f& arm2, uint32_t slices, const RGBA& color);
 	void AddSphere(const Vec3f& position, float radius, int sectorCount, int stackCount);
 	void AddCube(float sideLength, const RGBA& color);
 	void AddCube(const Vec3f& center, const Vec3f& extent, const RGBA& color);
 	void AddQuad(const Vec3f& bottomLeft, const Vec3f& up, float upLength, const Vec3f& right, float rightLength, const Vec3f& normal, const RGBA& color = RGBA::WHITE, const Vec2f& uvOffset = Vec2f::ZERO, float uvStepSize = 1.0f);
 	void AddQuad(const Vec3f& center, const Vec3f& extent, const Vec3f& normal, const RGBA& color = RGBA::WHITE, const Vec2f& uvOffset = Vec2f::ZERO, float uvStepSize = 1.0f, bool bReversed = false);
+	void AddLathGeometry(const Vec3f& axis, const Vec3f& arm1, const Vec3f& arm2, int slices, const std::vector<Point2f>& points, const RGBA& color, const float epsilon = 0.0f);
+	
 	void AddVertex(const Vec3f& position);
 	void AddIndex(int index);
 
+
+	void ComputeNormals();
 
 	std::vector<VertexMaster> vertices;
 	std::vector<unsigned int> indices;
@@ -214,6 +212,7 @@ public:
 private:
 	VertexMaster stamp;
 	unsigned int startIndex;
+
 };
 
 

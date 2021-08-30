@@ -485,10 +485,17 @@ Vector2<T> Normalize(const Vector2<T>& v) {
 	return ret;
 }
 
-template<typename T, typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr>
+template<typename T>
 T DotProduct(const Vector2<T>& v1, const Vector2<T>& v2) {
 	return T((v1.x * v2.x) + (v1.y * v2.y));
 }
+template<class T>
+T Length(const Vector2<T>& a)
+{
+	return DotProduct(a, a);
+}
+
+
 
 template<typename T> template<typename T2> inline
 Vector2<T>::operator Vector2<T2>() const
@@ -753,6 +760,11 @@ Vector3<T> operator+(const Vector3<T>& v1, const Vector3<T>& v2) {
 }
 
 template<typename T>
+Vector3<T> operator+(const Vector3<T>& v1,  float value) {
+	return Vector3<T>(v1.x + value, v1.y + value, v1.z + value);
+}
+
+template<typename T>
 Vector3<T> operator-(const Vector3<T>& v1, const Vector3<T>& v2) {
 	Vector3<T> ret;
 	
@@ -761,6 +773,12 @@ Vector3<T> operator-(const Vector3<T>& v1, const Vector3<T>& v2) {
 	ret.z = v1.z - v2.z;
 	return ret;
 }
+
+template<typename T>
+Vector3<T> operator-(const Vector3<T>& v1, float value) {
+	return Vector3<T>(v1.x - value, v1.y - value, v1.z - value);
+}
+
 template<typename T>
 Vector3<T> operator*(const Vector3<T>& v1, const Vector3<T>& v2) {
 	Vector3<T> ret;
@@ -799,10 +817,15 @@ Vector3<T> Normalize(const Vector3<T>& v) {
 	return ret;
 }
 
-
-template<typename T, typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr>
+template<typename T>
 T DotProduct(const Vector3<T>& v1, const Vector3<T>& v2) {
 	return T((v1.x * v2.x) + (v1.y * v2.y) + (v1.z * v2.z));
+}
+
+template<class T> 
+T Length(const Vector3<T>& a) 
+{ 
+	return DotProduct(a, a); 
 }
 
 

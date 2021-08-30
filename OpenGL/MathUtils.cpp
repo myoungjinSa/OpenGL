@@ -25,14 +25,14 @@ float MathUtils::RadiansToDegrees(float radians)
 }
 
 
-float MathUtils::CosDegrees(float input)
+float MathUtils::CosDegrees(float angle)
 {
-	return cos(DegreesToRadians(input));
+	return cos(DegreesToRadians(angle));
 }
 
-float MathUtils::SinDegrees(float input)
+float MathUtils::SinDegrees(float angle)
 {
-	return sin(DegreesToRadians(input));
+	return sin(DegreesToRadians(angle));
 }
 
 

@@ -42,7 +42,7 @@ bool Scene::BuildObject(Renderer& renderer) {
 		return false;
 	}
 
-	GameObject* pObject = new Cube();
+	GameObject* pObject = new Sphere(2.0f, 16, 16);//new Cylinder(Vec3f::UP, Vec3f::RIGHT, Vec3f::FORWARD, 32);
 	objects.emplace_back(pObject);
 
 	for (const auto& obj : objects) {

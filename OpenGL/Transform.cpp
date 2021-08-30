@@ -2,48 +2,48 @@
 #include "Object.h"
 #include "Quaternion.h"
 
-Transform::Transform(Object* _owner)
+RigidTransform::RigidTransform(Object* _owner)
 	: Component(_owner), position(0.0f, 0.0f, 0.0f), rotation(0.0f, 0.0f, 0.0f), movingSpeed(1.0f)
 {
 	worldMatrix = Matrix<float, 4, 4>::Identity();
 }
 
-void Transform::AddPosition(const Vec3f& _position) {
+void RigidTransform::AddPosition(const Vec3f& _position) {
 	position += _position;
 	SetTransform();
 }
 
-void Transform::AddPosition(float x, float y, float z) {
+void RigidTransform::AddPosition(float x, float y, float z) {
 	position.x += x;
 	position.y += y;
 	position.z += z;
 	SetTransform();
 }
-void Transform::SetPosition(const Vec3f& _position) {
+void RigidTransform::SetPosition(const Vec3f& _position) {
 	position = _position;
 	SetTransform();
 }
 
-void Transform::SetPosition(float x, float y, float z) {
+void RigidTransform::SetPosition(float x, float y, float z) {
 	position = Vec3f(x, y, z);
 	SetTransform();
 }
 
-Vec3f Transform::GetPosition() const {
+Vec3f RigidTransform::GetPosition() const {
 	return position;
 }
 
-Vec3f Transform::GetRotation() const {
+Vec3f RigidTransform::GetRotation() const {
 	return rotation;
 }
-void Transform::GetPosition(std::array<float, 4>& _position) {
+void RigidTransform::GetPosition(std::array<float, 4>& _position) {
 	_position[0] = position.x;
 	_position[1] = position.y;
 	_position[2] = position.z;
 	_position[3] = 1.0f;
 }
 
-Matrix<float, 3, 3> Transform::GetRotationMatrix() const {
+Matrix<float, 3, 3> RigidTransform::GetRotationMatrix() const {
 	Matrix<float, 3, 3> rotationMatrix;
 	rotationMatrix.value[0] = worldMatrix.value[0];
 	rotationMatrix.value[1] = worldMatrix.value[1];
@@ -60,13 +60,13 @@ Matrix<float, 3, 3> Transform::GetRotationMatrix() const {
 	return rotationMatrix;
 }
 
-void Transform::Rotate(float pitch, float yaw, float roll) {
+void RigidTransform::Rotate(float pitch, float yaw, float roll) {
 	Matrix<float, 4, 4> rotationMatrix = Matrix<float, 4, 4>::Identity();
 	CalculateRotationMatrix(rotationMatrix, pitch, yaw, roll);
 	worldMatrix.Multiply(rotationMatrix);
 }
 
-Vec4f Transform::Rotate(const Vec3f& pos, const Vec3f& pivot, float pitch, float yaw, float roll) {
+Vec4f RigidTransform::Rotate(const Vec3f& pos, const Vec3f& pivot, float pitch, float yaw, float roll) {
 	Matrix<float, 4, 4> rotationMatrix = Matrix<float, 4 ,4>::Identity();
 	CalculateRotationMatrix(rotationMatrix, pitch, yaw, roll);
 	
@@ -76,7 +76,7 @@ Vec4f Transform::Rotate(const Vec3f& pos, const Vec3f& pivot, float pitch, float
 	return rotatedVector;
 }
 
-void Transform::CalculateRotationMatrix(Matrix<float, 4, 4>& rotationMatrix, float pitch, float yaw, float roll, bool bUseQuaternion) const {
+void RigidTransform::CalculateRotationMatrix(Matrix<float, 4, 4>& rotationMatrix, float pitch, float yaw, float roll, bool bUseQuaternion) const {
 	if (bUseQuaternion) {
 		Quaternion q;
 		q.GetEuler(Vec3d(pitch, yaw, roll));
@@ -138,43 +138,43 @@ void Transform::CalculateRotationMatrix(Matrix<float, 4, 4>& rotationMatrix, flo
 	}
 }
 
-void Transform::Move(const Vec3f& direction, float elapsedTime) {
+void RigidTransform::Move(const Vec3f& direction, float elapsedTime) {
 	position = GetPosition() + Normalize(direction) * elapsedTime * movingSpeed;
 	SetTransform();
 }
 
-void Transform::SetLook(const Vec3f& look) {
+void RigidTransform::SetLook(const Vec3f& look) {
 	worldMatrix.value[8] = look.x;
 	worldMatrix.value[9] = look.y;
 	worldMatrix.value[10] = look.z;
 }
 
-void Transform::SetLook(Vec3f&& look) noexcept {
+void RigidTransform::SetLook(Vec3f&& look) noexcept {
 	worldMatrix.value[8] = look.x;
 	worldMatrix.value[9] = look.y;
 	worldMatrix.value[10] = look.z;
 }
 
-void Transform::SetUp(const Vec3f& up) {
+void RigidTransform::SetUp(const Vec3f& up) {
 	worldMatrix.value[4] = up.x;
 	worldMatrix.value[5] = up.y;
 	worldMatrix.value[6] = up.z;
 }
 
 
-void Transform::SetUp(Vec3f&& up) noexcept {
+void RigidTransform::SetUp(Vec3f&& up) noexcept {
 	worldMatrix.value[4] = up.x;
 	worldMatrix.value[5] = up.y;
 	worldMatrix.value[6] = up.z;
 }
 
-void Transform::SetRight(const Vec3f& right) {
+void RigidTransform::SetRight(const Vec3f& right) {
 	worldMatrix.value[0] = right.x;
 	worldMatrix.value[1] = right.y;
 	worldMatrix.value[2] = right.z;
 }
 
-void Transform::SetRight(Vec3f&& right) noexcept {
+void RigidTransform::SetRight(Vec3f&& right) noexcept {
 	worldMatrix.value[0] = right.x;
 	worldMatrix.value[1] = right.y;
 	worldMatrix.value[2] = right.z;
@@ -182,30 +182,30 @@ void Transform::SetRight(Vec3f&& right) noexcept {
 
 
 
-Vec3f Transform::GetLook() const {
+Vec3f RigidTransform::GetLook() const {
 	Vec3f lookVector(worldMatrix.value[8], worldMatrix.value[9], worldMatrix.value[10]);
 	return Normalize(lookVector);
 }
 
-Vec3f Transform::GetRight() const {
+Vec3f RigidTransform::GetRight() const {
 	Vec3f rightVector(worldMatrix.value[0], worldMatrix.value[1], worldMatrix.value[2]);
 	return Normalize(rightVector);
 }
 
-Vec3f Transform::GetUp() const {
+Vec3f RigidTransform::GetUp() const {
 	Vec3f upVector(worldMatrix.value[4], worldMatrix.value[5], worldMatrix.value[6]);
 	return Normalize(upVector);
 }
 
-void Transform::SetMovingSpeed(float speed) {
+void RigidTransform::SetMovingSpeed(float speed) {
 	movingSpeed = speed;
 }
 
-float Transform::GetMovingSpeed() const {
+float RigidTransform::GetMovingSpeed() const {
 	return movingSpeed;
 }
 
-void Transform::SetTransform() {
+void RigidTransform::SetTransform() {
 	worldMatrix[12] = position.x;
 	worldMatrix[13] = position.y;
 	worldMatrix[14] = position.z;

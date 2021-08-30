@@ -3,60 +3,26 @@
 #include "Renderer.h"
 #include "Logger.h"
 #include "Transform.h"
+
 #include <tuple>
 #include <string>
 
-//
-//Vertex::Vertex()
-//	: position()
-//{
-//}
-//
-//Vertex::Vertex(const Vec3f& pos) 
-//	: position(pos)
-//{
-//}
-//Vertex::~Vertex() {
-//
-//}
 
+//함수 외부에서 free를 해줘야함
+byte* ReadBufferData(void* pBuffer, size_t targetDataSize) {
+	if (!pBuffer)
+		return nullptr;
 
-//ColorVertex::ColorVertex() 
-//	: Vertex(), color()
-//{
-//
-//}
-//
-//ColorVertex::ColorVertex(const Vec3f& pos, const RGBA& _color) 
-//	: Vertex(pos), color(_color)
-//{
-//
-//}
-//
-//
-//ColorVertex::~ColorVertex() {
-//
-//}
-//
-//void ColorVertex::Copy(const VertexMaster& source, byte* pDestination) {
-//	ColorVertex* pColorVertex = (ColorVertex*)(pDestination);
-//	pColorVertex->position = source.position;
-//	pColorVertex->color = source.color;
-//
-//}
-//void ColorVertex::BindVertexBuffer(OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeofVertex) {
-//	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
-//	gl.glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(ColorVertex), pBuffer, GL_STATIC_DRAW);
-//
-//	gl.glEnableVertexAttribArray(0);		//Vertex Position
-//	gl.glEnableVertexAttribArray(1);		//Vertex color.
-//
-//	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
-//	gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeofVertex, 0);
-//
-//	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
-//	gl.glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, false, sizeofVertex, (unsigned char*)NULL + (3 * sizeof(float)));
-//}
+	byte* pReturn = (byte*)malloc(targetDataSize * sizeof(byte));
+	if (!pReturn)
+		return nullptr;
+
+	memset(pReturn, 0, targetDataSize * sizeof(byte));
+	memcpy_s(pReturn, targetDataSize * sizeof(byte), pBuffer, targetDataSize * sizeof(byte));
+	return pReturn;
+}
+
+static const float tau = 6.28318530718f;
 
 Vertex::Vertex() 
 	:position(), uv0(), normal()
@@ -69,9 +35,6 @@ Vertex::Vertex(const Vec3f& pos, const Vec2f& _uv0, const Vec3f& _normal)
 
 }
 
-Vertex::~Vertex() {
-
-}
 void Vertex::Copy(const VertexMaster& source, byte* pDestination) {
 	Vertex* pVertex = (Vertex*)(pDestination);
 	pVertex->position = source.position;
@@ -98,19 +61,6 @@ void Vertex::BindVertexBuffer(OpenGL& gl, void* pBuffer, unsigned int vertexBuff
 
 }
 
-//함수 외부에서 free를 해줘야함
-byte* Vertex::ReadBufferData(void* pBuffer, size_t targetDataSize) {
-	if (!pBuffer)
-		return nullptr;
-
-	byte* pReturn = (byte*)malloc(targetDataSize * sizeof(byte));
-	if (!pReturn)
-		return nullptr;
-
-	memset(pReturn, 0, targetDataSize * sizeof(byte));
-	memcpy_s(pReturn, targetDataSize * sizeof(byte), pBuffer, targetDataSize * sizeof(byte));
-	return pReturn;
-}
 
 ColorVertex::ColorVertex() 
 	: position(), color()
@@ -124,9 +74,6 @@ ColorVertex::ColorVertex(const Vec3f& pos, const RGBA& _color)
 
 }
 
-ColorVertex::~ColorVertex() {
-
-}
 
 void ColorVertex::Copy(const VertexMaster& source, byte* pDestination) {
 	ColorVertex* pVertex = (ColorVertex*)(pDestination);
@@ -148,17 +95,44 @@ void ColorVertex::BindVertexBuffer(OpenGL& gl, void* pBuffer, unsigned int verte
 	gl.glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, false, sizeofVertex, (unsigned char*)NULL + (3 * sizeof(float)));
 }
 
-byte* ColorVertex::ReadBufferData(void* pBuffer, size_t targetDataSize) {
-	if (!pBuffer)
-		return nullptr;
 
-	byte* pReturn = (byte*)malloc(targetDataSize * sizeof(byte));
-	if (!pReturn)
-		return nullptr;
+NormalVertex::NormalVertex() 
+	:position(), normal(), color()
+{
 
-	memset(pReturn, 0, targetDataSize * sizeof(byte));
-	memcpy_s(pReturn, targetDataSize * sizeof(byte), pBuffer, targetDataSize * sizeof(byte));
-	return pReturn;
+}
+
+
+
+NormalVertex::NormalVertex(const Vec3f& pos, const Vec3f& _normal, const RGBA& _color)
+	: position(pos), normal(_normal), color(_color)
+{
+
+}
+
+void NormalVertex::Copy(const VertexMaster& source, byte* pDestination) {
+	NormalVertex* pVertex = (NormalVertex*)(pDestination);
+	pVertex->position = source.position;
+	pVertex->normal = source.normal;
+	pVertex->color = source.color;
+}
+
+void NormalVertex::BindVertexBuffer(OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeofVertex) {
+	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
+	gl.glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(NormalVertex), pBuffer, GL_STATIC_DRAW);
+
+	gl.glEnableVertexAttribArray(0); // Position;
+	gl.glEnableVertexAttribArray(1); // Normal
+	gl.glEnableVertexAttribArray(2); // Color
+
+	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
+	gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeofVertex, 0);
+	
+	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
+	gl.glVertexAttribPointer(1, 3, GL_FLOAT, false, sizeofVertex, (unsigned char*)NULL + (3 * sizeof(float)));
+	
+	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
+	gl.glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, false, sizeofVertex, (unsigned char*)NULL + (6 * sizeof(float)));
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
@@ -274,7 +248,11 @@ Mesh::Mesh()
 }
 
 Mesh::~Mesh() {
-	
+	for (uint32_t iVert = 0; iVert < vertexList.size(); ++iVert) {
+		delete vertexList[iVert];
+		vertexList[iVert] = nullptr;
+	}
+	vertexList.clear();
 }
 
 bool Mesh::Initialize(Renderer& renderer, VertexBufferBindCallback* pBindFuction, void* vertexData, unsigned int numVertices, unsigned int sizeofVertex, unsigned int* indexData, unsigned int numIndices) {
@@ -305,18 +283,22 @@ void Mesh::Shutdown(Renderer& renderer) {
 void Mesh::Render(Renderer& renderer) {
 	renderer.DrawIndexBuffer(vertexArrayId, indexCount);
 }
+
+
 bool Mesh::BuildTriangleMeshes() {
 	for (size_t iIndex = 0; iIndex < indexCount; iIndex += 3) {
-		Vertex v = vertexList.at(indexList[iIndex]);
-		std::tuple<const Vertex&, const Vertex&, const Vertex&> vTuple = std::make_tuple(vertexList.at(indexList[iIndex]), vertexList.at(indexList[iIndex + 1]), vertexList.at(indexList[iIndex + 2]));
-		meshes.push_back(Triangle(std::get<0>(vTuple), std::get<1>(vTuple), std::get<2>(vTuple)));
+		Vertex* v = vertexList.at(indexList[iIndex]);
+		std::tuple<const Vertex*, const Vertex*, const Vertex*> vTuple = std::make_tuple(vertexList.at(indexList[iIndex]), vertexList.at(indexList[iIndex + 1]), vertexList.at(indexList[iIndex + 2]));
+		meshes.push_back(Triangle(*std::get<0>(vTuple), *std::get<1>(vTuple), *std::get<2>(vTuple)));
 	}
 	return true;
 }
+
+
 bool Mesh::BuildVertexList(void* vertexDatas) {
 	size_t offset = 0;
 	for (size_t iVertex = 0; iVertex < vertexCount; iVertex++) {
-		Vec3f* pPosBuffer = reinterpret_cast<Vec3f*>(Vertex::ReadBufferData(static_cast<byte*>(vertexDatas) + offset, sizeof(Vec3f)));
+		Vec3f* pPosBuffer = reinterpret_cast<Vec3f*>(ReadBufferData(static_cast<byte*>(vertexDatas) + offset, sizeof(Vec3f)));
 		if (!pPosBuffer)
 			return false;
 
@@ -324,7 +306,7 @@ bool Mesh::BuildVertexList(void* vertexDatas) {
 		LogDebug(L"Vertex Position : %5lf, %5lf, %5lf\n", pPosBuffer->x, pPosBuffer->y, pPosBuffer->z);
 
 
-		Vec2f* pUVBuffer = reinterpret_cast<Vec2f*>(Vertex::ReadBufferData(static_cast<byte*>(vertexDatas) + offset, sizeof(Vec2f)));
+		Vec2f* pUVBuffer = reinterpret_cast<Vec2f*>(ReadBufferData(static_cast<byte*>(vertexDatas) + offset, sizeof(Vec2f)));
 		if (!pUVBuffer)
 			return false;
 
@@ -332,7 +314,7 @@ bool Mesh::BuildVertexList(void* vertexDatas) {
 		LogDebug(L"UV  : %5lf, %5lf\n", pUVBuffer->x, pUVBuffer->y);
 
 
-		Vec3f* pNormalBuffer = reinterpret_cast<Vec3f*>(Vertex::ReadBufferData(static_cast<byte*>(vertexDatas) + offset, sizeof(Vec3f)));
+		Vec3f* pNormalBuffer = reinterpret_cast<Vec3f*>(ReadBufferData(static_cast<byte*>(vertexDatas) + offset, sizeof(Vec3f)));
 		if (!pNormalBuffer)
 			return false;
 
@@ -340,8 +322,7 @@ bool Mesh::BuildVertexList(void* vertexDatas) {
 		LogDebug(L"Normal : %5lf, %5lf, %5lf\n", pNormalBuffer->x, pNormalBuffer->y, pNormalBuffer->z);
 
 
-		Vertex v(*pPosBuffer, *pUVBuffer, *pNormalBuffer);
-		vertexList.push_back(v);
+		vertexList.push_back(new Vertex(*pPosBuffer, *pUVBuffer, *pNormalBuffer));
 
 		free(pPosBuffer); pPosBuffer = nullptr;
 		free(pUVBuffer); pUVBuffer = nullptr;
@@ -452,6 +433,68 @@ void MeshBuilder::AddQuad(const Vec3f& center, const Vec3f& extent, const Vec3f&
 		AddIndex(3 + currentVert);
 	}
 }
+
+void MeshBuilder::AddCylinder(const Vec3f& axis, const Vec3f& arm1, const Vec3f& arm2, uint32_t sliceCount, const RGBA& color) {
+
+	SetColor(color);
+	for (uint32_t iSlice = 0; iSlice <= sliceCount; ++iSlice) {
+		const float tex_s = static_cast<float>(iSlice) / sliceCount, angle = (float)(iSlice % sliceCount) * tau / sliceCount;
+		const Vec3f arm = arm1 * std::cos(angle) + arm2 * std::sin(angle);
+		
+		SetPosition(arm);
+		SetNormal(Normalize(arm));
+
+		vertices.emplace_back(stamp);
+		
+		SetColor(color);
+		SetPosition(arm + axis);
+		SetNormal(Normalize(arm));
+
+		vertices.emplace_back(stamp);
+	}
+	for (uint32_t iSlice = 0; iSlice < sliceCount; ++iSlice) {
+		AddIndex(iSlice * 2);
+		AddIndex(iSlice * 2 + 2);
+		AddIndex(iSlice * 2 + 3);
+
+		AddIndex(iSlice * 2);
+		AddIndex(iSlice * 2 + 3);
+		AddIndex(iSlice * 2 + 1);
+	}
+
+	//Generate caps
+	uint32_t base = (uint32_t)vertices.size();
+	for (uint32_t iSlice = 0; iSlice < sliceCount; ++iSlice) {
+		const float angle = static_cast<float>(iSlice % sliceCount) * tau / sliceCount;
+		const float cosAngle = std::cos(angle);
+		const float sinAngle = std::sin(angle);
+		
+		const Vec3f arm = arm1 * cosAngle + arm2 * sinAngle;
+		SetColor(color); 
+		SetPosition(arm + axis);
+		SetNormal(Normalize(axis));
+
+		vertices.push_back(stamp);
+
+		SetColor(color);
+		SetPosition(arm);
+		SetNormal(-Normalize(axis));
+
+		vertices.push_back(stamp);
+	}
+
+	for (uint32_t iSlice = 2; iSlice < sliceCount; ++iSlice) {
+		AddIndex(base);
+		AddIndex(base + iSlice * 2 - 2);
+		AddIndex(base + iSlice * 2);
+
+		AddIndex(base + 1);
+		AddIndex(base + iSlice * 2 + 1);
+		AddIndex(base + iSlice * 2 - 1);
+	}
+}
+
+
 void MeshBuilder::AddSphere(const Vec3f& center, float radius, int sectorCount, int stackCount) {
 	const float PI = acos(-1);
 
@@ -638,6 +681,47 @@ void MeshBuilder::AddCube(const Vec3f& center, const Vec3f& extent, const RGBA& 
 	AddIndex(6); AddIndex(3); AddIndex(7);
 }
 
+void MeshBuilder::AddLathGeometry(const Vec3f& axis, const Vec3f& arm1, const Vec3f& arm2, int slices, const std::vector<Point2f>& points, const RGBA& color, const float epsilon) {
+	for (int iSlice = 0; iSlice <= slices; ++iSlice) {
+		const float angle = (static_cast<float>(iSlice % slices) * tau / slices) + (tau / 8.0f), cosAngle = std::cos(angle), sinAngle = std::sin(angle);
+		Matrix<float, 3, 3> mat = Matrix<float, 3, 3>::Identity();
+		Vec3f radius = arm1 * cosAngle + arm2 * sinAngle;
+		
+		mat.value[0] = axis.x;
+		mat.value[1] = axis.y;
+		mat.value[2] = axis.z;
+
+		mat.value[3] = radius.x;
+		mat.value[4] = radius.y;
+		mat.value[5] = radius.z;
+
+		for (auto& p : points) {
+			Vec3f newPoints = Transform(mat, Vec3f(p.x, p.y, 0.0f));
+			SetPosition(newPoints + epsilon);
+			SetNormal(Vec3f());
+			SetColor(color);
+			vertices.push_back(stamp);
+		}
+
+		if (0 < iSlice) {
+			for (uint32_t i = 1; i < (uint32_t)points.size(); ++i) {
+				uint32_t i0 = (iSlice - 1) * uint32_t(points.size()) + (i - 1);
+				uint32_t i1 = (iSlice - 0) * uint32_t(points.size()) + (i - 1);
+				uint32_t i2 = (iSlice - 0) * uint32_t(points.size()) + (i - 0);
+				uint32_t i3 = (iSlice - 1) * uint32_t(points.size()) + (i - 0);
+				AddIndex(i0);
+				AddIndex(i2);
+				AddIndex(i1);
+
+				AddIndex(i0);
+				AddIndex(i3);
+				AddIndex(i2);
+			}
+		}
+	}
+	ComputeNormals();
+}
+
 
 void MeshBuilder::AddVertex(const Vec3f& _position) {
 	stamp.position = _position;
@@ -670,3 +754,41 @@ void MeshBuilder::CopyToMesh(Renderer& renderer, Mesh* pMesh, VertexBufferBindCa
 	vertexBuffer = nullptr;
 }
 
+
+void MeshBuilder::ComputeNormals() {
+	static const double NORMAL_EPSILON = 0.0001;
+
+	std::vector<uint32_t> uniqueVertIndices(vertices.size(), 0);
+	for (uint32_t iVert = 0; iVert < uniqueVertIndices.size(); ++iVert) {
+		if (uniqueVertIndices[iVert] == 0) {
+			uniqueVertIndices[iVert] = iVert + 1;
+			const Vec3f v0 = vertices[iVert].position;
+			for (auto jVert = iVert + 1; jVert < vertices.size(); ++jVert) {
+				const Vec3f v1 = vertices[jVert].position;
+				if (Length(v1 - v0) < NORMAL_EPSILON) {
+					uniqueVertIndices[jVert] = uniqueVertIndices[iVert];
+				}
+			}
+		}
+	}
+
+	uint32_t idx0, idx1, idx2;
+	for (int idx = 0; idx < indices.size(); idx += 3) {
+		idx0 = uniqueVertIndices[idx] - 1;
+		idx1 = uniqueVertIndices[idx + 1] - 1;
+		idx2 = uniqueVertIndices[idx + 2] - 1;
+
+		VertexMaster v0 = vertices[idx0];
+		VertexMaster v1 = vertices[idx1];
+		VertexMaster v2 = vertices[idx2];
+
+		const Vec3f normal = Cross(v1.position - v0.position, v2.position - v0.position);
+		v0.normal += normal; v1.normal += normal; v2.normal += normal;
+	}
+	for (uint32_t iVert = 0; iVert < vertices.size(); ++iVert) {
+		vertices[iVert].normal = vertices[uniqueVertIndices[iVert] - 1].normal;
+	}
+	for (auto& v : vertices) {
+		v.normal = Normalize(v.normal);
+	}
+}
