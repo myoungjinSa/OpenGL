@@ -773,10 +773,12 @@ void MeshBuilder::ComputeNormals() {
 	}
 
 	uint32_t idx0, idx1, idx2;
-	for (int idx = 0; idx < indices.size(); idx += 3) {
-		idx0 = uniqueVertIndices[idx] - 1;
-		idx1 = uniqueVertIndices[idx + 1] - 1;
-		idx2 = uniqueVertIndices[idx + 2] - 1;
+	
+	//Index Buffer 버그 고쳐야함
+	/*for (int idx = 2; idx < indices.size(); idx += 3) {
+		idx0 = uniqueVertIndices[idx - 2] - 1;
+		idx1 = uniqueVertIndices[idx - 1] - 1;
+		idx2 = uniqueVertIndices[idx] - 1;
 
 		VertexMaster v0 = vertices[idx0];
 		VertexMaster v1 = vertices[idx1];
@@ -784,7 +786,7 @@ void MeshBuilder::ComputeNormals() {
 
 		const Vec3f normal = Cross(v1.position - v0.position, v2.position - v0.position);
 		v0.normal += normal; v1.normal += normal; v2.normal += normal;
-	}
+	}*/
 	for (uint32_t iVert = 0; iVert < vertices.size(); ++iVert) {
 		vertices[iVert].normal = vertices[uniqueVertIndices[iVert] - 1].normal;
 	}

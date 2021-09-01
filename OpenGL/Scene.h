@@ -3,6 +3,7 @@
 #include "Light.h"
 #include "Matrix.h"
 #include "Object.h"
+#include "Gizmos.h"
 
 class Shader;
 class ShaderParameter;
@@ -36,6 +37,8 @@ private:
 	std::shared_ptr<Shader> DefaultShader;
 	std::vector<GameObject*> objects;
 	Light phongLight;
+	
+	Gizmos Gizmo;
 
 	Matrix<float, 4, 4> projectionMatrix;
 };

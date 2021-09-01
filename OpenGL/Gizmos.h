@@ -1,5 +1,7 @@
 #pragma once
 #include <map>
+#include <memory>
+#include <functional>
 #include "Matrix.h"
 #include "Types.h"
 #include "Mesh.h"
@@ -20,6 +22,7 @@ struct GizmoParameter {
 class String;
 class Camera;
 class RigidTransform;
+class Renderer;
 class Gizmos
 {
 public:
@@ -54,17 +57,24 @@ public:
 		};
 
 		struct GizmoMeshComponent {
-			Mesh gizmoMesh;
+			std::shared_ptr<Mesh> pGizmoMesh;
 			RGBA baseColor;
 			RGBA highlightColor;
+
+			GizmoMeshComponent() = default;
+			GizmoMeshComponent(std::function<std::shared_ptr<Mesh>()> meshBuildFunction, const RGBA& _baseColor, const RGBA& _highlightColor);
+			GizmoMeshComponent(const GizmoMeshComponent& other);
+
+			const GizmoMeshComponent& operator=(const GizmoMeshComponent& other);
 		};
 
-		GizmoImpl(Gizmos* pOwner);
+		GizmoImpl(Gizmos* pOwner, Renderer& renderer);
 
 
 		std::map<eInteract, GizmoMeshComponent> meshComponents;
 		Gizmos* pOwner;
 	};
+	bool Initialize(Renderer& renderer);
 	void Update(float deltaTime);
 	void Render(const GizmoParameter& parameter, Camera* pCamera);
 

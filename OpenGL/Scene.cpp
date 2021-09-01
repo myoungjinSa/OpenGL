@@ -11,7 +11,8 @@
 
 Scene::Scene() 
 	:pCamera(nullptr),
-	 projectionMatrix()
+	 projectionMatrix(),
+	 Gizmo()
 {
 
 }
@@ -63,6 +64,8 @@ bool Scene::BuildObject(Renderer& renderer) {
 	pCamera->SetPosition(0.0f, 0.0f, -10.0f);
 	pCamera->SetViewport(Rect2f(0.0f, 0.0f, renderer.GetRenderTargetWidth(), renderer.GetRenderTargetHeight()));
 	
+	Gizmo.Initialize(renderer);
+
 	return true;
 }
 

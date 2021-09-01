@@ -8,6 +8,7 @@ public:
 	RGBA(float red, float green, float blue);
 	RGBA(float red, float green, float blue, float alpha);
 	RGBA(unsigned int hexColor);
+	RGBA(const RGBA& RGBA) = default;
 
 	template<typename T>
 	RGBA(const Vector4<T>& color);
