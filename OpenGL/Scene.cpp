@@ -78,6 +78,8 @@ void Scene::Update(const float& elapsedTime) {
 		obj->Rotate(MathUtils::DegreesToRadians(0.0f), MathUtils::DegreesToRadians(1.0f), MathUtils::DegreesToRadians(0.0f));
 		//obj->Move(obj->GetLook(), 1.0f, elapsedTime);
 	}
+
+	Gizmo.Update(elapsedTime);
 }
 
 bool Scene::Render(Renderer& renderer) {
@@ -92,7 +94,8 @@ bool Scene::Render(Renderer& renderer) {
 		
 		objects[iObj]->Render(renderer, GetViewMatrix(), GetProjectionMatrix());
 	}
-
+	GizmoParameter gizmoParam;
+	Gizmo.Render(renderer, gizmoParam, pCamera, *this);
 	renderer.EndRender();
 	return true;
 }

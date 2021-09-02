@@ -221,6 +221,7 @@ void Cube::Update(float deltaTime) {
 void Cube::Render(Renderer& renderer) {
 	GameObject::Render(renderer);
 	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
+	renderer.SetDepthTest(true);
 
 	pMesh->Render(renderer);
 }
@@ -228,7 +229,8 @@ void Cube::Render(Renderer& renderer) {
 void Cube::Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix) {
 	GameObject::Render(renderer);
 	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
-
+	renderer.SetDepthTest(true);
+	
 	pMesh->Render(renderer);
 
 	boundingVolume->Render(renderer, viewMatrix, projectionMatrix);
@@ -317,11 +319,15 @@ void Sphere::Update(float deltaTime) {
 
 void Sphere::Render(Renderer& renderer) {
 	GameObject::Render(renderer);
+	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
+	renderer.SetDepthTest(true);
 	pMesh->Render(renderer);
 }
 
 void Sphere::Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix) {
 	GameObject::Render(renderer);
+	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
+	renderer.SetDepthTest(true);
 	pMesh->Render(renderer);
 }
 

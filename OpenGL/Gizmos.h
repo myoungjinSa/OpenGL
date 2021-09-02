@@ -6,6 +6,7 @@
 #include "Types.h"
 #include "Mesh.h"
 #include "RGBA.h"
+#include "Object.h"
 
 
 struct GizmoParameter {
@@ -16,14 +17,15 @@ struct GizmoParameter {
 	Size2f viewport_size;				// 3d viewport used to render the view
 	Vec3f ray_origin;				   // world-space ray origin (i.e. the camera position)
 	Vec3f ray_direction;				// world-space ray direction
-	
 };
 
 class String;
 class Camera;
 class RigidTransform;
 class Renderer;
-class Gizmos
+class ColorShader;
+class Scene;
+class Gizmos : public Object
 {
 public:
 	enum class eTransformMode {
@@ -66,17 +68,21 @@ public:
 			GizmoMeshComponent(const GizmoMeshComponent& other);
 
 			const GizmoMeshComponent& operator=(const GizmoMeshComponent& other);
+
 		};
 
 		GizmoImpl(Gizmos* pOwner, Renderer& renderer);
+		
+		void Update(float deltaTime);
+		void Render(Renderer& renderer, const GizmoParameter& parameter, Camera* pCamera, const Scene& scene);
 
-
+		std::shared_ptr<ColorShader> defaultShader;
 		std::map<eInteract, GizmoMeshComponent> meshComponents;
 		Gizmos* pOwner;
 	};
 	bool Initialize(Renderer& renderer);
 	void Update(float deltaTime);
-	void Render(const GizmoParameter& parameter, Camera* pCamera);
+	void Render(Renderer& renderer, const GizmoParameter& parameter, Camera* pCamera, const Scene& scene);
 
 	eTransformMode GetMode() const;
 
