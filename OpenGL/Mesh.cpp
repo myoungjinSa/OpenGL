@@ -25,12 +25,12 @@ byte* ReadBufferData(void* pBuffer, size_t targetDataSize) {
 static const float tau = 6.28318530718f;
 
 Vertex::Vertex() 
-	:position(), uv0(), normal()
+	:position(), uv0(), normal(), color()
 {
 
 }
-Vertex::Vertex(const Vec3f& pos, const Vec2f& _uv0, const Vec3f& _normal) 
-	: position(pos), uv0(_uv0), normal(_normal)
+Vertex::Vertex(const Vec3f& pos, const Vec2f& _uv0, const Vec3f& _normal, const RGBA& _color) 
+	: position(pos), uv0(_uv0), normal(_normal), color(_color)
 {
 
 }
@@ -38,6 +38,7 @@ Vertex::Vertex(const Vec3f& pos, const Vec2f& _uv0, const Vec3f& _normal)
 void Vertex::Copy(const VertexMaster& source, byte* pDestination) {
 	Vertex* pVertex = (Vertex*)(pDestination);
 	pVertex->position = source.position;
+	pVertex->color = source.color;
 	pVertex->uv0 = source.uv0;
 	pVertex->normal = source.normal;
 }
@@ -47,93 +48,23 @@ void Vertex::BindVertexBuffer(OpenGL& gl, void* pBuffer, unsigned int vertexBuff
 	gl.glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(Vertex), pBuffer, GL_STATIC_DRAW);
 
 	gl.glEnableVertexAttribArray(0); // Vertex Position;
-	gl.glEnableVertexAttribArray(1); // Texture coordinates;
-	gl.glEnableVertexAttribArray(2); // Normal
-
-	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
-	gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeofVertex, 0);
-
-	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
-	gl.glVertexAttribPointer(1, 2, GL_FLOAT, false, sizeofVertex, (unsigned char*)NULL + (3 * sizeof(float)));
-
-	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
-	gl.glVertexAttribPointer(2, 3, GL_FLOAT, false, sizeofVertex, (unsigned char*)NULL + (5 * sizeof(float)));
-
-}
-
-
-ColorVertex::ColorVertex() 
-	: position(), color()
-{
-
-}
-
-ColorVertex::ColorVertex(const Vec3f& pos, const RGBA& _color) 
-	:position(pos), color(_color)
-{
-
-}
-
-
-void ColorVertex::Copy(const VertexMaster& source, byte* pDestination) {
-	ColorVertex* pVertex = (ColorVertex*)(pDestination);
-	pVertex->position = source.position;
-	pVertex->color = source.color;
-}
-
-void ColorVertex::BindVertexBuffer(OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeofVertex) {
-	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
-	gl.glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(ColorVertex), pBuffer, GL_STATIC_DRAW);
-
-	gl.glEnableVertexAttribArray(0); // Position;
 	gl.glEnableVertexAttribArray(1); // Color
+	gl.glEnableVertexAttribArray(2); // Texture coordinates;
+	gl.glEnableVertexAttribArray(3); // Normal
 
 	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
 	gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeofVertex, 0);
 
 	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
 	gl.glVertexAttribPointer(1, 4, GL_UNSIGNED_BYTE, false, sizeofVertex, (unsigned char*)NULL + (3 * sizeof(float)));
-}
-
-
-NormalVertex::NormalVertex() 
-	:position(), normal(), color()
-{
-
-}
-
-
-
-NormalVertex::NormalVertex(const Vec3f& pos, const Vec3f& _normal, const RGBA& _color)
-	: position(pos), normal(_normal), color(_color)
-{
-
-}
-
-void NormalVertex::Copy(const VertexMaster& source, byte* pDestination) {
-	NormalVertex* pVertex = (NormalVertex*)(pDestination);
-	pVertex->position = source.position;
-	pVertex->normal = source.normal;
-	pVertex->color = source.color;
-}
-
-void NormalVertex::BindVertexBuffer(OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeofVertex) {
-	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
-	gl.glBufferData(GL_ARRAY_BUFFER, vertexCount * sizeof(NormalVertex), pBuffer, GL_STATIC_DRAW);
-
-	gl.glEnableVertexAttribArray(0); // Position;
-	gl.glEnableVertexAttribArray(1); // Normal
-	gl.glEnableVertexAttribArray(2); // Color
 
 	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
-	gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeofVertex, 0);
-	
+	gl.glVertexAttribPointer(2, 2, GL_FLOAT, false, sizeofVertex, (unsigned char*)NULL + (3 * sizeof(float)) + (4 * sizeof(unsigned char)));
+
 	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
-	gl.glVertexAttribPointer(1, 3, GL_FLOAT, false, sizeofVertex, (unsigned char*)NULL + (3 * sizeof(float)));
-	
-	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
-	gl.glVertexAttribPointer(2, 4, GL_UNSIGNED_BYTE, false, sizeofVertex, (unsigned char*)NULL + (6 * sizeof(float)));
+	gl.glVertexAttribPointer(3, 3, GL_FLOAT, false, sizeofVertex, (unsigned char*)NULL + (5 * sizeof(float)) + (4 * sizeof(unsigned char)));
 }
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////
 Triangle::Triangle()
@@ -306,6 +237,14 @@ bool Mesh::BuildVertexList(void* vertexDatas) {
 		LogDebug(L"Vertex Position : %5lf, %5lf, %5lf\n", pPosBuffer->x, pPosBuffer->y, pPosBuffer->z);
 
 
+		RGBA* pColorBuffer = reinterpret_cast<RGBA*>(ReadBufferData(static_cast<byte*>(vertexDatas) + offset, sizeof(RGBA)));
+		if (!pColorBuffer)
+			return false;
+
+		offset += sizeof(RGBA);
+		LogDebug(L"Color : %5lf, %5lf, %5lf, %5lf\n", pColorBuffer->red, pColorBuffer->green, pColorBuffer->blue, pColorBuffer->alpha);
+
+
 		Vec2f* pUVBuffer = reinterpret_cast<Vec2f*>(ReadBufferData(static_cast<byte*>(vertexDatas) + offset, sizeof(Vec2f)));
 		if (!pUVBuffer)
 			return false;
@@ -322,9 +261,10 @@ bool Mesh::BuildVertexList(void* vertexDatas) {
 		LogDebug(L"Normal : %5lf, %5lf, %5lf\n", pNormalBuffer->x, pNormalBuffer->y, pNormalBuffer->z);
 
 
-		vertexList.push_back(new Vertex(*pPosBuffer, *pUVBuffer, *pNormalBuffer));
+		vertexList.push_back(new Vertex(*pPosBuffer, *pUVBuffer, *pNormalBuffer, *pColorBuffer));
 
 		free(pPosBuffer); pPosBuffer = nullptr;
+		free(pColorBuffer); pColorBuffer = nullptr;
 		free(pUVBuffer); pUVBuffer = nullptr;
 		free(pNormalBuffer); pNormalBuffer = nullptr;
 	}
@@ -698,7 +638,7 @@ void MeshBuilder::AddLathGeometry(const Vec3f& axis, const Vec3f& arm1, const Ve
 		for (auto& p : points) {
 			Vec3f newPoints = Transform(mat, Vec3f(p.x, p.y, 0.0f));
 			SetPosition(newPoints + epsilon);
-			SetNormal(Vec3f());
+			//SetNormal(Vec3f());
 			SetColor(color);
 			vertices.push_back(stamp);
 		}

@@ -98,6 +98,8 @@ void KeyboardInput::KeyboardEvent::GetInfo() {
 float MouseInput::xAngle = 0.0f;
 float MouseInput::yAngle = 0.0f;
 bool MouseInput::dragging = false;
+bool MouseInput::leftButtonDown = false;
+bool MouseInput::rightButtonDown = false;
 Point2i MouseInput::mousePoint;
 std::vector<Observer*> MouseInput::observers;
 
@@ -106,6 +108,7 @@ bool MouseInput::Initialize() {
 	return true;
 }
 void MouseInput::ProcessLButtonDown(int x, int y) {
+	leftButtonDown = true;
 	dragging = !dragging;
 	if (dragging) {
 		mousePoint.x = x;
@@ -115,6 +118,39 @@ void MouseInput::ProcessLButtonDown(int x, int y) {
 		Notify(e);
 	}
 }
+
+
+void MouseInput::ProcessLButtonUp(int x, int y) {
+	leftButtonDown = false;
+	if (dragging) {
+		dragging = false;
+		MouseEvent e(MouseEvent::MOUSE_STATE::LBUTTON_UP, Point2i(x, y));
+		Notify(e);
+	}
+}
+
+void MouseInput::ProcessRButtonDown(int x, int y) {
+	rightButtonDown = true;
+	dragging = !dragging;
+	if (dragging) {
+		mousePoint.x = x;
+		mousePoint.y = y;
+
+		MouseEvent e(MouseEvent::MOUSE_STATE::RBUTTON_DOWN, Point2i(mousePoint.x, mousePoint.y));
+		Notify(e);
+	}
+}
+
+void MouseInput::ProcessRButtonUp(int x, int y) {
+	rightButtonDown = false;
+	if (dragging) {
+		dragging = false;
+		MouseEvent e(MouseEvent::MOUSE_STATE::RBUTTON_UP, Point2i(x, y));
+		Notify(e);
+	}
+}
+
+
 void MouseInput::ProcessMouseMove(int x, int y) {
 	if (dragging) {
 		int dragX = x;
@@ -127,8 +163,10 @@ void MouseInput::ProcessMouseMove(int x, int y) {
 		mousePoint.y = dragY;
 		//dragY = y;
 
-		MouseEvent e(MouseEvent::MOUSE_STATE::MOUSE_DRAG, Point2i(mousePoint.x, mousePoint.y));
-		Notify(e);
+		if (rightButtonDown) {
+			MouseEvent e(MouseEvent::MOUSE_STATE::MOUSE_DRAG, Point2i(mousePoint.x, mousePoint.y));
+			Notify(e);
+		}
 	}
 }
 
@@ -140,13 +178,6 @@ float MouseInput::GetYAngle() {
 	return yAngle;
 }
 
-void MouseInput::ProcessLButtonUp(int x, int y) {
-	if (dragging) {
-		dragging = false;
-		MouseEvent e(MouseEvent::MOUSE_STATE::LBUTTON_UP, Point2i(x, y));
-		Notify(e);
-	}
-}
 
 void MouseInput::Attach(Observer* pObserver) {
 	observers.push_back(pObserver);

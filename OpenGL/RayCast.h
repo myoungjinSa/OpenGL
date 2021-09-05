@@ -31,7 +31,8 @@ public:
 	RayCast(Scene& _targetScene);
 	~RayCast();
 
-	GameObject* HitTest(float x, float y, int screenWidth, int screenHeight);
+
+	GameObject* HitTest(Object& target, float x, float y, int screenWidth, int screenHeight);
 private:
 	Vec3f CalculateRayDirection(const Scene& targetScene, float x, float y, int screenWidth, int screenHeight);
 	Vec2f GetNormalizedDeviceCoords(float x, float y, int screenWidth, int screenHeight);

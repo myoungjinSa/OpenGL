@@ -60,7 +60,7 @@ public:
 
 	virtual void Update(float deltaTime){}
 
-	bool Intersect(const Ray& ray, double& distance);
+	virtual bool Intersect(const Ray& ray, double& distance);
 
 	void SetPosition(float x, float y, float z);
 	void SetPosition(const Vec3f& _position);
@@ -73,6 +73,10 @@ public:
 	void Move(const Vec3f& dir, float movingSpeed, float elapsedTime);
 	void Rotate(float pitch, float yaw, float roll);
 
+	bool IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, float& distance);
+	bool IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, bool bFrontOnly, double& distance);
+
+
 	virtual Vec3f GetExtent() const { return Vec3f(); }
 public:
 	std::shared_ptr<RigidTransform> transform;
@@ -84,8 +88,6 @@ protected:
 	std::shared_ptr<Mesh> pMesh;
 	std::shared_ptr<Texture> albedoMap;
 	std::shared_ptr<Texture> normalMap;
-
-	bool IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, bool bFrontOnly, double& distance);
 };
 
 class Cube : public GameObject {

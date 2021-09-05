@@ -68,7 +68,7 @@ bool BoundingBox::Init(Renderer& renderer) {
 	if (!pMesh)
 		return false;
 
-	meshBuilder.CopyToMesh(renderer, pMesh.get(), &ColorVertex::BindVertexBuffer, &ColorVertex::Copy, sizeof(ColorVertex));
+	meshBuilder.CopyToMesh(renderer, pMesh.get(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 
 }
 

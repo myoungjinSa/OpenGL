@@ -49,40 +49,17 @@ byte* ReadBufferData(void* pBuffer, size_t targetDataSize);
 struct Vertex final{
 public:
 	Vertex();
-	Vertex(const Vec3f& pos, const Vec2f& uv, const Vec3f& normal);
+	Vertex(const Vec3f& pos, const Vec2f& uv, const Vec3f& normal, const RGBA& color);
 
 	static void Copy(const VertexMaster& source, byte* pDestination);
 	static void BindVertexBuffer(OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeOfVertex);
 
 	Vec3f position;
+	RGBA  color;
 	Vec2f uv0;
 	Vec3f normal;
 };
 
-struct ColorVertex final{
-public:
-	ColorVertex();
-	ColorVertex(const Vec3f& pos, const RGBA& color);
-
-	static void Copy(const VertexMaster& source, byte* pDestination);
-	static void BindVertexBuffer(OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeOfVertex);
-	
-	Vec3f position;
-	RGBA color;
-};
-
-struct NormalVertex final{
-public:
-	NormalVertex();
-	NormalVertex(const Vec3f& pos, const Vec3f& normal, const RGBA& color);
-
-	static void Copy(const VertexMaster& source, byte* pDestination);
-	static void BindVertexBuffer(OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeOfVertex);
-	
-	Vec3f position;
-	Vec3f normal;
-	RGBA color;
-};
 
 struct Triangle{
 public:
@@ -202,7 +179,6 @@ public:
 	
 	void AddVertex(const Vec3f& position);
 	void AddIndex(int index);
-
 
 	void ComputeNormals();
 

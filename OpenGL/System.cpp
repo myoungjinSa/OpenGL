@@ -184,6 +184,19 @@ LRESULT CALLBACK System::MessageHandler(HWND hwnd, UINT umsg, WPARAM wParam, LPA
 		KeyboardInput::KeyUp((unsigned int)wParam);
 		return 0;
 	}
+	case WM_RBUTTONDOWN:
+	{
+		MouseInput::ProcessRButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		SetCapture(hWnd);
+		
+		return 0;
+	}
+	case WM_RBUTTONUP:
+	{
+		MouseInput::ProcessRButtonUp(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		ReleaseCapture();
+		return 0;
+	}
 	case WM_LBUTTONDOWN:
 	{
 		

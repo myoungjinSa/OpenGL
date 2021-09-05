@@ -51,6 +51,8 @@ public:
 		enum class MOUSE_STATE {
 			LBUTTON_DOWN,
 			LBUTTON_UP,
+			RBUTTON_DOWN,
+			RBUTTON_UP,
 			MOUSE_DRAG,
 			MOUSE_STATE_COUNT
 		};
@@ -66,6 +68,8 @@ public:
 	~MouseInput();
 
 	static bool Initialize();
+	static void ProcessRButtonDown(int x, int y);
+	static void ProcessRButtonUp(int x, int y);
 	static void ProcessLButtonUp(int x, int y);
 	static void ProcessLButtonDown(int x, int y);
 	static void ProcessMouseMove(int x, int y);
@@ -78,6 +82,8 @@ public:
 
 	static void Notify(MouseInput::MouseEvent& e);
 private:
+	static bool leftButtonDown;
+	static bool rightButtonDown;
 	static bool dragging;
 	static Point2i mousePoint;
 	static float yAngle;

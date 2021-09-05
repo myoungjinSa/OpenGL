@@ -29,7 +29,7 @@ RayCast::~RayCast() {
 
 }
 
-GameObject* RayCast::HitTest(float x, float y, int screenWidth, int screenHeight) {
+GameObject* RayCast::HitTest(Object& target, float x, float y, int screenWidth, int screenHeight) {
 	Vec3f rayDirection = CalculateRayDirection(targetScene, x, y, screenWidth, screenHeight);
 	LogInfo(L"Ray: x = %5lf, y = %5lf, z = %5lf\n", rayDirection.x, rayDirection.y, rayDirection.z);
 
@@ -42,8 +42,16 @@ GameObject* RayCast::HitTest(float x, float y, int screenWidth, int screenHeight
 	rayWorldPos.z = inversedViewMatrix.value[14];
 
 	Ray ray(rayWorldPos, rayDirection, 1000.0f);
-	for (size_t iObj = 0; iObj < targetScene.GetObjectCount(); iObj++) {
-		targetScene.IntersectObjects(ray);
+
+	if (dynamic_cast<Scene*>(&target)) {
+		for (size_t iObj = 0; iObj < targetScene.GetObjectCount(); iObj++) {
+			if (targetScene.IntersectObjects(ray)) {
+				return targetScene.GetGameObject(iObj);
+			}
+		}
+	}else if (Gizmos* pGizmo = dynamic_cast<Gizmos*>(&target)) {
+		double distance = 0.0;
+		pGizmo->Intersect(ray, distance);
 	}
 	
 	return nullptr;

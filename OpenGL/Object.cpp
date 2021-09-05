@@ -95,15 +95,15 @@ bool GameObject::Intersect(const Ray& ray, double& distance) {
 	//	}
 	//	
 	//}
-	bool bIntersect = false;
+
 	for (size_t iTriangle = 0; iTriangle < pMesh->GetTriangleMeshCount(); iTriangle++) {
 		Triangle triangleMesh = pMesh->GetTriangleMesh(iTriangle);
-		bIntersect = IntersectTriangle(ray, triangleMesh.vertices[0].position, triangleMesh.vertices[1].position, triangleMesh.vertices[2].position, false, distance);
-		if (bIntersect)
-			LogDebug(L"Hit\n");
+		if (IntersectTriangle(ray, triangleMesh.vertices[0].position, triangleMesh.vertices[1].position, triangleMesh.vertices[2].position, false, distance)) {
+			return true;
+		}
 	}
 	
-	return bIntersect;
+	return false;
 }
 bool GameObject::IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, bool bFrontOnly, double& distance) {
 	Vec3f edge1 = v1 - v0;
@@ -144,7 +144,27 @@ bool GameObject::IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f&
 	return true;
 }
 
+bool GameObject::IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, float& distance) {
+	auto e1 = v1 - v0, e2 = v2 - v0, h = Cross(ray.GetDirection(), e2);
+	auto a = DotProduct(e1, h);
+	if (std::abs(a) == 0) return false;
 
+	float f = 1 / a;
+	auto s = ray.GetPosition() - v0;
+	auto u = f * DotProduct(s, h);
+	if (u < 0 || u > 1) return false;
+
+	auto q = Cross(s, e1);
+	auto v = f * DotProduct(ray.GetDirection(), q);
+	if (v < 0 || u + v > 1) return false;
+
+	auto t = f * DotProduct(e2, q);
+	if (t < 0) return false;
+
+	if (distance) 
+		distance = t;
+	return true;
+}
 
 ///////////////////////////////////////////////////////////////
 Cube::Cube()
@@ -305,6 +325,17 @@ bool Sphere::Initialize(Renderer& renderer) {
 	Vec3f specularColor(1.0f, 1.0f, 1.0f);
 	material = std::make_shared<Material>(diffuseColor, ambientColor, specularColor, std::make_pair(Material::TextureType::TEXTURE_ALBEDO, albedoMap->textureID));
 
+	AddComponent<BoundingBox>();
+	auto boundingBox = GetComponent<BoundingBox>();
+
+	boundingBox->SetCenter(transform->GetPosition());
+	boundingBox->SetExtent(GetExtent());
+
+	boundingVolume = boundingBox;
+	if (!boundingVolume->Init(renderer))
+		return false;
+
+
 	return true;
 }
 
@@ -329,6 +360,7 @@ void Sphere::Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatrix, c
 	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
 	renderer.SetDepthTest(true);
 	pMesh->Render(renderer);
+	boundingVolume->Render(renderer, viewMatrix, projectionMatrix);
 }
 
 
@@ -370,7 +402,7 @@ bool Cylinder::Initialize(Renderer& renderer) {
 	if (!pMesh)
 		return false;
 
-	meshBuilder.CopyToMesh(renderer, pMesh.get(), &NormalVertex::BindVertexBuffer, &NormalVertex::Copy, sizeof(NormalVertex));
+	meshBuilder.CopyToMesh(renderer, pMesh.get(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 	
 	albedoMap = TextureLoader::GetTexture(renderer, "Capture.bmp");
 

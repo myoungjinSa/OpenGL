@@ -94,8 +94,7 @@ bool Scene::Render(Renderer& renderer) {
 		
 		objects[iObj]->Render(renderer, GetViewMatrix(), GetProjectionMatrix());
 	}
-	GizmoParameter gizmoParam;
-	Gizmo.Render(renderer, gizmoParam, pCamera, *this);
+	Gizmo.Render(renderer, pCamera, *this);
 	renderer.EndRender();
 	return true;
 }
@@ -122,15 +121,28 @@ Matrix<float, 4, 4> Scene::GetProjectionMatrix() const {
 	return projectionMatrix;
 }
 
+GameObject* Scene::GetGameObject(uint32_t idx) const{
+	if (objects.size() <= idx)
+		return nullptr;
+
+	return objects[idx];
+}
+
 size_t Scene::GetObjectCount() const {
 	return objects.size();
 }
 void Scene::Picking(int x, int y, int screenWidth, int screenHeight) {
 	RayCast rayCast(*this);
 
-	GameObject* pHitObject = rayCast.HitTest(x, y, screenWidth, screenHeight);
+	GameObject* pHitObject = rayCast.HitTest(*this, x, y, screenWidth, screenHeight);
+	
 	if (pHitObject) {
-
+		if (Gizmo.IsAlreadyAttached()) {
+			const GameObject& pAttachedObjects = Gizmo.GetAttachedObjects(0);
+			GameObject* pGizmo = rayCast.HitTest(Gizmo, x, y, screenWidth, screenHeight);
+		}else {
+			Gizmo.Attach(*pHitObject);
+		}
 	}
 }
 
@@ -154,9 +166,10 @@ void Scene::FillShaderParameter(const GameObject& gameObject, ShaderParameter& s
 bool Scene::IntersectObjects(const Ray& ray) const {
 	double distance = 0.0;
 	for (size_t iObj = 0; iObj < objects.size(); iObj++) {
-		objects[iObj]->Intersect(ray, distance);
+		if (objects[iObj]->Intersect(ray, distance))
+			return true;
 	}
-	return true;
+	return false;
 }
 
 

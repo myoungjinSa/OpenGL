@@ -9,6 +9,7 @@
 #include "Object.h"
 
 
+
 struct GizmoParameter {
 	float snap_translation{ 0.f };      // World-scale units used for snapping translation
 	float snap_scale{ 0.f };            // World-scale units used for snapping scale
@@ -17,6 +18,8 @@ struct GizmoParameter {
 	Size2f viewport_size;				// 3d viewport used to render the view
 	Vec3f ray_origin;				   // world-space ray origin (i.e. the camera position)
 	Vec3f ray_direction;				// world-space ray direction
+
+	std::vector<GameObject*> attachTargets;	//The target to attach.
 };
 
 class String;
@@ -25,7 +28,8 @@ class RigidTransform;
 class Renderer;
 class ColorShader;
 class Scene;
-class Gizmos : public Object
+class Ray;
+class Gizmos : public GameObject
 {
 public:
 	enum class eTransformMode {
@@ -73,23 +77,39 @@ public:
 
 		GizmoImpl(Gizmos* pOwner, Renderer& renderer);
 		
+		bool Intersect(const Ray& ray, double& distance);
 		void Update(float deltaTime);
 		void Render(Renderer& renderer, const GizmoParameter& parameter, Camera* pCamera, const Scene& scene);
 
 		std::shared_ptr<ColorShader> defaultShader;
 		std::map<eInteract, GizmoMeshComponent> meshComponents;
 		Gizmos* pOwner;
+
+	private:
+		bool IntersectTranslationGizmos(const Ray& ray, double& distance);
+		bool IntersectRotationGizmos(const Ray& ray, double& distance);
+		bool IntersectScaleGizmos(const Ray& ray, double& distance);
 	};
 	bool Initialize(Renderer& renderer);
+
+	void Attach(GameObject& Target);
+	void Detach();
+
 	void Update(float deltaTime);
-	void Render(Renderer& renderer, const GizmoParameter& parameter, Camera* pCamera, const Scene& scene);
+	void Render(Renderer& renderer, Camera* pCamera, const Scene& scene);
+
+	bool Intersect(const Ray& ray, double& distance);
+
+	bool IsAlreadyAttached() const;
+	const GameObject& GetAttachedObjects(uint32_t index) const;
 
 	eTransformMode GetMode() const;
 
 	static bool Transform(const String& name, Gizmos& gizmo, RigidTransform& tr);
 	
-public:
+private:
+	eTransformMode transformMode;
 	std::unique_ptr<GizmoImpl> impl;
-
+	std::vector<GameObject*> targets;
 };
 
