@@ -55,15 +55,9 @@ void Camera::Update(float deltaTime) {
 	float movingSpeed = transform.get()->GetMovingSpeed();
 	if (KeyboardInput::IsKeyDown(KEY_D)) {
 		Move(GetRight() * 1.0f, movingSpeed, deltaTime);
-	/*	Vec3f pos = GetPosition();
-		pos += Normalize(Cross(lookAt, up)) * 0.5f;
-		SetPosition(pos);*/
 	}
 	else if (KeyboardInput::IsKeyDown(KEY_A)) {
 		Move(GetRight() * -1.0f, movingSpeed, deltaTime);
-		/*Vec3f pos = GetPosition();
-		pos -= Normalize(Cross(lookAt, up)) * 0.5f;
-		SetPosition(pos);*/
 	}
 	else if (KeyboardInput::IsKeyDown(KEY_W)) {
 		Move(GetLook(), movingSpeed, deltaTime);

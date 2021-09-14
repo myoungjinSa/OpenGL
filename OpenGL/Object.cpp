@@ -144,7 +144,7 @@ bool GameObject::IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f&
 	return true;
 }
 
-bool GameObject::IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, float& distance) {
+bool GameObject::IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, double& distance) {
 	auto e1 = v1 - v0, e2 = v2 - v0, h = Cross(ray.GetDirection(), e2);
 	auto a = DotProduct(e1, h);
 	if (std::abs(a) == 0) return false;

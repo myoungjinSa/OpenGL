@@ -3,10 +3,30 @@
 #include "Quaternion.h"
 
 RigidTransform::RigidTransform(Object* _owner)
-	: Component(_owner), position(0.0f, 0.0f, 0.0f), rotation(0.0f, 0.0f, 0.0f), movingSpeed(1.0f)
+	: Component(_owner), position(0.0f, 0.0f, 0.0f), orientation(0.0, 0.0, 0.0, 1.0), scale(1.0f, 1.0f, 1.0f), movingSpeed(1.0f)
 {
 	worldMatrix = Matrix<float, 4, 4>::Identity();
 }
+
+Vec3f RigidTransform::TransformVector(const Vec3f& vec)const{
+	return Quaternion::Rotate(orientation, vec * scale);
+}
+
+Vec3f RigidTransform::TransformPoint(const Vec3f& point) const{
+	return position + TransformVector(point);
+}
+
+
+Vec3f RigidTransform::DetransformPoint(const Vec3f& point) const{
+	return DetransformVector(point - position);
+}
+
+Vec3f RigidTransform::DetransformVector(const Vec3f& vec) const{
+	Quaternion q(vec, 1.0f);
+
+	return Quaternion::Rotate(q.Inverse(orientation).GetVector(), vec) / Vec3d(scale.x, scale.y, scale.z);
+}
+
 
 void RigidTransform::AddPosition(const Vec3f& _position) {
 	position += _position;
@@ -33,9 +53,6 @@ Vec3f RigidTransform::GetPosition() const {
 	return position;
 }
 
-Vec3f RigidTransform::GetRotation() const {
-	return rotation;
-}
 void RigidTransform::GetPosition(std::array<float, 4>& _position) {
 	_position[0] = position.x;
 	_position[1] = position.y;

@@ -83,8 +83,12 @@ public:
 
 		std::shared_ptr<ColorShader> defaultShader;
 		std::map<eInteract, GizmoMeshComponent> meshComponents;
-		Gizmos* pOwner;
+		InteractionState interactionState;
+		bool localToggle;
+		bool hasClicked;					 // State to describe if the user has pressed the left mouse button during the last frame
+		bool hasReleased;				     // State to describe if the user has released the left mouse button during the last frame
 
+		Gizmos* pOwner;
 	private:
 		bool IntersectTranslationGizmos(const Ray& ray, double& distance);
 		bool IntersectRotationGizmos(const Ray& ray, double& distance);
@@ -103,6 +107,7 @@ public:
 	bool IsAlreadyAttached() const;
 	const GameObject& GetAttachedObjects(uint32_t index) const;
 
+	float ScaleByDistanceToTarget(const Vec3f& targetPos, float yfov, float pixelScale) const;
 	eTransformMode GetMode() const;
 
 	static bool Transform(const String& name, Gizmos& gizmo, RigidTransform& tr);

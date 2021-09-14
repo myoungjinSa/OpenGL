@@ -53,7 +53,8 @@ public:
 	void SetReal(double real) { value[3] = real; }
 
 	Quaternion Conjugate() const { return Quaternion(-GetComplex(), GetReal());}
-	
+	Quaternion Conjugate(const Vector4<double>& q) const { return Quaternion(-q.x, -q.y, -q.z, q.w); }
+
 	/**
 	 * @brief Computes the inverse of this quaternion.
 	 *
@@ -68,9 +69,13 @@ public:
 		return Conjugate() / Normalize();
 	}
 
+	Quaternion Inverse(const Vector4<double>& q) const {
+		return Conjugate(q) / Normalize(q);
+	}
+
 	
 	double Normalize() const { return sqrt(value[0] * value[0] + value[1] * value[1] + value[2] * value[2] + value[3] * value[3]); }
-	
+	double Normalize(const Vector4<double>& q) const { return sqrt(q.x * q.x + q.y * q.y + q.z * q.z + q.w * q.w); }
 	/**
 	* @brief Quaternion product operator.
 	*
@@ -313,6 +318,14 @@ public:
 		return Quaternion(q0.value[0] * st0 + q1.value[0] * st1, q0.value[1] * st0 + q1.value[1] * st1,	q0.value[2] * st0 + q1.value[2] * st1, q0.value[3] * st0 + q1.value[3] * st1);
 	}
 
+
+	//Support for 3D Spatial rotations using quaternions, via qmul(qmul(q, v), qconj(q))
+	static Vector4<double> Multiply(const Vector4<double>& left, const Vector4<double>& right);
+	static Vector3<double> GetXDirection(const Vector4<double>& qVec);
+	static Vector3<double> GetYDirection(const Vector4<double>& qVec);
+	static Vector3<double> GetZDirection(const Vector4<double>& qVec);
+
+	static Vector3<double> Rotate(const Vector4<double>& q, const Vector3<double>& v);
 private:
 	double value[4];
 };

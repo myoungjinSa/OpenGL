@@ -6,6 +6,7 @@
 #include "Shader.h"
 #include "Scene.h"
 #include "RayCast.h"
+#include "Transform.h"
 #include "String/String.h"
 
 Gizmos::GizmoImpl::GizmoMeshComponent::GizmoMeshComponent(std::function<std::shared_ptr<Mesh>()> meshBuildFunction, const RGBA& _baseColor, const RGBA& _highlightColor) 
@@ -26,7 +27,9 @@ const Gizmos::GizmoImpl::GizmoMeshComponent& Gizmos::GizmoImpl::GizmoMeshCompone
 	return *this;
 }
 
-Gizmos::GizmoImpl::GizmoImpl(Gizmos* _pOwner, Renderer& renderer) : pOwner(_pOwner) {
+Gizmos::GizmoImpl::GizmoImpl(Gizmos* _pOwner, Renderer& renderer) 
+	: pOwner(_pOwner), hasClicked(false), hasReleased(false), localToggle(false)
+{
 	std::vector<Point2f> arrowPoints = { {0.25f, 0.0f} , {0.25f, 0.25f}, {1.0f, 0.10f}, {1.2f, 0.0f} };
 	std::vector<Point2f> mace_points = { { 0.25f, 0 }, { 0.25f, 0.05f },{ 1, 0.05f },{ 1, 0.1f },{ 1.25f, 0.1f }, { 1.25f, 0 } };
 	std::vector<Point2f> ring_points = { { +0.025f, 1 },{ -0.025f, 1 },{ -0.025f, 1 },{ -0.025f, 1.1f },{ -0.025f, 1.1f },{ +0.025f, 1.1f },{ +0.025f, 1.1f },{ +0.025f, 1 } };
@@ -70,6 +73,9 @@ Gizmos::GizmoImpl::GizmoImpl(Gizmos* _pOwner, Renderer& renderer) : pOwner(_pOwn
 			return pGizmoMesh;
 			}, RGBA::BLUE, RGBA::YELLOW)
 	};
+
+	interactionState = {false , false, Vec3f(), Vec4f(), Vec3f(), Vec3f(), eInteract::NONE};
+
 	defaultShader = std::make_shared<ColorShader>(pOwner);
 
 	if (!defaultShader) {
@@ -83,7 +89,12 @@ Gizmos::GizmoImpl::GizmoImpl(Gizmos* _pOwner, Renderer& renderer) : pOwner(_pOwn
 }
 
 bool Gizmos::GizmoImpl::Intersect(const Ray& ray, double& distance) {
+	if (!pOwner)
+		return false;
 	Gizmos::eTransformMode transformMode = pOwner->GetMode();
+
+	//기즈모 스케일 처리가 들어가야함
+
 
 	switch (transformMode) {
 	case Gizmos::eTransformMode::TRANSLATE: 	return IntersectTranslationGizmos(ray, distance);
@@ -102,7 +113,8 @@ bool Gizmos::GizmoImpl::IntersectTranslationGizmos(const Ray& ray, double& dista
 	std::shared_ptr<Mesh> translationXMesh = meshComponents[eInteract::TRANSLATE_X].pGizmoMesh;
 	for (uint32_t iTriangle = 0; iTriangle < translationXMesh.get()->GetTriangleMeshCount(); iTriangle++) {
 		Triangle triangleMesh = translationXMesh->GetTriangleMesh(iTriangle);
-		if (pOwner->IntersectTriangle(ray, triangleMesh.vertices[0].position, triangleMesh.vertices[1].position, triangleMesh.vertices[2].position, false, distance)) {
+		if (pOwner->IntersectTriangle(ray, triangleMesh.vertices[0].position, triangleMesh.vertices[1].position, triangleMesh.vertices[2].position, distance)) {
+			interactionState.interationMode = eInteract::TRANSLATE_X;
 			return true;
 		}
 
@@ -111,7 +123,8 @@ bool Gizmos::GizmoImpl::IntersectTranslationGizmos(const Ray& ray, double& dista
 	std::shared_ptr<Mesh> translationYMesh = meshComponents[eInteract::TRANSLATE_Y].pGizmoMesh;
 	for (uint32_t iTriangle = 0; iTriangle < translationYMesh.get()->GetTriangleMeshCount(); iTriangle++) {
 		Triangle triangleMesh = translationYMesh->GetTriangleMesh(iTriangle);
-		if (pOwner->IntersectTriangle(ray, triangleMesh.vertices[0].position, triangleMesh.vertices[1].position, triangleMesh.vertices[2].position, false, distance)) {
+		if (pOwner->IntersectTriangle(ray, triangleMesh.vertices[0].position, triangleMesh.vertices[1].position, triangleMesh.vertices[2].position, distance)) {
+			interactionState.interationMode = eInteract::TRANSLATE_Y;
 			return true;
 		}
 	}
@@ -119,27 +132,38 @@ bool Gizmos::GizmoImpl::IntersectTranslationGizmos(const Ray& ray, double& dista
 	std::shared_ptr<Mesh> translationZMesh = meshComponents[eInteract::TRANSLATE_Z].pGizmoMesh;
 	for (uint32_t iTriangle = 0; iTriangle < translationZMesh.get()->GetTriangleMeshCount(); iTriangle++) {
 		Triangle triangleMesh = translationZMesh->GetTriangleMesh(iTriangle);
-		if (pOwner->IntersectTriangle(ray, triangleMesh.vertices[0].position, triangleMesh.vertices[1].position, triangleMesh.vertices[2].position, false, distance)) {
+		if (pOwner->IntersectTriangle(ray, triangleMesh.vertices[0].position, triangleMesh.vertices[1].position, triangleMesh.vertices[2].position, distance)) {
+			interactionState.interationMode = eInteract::TRANSLATE_Z;
 			return true;
 		}
 	}
 
+	interactionState.interationMode = eInteract::NONE;
 
-	return true;
+	return false;
 }
+
+
 
 bool Gizmos::GizmoImpl::IntersectRotationGizmos(const Ray& ray, double& distance) {
 
-	return true;
+	return false;
 }
 
 bool Gizmos::GizmoImpl::IntersectScaleGizmos(const Ray& ray, double& distance) {
 
-	return true;
+	return false;
 }
 
 
 void Gizmos::GizmoImpl::Update(float deltaTime) {
+	if (interactionState.interationMode == eInteract::NONE)
+		return;
+
+	if (pOwner->GetMode() == eTransformMode::TRANSLATE) {
+
+	}
+
 
 }
 void Gizmos::GizmoImpl::Render(Renderer& renderer, const GizmoParameter& gizmoParam, Camera* pCamera, const Scene& scene) {
@@ -153,9 +177,8 @@ void Gizmos::GizmoImpl::Render(Renderer& renderer, const GizmoParameter& gizmoPa
 	
 	//Calculate Center of Objects 
 
-	
 	Matrix<float, 4, 4> worldMatrix = Matrix<float, 4, 4>::Identity();
-	MakeWorldMatrix(targets[0]->GetPosition(), targets[0]->GetLook(), targets[0]->GetRight(), targets[0]->GetUp(), worldMatrix);
+	MakeWorldMatrix(targets[0]->GetPosition(), Vec3f::FORWARD, Vec3f::RIGHT, Vec3f::UP, worldMatrix);
 	shaderParam.worldMatrix = worldMatrix;
 	pCamera->GetViewMatrix(shaderParam.viewMatrix);
 	shaderParam.projectionMatrix = scene.GetProjectionMatrix();
@@ -193,14 +216,18 @@ const GameObject& Gizmos::GetAttachedObjects(uint32_t index) const {
 	return *(targets.at(index));
 }
 
+float Gizmos::ScaleByDistanceToTarget(const Vec3f& targetPos, float yfov, float pixelScale) const {
+	float dist = ::Length(targetPos - transform.get()->GetPosition());
+	return std::tan(yfov) * dist;
+}
+
 bool Gizmos::Intersect(const Ray& ray, double& distance) {
 	if (targets.empty())
 		return false;
 
-	impl->Intersect(ray, distance);
-
-	return true;
+	return impl->Intersect(ray, distance);
 }
+
 
 void Gizmos::Attach(GameObject& pGameObject) {	
 	if(IsAlreadyAttached())

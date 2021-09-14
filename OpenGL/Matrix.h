@@ -364,6 +364,7 @@ public:
 	
 	Vector2();
 	Vector2(T v0, T v1);
+	Vector2(T s);
 	Vector2(const Vector2<T>& v) = default;
 	void SetXY(T x, T y);
 
@@ -400,6 +401,13 @@ Vector2<T>::Vector2()
 template<typename T> inline
 Vector2<T>::Vector2(T v0, T v1)
 	: x(v0), y(v1)
+{
+
+}
+
+template<typename T> inline
+Vector2<T>::Vector2(T s) 
+	: Vector2<T>(s, s)
 {
 
 }
@@ -572,6 +580,7 @@ public:
 
 	Vector3();
 	Vector3(T v0, T v1, T v2);
+	Vector3(T s);
 	//explicit Vector3(const T* values);
 	Vector3(const Matrix<T, 1, 3>& mat);
 	Vector3(const Vector3<T>& v) = default;
@@ -589,6 +598,7 @@ public:
 	template<typename T2> operator Vector3<T2>() const;
 	Vector3& operator+=(const Vector3& rhs);
 	Vector3& operator-=(const Vector3& rhs);
+	Vector3& operator/=(const Vector3& rhs);
 	Vector3& operator*=(const float& scalarConstant);
 	Vector3& operator=(const Vector2<T>& rhs);
 
@@ -611,6 +621,12 @@ Vector3<T>::Vector3()
 template<typename T> inline
 Vector3<T>::Vector3(T v0, T v1, T v2)
 	: x(v0), y(v1), z(v2) {
+
+}
+template<typename T> inline
+Vector3<T>::Vector3(T s) 
+	: Vector3<T>(s, s, s)
+{
 
 }
 
@@ -696,6 +712,13 @@ Vector3<T>& Vector3<T>::operator-=(const Vector3<T>& rhs) {
 	z -= rhs.z;
 	return *this;
 }
+template<typename T> inline
+Vector3<T>& Vector3<T>::operator/=(const Vector3<T>& rhs) {
+	x /= rhs.x;
+	y /= rhs.y;
+	z /= rhs.z;
+	return *this;
+}
 
 template<typename T> inline
 Vector3<T>& Vector3<T>::operator*=(const float& scalar) {
@@ -704,6 +727,7 @@ Vector3<T>& Vector3<T>::operator*=(const float& scalar) {
 	z *= scalar;
 	return *this;
 }
+
 
 template<typename T> inline
 Vector3<T>& Vector3<T>::operator=(const Vector2<T>& rhs) {
@@ -799,7 +823,16 @@ Vector3<T> operator*(const Vector3<T>& v1, const float& scalar) {
 	ret.z = v1.z * scalar;
 	return ret;
 }
+template<typename T>
+Vector3<T> operator/(const Vector3<T>& v1, const Vector3<T>& v2) {
+	Vector3<T> ret;
+	assert(v2.x != 0.0 && v2.y != 0.0 && v2.z != 0.0);
 
+	ret.x = v1.x / v2.x;
+	ret.y = v1.y / v2.y;
+	ret.z = v1.z / v2.z;
+	return ret;
+}
 
 template<typename T, typename std::enable_if<std::is_floating_point<T>::value>::type* = nullptr>
 Vector3<T> Cross(const Vector3<T>& v1, const Vector3<T>& v2) {
@@ -836,6 +869,7 @@ public:
 
 	Vector4();
 	Vector4(T v0, T v1, T v2, T v3);
+	Vector4(T s);
 	Vector4(const Vector2<T>& base, float z, float w);
 	Vector4(const Vector3<T>& base, float w);
 	Vector4(const Vector4<T>& other) = default;
@@ -873,6 +907,13 @@ Vector4<T>::Vector4()
 template<typename T> inline
 Vector4<T>::Vector4(T v0, T v1, T v2, T v3) 
 	:x(v0), y(v1), z(v2), w(v3)
+{
+
+}
+
+template<typename T> inline
+Vector4<T>::Vector4(T s) 
+	: Vector4<T>(s, s, s, s)
 {
 
 }

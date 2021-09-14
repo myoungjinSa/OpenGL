@@ -26,7 +26,6 @@ public:
 	Matrix<float, 4, 4> GetViewMatrix() const;
 	Matrix<float, 4, 4> GetProjectionMatrix() const;
 
-
 	size_t	GetObjectCount() const;
 	void	Picking(int x, int y, int screenWidth, int screenHeight);
 	bool	IntersectObjects(const Ray& ray) const;
@@ -34,6 +33,8 @@ public:
 	void	FillShaderParameter(const GameObject& gameObject, ShaderParameter& shaderParam);
 	
 	GameObject* GetGameObject(uint32_t idx) const;
+
+	Vec3f GetCameraPosition()const;
 private:
 	Camera* pCamera;
 	

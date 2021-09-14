@@ -3,6 +3,7 @@
 #include "Scene.h"
 #include "Object.h"
 #include "Logger.h"
+#include "Transform.h"
 
 
 Ray::Ray(const Vec3f& _position, const Vec3f& _direction, float _length) 
@@ -29,6 +30,22 @@ RayCast::~RayCast() {
 
 }
 
+void RayCast::Transform(float scale, Ray& ray) {
+
+}
+Ray RayCast::Transform(const RigidTransform& transform, const Ray& ray) {
+	return Ray(transform.TransformPoint(ray.GetPosition()), transform.TransformVector(ray.GetDirection()), 1000.0f);
+}
+
+void RayCast::Detransform(float scale, Ray& ray) {
+	ray.SetPosition(ray.GetPosition() * scale);
+	ray.SetDirection(ray.GetDirection() / (Max(scale, 0.1f)));
+}
+
+Ray RayCast::Detransform(const RigidTransform& transform, const Ray& ray) {
+	return Ray(transform.DetransformPoint(ray.GetPosition()), transform.DetransformVector(ray.GetDirection()), 1000.0f);
+}
+
 GameObject* RayCast::HitTest(Object& target, float x, float y, int screenWidth, int screenHeight) {
 	Vec3f rayDirection = CalculateRayDirection(targetScene, x, y, screenWidth, screenHeight);
 	LogInfo(L"Ray: x = %5lf, y = %5lf, z = %5lf\n", rayDirection.x, rayDirection.y, rayDirection.z);
@@ -51,7 +68,15 @@ GameObject* RayCast::HitTest(Object& target, float x, float y, int screenWidth, 
 		}
 	}else if (Gizmos* pGizmo = dynamic_cast<Gizmos*>(&target)) {
 		double distance = 0.0;
-		pGizmo->Intersect(ray, distance);
+		const RigidTransform& gizmoTransform = *pGizmo->transform;
+		//float drawScale = pGizmo->ScaleByDistanceToTarget(targetScene.GetCameraPosition(), 1.0f, 0.0f);
+
+		//Ray newRay = Detransform(gizmoTransform, ray);
+		//Detransform(drawScale, newRay);
+
+		if (pGizmo->Intersect(ray, distance)) {
+			return pGizmo;
+		}
 	}
 	
 	return nullptr;
@@ -76,14 +101,14 @@ Vec4f RayCast::ConvertToEyeCoords(const Vec4f& rayClip, const Matrix<float, 4, 4
 	Matrix<float, 4, 4> invertedProjection = Inverse(projectionMatrix);
 	
 
-	Vec4f rayEye = Transform(invertedProjection, rayClip);
+	Vec4f rayEye = ::Transform(invertedProjection, rayClip);
 	return Vec4f(rayEye.x, rayEye.y, 1.0f, 0.0f);
 }
 
 Vec3f RayCast::ConvertToWorldCoords(const Vec4f& rayEye, const Matrix<float, 4, 4>& _viewMatrix) const {
 	Matrix<float, 4, 4> viewMatrix = _viewMatrix;
 	Matrix<float, 4, 4> invertedViewMatrix = Inverse(viewMatrix);
-	Vec4f rayWorld = Transform(invertedViewMatrix, rayEye);
+	Vec4f rayWorld = ::Transform(invertedViewMatrix, rayEye);
 
 
 	return Normalize(Vec3f(rayWorld.x, rayWorld.y, rayWorld.z));

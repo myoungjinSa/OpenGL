@@ -4,7 +4,7 @@
 
 class GameObject;
 class Scene;
-
+class RigidTransform;
 class Ray{
 public:
 	Ray() = delete;
@@ -31,6 +31,11 @@ public:
 	RayCast(Scene& _targetScene);
 	~RayCast();
 
+	void		Transform(float scale, Ray& ray);
+	Ray			Transform(const RigidTransform& transform, const Ray& ray);
+	
+	void		Detransform(float scale, Ray& ray);
+	Ray			Detransform(const RigidTransform& transform, const Ray& ray);
 
 	GameObject* HitTest(Object& target, float x, float y, int screenWidth, int screenHeight);
 private:

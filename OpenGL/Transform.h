@@ -9,12 +9,16 @@ class RigidTransform : public Component
 public:
 	RigidTransform(Object* owner);
 
+	Vec3f TransformVector(const Vec3f& vec)const;
+	Vec3f TransformPoint(const Vec3f& point)const;
+	Vec3f DetransformVector(const Vec3f& vec)const;
+	Vec3f DetransformPoint(const Vec3f& point)const;
+
 	void AddPosition(const Vec3f& position);
 	void AddPosition(float x, float y, float z);
 	void SetPosition(const Vec3f& position);
 	void SetPosition(float x, float y, float z);
 	Vec3f GetPosition() const;
-	Vec3f GetRotation() const;
 	void GetPosition(std::array<float, 4>& position);
 	Matrix<float, 3, 3> GetRotationMatrix() const;
 
@@ -46,7 +50,8 @@ private:
 	void SetTransform();
 private:
 	Vec3f position;
-	Vec3f rotation;
+	Vec4d orientation;
+	Vec3f scale;
 
 	Matrix<float, 4, 4> worldMatrix;
 

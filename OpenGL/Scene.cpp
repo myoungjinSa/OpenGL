@@ -128,6 +128,10 @@ GameObject* Scene::GetGameObject(uint32_t idx) const{
 	return objects[idx];
 }
 
+Vec3f Scene::GetCameraPosition() const {
+	assert(pCamera);
+	return pCamera->GetPosition();
+}
 size_t Scene::GetObjectCount() const {
 	return objects.size();
 }
@@ -139,7 +143,11 @@ void Scene::Picking(int x, int y, int screenWidth, int screenHeight) {
 	if (pHitObject) {
 		if (Gizmo.IsAlreadyAttached()) {
 			const GameObject& pAttachedObjects = Gizmo.GetAttachedObjects(0);
-			GameObject* pGizmo = rayCast.HitTest(Gizmo, x, y, screenWidth, screenHeight);
+			if (GameObject* pGizmo = rayCast.HitTest(Gizmo, x, y, screenWidth, screenHeight)) {
+				
+				//pGizmo->
+			}
+
 		}else {
 			Gizmo.Attach(*pHitObject);
 		}
