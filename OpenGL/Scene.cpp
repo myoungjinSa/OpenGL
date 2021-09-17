@@ -70,8 +70,8 @@ bool Scene::BuildObject(Renderer& renderer) {
 }
 
 void Scene::Update(const float& elapsedTime) {
-	if (pCamera)
-		pCamera->Update(elapsedTime);
+	assert(pCamera);
+	pCamera->Update(elapsedTime);
 
 
 	for (const auto& obj : objects) {
@@ -79,7 +79,7 @@ void Scene::Update(const float& elapsedTime) {
 		//obj->Move(obj->GetLook(), 1.0f, elapsedTime);
 	}
 
-	Gizmo.Update(elapsedTime);
+	Gizmo.Update(*pCamera, elapsedTime);
 }
 
 bool Scene::Render(Renderer& renderer) {

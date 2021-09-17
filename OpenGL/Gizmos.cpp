@@ -8,6 +8,7 @@
 #include "RayCast.h"
 #include "Transform.h"
 #include "String/String.h"
+#include "Input.h"
 
 Gizmos::GizmoImpl::GizmoMeshComponent::GizmoMeshComponent(std::function<std::shared_ptr<Mesh>()> meshBuildFunction, const RGBA& _baseColor, const RGBA& _highlightColor) 
 	: baseColor(_baseColor), highlightColor(_highlightColor)
@@ -74,7 +75,7 @@ Gizmos::GizmoImpl::GizmoImpl(Gizmos* _pOwner, Renderer& renderer)
 			}, RGBA::BLUE, RGBA::YELLOW)
 	};
 
-	interactionState = {false , false, Vec3f(), Vec4f(), Vec3f(), Vec3f(), eInteract::NONE};
+	interactionState = {false , false, Vec3f(), Vec4f(), Vec3f(), Vec3f(), Vec3f(), Vec3f(),eInteract::NONE};
 
 	defaultShader = std::make_shared<ColorShader>(pOwner);
 
@@ -109,12 +110,16 @@ bool Gizmos::GizmoImpl::Intersect(const Ray& ray, double& distance) {
 }
 
 bool Gizmos::GizmoImpl::IntersectTranslationGizmos(const Ray& ray, double& distance) {
-	double d = 0.0;
 	std::shared_ptr<Mesh> translationXMesh = meshComponents[eInteract::TRANSLATE_X].pGizmoMesh;
 	for (uint32_t iTriangle = 0; iTriangle < translationXMesh.get()->GetTriangleMeshCount(); iTriangle++) {
 		Triangle triangleMesh = translationXMesh->GetTriangleMesh(iTriangle);
 		if (pOwner->IntersectTriangle(ray, triangleMesh.vertices[0].position, triangleMesh.vertices[1].position, triangleMesh.vertices[2].position, distance)) {
+			interactionState.active = true;
+			interactionState.originalPosition = pOwner->GetPosition();
 			interactionState.interationMode = eInteract::TRANSLATE_X;
+			interactionState.rayOrigin = ray.GetPosition();
+			interactionState.rayDirection = ray.GetDirection();
+			interactionState.clickOffset = ray.GetPosition() + ray.GetDirection() * distance;
 			return true;
 		}
 
@@ -124,7 +129,12 @@ bool Gizmos::GizmoImpl::IntersectTranslationGizmos(const Ray& ray, double& dista
 	for (uint32_t iTriangle = 0; iTriangle < translationYMesh.get()->GetTriangleMeshCount(); iTriangle++) {
 		Triangle triangleMesh = translationYMesh->GetTriangleMesh(iTriangle);
 		if (pOwner->IntersectTriangle(ray, triangleMesh.vertices[0].position, triangleMesh.vertices[1].position, triangleMesh.vertices[2].position, distance)) {
+			interactionState.active = true;
+			interactionState.originalPosition = pOwner->GetPosition();
 			interactionState.interationMode = eInteract::TRANSLATE_Y;
+			interactionState.rayOrigin = ray.GetPosition();
+			interactionState.rayDirection = ray.GetDirection();
+			interactionState.clickOffset = ray.GetPosition() + ray.GetDirection() * distance;
 			return true;
 		}
 	}
@@ -133,11 +143,17 @@ bool Gizmos::GizmoImpl::IntersectTranslationGizmos(const Ray& ray, double& dista
 	for (uint32_t iTriangle = 0; iTriangle < translationZMesh.get()->GetTriangleMeshCount(); iTriangle++) {
 		Triangle triangleMesh = translationZMesh->GetTriangleMesh(iTriangle);
 		if (pOwner->IntersectTriangle(ray, triangleMesh.vertices[0].position, triangleMesh.vertices[1].position, triangleMesh.vertices[2].position, distance)) {
+			interactionState.active = true;
+			interactionState.originalPosition = pOwner->GetPosition();
 			interactionState.interationMode = eInteract::TRANSLATE_Z;
+			interactionState.rayOrigin = ray.GetPosition();
+			interactionState.rayDirection = ray.GetDirection();
+			interactionState.clickOffset = ray.GetPosition() + ray.GetDirection() * distance;
 			return true;
 		}
 	}
 
+	interactionState.active = false;
 	interactionState.interationMode = eInteract::NONE;
 
 	return false;
@@ -146,7 +162,7 @@ bool Gizmos::GizmoImpl::IntersectTranslationGizmos(const Ray& ray, double& dista
 
 
 bool Gizmos::GizmoImpl::IntersectRotationGizmos(const Ray& ray, double& distance) {
-
+	
 	return false;
 }
 
@@ -156,16 +172,65 @@ bool Gizmos::GizmoImpl::IntersectScaleGizmos(const Ray& ray, double& distance) {
 }
 
 
-void Gizmos::GizmoImpl::Update(float deltaTime) {
+void Gizmos::GizmoImpl::Update(const Camera& camera, float deltaTime) {
 	if (interactionState.interationMode == eInteract::NONE)
 		return;
-
+	
 	if (pOwner->GetMode() == eTransformMode::TRANSLATE) {
-
+		for (auto& t : pOwner->targets) {
+			Vec3f position = t->GetPosition();
+			//position += interactionState.clickOffset;
+			switch (interactionState.interationMode) {
+			case eInteract::TRANSLATE_X:	Translate(Vec3f::RIGHT, camera.GetPosition(), position);	break;
+			case eInteract::TRANSLATE_Y:	Translate(Vec3f::UP, camera.GetPosition(), position);		break;
+			case eInteract::TRANSLATE_Z:	Translate(Vec3f::FORWARD, camera.GetPosition(), position);	break;
+			default:
+				assert(0);
+				break;
+			}
+			t->SetPosition(position);
+		}
 	}
 
 
 }
+
+void Gizmos::GizmoImpl::Translate(const Vec3f& axis, const Vec3f& cameraPosition, Vec3f& position) {
+	if (interactionState.interationMode == eInteract::NONE)
+		return;
+
+	Vec3f planeTangent = Cross(axis, position - cameraPosition);
+	Vec3f planeNormal = Cross(axis, planeTangent);
+	DragTranslation(planeNormal, position);
+
+	position = interactionState.originalPosition + axis * DotProduct(position - interactionState.originalPosition, axis);
+}
+
+void Gizmos::GizmoImpl::DragTranslation(const Vec3f& planeNormal, Vec3f& position) {
+	if (interactionState.interationMode == eInteract::NONE)
+		return;
+
+
+	interactionState.originalPosition = position;
+
+	Vec3f planePoint = interactionState.originalPosition;
+	
+	Ray ray(interactionState.rayOrigin, interactionState.rayDirection, 1000.0f);
+	
+	float denom = DotProduct(ray.GetDirection(), planeNormal);
+	if (std::abs(denom) == 0)
+		return;
+
+	float t = DotProduct(planePoint - ray.GetPosition(), planeNormal) / denom;
+	if (t < 0)
+		return;
+
+	position = ray.GetPosition() + ray.GetDirection() * t;
+
+	//Do Snap Translation
+	//..
+}
+
 void Gizmos::GizmoImpl::Render(Renderer& renderer, const GizmoParameter& gizmoParam, Camera* pCamera, const Scene& scene) {
 	ShaderParameter shaderParam;
 	const std::vector<GameObject*> targets = gizmoParam.attachTargets;
@@ -225,26 +290,58 @@ bool Gizmos::Intersect(const Ray& ray, double& distance) {
 	if (targets.empty())
 		return false;
 
-	return impl->Intersect(ray, distance);
+	if (!impl->Intersect(ray, distance)) {
+		return false;
+	}
+
+	return true;
+}
+void Gizmos::ProcessEvent(Event& e) {
+	if (MouseInput::MouseEvent* pMouseEvent = dynamic_cast<MouseInput::MouseEvent*>(&e)) {
+		if (pMouseEvent->mouseState == MouseInput::MouseEvent::MOUSE_STATE::MOUSE_STATE_COUNT)
+			return;
+
+		if (pMouseEvent->mouseState == MouseInput::MouseEvent::MOUSE_STATE::LBUTTON_UP) {
+			impl->interactionState.interationMode = GizmoImpl::eInteract::NONE;
+			LogDebug(L"Gizmos:: Mouse Released\n");
+		}
+
+		Point2i newMousePoint = pMouseEvent->mousePoint;
+		Vec2f mouseDelta(newMousePoint.x - MouseInput::oldMousePoint.x, newMousePoint.y - MouseInput::oldMousePoint.y);
+
+		if (pMouseEvent->mouseState == MouseInput::MouseEvent::MOUSE_STATE::LEFT_BUTTON_DRAG) {
+			if (sqrtf(newMousePoint.x - MouseInput::oldMousePoint.x + newMousePoint.y - MouseInput::oldMousePoint.y) > 50.0f)
+			{
+				MouseInput::oldMousePoint = newMousePoint;
+				return;
+			}
+			
+		}
+		MouseInput::oldMousePoint = newMousePoint;
+	}
+
 }
 
 
 void Gizmos::Attach(GameObject& pGameObject) {	
 	if(IsAlreadyAttached())
 		Detach();
-
 	targets.push_back(&pGameObject);
+	
+	MouseInput::Attach(this);
 }
 
 void Gizmos::Detach() {
+	MouseInput::Detach(this);
+
 	targets.clear();
 }
 
-void Gizmos::Update(float deltaTime) {
+void Gizmos::Update(const Camera& camera, float deltaTime) {
 	if (targets.empty())
 		return;
 
-	impl->Update(deltaTime);
+	impl->Update(camera, deltaTime);
 }
 
 void Gizmos::Render(Renderer& renderer, Camera* pCamera, const Scene& scene) {

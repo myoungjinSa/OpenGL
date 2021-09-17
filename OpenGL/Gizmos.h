@@ -7,8 +7,7 @@
 #include "Mesh.h"
 #include "RGBA.h"
 #include "Object.h"
-
-
+#include "Observer.h"
 
 struct GizmoParameter {
 	float snap_translation{ 0.f };      // World-scale units used for snapping translation
@@ -29,7 +28,8 @@ class Renderer;
 class ColorShader;
 class Scene;
 class Ray;
-class Gizmos : public GameObject
+
+class Gizmos final : public GameObject, public Observer 
 {
 public:
 	enum class eTransformMode {
@@ -58,6 +58,8 @@ public:
 			Vec3f originalPosition;
 			Vec4f originalOrientation;
 			Vec3f originalScale;
+			Vec3f rayOrigin;
+			Vec3f rayDirection;
 			Vec3f clickOffset;
 			eInteract interationMode;
 		};
@@ -78,8 +80,11 @@ public:
 		GizmoImpl(Gizmos* pOwner, Renderer& renderer);
 		
 		bool Intersect(const Ray& ray, double& distance);
-		void Update(float deltaTime);
+		void Update(const Camera& Camera, float deltaTime);
+		void Translate(const Vec3f& axis, const Vec3f& cameraPosition, Vec3f& position);
+
 		void Render(Renderer& renderer, const GizmoParameter& parameter, Camera* pCamera, const Scene& scene);
+
 
 		std::shared_ptr<ColorShader> defaultShader;
 		std::map<eInteract, GizmoMeshComponent> meshComponents;
@@ -93,16 +98,21 @@ public:
 		bool IntersectTranslationGizmos(const Ray& ray, double& distance);
 		bool IntersectRotationGizmos(const Ray& ray, double& distance);
 		bool IntersectScaleGizmos(const Ray& ray, double& distance);
+
+		void DragTranslation(const Vec3f& planeNormal, Vec3f& position);
+
 	};
 	bool Initialize(Renderer& renderer);
 
 	void Attach(GameObject& Target);
 	void Detach();
 
-	void Update(float deltaTime);
+	void Update(const Camera& camera, float deltaTime);
 	void Render(Renderer& renderer, Camera* pCamera, const Scene& scene);
 
 	bool Intersect(const Ray& ray, double& distance);
+	void ProcessEvent(Event& e) override;
+
 
 	bool IsAlreadyAttached() const;
 	const GameObject& GetAttachedObjects(uint32_t index) const;

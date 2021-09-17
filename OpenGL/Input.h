@@ -53,7 +53,8 @@ public:
 			LBUTTON_UP,
 			RBUTTON_DOWN,
 			RBUTTON_UP,
-			MOUSE_DRAG,
+			LEFT_BUTTON_DRAG,
+			RIGHT_BUTTON_DRAG,
 			MOUSE_STATE_COUNT
 		};
 		MouseEvent(MOUSE_STATE mouseState, const Point2i& mousePos);
@@ -81,6 +82,8 @@ public:
 	static bool Detach(Observer* observer);
 
 	static void Notify(MouseInput::MouseEvent& e);
+
+	static Point2i oldMousePoint;
 private:
 	static bool leftButtonDown;
 	static bool rightButtonDown;

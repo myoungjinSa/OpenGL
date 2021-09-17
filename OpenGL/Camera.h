@@ -45,7 +45,5 @@ private:
 
 	float xAngle;
 	float yAngle;
-
-	Point2i oldMousePoint;
 };
 

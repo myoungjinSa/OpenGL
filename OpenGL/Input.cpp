@@ -67,12 +67,12 @@ void KeyboardInput::Attach(Observer* pObserver) {
 
 bool KeyboardInput::Detach(Observer* pObserver) {
 	observers.erase(std::remove_if(observers.begin(), observers.end(), [pObserver](Observer* pOb) {
-		if (pOb == pObserver)
-			return true;
-		else
-			return false;
+if (pOb == pObserver)
+return true;
+else
+return false;
 		}), observers.end());
-	return true;
+		return true;
 }
 void KeyboardInput::Notify(KeyboardInput::KeyboardEvent& e) {
 	for (auto pObserver : observers) {
@@ -101,6 +101,7 @@ bool MouseInput::dragging = false;
 bool MouseInput::leftButtonDown = false;
 bool MouseInput::rightButtonDown = false;
 Point2i MouseInput::mousePoint;
+Point2i MouseInput::oldMousePoint;
 std::vector<Observer*> MouseInput::observers;
 
 bool MouseInput::Initialize() {
@@ -152,19 +153,23 @@ void MouseInput::ProcessRButtonUp(int x, int y) {
 
 
 void MouseInput::ProcessMouseMove(int x, int y) {
+	if (mousePoint.x == x && mousePoint.y == y)
+		return;
+
 	if (dragging) {
 		int dragX = x;
 		int dragY = y;
-
-		//xAngle += (y - mousePoint.y) / 3.6;
-		//yAngle += (x - mousePoint.x) / 3.6;
 
 		mousePoint.x = dragX;
 		mousePoint.y = dragY;
 		//dragY = y;
 
 		if (rightButtonDown) {
-			MouseEvent e(MouseEvent::MOUSE_STATE::MOUSE_DRAG, Point2i(mousePoint.x, mousePoint.y));
+			MouseEvent e(MouseEvent::MOUSE_STATE::RIGHT_BUTTON_DRAG, Point2i(mousePoint.x, mousePoint.y));
+			Notify(e);
+		}
+		if (leftButtonDown) {
+			MouseEvent e(MouseEvent::MOUSE_STATE::LEFT_BUTTON_DRAG, Point2i(mousePoint.x, mousePoint.y));
 			Notify(e);
 		}
 	}

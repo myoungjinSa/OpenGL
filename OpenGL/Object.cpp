@@ -98,7 +98,7 @@ bool GameObject::Intersect(const Ray& ray, double& distance) {
 
 	for (size_t iTriangle = 0; iTriangle < pMesh->GetTriangleMeshCount(); iTriangle++) {
 		Triangle triangleMesh = pMesh->GetTriangleMesh(iTriangle);
-		if (IntersectTriangle(ray, triangleMesh.vertices[0].position, triangleMesh.vertices[1].position, triangleMesh.vertices[2].position, false, distance)) {
+		if (IntersectTriangle(ray, triangleMesh.vertices[0].position, triangleMesh.vertices[1].position, triangleMesh.vertices[2].position, distance)) {
 			return true;
 		}
 	}
@@ -161,8 +161,8 @@ bool GameObject::IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f&
 	auto t = f * DotProduct(e2, q);
 	if (t < 0) return false;
 
-	if (distance) 
-		distance = t;
+	distance = t;
+	
 	return true;
 }
 

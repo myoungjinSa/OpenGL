@@ -186,8 +186,9 @@ LRESULT CALLBACK System::MessageHandler(HWND hwnd, UINT umsg, WPARAM wParam, LPA
 	}
 	case WM_RBUTTONDOWN:
 	{
-		MouseInput::ProcessRButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		SetCapture(hWnd);
+
+		MouseInput::ProcessRButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		
 		return 0;
 	}
@@ -199,9 +200,9 @@ LRESULT CALLBACK System::MessageHandler(HWND hwnd, UINT umsg, WPARAM wParam, LPA
 	}
 	case WM_LBUTTONDOWN:
 	{
-		
-		MouseInput::ProcessLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		SetCapture(hWnd);
+		MouseInput::ProcessLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
+		
 		if (pScene) {
 			pScene->Picking(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), screenWidth, screenHeight);
 		}
@@ -215,7 +216,6 @@ LRESULT CALLBACK System::MessageHandler(HWND hwnd, UINT umsg, WPARAM wParam, LPA
 	}
 	case WM_LBUTTONUP:
 	{
-
 		MouseInput::ProcessLButtonUp(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		ReleaseCapture();
 		

@@ -68,12 +68,6 @@ GameObject* RayCast::HitTest(Object& target, float x, float y, int screenWidth, 
 		}
 	}else if (Gizmos* pGizmo = dynamic_cast<Gizmos*>(&target)) {
 		double distance = 0.0;
-		const RigidTransform& gizmoTransform = *pGizmo->transform;
-		//float drawScale = pGizmo->ScaleByDistanceToTarget(targetScene.GetCameraPosition(), 1.0f, 0.0f);
-
-		//Ray newRay = Detransform(gizmoTransform, ray);
-		//Detransform(drawScale, newRay);
-
 		if (pGizmo->Intersect(ray, distance)) {
 			return pGizmo;
 		}
