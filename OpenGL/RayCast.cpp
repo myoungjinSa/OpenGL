@@ -34,7 +34,7 @@ void RayCast::Transform(float scale, Ray& ray) {
 
 }
 Ray RayCast::Transform(const RigidTransform& transform, const Ray& ray) {
-	return Ray(transform.TransformPoint(ray.GetPosition()), transform.TransformVector(ray.GetDirection()), 1000.0f);
+	return Ray(transform.TransformPoint(ray.GetPosition()), transform.TransformVector(ray.GetDirection()), 10000.0f);
 }
 
 void RayCast::Detransform(float scale, Ray& ray) {
@@ -43,12 +43,12 @@ void RayCast::Detransform(float scale, Ray& ray) {
 }
 
 Ray RayCast::Detransform(const RigidTransform& transform, const Ray& ray) {
-	return Ray(transform.DetransformPoint(ray.GetPosition()), transform.DetransformVector(ray.GetDirection()), 1000.0f);
+	return Ray(transform.DetransformPoint(ray.GetPosition()), transform.DetransformVector(ray.GetDirection()), 10000.0f);
 }
 
 GameObject* RayCast::HitTest(Object& target, float x, float y, int screenWidth, int screenHeight) {
 	Vec3f rayDirection = CalculateRayDirection(targetScene, x, y, screenWidth, screenHeight);
-	LogInfo(L"Ray: x = %5lf, y = %5lf, z = %5lf\n", rayDirection.x, rayDirection.y, rayDirection.z);
+	//LogInfo(L"Ray: x = %5lf, y = %5lf, z = %5lf\n", rayDirection.x, rayDirection.y, rayDirection.z);
 
 	Matrix<float, 4, 4> inversedViewMatrix = Inverse(targetScene.GetViewMatrix());
 	
@@ -58,7 +58,7 @@ GameObject* RayCast::HitTest(Object& target, float x, float y, int screenWidth, 
 	rayWorldPos.y = inversedViewMatrix.value[13];
 	rayWorldPos.z = inversedViewMatrix.value[14];
 
-	Ray ray(rayWorldPos, rayDirection, 1000.0f);
+	Ray ray(rayWorldPos, rayDirection, 10000.0f);
 
 	if (dynamic_cast<Scene*>(&target)) {
 		for (size_t iObj = 0; iObj < targetScene.GetObjectCount(); iObj++) {

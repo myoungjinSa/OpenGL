@@ -101,7 +101,6 @@ bool MouseInput::dragging = false;
 bool MouseInput::leftButtonDown = false;
 bool MouseInput::rightButtonDown = false;
 Point2i MouseInput::mousePoint;
-Point2i MouseInput::oldMousePoint;
 std::vector<Observer*> MouseInput::observers;
 
 bool MouseInput::Initialize() {

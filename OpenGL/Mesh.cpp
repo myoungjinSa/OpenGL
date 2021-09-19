@@ -172,6 +172,7 @@ Vec2f Triangle::GetUV(size_t index) const {
 	return vertices[index].uv0;
 }
 
+
 Mesh::Mesh()
 	:meshes(), vertexList(), vertexCount(0), vertexArrayId(0), vertexBufferId(0), indexCount(0), indexBufferId(0)
 {
@@ -234,7 +235,7 @@ bool Mesh::BuildVertexList(void* vertexDatas) {
 			return false;
 
 		offset += sizeof(Vec3f);
-		LogDebug(L"Vertex Position : %5lf, %5lf, %5lf\n", pPosBuffer->x, pPosBuffer->y, pPosBuffer->z);
+		//LogDebug(L"Vertex Position : %5lf, %5lf, %5lf\n", pPosBuffer->x, pPosBuffer->y, pPosBuffer->z);
 
 
 		RGBA* pColorBuffer = reinterpret_cast<RGBA*>(ReadBufferData(static_cast<byte*>(vertexDatas) + offset, sizeof(RGBA)));
@@ -242,7 +243,7 @@ bool Mesh::BuildVertexList(void* vertexDatas) {
 			return false;
 
 		offset += sizeof(RGBA);
-		LogDebug(L"Color : %5lf, %5lf, %5lf, %5lf\n", pColorBuffer->red, pColorBuffer->green, pColorBuffer->blue, pColorBuffer->alpha);
+		//LogDebug(L"Color : %5lf, %5lf, %5lf, %5lf\n", pColorBuffer->red, pColorBuffer->green, pColorBuffer->blue, pColorBuffer->alpha);
 
 
 		Vec2f* pUVBuffer = reinterpret_cast<Vec2f*>(ReadBufferData(static_cast<byte*>(vertexDatas) + offset, sizeof(Vec2f)));
@@ -250,7 +251,7 @@ bool Mesh::BuildVertexList(void* vertexDatas) {
 			return false;
 
 		offset += sizeof(Vec2f);
-		LogDebug(L"UV  : %5lf, %5lf\n", pUVBuffer->x, pUVBuffer->y);
+		//LogDebug(L"UV  : %5lf, %5lf\n", pUVBuffer->x, pUVBuffer->y);
 
 
 		Vec3f* pNormalBuffer = reinterpret_cast<Vec3f*>(ReadBufferData(static_cast<byte*>(vertexDatas) + offset, sizeof(Vec3f)));
@@ -258,7 +259,7 @@ bool Mesh::BuildVertexList(void* vertexDatas) {
 			return false;
 
 		offset += sizeof(Vec3f);
-		LogDebug(L"Normal : %5lf, %5lf, %5lf\n", pNormalBuffer->x, pNormalBuffer->y, pNormalBuffer->z);
+		//LogDebug(L"Normal : %5lf, %5lf, %5lf\n", pNormalBuffer->x, pNormalBuffer->y, pNormalBuffer->z);
 
 
 		vertexList.push_back(new Vertex(*pPosBuffer, *pUVBuffer, *pNormalBuffer, *pColorBuffer));

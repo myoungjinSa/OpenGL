@@ -98,7 +98,11 @@ bool GameObject::Intersect(const Ray& ray, double& distance) {
 
 	for (size_t iTriangle = 0; iTriangle < pMesh->GetTriangleMeshCount(); iTriangle++) {
 		Triangle triangleMesh = pMesh->GetTriangleMesh(iTriangle);
-		if (IntersectTriangle(ray, triangleMesh.vertices[0].position, triangleMesh.vertices[1].position, triangleMesh.vertices[2].position, distance)) {
+		Vec4f vertex0 = ::Transform(transform->GetWorldMatrix(), Vec4f(triangleMesh.vertices[0].position, 1.0f));
+		Vec4f vertex1 = ::Transform(transform->GetWorldMatrix(), Vec4f(triangleMesh.vertices[1].position, 1.0f));
+		Vec4f vertex2 = ::Transform(transform->GetWorldMatrix(), Vec4f(triangleMesh.vertices[2].position, 1.0f));
+
+		if (IntersectTriangle(ray, Vec3f(vertex0.x, vertex0.y, vertex0.z), Vec3f(vertex1.x, vertex1.y, vertex1.z), Vec3f(vertex2.x, vertex2.y, vertex2.z), distance)) {
 			return true;
 		}
 	}
@@ -163,6 +167,36 @@ bool GameObject::IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f&
 
 	distance = t;
 	
+	return true;
+}
+
+bool GameObject::IntersectTriangle(const Ray& ray, const Triangle& triangle, double& distance) {
+	Vec3f v0 = triangle.GetPosition(0);
+	Vec3f v1 = triangle.GetPosition(1);
+	Vec3f v2 = triangle.GetPosition(2);
+
+	auto e1 = v1 - v0;
+	auto e2 = v2 - v0;
+	auto h = Cross(ray.GetDirection(), e2);
+	
+	auto a = DotProduct(e1, h);
+	if (std::abs(a) == 0)
+		return false;
+
+	float f = 1 / a;
+	auto s = ray.GetPosition() - v0;
+	auto u = f * DotProduct(s, h);
+	if (u < 0 || u > 1) return false;
+
+	auto q = Cross(s, e1);
+	auto v = f * DotProduct(ray.GetDirection(), q);
+	if (v < 0 || u + v > 1) return false;
+
+	auto t = f * DotProduct(e2, q);
+	if (t < 0) return false;
+
+	distance = t;
+
 	return true;
 }
 

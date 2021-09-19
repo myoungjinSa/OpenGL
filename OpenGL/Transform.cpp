@@ -222,6 +222,16 @@ float RigidTransform::GetMovingSpeed() const {
 	return movingSpeed;
 }
 
+const Matrix<float, 4, 4>& RigidTransform::GetWorldMatrix() const {
+	return worldMatrix;
+}
+
+void RigidTransform::SetWorldMatrix(const Matrix<float, 4, 4>& _worldMatrix) {
+	worldMatrix = _worldMatrix;
+
+	SetPosition(worldMatrix[12], worldMatrix[13], worldMatrix[14]);
+}
+
 void RigidTransform::SetTransform() {
 	worldMatrix[12] = position.x;
 	worldMatrix[13] = position.y;

@@ -14,7 +14,7 @@ class Renderer;
 class Ray;
 class BoundingVolume;
 class Renderer;
-
+class Triangle;
 
 class Object {
 protected:
@@ -74,6 +74,7 @@ public:
 	void Rotate(float pitch, float yaw, float roll);
 
 	bool IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, double& distance);
+	bool IntersectTriangle(const Ray& ray, const Triangle& triangle, double& distance);
 	bool IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, bool bFrontOnly, double& distance);
 
 

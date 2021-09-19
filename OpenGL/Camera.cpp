@@ -8,6 +8,7 @@ Camera::Camera()
 	,width(0)
 	,height(0)
 	,viewMatrix()
+	,oldMousePoint()
 	,xAngle(0.0f)
 	,yAngle(0.0f)
 {
@@ -173,21 +174,21 @@ void Camera::ProcessEvent(Event& e) {
 		
 
 		Point2i newMousePoint = pMouseEvent->mousePoint;
-		Vec2f mouseDelta(newMousePoint.x - MouseInput::oldMousePoint.x, newMousePoint.y - MouseInput::oldMousePoint.y);
+		Vec2f mouseDelta(newMousePoint.x - oldMousePoint.x, newMousePoint.y - oldMousePoint.y);
 		
 		if (pMouseEvent->mouseState == MouseInput::MouseEvent::MOUSE_STATE::RIGHT_BUTTON_DRAG) {
-			if (sqrtf(newMousePoint.x - MouseInput::oldMousePoint.x + newMousePoint.y - MouseInput::oldMousePoint.y) > 50.0f)
+			if (sqrtf(newMousePoint.x - oldMousePoint.x + newMousePoint.y - oldMousePoint.y) > 50.0f)
 			{
-				MouseInput::oldMousePoint = newMousePoint;
+				oldMousePoint = newMousePoint;
 				return;
 			}
 			const float rotationSpeed = 0.5f;
 
-			xAngle += (newMousePoint.y - MouseInput::oldMousePoint.y) / 3.6f;
-			yAngle += (newMousePoint.x - MouseInput::oldMousePoint.x) / 3.6f;
+			xAngle += (newMousePoint.y - oldMousePoint.y) / 3.6f;
+			yAngle += (newMousePoint.x - oldMousePoint.x) / 3.6f;
 	
 		}
-		MouseInput::oldMousePoint = newMousePoint;
+		oldMousePoint = newMousePoint;
 	}
 
 	if (dynamic_cast<KeyboardInput::KeyboardEvent*>(&e)) {

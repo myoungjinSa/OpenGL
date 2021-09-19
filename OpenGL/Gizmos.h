@@ -126,5 +126,7 @@ private:
 	eTransformMode transformMode;
 	std::unique_ptr<GizmoImpl> impl;
 	std::vector<GameObject*> targets;
+
+	Point2i oldMousePoint;
 };
 

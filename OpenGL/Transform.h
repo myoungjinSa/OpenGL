@@ -43,7 +43,8 @@ public:
 	void  SetMovingSpeed(float speed);
 	float GetMovingSpeed() const;
 
-
+	const Matrix<float, 4, 4>& GetWorldMatrix() const;
+	void SetWorldMatrix(const Matrix<float, 4, 4>& worldMatrix);
 private:
 	void CalculateRotationMatrix(Matrix<float, 4, 4>& rotationMatrix, float pitch, float yaw, float roll, bool bUseQuaternion = true) const;
 	

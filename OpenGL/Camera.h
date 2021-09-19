@@ -42,6 +42,7 @@ private:
 	float height;
 	Matrix<float, 4, 4> viewMatrix;
 
+	Point2i oldMousePoint;
 
 	float xAngle;
 	float yAngle;
