@@ -90,11 +90,13 @@ public:
 		std::map<eInteract, GizmoMeshComponent> meshComponents;
 		InteractionState interactionState;
 		bool localToggle;
+		bool dragging;
 		bool hasClicked;					 // State to describe if the user has pressed the left mouse button during the last frame
 		bool hasReleased;				     // State to describe if the user has released the left mouse button during the last frame
 
 		Gizmos* pOwner;
 	private:
+		bool IntersectInternal(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, double* hit_t);
 		bool IntersectTranslationGizmos(const Ray& ray, double& distance);
 		bool IntersectRotationGizmos(const Ray& ray, double& distance);
 		bool IntersectScaleGizmos(const Ray& ray, double& distance);

@@ -73,13 +73,11 @@ void Scene::Update(const float& elapsedTime) {
 	assert(pCamera);
 	pCamera->Update(elapsedTime);
 
-
+	Gizmo.Update(*pCamera, elapsedTime);
 	for (const auto& obj : objects) {
 		obj->Rotate(MathUtils::DegreesToRadians(0.0f), MathUtils::DegreesToRadians(1.0f), MathUtils::DegreesToRadians(0.0f));
 		//obj->Move(obj->GetLook(), 1.0f, elapsedTime);
 	}
-
-	Gizmo.Update(*pCamera, elapsedTime);
 }
 
 bool Scene::Render(Renderer& renderer) {
