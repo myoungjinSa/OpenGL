@@ -366,9 +366,9 @@ bool Sphere::Initialize(Renderer& renderer) {
 	boundingBox->SetExtent(GetExtent());
 
 	boundingVolume = boundingBox;
-	if (!boundingVolume->Init(renderer))
+	if (!boundingVolume->Init(renderer)) {
 		return false;
-
+	}
 
 	return true;
 }

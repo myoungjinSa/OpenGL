@@ -51,7 +51,6 @@ bool Scene::BuildObject(Renderer& renderer) {
 			LogError(L"Could not initialize the model object\n");
 			return false;
 		}
-
 	}
 
 	pCamera = new Camera();
