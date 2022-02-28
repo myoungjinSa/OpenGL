@@ -4,6 +4,7 @@
 #include "Scene.h"
 #include "Renderer.h"
 
+
 System::System() 
 	: pOpenGL(nullptr),
 	pScene(nullptr),

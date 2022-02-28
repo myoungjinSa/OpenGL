@@ -242,7 +242,7 @@ bool Cube::Initialize(Renderer& renderer) {
 
 	meshBuilder.CopyToMesh(renderer, pMesh.get(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 
-	albedoMap = TextureLoader::GetTexture(renderer, "Capture.bmp");
+	albedoMap = TextureLoader::GetTexture(renderer, L"Capture.bmp");
 	//normalMap = TextureLoader::GetTexture(renderer, "Resource\\Texture\\BMP\\NormalMap.bmp");
 
 	Vec3f diffuseColor(0.8f, 0.85f, 0.85f);
@@ -352,7 +352,7 @@ bool Sphere::Initialize(Renderer& renderer) {
 
 	meshBuilder.CopyToMesh(renderer, pMesh.get(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 
-	albedoMap = TextureLoader::GetTexture(renderer, "Capture.bmp");
+	albedoMap = TextureLoader::GetTexture(renderer, L"Capture.bmp");
 
 	Vec3f diffuseColor(0.8f, 0.85f, 0.85f);
 	Vec4f ambientColor(0.3f, 0.3f, 0.3f, 1.0f);
@@ -438,7 +438,7 @@ bool Cylinder::Initialize(Renderer& renderer) {
 
 	meshBuilder.CopyToMesh(renderer, pMesh.get(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 	
-	albedoMap = TextureLoader::GetTexture(renderer, "Capture.bmp");
+	albedoMap = TextureLoader::GetTexture(renderer, L"Capture.bmp");
 
 	Vec3f diffuseColor(0.8f, 0.85f, 0.85f);
 	Vec4f ambientColor(0.3f, 0.3f, 0.3f, 1.0f);

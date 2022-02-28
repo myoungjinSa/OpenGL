@@ -105,7 +105,7 @@ void Renderer::BindTexture(unsigned int width, unsigned int height, unsigned int
 	pGL->glActiveTexture(GL_TEXTURE0 + textureId);
 
 	glBindTexture(GL_TEXTURE_2D, textureId);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, pPixelData);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, pPixelData);
 }
 
 void Renderer::DisableVertexAttribArray(size_t vertexAttribCount) {

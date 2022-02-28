@@ -4,6 +4,8 @@
 #include <fstream>
 #include <cassert>
 #include "TGAReader/tga_reader.h"
+#include "Picture.h"
+#include "PictureFile.h"
 
 Texture::Texture() 
 	: loaded(false), textureID(0)
@@ -15,7 +17,7 @@ Texture::~Texture() {
 
 }
 
-bool Texture::Initialize(Renderer& renderer, const String& fileName, unsigned int textureUnit, bool wrap) {
+bool Texture::Initialize(Renderer& renderer, const WString& fileName, unsigned int textureUnit, bool wrap) {
 	bool result;
 
 	int texID = 0;
@@ -38,8 +40,18 @@ void Texture::Shutdown() {
 	return;
 }
 
-bool Texture::LoadBMP(Renderer& renderer, const String& fileName, unsigned int textureUnit, bool wrap, int& genTextureID) {
-	std::ifstream fin(fileName.c_str(), std::ios::in | std::ios::binary);
+bool Texture::LoadBMP(Renderer& renderer, const WString& filename, unsigned int textureUnit, bool wrap, int& genTextureID) {
+	Picture picture;
+	loaded = PictureFile::CreatePicture(picture, filename);
+	
+	renderer.AllocateTextures(textureID, 1);
+	renderer.BindTexture(picture.GetWidth(), picture.GetHeight(), textureID, (unsigned char*)picture.GetMemory());
+	renderer.SetSampleMode(true);
+	renderer.SetFiltering();
+
+	genTextureID = textureID;
+
+	/*std::ifstream fin(fileName.c_str(), std::ios::in | std::ios::binary);
 	if (fin.fail())
 		return false;
 
@@ -74,14 +86,13 @@ bool Texture::LoadBMP(Renderer& renderer, const String& fileName, unsigned int t
 
 	genTextureID = textureID;
 	delete[] pPixelData;
-	pPixelData = nullptr;
+	pPixelData = nullptr;*/
 
-	loaded = true;
 	return loaded;
 }
 
 /////////////////////////////////////////////////////////////////////////////
-std::vector<std::pair<String&&, std::shared_ptr<Texture>>> TextureLoader::textures;
+std::vector<std::pair<WString&&, std::shared_ptr<Texture>>> TextureLoader::textures;
 TextureLoader::TextureLoader() {
 	textures.clear();
 }
@@ -96,7 +107,7 @@ void TextureLoader::Release() {
 
 	textures.clear();
 }
-const std::shared_ptr<Texture>& TextureLoader::GetTexture(Renderer& renderer, const String& filename) {
+const std::shared_ptr<Texture>& TextureLoader::GetTexture(Renderer& renderer, const WString& filename) {
 	bool bFind = false;
 	for (size_t iTexture = 0; iTexture < textures.size(); iTexture++) {
 		if (textures[iTexture].first.Compare(filename)) {
@@ -114,7 +125,7 @@ const std::shared_ptr<Texture>& TextureLoader::GetTexture(Renderer& renderer, co
 	return textures[index - 1].second;
 }
 
-bool TextureLoader::Load(Renderer& renderer, const String& filename) {
+bool TextureLoader::Load(Renderer& renderer, const WString& filename) {
 	std::shared_ptr<Texture> texture = std::make_shared<Texture>();
 	if (!texture)
 		return false;

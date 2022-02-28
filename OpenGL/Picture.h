@@ -10,6 +10,13 @@ public:
 };
 
 class Picture {
+public:
+	enum class eStorage {
+		STORAGE_NONE,
+		STOARGE_ALLOCATED,
+		STORAGE_BOUND,
+	};
+
 	Picture();
 	Picture(const Picture& other);
 	virtual ~Picture();
@@ -33,4 +40,5 @@ protected:
 	int   height;
 	int   bpp;
 	int   pitch;
+	eStorage storage;
 };

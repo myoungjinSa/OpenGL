@@ -52,7 +52,7 @@ public:
 	Texture(const Texture& other) = delete;
 	~Texture();
 
-	bool Initialize(Renderer& renderer, const String& fileName, unsigned int textureUnit, bool wrap);
+	bool Initialize(Renderer& renderer, const WString& fileName, unsigned int textureUnit, bool wrap);
 	void Shutdown();
 
 	bool IsNull()const { return textureID == 0; }
@@ -60,7 +60,7 @@ public:
 public:
 	unsigned int textureID;
 private:
-	bool LoadBMP(Renderer& renderer, const String& fileName, unsigned int textureUnit, bool wrap, int& genTextureID);
+	bool LoadBMP(Renderer& renderer, const WString& fileName, unsigned int textureUnit, bool wrap, int& genTextureID);
 
 	bool loaded;
 };
@@ -71,12 +71,12 @@ public:
 	TextureLoader();
 	~TextureLoader();
 	
-	static const std::shared_ptr<Texture>& GetTexture(Renderer& renderer, const String& filename);
+	static const std::shared_ptr<Texture>& GetTexture(Renderer& renderer, const WString& filename);
 	static void Release();
 private:
-	static bool Load(Renderer& renderer, const String& filename);
+	static bool Load(Renderer& renderer, const WString& filename);
 
-	static std::vector<std::pair<String&&, std::shared_ptr<Texture>>> textures;
+	static std::vector<std::pair<WString&&, std::shared_ptr<Texture>>> textures;
 };
 
 class RenderTarget {
