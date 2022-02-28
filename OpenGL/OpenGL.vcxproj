@@ -157,6 +157,7 @@
     <ClCompile Include="Matrix.cpp" />
     <ClCompile Include="Mesh.cpp" />
     <ClCompile Include="Object.cpp" />
+    <ClCompile Include="Picture.cpp" />
     <ClCompile Include="Quaternion.cpp" />
     <ClCompile Include="RayCast.cpp" />
     <ClCompile Include="Renderer.cpp" />
@@ -192,6 +193,7 @@
     <ClInclude Include="Mesh.h" />
     <ClInclude Include="Object.h" />
     <ClInclude Include="Observer.h" />
+    <ClInclude Include="Picture.h" />
     <ClInclude Include="Quaternion.h" />
     <ClInclude Include="RayCast.h" />
     <ClInclude Include="Renderer.h" />
