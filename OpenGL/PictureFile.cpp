@@ -7,6 +7,22 @@
 
 #pragma comment (lib,"Gdiplus.lib")
 
+WString imageList[]{
+	L".png",
+	L".bmp",
+	L".jpg",
+	L".jpeg",
+	L".tga",
+	L".tiff",
+	L".tif"
+};
+
+WString videoList[]{
+	L".mxf",
+	L".mov",
+	L".mp4",
+};
+
 PictureFile::PictureFile() {
 
 }
@@ -15,12 +31,43 @@ PictureFile::~PictureFile() {
 
 }
 
+bool PictureFile::CreateVideoFrame(Picture& picture, const WString& filename, int frameNo) {
+	
+	return true;
+}
+
 bool PictureFile::CreatePicture(Picture& picture, const WString& filename) {
 	static GDIPictureFile pictureFile;
 	if (!pictureFile.Create(picture, filename)) {
 		return false;
 	}
 	return true;
+}
+
+bool PictureFile::IsVideoFile(const WString& filename) {
+	WString Extent = FileUtils::GetFileExtent(filename);
+	if (Extent.Empty())
+		return false;
+	
+	for (size_t iVideoFormat = 0; iVideoFormat < _countof(videoList); iVideoFormat++) {
+		if (Extent.CompareNoCase(videoList[iVideoFormat])) {
+			return true;
+		}
+	}
+	return true;
+}
+
+bool PictureFile::IsImageFile(const WString& filename) {
+	WString Extent = FileUtils::GetFileExtent(filename);
+	if (Extent.Empty())
+		return false;
+
+	for (size_t iImageFormat = 0; iImageFormat < _countof(imageList); iImageFormat++) {
+		if (Extent.CompareNoCase(imageList[iImageFormat])) {
+			return true;
+		}
+	}
+	return false;
 }
 
 unsigned __int64 GDIPictureFile::gdiplusToken = 0;

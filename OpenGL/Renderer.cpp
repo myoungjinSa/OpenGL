@@ -66,13 +66,11 @@ bool Renderer::AllocateIndexBuffer(unsigned int& indexBufferId, size_t indexCoun
 }
 
 bool Renderer::AllocateFrameBuffer(unsigned int& colorBuffer, unsigned int& depthBuffer, unsigned int& fbo) {
-
 	pGL->glGenFramebuffersEXT(1, &fbo);
 	pGL->glBindFramebufferEXT(GL_FRAMEBUFFER, fbo);
 
 	return true;
 }
-
 
 bool Renderer::AllocateTextures(unsigned int& textureId, unsigned int textureCount) {
 	//Generate an ID for the texture.
@@ -189,10 +187,6 @@ bool Renderer::CreateRenderTarget(RenderTarget& renderTarget, const Size2u& scre
 	}
 	pGL->glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, renderTarget.iFrameBuffer);
 	OpenGL::CheckError();
-
-
-
-
 
 	return true;
 }

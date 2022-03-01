@@ -34,7 +34,7 @@ public:
 		return *p;
 	}
 
-	ptrdiff_t operator-(const StringIterator rhs) const {
+	ptrdiff_t operator-(const StringIterator& rhs) const {
 		return p - rhs.p;
 	}
 
@@ -58,18 +58,27 @@ struct std::iterator_traits<StringIterator<char>> {
 	using reference			= char&;
 };
 
+template<typename T>
 class ReverseStringIterator {
-	char* p{ nullptr };
+	T* p{ nullptr };
 public:
-	ReverseStringIterator(char* p) : p{ p } {};
+	ReverseStringIterator(T* p) : p{ p } {};
 	bool operator!=(const ReverseStringIterator& rhs) const {
 		return p != rhs.p;
 	}
+	bool operator==(const ReverseStringIterator& rhs) const {
+		return p == rhs.p;
+	}
 
+	ptrdiff_t operator-(const ReverseStringIterator& rhs) const {
+		return p - rhs.p;
+	}
 	ReverseStringIterator& operator++() {
 		--p;
 		return *this;
 	}
+	
+
 	char operator*() {
 		return *(p - 1);
 	}
@@ -137,7 +146,7 @@ public:
 	const String&		operator=(const String& other);
 
 	using iterator = StringIterator<char>;
-	using reverse_iterator = ReverseStringIterator;
+	using reverse_iterator = ReverseStringIterator<char>;
 
 	iterator			begin();
 	iterator			end();
@@ -179,6 +188,9 @@ struct std::iterator_traits<StringIterator<wchar_t>> {
 class WString {
 	friend std::wostream& operator<<(std::wostream& os, const WString& str);
 public:
+	using iterator = StringIterator<wchar_t>;
+	using reverse_iterator = ReverseStringIterator<wchar_t>;
+
 	WString();
 	WString(wchar_t ch);
 	WString(const wchar_t* wstring);
@@ -204,35 +216,36 @@ public:
 	bool				operator!=(const WString& other);
 	bool				operator==(const WString& other);
 
+	reverse_iterator    ReverseFind(wchar_t wch)const;
+	reverse_iterator	ReverseFind(const wchar_t* wstr)const;
+	reverse_iterator    ReverseFind(const WString& wstr)const;
+	iterator			Find(const WString& wstr)const;
+	iterator			Find(const wchar_t* wstr)const;
+	iterator			Find(wchar_t wch)const;
 	bool				Assign(const wchar_t* wstr);
 	bool				Assign(const WString& wstr);
 	bool				Append(const WString& str);
 	bool				Append(const wchar_t* str);
-	WString				SubString(size_t stringPos, size_t count);
+	WString				SubString(size_t stringPos, size_t count)const;
 	bool				Compare(const WString& other) const;
+	bool				CompareNoCase(const WString& other) const;
 	size_t				Length() const;
 	bool				Empty()const;
 	bool				Resize(size_t size);
 	bool				Reserve(size_t reserveSize);
 	const wchar_t*		c_str() const;
+	const wchar_t*		c_str();
 	void				Clear();
 
-	wchar_t* begin() const {
-		return &wstring[0];
-	}
-	wchar_t* end() const {
-		return &(wstring[length]);
-	}
-
-	using iterator = StringIterator<wchar_t>;
-
-	iterator begin();
-	iterator end();
+	iterator begin()const;
+	iterator end()const;
+	reverse_iterator rbegin()const;
+	reverse_iterator rend()const;
 private:
 	wchar_t*	wstring;
 	size_t		currentChar;
 	size_t		length;
-	int			capacity;
+	int			capacity;  
 };
 
 template<typename ...Args>

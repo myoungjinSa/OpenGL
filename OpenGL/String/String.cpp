@@ -3,7 +3,6 @@
 #include <string.h>
 #include <stdarg.h>
 
-
 //using namespace MJCore;
 
 String::String() :string{ nullptr }, length{ 0 }, currentChar{ 0 }, capacity{ 0 } {}
@@ -291,14 +290,14 @@ inline bool String::operator<(const String& other) {
 	}
 	return string[iChar] < other.string[iChar];
 }
-inline bool String::operator!=(const String& other) {
+bool String::operator!=(const String& other) {
 	return !Compare(other);
 }
-inline bool String::operator==(const String& other) {
+bool String::operator==(const String& other) {
 	return Compare(other);
 }
 
-inline bool String::Empty() const {
+bool String::Empty() const {
 	return length == 0;
 }
 //////////////////////////////////////////////////////////////
@@ -513,14 +512,25 @@ WString& WString::operator=(WString&& other) noexcept {
 WString::~WString() {
 	free(wstring);
 	wstring = 0;
+	length = 0;
+	capacity = 0;
+	currentChar = 0;
 }
 
 
-WString::iterator WString::begin() {
+WString::reverse_iterator WString::rbegin()const{
+	return reverse_iterator(wstring + capacity);
+}
+
+WString::reverse_iterator WString::rend()const{
+	return reverse_iterator(wstring);
+}
+
+WString::iterator WString::begin()const{
 	return iterator(wstring);
 }
 
-WString::iterator WString::end() {
+WString::iterator WString::end()const{
 	return iterator(wstring + capacity);
 }
 
@@ -531,6 +541,44 @@ bool WString::Compare(const WString& other) const {
 	for (size_t iChar = 0; iChar < length; ++iChar) {
 		if (wstring[iChar] != other.wstring[iChar])
 			return false;
+	}
+
+	return true;
+}
+
+bool WString::CompareNoCase(const WString& other) const {
+	if (length != other.length)
+		return false;
+
+	WString toLower(wstring);
+	WString toLower2(other);
+
+	int err = _wcslwr_s(const_cast<wchar_t*>(toLower.c_str()), toLower.capacity);
+	if (err != 0) {
+		return false;
+	}
+	err = _wcslwr_s(const_cast<wchar_t*>(toLower2.c_str()), toLower2.capacity);
+	if (err != 0) {
+		return false;
+	}
+
+	if (!toLower.Compare(toLower2)) {
+		return false;
+	}
+
+	WString toUpper(wstring);
+	WString toUpper2(other);
+	err = _wcsupr_s(const_cast<wchar_t*>(toUpper.c_str()), toUpper.capacity);
+	if (err != 0) {
+		return false;
+	}
+	err = _wcsupr_s(const_cast<wchar_t*>(toUpper2.c_str()), toUpper2.capacity);
+	if (err != 0) {
+		return false;
+	}
+
+	if (!toUpper.Compare(toUpper2)) {
+		return false;
 	}
 
 	return true;
@@ -584,6 +632,44 @@ bool WString::Reserve(size_t reserveSize) {
 	memset(&wstring[length], 0, capacity - length);
 	return true;
 }
+
+WString::reverse_iterator WString::ReverseFind(wchar_t wch) const {
+	return ReverseFind(WString(wch));
+}
+WString::reverse_iterator WString::ReverseFind(const WString& wstr)const {
+	return ReverseFind(wstr.c_str());
+}
+WString::reverse_iterator WString::ReverseFind(const wchar_t* _wstr)const {
+	if (wcsnlen(_wstr, 256) == 0) {
+		return rend();
+	}
+
+	wchar_t* pFind = wcsstr(wstring, _wstr);
+	if (!pFind) {
+		return rend();
+	}
+	return WString::reverse_iterator(pFind);
+}
+WString::iterator WString::Find(wchar_t wch) const {
+	return Find(WString(wch));
+}
+WString::iterator WString::Find(const WString& wstr)const{
+	return Find(wstr.c_str());
+}
+
+WString::iterator WString::Find(const wchar_t* _wstr)const{
+	if (wcsnlen(_wstr, 256) == 0) {
+		return end();
+	}
+
+	wchar_t* pFind = wcsstr(wstring, _wstr);
+	if (!pFind) {
+		return end();
+	}
+
+	return WString::iterator(pFind);
+}
+
 bool WString::Assign(const wchar_t* _wstr) {
 	WString wstr(_wstr);
 	return Assign(wstr);
@@ -645,7 +731,7 @@ bool WString::Append(const wchar_t* wstr) {
 
 	return true;
 }
-WString WString::SubString(size_t stringPos, size_t count) {
+WString WString::SubString(size_t stringPos, size_t count)const {
 	const size_t tempStringCount = count + 1;
 
 	wchar_t* tempString = (wchar_t*)malloc(sizeof(wchar_t) * (count + 1));
@@ -657,11 +743,11 @@ WString WString::SubString(size_t stringPos, size_t count) {
 	return retString;
 }
 
-inline size_t WString::Length() const {
+size_t WString::Length() const {
 	return length;
 }
 
-inline bool WString::Empty() const {
+bool WString::Empty() const {
 	return length == 0;
 }
 
@@ -678,6 +764,9 @@ bool WString::operator!=(const WString& other) {
 }
 
 const wchar_t* WString::c_str() const {
+	return &wstring[0];
+}
+const wchar_t* WString::c_str() {
 	return &wstring[0];
 }
 

@@ -8,7 +8,7 @@
 #include "PictureFile.h"
 
 Texture::Texture() 
-	: loaded(false), textureID(0)
+	: textureID(0)
 {
 
 }
@@ -21,8 +21,7 @@ bool Texture::Initialize(Renderer& renderer, const WString& fileName, unsigned i
 	bool result;
 
 	int texID = 0;
-	//Load the BMP file.
-	result = LoadBMP(renderer, fileName, textureUnit, wrap, texID);
+	result = Load(renderer, fileName, textureUnit, wrap, texID);
 	if (!result) {
 		return false;
 	}
@@ -33,16 +32,29 @@ bool Texture::Initialize(Renderer& renderer, const WString& fileName, unsigned i
 }
 
 void Texture::Shutdown() {
-	if (loaded) {
-		glDeleteTextures(1, &textureID);
-		loaded = false;
-	}
+	glDeleteTextures(1, &textureID);
 	return;
 }
 
-bool Texture::LoadBMP(Renderer& renderer, const WString& filename, unsigned int textureUnit, bool wrap, int& genTextureID) {
+bool Texture::Load(Renderer& renderer, const WString& filename, unsigned int textureUnit, bool wrap, int& genTextureID) {
+	if (!FileUtils::DoesFileExist(filename)) {
+		return false;
+	}
 	Picture picture;
-	loaded = PictureFile::CreatePicture(picture, filename);
+	if (PictureFile::IsImageFile(filename)) {
+		if (!PictureFile::CreatePicture(picture, filename)) {
+			return false;
+		}
+	}else if(PictureFile::IsVideoFile(filename)){
+		if (!PictureFile::CreatePicture(picture, filename)) {
+			return false;
+		}
+
+	}
+	else {
+		assert(0);
+		return false;
+	}
 	
 	renderer.AllocateTextures(textureID, 1);
 	renderer.BindTexture(picture.GetWidth(), picture.GetHeight(), textureID, (unsigned char*)picture.GetMemory());
@@ -50,45 +62,7 @@ bool Texture::LoadBMP(Renderer& renderer, const WString& filename, unsigned int 
 	renderer.SetFiltering();
 
 	genTextureID = textureID;
-
-	/*std::ifstream fin(fileName.c_str(), std::ios::in | std::ios::binary);
-	if (fin.fail())
-		return false;
-
-	const int headerSize = 54;
-	unsigned char header[headerSize];
-	fin.read(reinterpret_cast<char*>(header), headerSize);
-
-	if (header[0] != 'B' || header[1] != 'M') {
-		return false;
-	}
-
-	unsigned int dataPos = *(int*)&(header[0x0A]);
-	unsigned int imageSize = *(int*)&(header[0x22]);
-	unsigned int width = *(int*)&(header[0x12]);
-	unsigned int height = *(int*)&(header[0x16]);
-
-	if (imageSize == 0)
-		imageSize = width * height * 3;
-
-	if (dataPos == 0)
-		dataPos = *(header + headerSize);
-		
-
-	unsigned char* pPixelData = new unsigned char[imageSize];
-	fin.read(reinterpret_cast<char*>(pPixelData), imageSize);
-	fin.close();
-
-	renderer.AllocateTextures(textureID, 1);
-	renderer.BindTexture(width, height, textureID, pPixelData);
-	renderer.SetSampleMode(true);
-	renderer.SetFiltering();
-
-	genTextureID = textureID;
-	delete[] pPixelData;
-	pPixelData = nullptr;*/
-
-	return loaded;
+	return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////

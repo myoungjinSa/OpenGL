@@ -1,7 +1,11 @@
 #pragma once
+#include "FileIO.h"
 
-class WString;
 class Picture;
+
+WString imageList[];
+WString videoList[];
+
 class PictureFile {
 public:
 	PictureFile();
@@ -11,6 +15,10 @@ public:
 	virtual bool Load(Picture& picture, const WString& filename) { return true; }
 	virtual bool Save(Picture& picture, const WString& filename) { return true; }
 
+	static bool IsVideoFile(const WString& filename);
+	static bool IsImageFile(const WString& filename);
+
+	static bool CreateVideoFrame(Picture& picture, const WString& filename, int frameNo);
 	static bool CreatePicture(Picture& picture, const WString& filename);
 };
 
