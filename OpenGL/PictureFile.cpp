@@ -1,7 +1,7 @@
 #include "PictureFile.h"
-#include "Picture.h"
 #include "String/String.h"
 #include "System.h"
+#include "VideoFile.h"
 
 #include <gdiplus.h>
 
@@ -32,7 +32,8 @@ PictureFile::~PictureFile() {
 }
 
 bool PictureFile::CreateVideoFrame(Picture& picture, const WString& filename, int frameNo) {
-	
+	//std::unique_ptr<VideoFile> VideoReader =  
+
 	return true;
 }
 
@@ -128,3 +129,15 @@ bool GDIPictureFile::Save(Picture& picture, const WString& filename) {
 	
 	return true;
 } 
+
+
+VideoInfo::VideoInfo()
+	: imageSize(0, 0)
+	, pixelFormat(ePixelFormat::PIXEL_FORMAT_ARGB)
+	, colorSpace(eColorSpace::COLOR_SPACE_DEFAULT)
+	, bpp(DEFAULT_BPP)
+	, startFrameNo(0)
+	, frameCount(1)
+{
+	
+}

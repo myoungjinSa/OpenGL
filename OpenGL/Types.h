@@ -84,7 +84,6 @@ public:
 	Size& operator=(Size&& size) noexcept;
 
 	T Area() const;
-
 	double AspectRatio()const;
 	bool Empty()const;
 

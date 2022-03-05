@@ -1,6 +1,5 @@
 #pragma once
-#ifndef video_reader_hpp
-#define video_reader_hpp
+#include "VideoFile.h"
 
 
 #pragma comment(lib, "avformat.lib")
@@ -18,19 +17,18 @@ extern "C" {
 #include <libavutil/avutil.h>
 }
 
+
+
 constexpr int RECEVIED_VIDEO = -1;
 constexpr int RECEVIED_NONE = 0;
 
-class VideoReader {
+
+class FFMPGVideoReader : public VideoFile {
 public:
-	VideoReader();
-	~VideoReader();
-
-	bool OpenFile(const char* filePath);
-	void Close();
-
-
+	bool OpenFile(const WString& filename, ePixelFormat pixelFormat) override;
+	void Close() override;
 private:
+
 	int width;
 	int height;
 	int channelNum;
@@ -54,5 +52,3 @@ private:
 	AVCodecContext* pAudioCodecContext;
 	AVFrame* pAudioFrame;
 };
-
-#endif

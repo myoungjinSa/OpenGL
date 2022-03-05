@@ -1,13 +1,27 @@
 #pragma once
 #include "FileIO.h"
-
-class Picture;
+#include "Picture.h"
 
 WString imageList[];
 WString videoList[];
 
+class VideoFile;
+class Codec;
+
 class PictureFile {
 public:
+	class CodecLimits {
+		virtual bool IsSupported(const Codec& codec);
+	};
+	class Factory {
+		Factory();
+		virtual ~Factory();
+
+		virtual VideoFile* CreateVideoFile(const WString& filename);
+
+
+	};
+
 	PictureFile();
 	virtual ~PictureFile();
 
@@ -36,3 +50,48 @@ private:
 	static unsigned __int64 gdiplusToken;
 };
 
+class VideoInfo {
+public:
+	VideoInfo();
+
+private:
+	Size2i imageSize;
+	int	   bpp;
+	ePixelFormat pixelFormat;
+	eColorSpace colorSpace;
+	__int64 startFrameNo;
+	__int64 frameCount;
+};
+
+class AudioInfo {
+public:
+	unsigned int channelCount;
+	unsigned int samplePerSecond;
+	unsigned int bitsPerSample;
+	
+	AudioInfo() {
+		Reset();
+	}
+
+	bool IsValid() const {
+		return channelCount != 0 && samplePerSecond != 0 && bitsPerSample != 0;
+	}
+	void Setup(unsigned int _channelCount, unsigned int _samplesPerSecond, unsigned int _bitsPerSample) {
+		channelCount = _channelCount;
+		samplePerSecond = _samplesPerSecond;
+		bitsPerSample = _bitsPerSample;
+	}
+
+	void Reset() {
+		channelCount = 0;
+		samplePerSecond = 0;
+		bitsPerSample = 0;
+	}
+};
+
+
+class VideoAudioInfo {
+public:
+	VideoInfo Video;
+	AudioInfo Audio;
+};

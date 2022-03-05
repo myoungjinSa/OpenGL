@@ -2,6 +2,22 @@
 #include "Types.h"
 #define DEFAULT_BPP 32
 
+enum class ePixelFormat {
+	PIXEL_FORMAT_ARGB,
+	PIXEL_FORMAT_RGB32,
+	PIXEL_FORMAT_RGB24,
+
+	PIXEL_FORMAT_COUNT,
+};
+
+enum class eColorSpace {
+	COLOR_SPACE_DEFAULT,
+	COLOR_SPACE_BT_709,
+	
+	COLOR_SPACE_COUNT,
+	COLOR_SPACE_SRGB = COLOR_SPACE_BT_709,
+};
+
 class PictureFormat {
 public:
 	static int CalcPitch(size_t imageWidth, int bpp) {

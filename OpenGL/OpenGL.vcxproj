@@ -148,6 +148,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Collision.cpp" />
     <ClCompile Include="Component.cpp" />
+    <ClCompile Include="FFMPEGDecoder.cpp" />
     <ClCompile Include="FileIO.cpp" />
     <ClCompile Include="Gizmos.cpp" />
     <ClCompile Include="Light.cpp" />
@@ -176,7 +177,7 @@
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="Transform.cpp" />
     <ClCompile Include="Types.cpp" />
-    <ClCompile Include="VideoReader.cpp" />
+    <ClCompile Include="VideoFile.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="BoundingVolume.h" />
@@ -185,6 +186,7 @@
     <ClInclude Include="Common.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="Compositor.h" />
+    <ClInclude Include="FFMPEGDecoder.h" />
     <ClInclude Include="FileIO.h" />
     <ClInclude Include="Gizmos.h" />
     <ClInclude Include="KeyCode.h" />
@@ -214,7 +216,7 @@
     <ClInclude Include="Timer.h" />
     <ClInclude Include="Transform.h" />
     <ClInclude Include="Types.h" />
-    <ClInclude Include="VideoReader.h" />
+    <ClInclude Include="VideoFile.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="color.ps" />
