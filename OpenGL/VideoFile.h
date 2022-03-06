@@ -84,7 +84,7 @@ public:
 	virtual bool Play() { return false; }
 	virtual bool Seek(int frameNo) { return false; }
 	virtual bool ReadAFrame() { return false; }
-	virtual bool Load(Picture& picture, int64_t* pts) { return false; }
+	virtual bool Load(Picture& picture, __int64* pts) { return false; }
 };
 
 #endif

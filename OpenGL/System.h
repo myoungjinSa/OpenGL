@@ -1,5 +1,6 @@
 #pragma once
 #include <Windows.h>
+#include <clocale>
 #include "Timer.h"
 //#include "GL/glut.h"
 #include "KeyCode.h"

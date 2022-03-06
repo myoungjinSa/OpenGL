@@ -35,7 +35,7 @@ public:
 	bool GetVideoAudioInfo(VideoAudioInfo& videoAudioInfo, Codec* pCodecInfo = nullptr) override;
 	
 	bool ReadAFrame() override;
-	bool Load(Picture& picture, int64_t* pts) override;
+	bool Load(Picture& picture, __int64* pts) override;
 private:
 	int width;
 	int height;

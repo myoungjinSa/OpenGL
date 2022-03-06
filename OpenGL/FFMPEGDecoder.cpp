@@ -275,7 +275,7 @@ bool FFMPGVideoReader::Load(Picture& picture, int64_t* pts) {
 	}
 
 	unsigned char* dest[4] = { (unsigned char*)picture.GetMemory(), NULL, NULL, NULL };
-	int dest_lineSize[4] = { width * 4, 0, 0, 0 };
+	int dest_lineSize[4] = { picture.GetPitch(), 0, 0, 0 };
 	sws_scale(pSwsScalerContext, pVideoFrame->data, pVideoFrame->linesize, 0, pVideoFrame->height, dest, dest_lineSize);
 	return true;
 } 
