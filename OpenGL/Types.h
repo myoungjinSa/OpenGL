@@ -84,7 +84,9 @@ public:
 	Size& operator=(Size&& size) noexcept;
 
 	T Area() const;
+	void Set(T _width, T _height);
 	double AspectRatio()const;
+	
 	bool Empty()const;
 
 	T width;

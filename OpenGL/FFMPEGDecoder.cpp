@@ -1,161 +1,187 @@
 #include "FFMPEGDecoder.h"
+#include "PictureFile.h"
 
+#pragma warning(disable : 4996)
 #pragma comment(lib, "avdevice.lib")
+
 #include <assert.h>
 extern "C" {
 #include <libavdevice/avdevice.h>
 }
 #include "Logger.h"
 
+static const char* av_make_error(int errnum) {
+	static char str[AV_ERROR_MAX_STRING_SIZE];
+	memset(str, 0, sizeof(str));
+	return av_make_error_string(str, AV_ERROR_MAX_STRING_SIZE, errnum);
+}
 
+FFMPGVideoReader::FFMPGVideoReader()
+	: width(0)
+	, height(0)
+	, channelNum(0)
+	, sampleRate(0)
+	, timeBase()
+	, pixelFormat()
+	, sampleFormat(AV_SAMPLE_FMT_NONE)
+	, pFormatContext(nullptr)
+	, pPacket(nullptr)
+	, videoStreamIndex(-1)
+	, pVideoCodecContext(nullptr)
+	, pVideoFrame(nullptr)
+	, pSwsScalerContext(nullptr)
+	, audioStreamIndex(-1)
+	, pAudioCodecContext(nullptr)
+	, pAudioFrame(nullptr)
+{
+	avdevice_register_all();
+}
 
+FFMPGVideoReader::~FFMPGVideoReader() {
+
+}
+
+bool FFMPGVideoReader::IsOpened() const {
+
+	return false;
+}
 bool FFMPGVideoReader::OpenFile(const WString& filename, ePixelFormat pixelFormat) {
+	pFormatContext = avformat_alloc_context();
+	if (!pFormatContext) {
+		LogError(L"Couldn't created AVFormatContext\n");
+		return false;
+	}
 
-	//avdevice_register_all();
-
-	//auto& width = this->width;
-	//auto& height = this->height;
-	//auto& channelNum = this->channelNum;
-	//auto& sampleRate = this->sampleRate;
-	//auto& timeBase = this->timeBase;
-	//auto& pFormatContext = this->pFormatContext;
-	//auto& pPacket = this->pPacket;
-
-	//auto& pVideoCodecContext = this->pVideoCodecContext;
-	//auto& videoStreamIndex = this->videoStreamIndex;
-	//auto& pVideoFrame = this->pVideoFrame;
-
-	//auto& pAudioCodecContext = this->pAudioCodecContext;
-	//auto& audioStreamIndex = this->audioStreamIndex;
-	//auto& pAudioFrame = this->pAudioFrame;
-
-	//this->pSwsScalerContext = NULL;
-
-	//pFormatContext = avformat_alloc_context();
-	//if (!pFormatContext) {
-	//	LogError(L"Couldn't created AVFormatContext\n");
-	//	return false;
-	//}
-
-	//const AVInputFormat* inputFormat = NULL;
-	//do {
-	//	inputFormat = av_input_video_device_next(inputFormat);
-	//} while (inputFormat != NULL && strcmp(inputFormat->name, "dshow") != 0);
+	const AVInputFormat* inputFormat = NULL;
+	do {
+		inputFormat = av_input_video_device_next(inputFormat);
+	} while (inputFormat != NULL && strcmp(inputFormat->name, "dshow") != 0);
 
 
-	//if (!inputFormat) {
-	//	LogError(L"Couldn't find DShow input format to get webcam\n");
-	//}
+	if (!inputFormat) {
+		LogError(L"Couldn't find DShow input format to get webcam\n");
+	}
+	
+	wchar_t* pWstr = const_cast<wchar_t*>(filename.c_str());
+	if (!pWstr) {
+		assert(0);
+		return false;
+	}
 
-	//if (avformat_open_input(&pFormatContext, filename, NULL, NULL) != 0) {
-	//	LogError(L"Couldn't open video file\n");
-	//	return false;
-	//}
+	size_t nLen = wcslen(pWstr);
+	char* pStr = (char*)malloc(sizeof(wchar_t) * nLen + 1);
+	wcstombs(pStr, pWstr, sizeof(wchar_t) * nLen);
+	
+	if (avformat_open_input(&pFormatContext, pStr, NULL, NULL) != 0) {
+		free(pStr);
+		LogError(L"Couldn't open video file\n");
+		return false;
+	}
 
+	free(pStr);
+	
 	////Find the first valid video stream inside the file
-	//videoStreamIndex = -1;
-	//audioStreamIndex = -1;
+	
+	AVCodecParameters* pVideoCodecParams = NULL;
+	AVCodecParameters* pAudioCodecParams = NULL;
 
-	//AVCodecParameters* pVideoCodecParams = NULL;
-	//AVCodecParameters* pAudioCodecParams = NULL;
+	const AVCodec* pVideoCodec = NULL;
+	const AVCodec* pAudioCodec = NULL;
 
-	//const AVCodec* pVideoCodec = NULL;
-	//const AVCodec* pAudioCodec = NULL;
+	for (int iStream = 0; iStream < pFormatContext->nb_streams; ++iStream) {
+		auto codecParams = pFormatContext->streams[iStream]->codecpar;
+		auto codec = avcodec_find_decoder(codecParams->codec_id);
+		if (!codec) {
+			continue;
+		}
 
-	//for (int iStream = 0; iStream < pFormatContext->nb_streams; ++iStream) {
-	//	auto codecParams = pFormatContext->streams[iStream]->codecpar;
-	//	auto codec = avcodec_find_decoder(codecParams->codec_id);
-	//	if (!codec) {
-	//		continue;
-	//	}
+		if (videoStreamIndex == -1 && codecParams->codec_type == AVMEDIA_TYPE_VIDEO) {
+			videoStreamIndex = iStream;
+			pVideoCodecParams = codecParams;
+			pVideoCodec = codec;
 
-	//	if (videoStreamIndex == -1 && codecParams->codec_type == AVMEDIA_TYPE_VIDEO) {
-	//		videoStreamIndex = iStream;
-	//		pVideoCodecParams = codecParams;
-	//		pVideoCodec = codec;
+			width = codecParams->width;
+			height = codecParams->height;
 
-	//		width = codecParams->width;
-	//		height = codecParams->height;
+			timeBase = pFormatContext->streams[iStream]->time_base;
+			continue;
+		}
 
-	//		timeBase = pFormatContext->streams[iStream]->time_base;
-	//		continue;
-	//	}
+		if (audioStreamIndex == -1 && codecParams->codec_type == AVMEDIA_TYPE_AUDIO) {
+			audioStreamIndex = iStream;
+			pAudioCodecParams = codecParams;
+			pAudioCodec = codec;
+			
+			channelNum = codecParams->channels;
+			sampleRate = codecParams->sample_rate;
 
-	//	if (audioStreamIndex == -1 && codecParams->codec_type == AVMEDIA_TYPE_AUDIO) {
-	//		audioStreamIndex = iStream;
-	//		pAudioCodecParams = codecParams;
-	//		pAudioCodec = codec;
-	//		
-	//		channelNum = codecParams->channels;
-	//		sampleRate = codecParams->sample_rate;
+			continue;
+		}
+	}
 
-	//		continue;
-	//	}
-	//}
+	if (videoStreamIndex == -1 || audioStreamIndex == -1) {
+		LogError(L"Couldn't find valid stream inside the file\n");
+		return false;
+	}
 
-	//if (videoStreamIndex == -1 || audioStreamIndex == -1) {
-	//	LogError(L"Couldn't find valid stream inside the file\n");
-	//	return false;
-	//}
+	//set up a codec context for the decoder
+	pVideoCodecContext = avcodec_alloc_context3(pVideoCodec);
+	if (!pVideoCodecContext) {
+		LogError(L"Couldn't create AVCodecContext\n");
+		return false;
+	}
 
-	////set up a codec context for the decoder
-	//pVideoCodecContext = avcodec_alloc_context3(pVideoCodec);
-	//if (!pVideoCodecContext) {
-	//	LogError(L"Couldn't create AVCodecContext\n");
-	//	return false;
-	//}
+	if (avcodec_parameters_to_context(pVideoCodecContext, pVideoCodecParams) < 0) {
+		LogError(L"Couldn't initialize AVCodecContext\n");
+		return false;
+	}
 
-	//if (avcodec_parameters_to_context(pVideoCodecContext, pVideoCodecParams) < 0) {
-	//	LogError(L"Couldn't initialize AVCodecContext\n");
-	//	return false;
-	//}
+	if (avcodec_open2(pVideoCodecContext, pVideoCodec, NULL) < 0) {
+		LogError(L"Couldn't open codec\n");
+		return false;
+	}
 
-	//if (avcodec_open2(pVideoCodecContext, pVideoCodec, NULL) < 0) {
-	//	LogError(L"Couldn't open codec\n");
-	//	return false;
-	//}
+	pVideoFrame = av_frame_alloc();
+	if (!pVideoFrame) {
+		LogError(L"Couldn't allocate AVFrame\n");
+		return false;
+	}
 
-	//pVideoFrame = av_frame_alloc();
-	//if (!pVideoFrame) {
-	//	LogError(L"Couldn't allocate AVFrame\n");
-	//	return false;
-	//}
+	//Setup a codec context for the audio decoder
+	pAudioCodecContext = avcodec_alloc_context3(pAudioCodec);
+	if (!pAudioCodecContext) {
+		LogError(L"Couldn't create AVCodecContext\n");
+		return false;
+	}
 
-	////Setup a codec context for the audio decoder
-	//pAudioCodecContext = avcodec_alloc_context3(pAudioCodec);
-	//if (!pAudioCodecContext) {
-	//	LogError(L"Couldn't create AVCodecContext\n");
-	//	return false;
-	//}
+	if (avcodec_parameters_to_context(pAudioCodecContext, pAudioCodecParams) < 0) {
+		LogError(L"Couldnt' intialize AVCodecContext\n");
+		return false;
+	}
 
-	//if (avcodec_parameters_to_context(pAudioCodecContext, pAudioCodecParams) < 0) {
-	//	LogError(L"Couldnt' intialize AVCodecContext\n");
-	//	return false;
-	//}
+	if (avcodec_open2(pAudioCodecContext, pAudioCodec, NULL) < 0) {
+		LogError(L"Coudln't open codec\n");
+		return false;
+	}
 
-	//if (avcodec_open2(pAudioCodecContext, pAudioCodec, NULL) < 0) {
-	//	LogError(L"Coudln't open codec\n");
-	//	return false;
-	//}
+	pAudioFrame = av_frame_alloc();
+	if (!pAudioFrame) {
+		LogError(L"Couldn't allocate AVFrame\n");
+		return false;
+	}
 
-	//pAudioFrame = av_frame_alloc();
-	//if (!pAudioFrame) {
-	//	LogError(L"Couldn't allocate AVFrame\n");
-	//	return false;
-	//}
-
-	//pPacket = av_packet_alloc();
-	//if (!pPacket) {
-	//	LogError(L"Couldn't allocate AVPacket\n");
-	//	return false;
-	//}
+	pPacket = av_packet_alloc();
+	if (!pPacket) {
+		LogError(L"Couldn't allocate AVPacket\n");
+		return false;
+	}
 
 
 	return true;
 }
 
 void FFMPGVideoReader::Close() {
-	/*sws_freeContext(pSwsScalerContext);
+	sws_freeContext(pSwsScalerContext);
 	avformat_close_input(&pFormatContext);
 	avformat_free_context(pFormatContext);
 	av_frame_free(&pVideoFrame);
@@ -163,5 +189,93 @@ void FFMPGVideoReader::Close() {
 
 	av_packet_free(&pPacket);
 	avcodec_free_context(&pVideoCodecContext);
-	avcodec_free_context(&pAudioCodecContext);*/
+	avcodec_free_context(&pAudioCodecContext);
 }
+
+bool FFMPGVideoReader::GetVideoAudioInfo(VideoAudioInfo& videoAudioInfo, Codec* pCodec) {
+	if (!pFormatContext)
+		return false;
+
+	videoAudioInfo.Video.imageSize.Set(width, height);
+	videoAudioInfo.Video.pixelFormat = ePixelFormat::PIXEL_FORMAT_ARGB;
+	videoAudioInfo.Video.colorSpace = eColorSpace::COLOR_SPACE_BT_709;
+	videoAudioInfo.Video.startFrameNo = 0;
+	videoAudioInfo.Video.frameCount = pFormatContext->streams[videoStreamIndex]->nb_frames;
+
+	return true;
+}
+
+
+bool FFMPGVideoReader::ReadAFrame() {
+	int response = 0;
+	while (0 <= av_read_frame(pFormatContext, pPacket)) {
+		if (pPacket->stream_index == videoStreamIndex) {
+			//Video Stream
+			response = avcodec_send_packet(pVideoCodecContext, pPacket);
+			if (response < 0) {
+				LogDebug(L"Failed to decode packet:%s\n", av_make_error(response));
+				return false;
+			}
+
+			response = avcodec_receive_frame(pVideoCodecContext, pVideoFrame);
+			if (response == AVERROR(EAGAIN) || response == AVERROR_EOF) {
+				av_packet_unref(pPacket);
+				continue;
+			}else if (response < 0) {
+				LogDebug(L"Failed to decode packet:%s \n", av_make_error(response));
+				return false;
+			}
+
+			pixelFormat = (AVPixelFormat)pVideoFrame->format;
+			//Done to construct one frame
+			av_packet_unref(pPacket);
+			return true;
+		}else if (pPacket->stream_index == audioStreamIndex) {
+			//Audio Stream, Send it to video decoder and then pull frame from decoder 
+			response = avcodec_send_packet(pAudioCodecContext, pPacket);
+			if (response < 0) {
+				LogDebug(L"Failed to decode packet: %s\n", av_make_error(response));
+				return false;
+			}
+			response = avcodec_receive_frame(pAudioCodecContext, pAudioFrame);
+			if (response == AVERROR(EAGAIN) || response == AVERROR_EOF) {
+				av_packet_unref(pPacket);
+				continue;
+			}
+			else if (response < 0) {
+				LogDebug(L"Failed to decode packet: %s\n", av_make_error(response));
+				return false;
+			}
+
+			sampleFormat = (AVSampleFormat)pAudioFrame->format;
+
+			//Done to construct one frame
+			av_packet_unref(pPacket);
+			return pAudioFrame->nb_samples;
+		}
+		else {
+			//Packet originates from a diffrent stream, so ignore it
+			av_packet_unref(pPacket);
+		}
+	}
+
+	return false;
+}
+
+bool FFMPGVideoReader::Load(Picture& picture, int64_t* pts) {
+	*pts = pVideoFrame->pts;
+
+	if (!pSwsScalerContext) {
+		pSwsScalerContext = sws_getContext(width, height, pVideoCodecContext->pix_fmt, width, height, AV_PIX_FMT_RGB32, SWS_BILINEAR, NULL, NULL, NULL);
+	}
+	if (!pSwsScalerContext) {
+		LogError(L"Couldn't initialize sw scaler\n");
+		assert(0);
+		return false;
+	}
+
+	unsigned char* dest[4] = { (unsigned char*)picture.GetMemory(), NULL, NULL, NULL };
+	int dest_lineSize[4] = { width * 4, 0, 0, 0 };
+	sws_scale(pSwsScalerContext, pVideoFrame->data, pVideoFrame->linesize, 0, pVideoFrame->height, dest, dest_lineSize);
+	return true;
+} 

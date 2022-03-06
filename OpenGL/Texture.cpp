@@ -46,7 +46,7 @@ bool Texture::Load(Renderer& renderer, const WString& filename, unsigned int tex
 			return false;
 		}
 	}else if(PictureFile::IsVideoFile(filename)){
-		if (!PictureFile::CreatePicture(picture, filename)) {
+		if (!PictureFile::CreateVideoFrame(picture, filename, 0)) {
 			return false;
 		}
 

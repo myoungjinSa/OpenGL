@@ -2,6 +2,7 @@
 #include "VideoFile.h"
 
 
+
 #pragma comment(lib, "avformat.lib")
 #pragma comment(lib, "avcodec.lib")
 #pragma comment(lib, "swresample.lib")
@@ -17,18 +18,25 @@ extern "C" {
 #include <libavutil/avutil.h>
 }
 
-
-
 constexpr int RECEVIED_VIDEO = -1;
 constexpr int RECEVIED_NONE = 0;
 
+class VideoAudioInfo;
 
 class FFMPGVideoReader : public VideoFile {
 public:
-	bool OpenFile(const WString& filename, ePixelFormat pixelFormat) override;
-	void Close() override;
-private:
+	FFMPGVideoReader();
+	~FFMPGVideoReader() override;
 
+	bool OpenFile(const WString& filename, ePixelFormat pixelFormat) override;
+	bool IsOpened()const;
+	void Close() override;
+
+	bool GetVideoAudioInfo(VideoAudioInfo& videoAudioInfo, Codec* pCodecInfo = nullptr) override;
+	
+	bool ReadAFrame() override;
+	bool Load(Picture& picture, int64_t* pts) override;
+private:
 	int width;
 	int height;
 	int channelNum;

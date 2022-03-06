@@ -1,7 +1,7 @@
 #include "PictureFile.h"
 #include "String/String.h"
 #include "System.h"
-#include "VideoFile.h"
+#include "FFMPEGDecoder.h"
 
 #include <gdiplus.h>
 
@@ -21,7 +21,91 @@ WString videoList[]{
 	L".mxf",
 	L".mov",
 	L".mp4",
+	L".webm"
 };
+
+
+std::unique_ptr<VideoFile> PictureFile::DefaultFactory::CreateVideoFile(const WString& filename) {
+	if (filename.Empty())
+		return nullptr;
+
+	if (!IsVideoFile(filename))
+		return nullptr;
+
+	return std::make_unique<FFMPGVideoReader>();
+}
+
+PictureFile::DefaultFactory PictureFile::FactoryPool::defaultFactory;
+PictureFile::FactoryPool::FactoryPool() 
+	: pCodecLimits(nullptr)
+{
+}
+
+PictureFile::FactoryPool::~FactoryPool() {
+	Clear();
+}
+
+void PictureFile::FactoryPool::Clear() {
+	factoryCandidates.clear();
+}
+
+
+bool PictureFile::FactoryPool::Add(std::unique_ptr<Factory> _factory) {
+	factoryCandidates.push_back(std::move(_factory));
+	return true;
+}
+
+void PictureFile::FactoryPool::Remove(Factory& factory) {
+	std::vector<std::unique_ptr<Factory>>::iterator iFound = std::find_if(factoryCandidates.begin(), factoryCandidates.end(), [&](std::unique_ptr<Factory>& _factory) {
+		return &factory == _factory.get();
+		}
+	);
+	factoryCandidates.erase(std::remove(factoryCandidates.begin(), factoryCandidates.end(), *iFound));
+}
+
+size_t PictureFile::FactoryPool::GetCount() const {
+	return factoryCandidates.size();
+}
+
+bool PictureFile::FactoryPool::IsSupported(const Codec& codec) const{
+	if (pCodecLimits && !pCodecLimits->IsSupported(codec)) {
+		return false;
+	}
+	return true;
+}
+
+std::unique_ptr<VideoFile> PictureFile::FactoryPool::CreateVideoFile(const WString& filename) {
+	for (size_t iFactory = 0; iFactory < factoryCandidates.size(); iFactory++) {
+		Factory* pFactory = factoryCandidates[iFactory].get();
+		if (pFactory) {
+			std::unique_ptr<VideoFile> VideoFile = pFactory->CreateVideoFile(filename);
+			if (VideoFile != nullptr) {
+				return std::move(VideoFile);
+			}
+		}
+	}
+	return defaultFactory.CreateVideoFile(filename);
+}
+
+std::unique_ptr<VideoFile> PictureFile::FactoryPool::CreateVideoFile(const WString& filename, const Codec& codec) {
+	for (size_t iFactory = 0; iFactory < factoryCandidates.size(); iFactory++) {
+		Factory* pFactory = factoryCandidates[iFactory].get();
+		if (pFactory) {
+			const std::shared_ptr<CodecLimits> codecLimits = pFactory->GetCodecLimits();
+			{
+				if (!codecLimits->IsSupported(codec))
+					continue;
+			}
+			std::unique_ptr<VideoFile> VideoFile = pFactory->CreateVideoFile(filename, codec);
+			if (VideoFile != nullptr)
+				return std::move(VideoFile);
+		}
+	}
+	return defaultFactory.CreateVideoFile(filename);
+}
+
+
+PictureFile::FactoryPool PictureFile::factoryPool;
 
 PictureFile::PictureFile() {
 
@@ -31,8 +115,54 @@ PictureFile::~PictureFile() {
 
 }
 
+bool PictureFile::AddFactory(std::unique_ptr<Factory> factory) {
+	if (factory != nullptr) {
+		return false;
+	}
+	return factoryPool.Add(std::move(factory));
+}
+
+void PictureFile::RemoveFactory(Factory& _factory) {
+	factoryPool.Remove(_factory);
+}
+
+void PictureFile::ClearFactory() {
+	factoryPool.Clear();
+}
+
+void PictureFile::SetCodecLimits(std::shared_ptr<CodecLimits>& codecLimits) {
+	factoryPool.SetCodecLimits(codecLimits);
+}
+
+bool PictureFile::IsSupportedCodec(const Codec& codec) {
+	if (factoryPool.codecLimits != nullptr) {
+		if (!factoryPool.codecLimits->IsSupported(codec))
+			return false;
+	}
+
+	return factoryPool.IsSupported(codec);
+}
+
+
 bool PictureFile::CreateVideoFrame(Picture& picture, const WString& filename, int frameNo) {
-	//std::unique_ptr<VideoFile> VideoReader =  
+	if (std::unique_ptr<VideoFile> videoFile = factoryPool.CreateVideoFile(filename)) {
+		if (!videoFile->OpenFile(filename, ePixelFormat::PIXEL_FORMAT_ARGB))
+			return false;
+
+		VideoAudioInfo videoAudioInfo;
+		if (videoFile->GetVideoAudioInfo(videoAudioInfo)) {
+			if (picture.Create(videoAudioInfo.Video.imageSize)) {
+				if (videoFile->ReadAFrame()) {
+					int64_t pts;
+					if (videoFile->Load(picture, &pts)) {
+						videoFile->Close();
+						return true;
+					}
+				}
+			}
+		}
+		videoFile->Close();
+	}
 
 	return true;
 }
@@ -99,7 +229,7 @@ bool GDIPictureFile::Create(Picture& picture, const WString& filename) {
 		return false;
 	}
 
-	if (!picture.Create(nullptr, bitmap.GetWidth(), bitmap.GetHeight(), DEFAULT_BPP)) {
+	if (!picture.Create(nullptr, bitmap.GetWidth(), bitmap.GetHeight(), DEFAULT_BPP, ePixelFormat::PIXEL_FORMAT_ARGB, eColorSpace::COLOR_SPACE_BT_709)) {
 		return false;
 	}
 

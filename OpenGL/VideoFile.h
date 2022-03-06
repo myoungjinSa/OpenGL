@@ -2,8 +2,12 @@
 #ifndef video_reader_hpp
 #define video_reader_hpp
 
-#include "PictureFile.h"
+#include "Types.h"
+#include "Picture.h"
 
+
+class VideoAudioInfo;
+class WString;
 class VideoFormat {
 public:
 	enum class eFrameRate {
@@ -58,8 +62,11 @@ public:
 		TYPE_COUNT,
 	};
 
-	eCodec codec;
-	eFileType fileType;
+	Codec();
+private:
+	eCodec		codec;
+	eFileType	fileType;
+	VideoFormat videoFormat;
 	eColorSpace colorSpace;
 };
 
@@ -72,8 +79,12 @@ public:
 	virtual bool IsOpened() const = 0;
 	virtual void Close() = 0;
 
-	virtual bool Play() { return true; }
-	virtual bool Seek() { return true; }
+	virtual bool GetVideoAudioInfo(VideoAudioInfo& VideoAudioInfo, Codec* pCodecInfo = nullptr) { return false; }
+	
+	virtual bool Play() { return false; }
+	virtual bool Seek(int frameNo) { return false; }
+	virtual bool ReadAFrame() { return false; }
+	virtual bool Load(Picture& picture, int64_t* pts) { return false; }
 };
 
 #endif

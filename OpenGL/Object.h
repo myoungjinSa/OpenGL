@@ -94,6 +94,7 @@ protected:
 class Cube : public GameObject {
 public:
 	Cube();
+	Cube(const Vec3f& size);
 	Cube(const Cube& other);
 	Cube(Cube&& other) noexcept = delete;
 	virtual ~Cube();

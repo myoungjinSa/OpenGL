@@ -1,5 +1,8 @@
 #include "VideoFile.h"
+#include "PictureFile.h"
 #include "Logger.h"
+#include "String/String.h"
+
 
 
 VideoFormat::VideoFormat() 
@@ -30,4 +33,11 @@ bool VideoFormat::Setup(const Size2i& _screenSize, const Size2i& _aspect, eScan 
 	return IsValid();
 }
 
+
+Codec::Codec() 
+	: codec(eCodec::CODEC_COUNT)
+	, fileType(eFileType::TYPE_COUNT)
+	, colorSpace(eColorSpace::COLOR_SPACE_DEFAULT)
+{
+}
 

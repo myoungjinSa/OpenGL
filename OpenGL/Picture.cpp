@@ -36,7 +36,7 @@ Picture& Picture::operator=(const Picture& other) {
 }
 
 void Picture::Destroy() {
-	if (pImage)
+	if(storage == eStorage::STOARGE_ALLOCATED && pImage)
 		delete[] pImage;
 
 	pImage = nullptr;
@@ -47,7 +47,19 @@ void Picture::Destroy() {
 	storage = eStorage::STORAGE_NONE;
 }
 
-bool Picture::Create(void* pData, int _width, int _height, int _bpp) {
+bool Picture::Create(const Size2i& imageSize) {
+	return Create(imageSize, ePixelFormat::PIXEL_FORMAT_ARGB, eColorSpace::COLOR_SPACE_BT_709);
+}
+
+bool Picture::Create(const Size2i& imageSize, ePixelFormat pixelFormat, eColorSpace colorSpace) {
+	return Create(imageSize.width, imageSize.height, pixelFormat, colorSpace);
+}
+
+bool Picture::Create(int width, int height, ePixelFormat pixelFormat, eColorSpace colorSpace) {
+	return Create(nullptr, width, height, DEFAULT_BPP, pixelFormat, colorSpace);
+}
+
+bool Picture::Create(void* pData, int _width, int _height, int _bpp, ePixelFormat pixelFormat, eColorSpace _colorSpace) {
 	Destroy();
 
 	width = _width;

@@ -276,6 +276,11 @@ double Size<T>::AspectRatio() const {
 	return width / static_cast<double>(height);
 }
 
+template<typename T> inline
+void Size<T>::Set(T _width, T _height) {
+	width = _width;
+	height = _height;
+}
 template<typename T>inline
 bool Size<T>::Empty() const {
 	return width <= 0 || height <= 0;

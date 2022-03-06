@@ -26,6 +26,8 @@ System::~System() {
 
 bool System::Initialize() {
 	bool result;
+	
+	std::setlocale(LC_ALL, "ko_KR");
 
 	pOpenGL = new OpenGL();
 	if (!pOpenGL)

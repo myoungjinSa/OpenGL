@@ -1,25 +1,32 @@
 #pragma once
 #include "FileIO.h"
 #include "Picture.h"
+#include "VideoFile.h"
 
 WString imageList[];
 WString videoList[];
 
-class VideoFile;
 class Codec;
 
-class PictureFile {
+class CodecLimits {
 public:
-	class CodecLimits {
-		virtual bool IsSupported(const Codec& codec);
-	};
+	virtual bool IsSupported(const Codec& codec) {}
+};
+
+class PictureFile {
+public:	
 	class Factory {
-		Factory();
-		virtual ~Factory();
+	public:
+		Factory() {}
+		virtual ~Factory() {}
 
-		virtual VideoFile* CreateVideoFile(const WString& filename);
+		virtual std::unique_ptr<VideoFile> CreateVideoFile(const WString& filename, const Codec& codec) { return nullptr; }
+		virtual std::unique_ptr<VideoFile> CreateVideoFile(const WString& filename) { return nullptr; }
 
-
+		void  SetCodecLimits(std::shared_ptr<CodecLimits>& _codecLimits) { codecLimits = _codecLimits; }
+		const std::shared_ptr<CodecLimits> GetCodecLimits()const { return codecLimits; }
+	protected:
+		std::shared_ptr<CodecLimits> codecLimits;
 	};
 
 	PictureFile();
@@ -34,6 +41,40 @@ public:
 
 	static bool CreateVideoFrame(Picture& picture, const WString& filename, int frameNo);
 	static bool CreatePicture(Picture& picture, const WString& filename);
+
+	static bool AddFactory(std::unique_ptr<Factory> factory);
+	static void RemoveFactory(Factory& factory);
+	static void ClearFactory();
+
+	static void SetCodecLimits(std::shared_ptr<CodecLimits>& codecLimits);
+	static bool IsSupportedCodec(const Codec& codec);
+
+protected:
+	class DefaultFactory : public Factory {
+	public:
+		std::unique_ptr<VideoFile> CreateVideoFile(const WString& filename) override;
+	};
+
+	class FactoryPool : public Factory {
+		friend class PictureFile;
+	public:
+		FactoryPool();
+		~FactoryPool() override;
+
+		bool Add(std::unique_ptr<Factory> factory);
+		void Remove(Factory& factory);
+		void Clear();
+		size_t GetCount() const;
+
+		bool IsSupported(const Codec& codec)const;
+		std::unique_ptr<VideoFile> CreateVideoFile(const WString& filename) override;
+		std::unique_ptr<VideoFile> CreateVideoFile(const WString& filename, const Codec& codec) override;
+	protected:
+		static DefaultFactory defaultFactory;
+		std::vector<std::unique_ptr<Factory>> factoryCandidates;
+		CodecLimits* pCodecLimits;
+	};
+	static FactoryPool factoryPool;
 };
 
 class GDIPictureFile : public PictureFile{
@@ -54,7 +95,6 @@ class VideoInfo {
 public:
 	VideoInfo();
 
-private:
 	Size2i imageSize;
 	int	   bpp;
 	ePixelFormat pixelFormat;
