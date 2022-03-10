@@ -144,28 +144,60 @@ bool PictureFile::IsSupportedCodec(const Codec& codec) {
 }
 
 
-bool PictureFile::CreateVideoFrame(Picture& picture, const WString& filename, int frameNo) {
+bool PictureFile::CreateVideoFrame(Picture& picture, const WString& filename, int64_t frameNo) {
+	bool bLoaded = false;
 	if (std::unique_ptr<VideoFile> videoFile = factoryPool.CreateVideoFile(filename)) {
 		if (!videoFile->OpenFile(filename, ePixelFormat::PIXEL_FORMAT_ARGB))
 			return false;
 
-		VideoAudioInfo videoAudioInfo;
-		if (videoFile->GetVideoAudioInfo(videoAudioInfo)) {
-			if (picture.Create(videoAudioInfo.Video.imageSize)) {
+		if (UpdateVideoFrame(picture, videoFile, frameNo)) {
+			bLoaded = true;
+		}
+
+		videoFile->Close();
+	}
+
+	return bLoaded;
+}
+bool PictureFile::SeekVideoFrame(Picture& picture, std::unique_ptr<VideoFile>& videoFile, int64_t frameNo) {
+	if (!videoFile->IsOpened())
+		return false;
+
+	VideoAudioInfo videoAudioInfo;
+	if (videoFile->GetVideoAudioInfo(videoAudioInfo)) {
+		if (picture.Create(videoAudioInfo.Video.imageSize)) {
+			int64_t pts = 0;
+			if (videoFile->Seek(pts)) {
 				if (videoFile->ReadAFrame()) {
-					int64_t pts;
-					if (videoFile->Load(picture, &pts)) {
-						videoFile->Close();
-						return true;
+					if (!videoFile->Load(picture)) {
+						return false;
 					}
 				}
 			}
 		}
-		videoFile->Close();
 	}
 
 	return true;
 }
+
+bool PictureFile::UpdateVideoFrame(Picture& picture, std::unique_ptr<VideoFile>& videoFile, int64_t frameNo) {
+	if (!videoFile->IsOpened())
+		return false;
+
+	VideoAudioInfo videoAudioInfo;
+	if (videoFile->GetVideoAudioInfo(videoAudioInfo)) {
+		if (picture.Create(videoAudioInfo.Video.imageSize)) {
+			int64_t pts = 0;
+			if (videoFile->ReadAFrame()) {
+				if (!videoFile->Load(picture)) {
+					return false;
+				}
+			}
+		}
+	}
+	return true;
+}
+
 
 bool PictureFile::CreatePicture(Picture& picture, const WString& filename) {
 	static GDIPictureFile pictureFile;

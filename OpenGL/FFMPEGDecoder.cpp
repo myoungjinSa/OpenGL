@@ -42,9 +42,20 @@ FFMPGVideoReader::~FFMPGVideoReader() {
 }
 
 bool FFMPGVideoReader::IsOpened() const {
-
-	return false;
+	return IsVideoValid();
 }
+
+bool FFMPGVideoReader::IsValid() const {
+	return IsVideoValid() && IsAudioValid();
+}
+bool FFMPGVideoReader::IsVideoValid() const {
+	return pFormatContext && videoStreamIndex != -1 && pVideoFrame && pVideoCodecContext && pPacket;
+}
+
+bool FFMPGVideoReader::IsAudioValid() const {
+	return pFormatContext && audioStreamIndex != -1 && pAudioFrame && pAudioCodecContext && pPacket;
+}
+
 bool FFMPGVideoReader::OpenFile(const WString& filename, ePixelFormat pixelFormat) {
 	pFormatContext = avformat_alloc_context();
 	if (!pFormatContext) {
@@ -206,7 +217,18 @@ bool FFMPGVideoReader::GetVideoAudioInfo(VideoAudioInfo& videoAudioInfo, Codec* 
 }
 
 
+bool FFMPGVideoReader::Seek(long long frameNo) {
+	if (!IsVideoValid())
+		return false;
+	av_seek_frame(pFormatContext, videoStreamIndex, frameNo, AVSEEK_FLAG_BACKWARD);
+	avcodec_flush_buffers(pVideoCodecContext);
+
+	return true;
+}
 bool FFMPGVideoReader::ReadAFrame() {
+	if (!IsVideoValid())
+		return false;
+
 	int response = 0;
 	while (0 <= av_read_frame(pFormatContext, pPacket)) {
 		if (pPacket->stream_index == videoStreamIndex) {
@@ -262,8 +284,11 @@ bool FFMPGVideoReader::ReadAFrame() {
 	return false;
 }
 
-bool FFMPGVideoReader::Load(Picture& picture, int64_t* pts) {
-	*pts = pVideoFrame->pts;
+
+
+bool FFMPGVideoReader::Load(Picture& picture) {
+	if (!IsVideoValid())
+		return false;
 
 	if (!pSwsScalerContext) {
 		pSwsScalerContext = sws_getContext(width, height, pVideoCodecContext->pix_fmt, width, height, AV_PIX_FMT_RGB32, SWS_BILINEAR, NULL, NULL, NULL);

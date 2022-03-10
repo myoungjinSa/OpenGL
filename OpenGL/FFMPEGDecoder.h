@@ -35,7 +35,12 @@ public:
 	bool GetVideoAudioInfo(VideoAudioInfo& videoAudioInfo, Codec* pCodecInfo = nullptr) override;
 	
 	bool ReadAFrame() override;
-	bool Load(Picture& picture, __int64* pts) override;
+	bool Seek(long long frameNo) override;
+	bool Load(Picture& picture) override;
+
+	bool IsValid() const;
+	bool IsVideoValid() const;
+	bool IsAudioValid() const;
 private:
 	int width;
 	int height;

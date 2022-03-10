@@ -161,6 +161,7 @@
     <ClCompile Include="Object.cpp" />
     <ClCompile Include="Picture.cpp" />
     <ClCompile Include="PictureFile.cpp" />
+    <ClCompile Include="Player.cpp" />
     <ClCompile Include="Quaternion.cpp" />
     <ClCompile Include="RayCast.cpp" />
     <ClCompile Include="Renderer.cpp" />
@@ -200,6 +201,7 @@
     <ClInclude Include="Observer.h" />
     <ClInclude Include="Picture.h" />
     <ClInclude Include="PictureFile.h" />
+    <ClInclude Include="Player.h" />
     <ClInclude Include="Quaternion.h" />
     <ClInclude Include="RayCast.h" />
     <ClInclude Include="Renderer.h" />

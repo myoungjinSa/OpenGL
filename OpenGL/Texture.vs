@@ -18,5 +18,5 @@ void main(){
 	gl_Position = projectionMatrix * viewMatrix * worldMatrix * vec4(inputPosition, 1.0);
 
 	vs_out.COLOR = inputColor;
-	vs_out.TEXCOORD = inputTexCoord;
+	vs_out.TEXCOORD = vec2(inputTexCoord.x, 1 - inputTexCoord.y);
 }

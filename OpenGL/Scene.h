@@ -30,8 +30,6 @@ public:
 	void	Picking(int x, int y, int screenWidth, int screenHeight);
 	bool	IntersectObjects(const Ray& ray) const;
 
-	void	FillShaderParameter(const GameObject& gameObject, ShaderParameter& shaderParam);
-	
 	GameObject* GetGameObject(uint32_t idx) const;
 
 	Vec3f GetCameraPosition()const;

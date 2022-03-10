@@ -86,9 +86,6 @@ bool Scene::Render(Renderer& renderer) {
 }
 
 void Scene::Shutdown(Renderer& renderer) {
-	//if(DefaultShader)
-	//	DefaultShader->Shutdown(renderer);
-
 	for (const auto& obj : objects)
 		obj->Shutdown(renderer);
 

@@ -95,6 +95,7 @@ protected:
 	std::shared_ptr<Mesh> pMesh;
 	std::shared_ptr<Texture> albedoMap;
 	std::shared_ptr<Texture> normalMap;
+
 };
 
 class Cube : public GameObject {

@@ -39,8 +39,10 @@ public:
 	static bool IsVideoFile(const WString& filename);
 	static bool IsImageFile(const WString& filename);
 
-	static bool CreateVideoFrame(Picture& picture, const WString& filename, int frameNo);
 	static bool CreatePicture(Picture& picture, const WString& filename);
+	static bool CreateVideoFrame(Picture& picture, const WString& filename, int64_t frameNo);
+	static bool UpdateVideoFrame(Picture& picture, std::unique_ptr<VideoFile>& videoFile, int64_t frameNo);
+	static bool SeekVideoFrame(Picture& picture, std::unique_ptr<VideoFile>& videoFile, int64_t frameNo);
 
 	static bool AddFactory(std::unique_ptr<Factory> factory);
 	static void RemoveFactory(Factory& factory);

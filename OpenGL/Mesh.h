@@ -23,27 +23,7 @@ struct VertexMaster {
 typedef unsigned char byte;
 typedef void (VertexCopyCallback)(const VertexMaster& source, byte* destination);
 typedef void (VertexBufferBindCallback)(OpenGL& gl, void* pVertexBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeofVertex);
-//struct Vertex {
-//public:
-//	Vertex();
-//	Vertex(const Vec3f& pos);
-//	~Vertex();
-//
-//	Vec3f position;
-//};
-//struct ColorVertex : public Vertex {
-//public:
-//	typedef unsigned int GLuint;
-//
-//	ColorVertex();
-//	ColorVertex(const Vec3f& pos, const RGBA& color);
-//	~ColorVertex();
-//
-//	static void Copy(const VertexMaster& source, byte* pDestination);
-//	static void BindVertexBuffer(OpenGL& gl, void* pBuffer, unsigned int vertexBufferId, unsigned int vertexCount, unsigned int sizeofVertex);
-//	
-//	RGBA color;
-//};
+
 byte* ReadBufferData(void* pBuffer, size_t targetDataSize);
 
 struct Vertex final{

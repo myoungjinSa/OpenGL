@@ -89,14 +89,7 @@ bool GameObject::Initialize(Renderer& renderer) {
 }
 
 bool GameObject::Intersect(const Ray& ray, double& distance) {
-	//if (boundingVolume) {
-	//	if (boundingVolume->IsIn(ray)) {
-	//		LogDebug(L"Hit AABB\n");
-	//		return true;
-	//	}
-	//	
-	//}
-
+	
 	for (size_t iTriangle = 0; iTriangle < pMesh->GetTriangleMeshCount(); iTriangle++) {
 		Triangle triangleMesh = pMesh->GetTriangleMesh(iTriangle);
 		Vec4f vertex0 = ::Transform(transform->GetWorldMatrix(), Vec4f(triangleMesh.vertices[0].position, 1.0f));
@@ -318,16 +311,6 @@ void Cube::Render(Renderer& renderer, const ShaderParameter& shaderParam) {
 	pMesh->Render(renderer);
 	boundingVolume->Render(renderer, shaderParam.viewMatrix, shaderParam.projectionMatrix);
 }
-
-//void Cube::Render(Renderer& renderer, ) {
-//	GameObject::Render(renderer);
-//	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
-//	renderer.SetDepthTest(true);
-//	
-//	pMesh->Render(renderer);
-//
-//	boundingVolume->Render(renderer, viewMatrix, projectionMatrix);
-//}
 
 
 Vec3f Cube::GetExtent() const {

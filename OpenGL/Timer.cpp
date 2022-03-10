@@ -29,6 +29,7 @@ void Timer::Stop() {
 void Timer::Reset() {
 	startTime = std::chrono::steady_clock::now();
 	endTime = std::chrono::steady_clock::now();
+	previousTimePoint = std::chrono::steady_clock::now();
 }
 
 long long Timer::GetTotalTime() const {

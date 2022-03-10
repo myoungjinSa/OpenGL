@@ -82,9 +82,9 @@ public:
 	virtual bool GetVideoAudioInfo(VideoAudioInfo& VideoAudioInfo, Codec* pCodecInfo = nullptr) { return false; }
 	
 	virtual bool Play() { return false; }
-	virtual bool Seek(int frameNo) { return false; }
+	virtual bool Seek(long long frameNo) { return false; }
 	virtual bool ReadAFrame() { return false; }
-	virtual bool Load(Picture& picture, __int64* pts) { return false; }
+	virtual bool Load(Picture& picture) { return false; }
 };
 
 #endif

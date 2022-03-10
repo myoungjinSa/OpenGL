@@ -23,7 +23,7 @@ void main(){
 
 	vec4 worldPosition = worldMatrix * vec4(inputPosition, 1.0);
 
-	vs_out.TEXCOORD = inputTexCoord;
+	vs_out.TEXCOORD = vec2(inputTexCoord.x, 1- inputTexCoord.y);
 	vs_out.N = mat3(worldMatrix) * inputNormal;
 	vs_out.L = lightPosition - worldPosition.xyz;
 	vs_out.V = worldCameraPosition - worldPosition.xyz;
