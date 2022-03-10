@@ -34,15 +34,6 @@ bool Scene::BuildObject(Renderer& renderer) {
 	phongLight.SetPosition(0.0f, 0.0f, -10.0f);
 	phongLight.SetDirection(Vec3f::FORWARD);
 
-	DefaultShader = std::make_shared<PhongShader>(this);
-	if (!DefaultShader)
-		return false;
-
-	if (!DefaultShader->Initialize(renderer)) {
-		LogError(L"Could not initialize the Default Shader\n");
-		return false;
-	}
-
 	GameObject* pObject = new Cube(Vec3f(3.0f, 3.0f, 3.0f));//new Sphere(2.0f, 16, 16);//new Cylinder(Vec3f::UP, Vec3f::RIGHT, Vec3f::FORWARD, 32);
 	objects.emplace_back(pObject);
 
@@ -86,10 +77,8 @@ bool Scene::Render(Renderer& renderer) {
 	Matrix<float, 4, 4> worldMatrix;
 	for (size_t iObj = 0; iObj < objects.size(); iObj++) {
 		ShaderParameter shaderParmaeter;
-		FillShaderParameter(*objects[iObj], shaderParmaeter);
-		DefaultShader->Render(renderer, shaderParmaeter);
-		
-		objects[iObj]->Render(renderer, GetViewMatrix(), GetProjectionMatrix());
+		objects[iObj]->FillShaderParameter(shaderParmaeter, GetViewMatrix(), GetProjectionMatrix(), phongLight, *pCamera);
+		objects[iObj]->Render(renderer, shaderParmaeter);
 	}
 	Gizmo.Render(renderer, pCamera, *this);
 	renderer.EndRender();
@@ -97,8 +86,8 @@ bool Scene::Render(Renderer& renderer) {
 }
 
 void Scene::Shutdown(Renderer& renderer) {
-	if(DefaultShader)
-		DefaultShader->Shutdown(renderer);
+	//if(DefaultShader)
+	//	DefaultShader->Shutdown(renderer);
 
 	for (const auto& obj : objects)
 		obj->Shutdown(renderer);
@@ -149,23 +138,6 @@ void Scene::Picking(int x, int y, int screenWidth, int screenHeight) {
 			Gizmo.Attach(*pHitObject);
 		}
 	}
-}
-
-void Scene::FillShaderParameter(const GameObject& gameObject, ShaderParameter& shaderParam) {
-	Matrix<float, 4, 4> worldMatrix  = Matrix<float, 4 , 4>::Identity();
-	MakeWorldMatrix(gameObject.GetPosition(), gameObject.GetLook(), gameObject.GetRight(), gameObject.GetUp(), worldMatrix);
-	shaderParam.worldMatrix = worldMatrix;
-	shaderParam.viewMatrix = GetViewMatrix();
-	shaderParam.projectionMatrix = GetProjectionMatrix();
-
-	shaderParam.lightPosition = phongLight.GetPosition();
-	shaderParam.diffuseAlbedo = gameObject.material->GetDiffuseAlbedo();
-	shaderParam.ambientAlbedo = gameObject.material->GetAmbientAlbedo();
-	shaderParam.specularAlbedo = gameObject.material->GetSpecularAlbedo();
-
-	shaderParam.cameraPosition = pCamera->GetPosition();
-
-	shaderParam.textureUnit = gameObject.material->GetTextureUnit(Material::TextureType::TEXTURE_ALBEDO);
 }
 
 bool Scene::IntersectObjects(const Ray& ray) const {

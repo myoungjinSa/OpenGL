@@ -280,7 +280,7 @@ bool Renderer::CompileGeometryShader(const char* gsFilename, unsigned int& geome
 	return true;
 }
 
-bool Renderer::SetShaderParameter(unsigned int shaderProgram, Matrix<float, 4, 4>& matrix, String&& variableName) {
+bool Renderer::SetShaderParameter(unsigned int shaderProgram, Matrix<float, 4, 4>& matrix, String variableName) {
 	_ASSERT(pGL);
 	unsigned int location = pGL->glGetUniformLocation(shaderProgram, variableName.c_str());
 	if (location == -1)
@@ -290,7 +290,7 @@ bool Renderer::SetShaderParameter(unsigned int shaderProgram, Matrix<float, 4, 4
 	return true;
 }
 
-bool Renderer::SetShaderParameter(unsigned int shaderProgram, const Matrix<float, 4, 4>& matrix, String&& variableName) {
+bool Renderer::SetShaderParameter(unsigned int shaderProgram, const Matrix<float, 4, 4>& matrix, String variableName) {
 	_ASSERT(pGL);
 	unsigned int location = pGL->glGetUniformLocation(shaderProgram, variableName.c_str());
 	if (location == -1)
@@ -301,7 +301,17 @@ bool Renderer::SetShaderParameter(unsigned int shaderProgram, const Matrix<float
 }
 
 
-bool Renderer::SetShaderParameter(unsigned int shaderProgram, Vec3f& vec3, String&& variableName) {
+bool Renderer::SetShaderParameter(unsigned int shaderProgram, const Vec3f& vec3, String variableName) {
+	_ASSERT(pGL);
+	unsigned int location = pGL->glGetUniformLocation(shaderProgram, variableName.c_str());
+	if (location == -1)
+		return false;
+
+	pGL->glUniform3fv(location, 1, (float*)const_cast<Vec3f&>(vec3).ConvertToValue());
+	return true;
+}
+
+bool Renderer::SetShaderParameter(unsigned int shaderProgram, Vec3f& vec3, String variableName) {
 	_ASSERT(pGL);
 	unsigned int location = pGL->glGetUniformLocation(shaderProgram, variableName.c_str());
 	if (location == -1)
@@ -311,9 +321,17 @@ bool Renderer::SetShaderParameter(unsigned int shaderProgram, Vec3f& vec3, Strin
 	return true;
 }
 
+bool Renderer::SetShaderParameter(unsigned int shaderProgram, const Vec4f& vec4, String variableName) {
+	_ASSERT(pGL);
+	unsigned int location = pGL->glGetUniformLocation(shaderProgram, variableName.c_str());
+	if (location == -1)
+		return false;
 
+	pGL->glUniform4fv(location, 1, (float*)const_cast<Vec4f&>(vec4).ConvertToValue());
+	return true;
+}
 
-bool Renderer::SetShaderParameter(unsigned int shaderProgram, Vec4f& vec4, String&& variableName) {
+bool Renderer::SetShaderParameter(unsigned int shaderProgram, Vec4f& vec4, String variableName) {
 	_ASSERT(pGL);
 	unsigned int location = pGL->glGetUniformLocation(shaderProgram, variableName.c_str());
 	if (location == -1)
@@ -323,7 +341,7 @@ bool Renderer::SetShaderParameter(unsigned int shaderProgram, Vec4f& vec4, Strin
 	return true;
 }
 
-bool Renderer::SetShaderParameter(unsigned int shaderProgram, int integer, String&& variableName) {
+bool Renderer::SetShaderParameter(unsigned int shaderProgram, int integer, String variableName) {
 	_ASSERT(pGL);
 	unsigned int location = pGL->glGetUniformLocation(shaderProgram, variableName.c_str());
 	if (location == -1)
@@ -332,43 +350,10 @@ bool Renderer::SetShaderParameter(unsigned int shaderProgram, int integer, Strin
 	pGL->glUniform1i(location, integer);
 	return true;
 }
-bool Renderer::SetShaderParameter(unsigned int shaderProgram, Matrix<float, 4, 4>& matrix,const String& variableName) {
-	_ASSERT(pGL);
-	unsigned int location = pGL->glGetUniformLocation(shaderProgram, variableName.c_str());
-	if (location == -1)
-		return false;
 
-	pGL->glUniformMatrix4fv(location, 1, false, (float*)&matrix.value);
-	return true;
-}
-bool Renderer::SetShaderParameter(unsigned int shaderProgram, Vec4f& vec4, const String& variableName) {
-	_ASSERT(pGL);
-	unsigned int location = pGL->glGetUniformLocation(shaderProgram, variableName.c_str());
-	if (location == -1)
-		return false;
 
-	pGL->glUniform4fv(location, 1, (float*)vec4.ConvertToValue());
-	return true;
-}
 
-bool Renderer::SetShaderParameter(unsigned int shaderProgram, Vec3f& vec3, const String& variableName) {
-	_ASSERT(pGL);
-	unsigned int location = pGL->glGetUniformLocation(shaderProgram, variableName.c_str());
-	if (location == -1)
-		return false;
 
-	pGL->glUniform3fv(location, 1, (float*)vec3.ConvertToValue());
-	return true;
-}
-bool Renderer::SetShaderParameter(unsigned int shaderProgram, int integer, const String& variableName) {
-	_ASSERT(pGL);
-	unsigned int location = pGL->glGetUniformLocation(shaderProgram, variableName.c_str());
-	if (location == -1)
-		return false;
-
-	pGL->glUniform1i(location, integer);
-	return true;
-}
 bool Renderer::BindVertexAttrib(unsigned int shaderProgram, unsigned int vertexShader, unsigned int fragmentShader, int vertexArgs, ...) {
 	
 	pGL->glAttachShader(shaderProgram, vertexShader);

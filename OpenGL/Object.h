@@ -15,6 +15,10 @@ class Ray;
 class BoundingVolume;
 class Renderer;
 class Triangle;
+class Shader;
+class Light;
+class Camera;
+class ShaderParameter;
 
 class Object {
 protected:
@@ -56,8 +60,8 @@ public:
 	virtual bool Initialize(Renderer& renderer);
 	virtual void Shutdown(Renderer& renderer) {}
 	virtual void Render(Renderer& renderer) {}
-	virtual void Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix) {}
-
+	virtual void Render(Renderer& renderer, const ShaderParameter& shaderParam) {}
+	
 	virtual void Update(float deltaTime){}
 
 	virtual bool Intersect(const Ray& ray, double& distance);
@@ -77,12 +81,14 @@ public:
 	bool IntersectTriangle(const Ray& ray, const Triangle& triangle, double& distance);
 	bool IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, bool bFrontOnly, double& distance);
 
+	void FillShaderParameter(ShaderParameter& shaderParam, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix, const Light& light, const Camera& Camera);
 
 	virtual Vec3f GetExtent() const { return Vec3f(); }
 public:
 	std::shared_ptr<RigidTransform> transform;
 	std::shared_ptr<Material> material;
 	std::shared_ptr<BoundingVolume> boundingVolume;
+	std::shared_ptr<Shader> shader;						//∞¥√º∫∞ ºŒ¿Ã¥ı
 protected:
 	std::vector<std::shared_ptr<Component>> components;
 
@@ -101,9 +107,8 @@ public:
 
 	bool Initialize(Renderer& renderer) override;
 	void Shutdown(Renderer& renderer) override;
-	void Render(Renderer& renderer) override;
-	void Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix) override;
-
+	void Render(Renderer& renderer, const ShaderParameter& shaderParam) override;
+	
 	void Update(float deltaTime) override;
 
 	Vec3f GetExtent() const override;
@@ -125,9 +130,8 @@ public:
 
 	bool Initialize(Renderer& renderer) override;
 	void Shutdown(Renderer& renderer) override;
-	void Render(Renderer& renderer) override;
-	void Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix) override;
-
+	void Render(Renderer& renderer, const ShaderParameter& shaderParam) override;
+	
 	void Update(float deltaTime) override;
 
 	Sphere& operator=(const Sphere& other);
@@ -149,8 +153,7 @@ public:
 	
 	bool Initialize(Renderer& renderer) override;
 	void Shutdown(Renderer& renderer) override;
-	void Render(Renderer& renderer) override;
-	void Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix) override;
+	void Render(Renderer& renderer, const ShaderParameter& shaderParam) override;
 	
 	void Update(float deltaTime) override;
 

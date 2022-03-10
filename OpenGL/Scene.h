@@ -38,7 +38,7 @@ public:
 private:
 	Camera* pCamera;
 	
-	std::shared_ptr<Shader> DefaultShader;
+	//std::shared_ptr<Shader> DefaultShader;
 	std::vector<GameObject*> objects;
 	Light phongLight;
 	

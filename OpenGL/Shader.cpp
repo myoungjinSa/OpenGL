@@ -20,15 +20,11 @@ Shader::~Shader() {
 }
 
 void Shader::Shutdown(Renderer& renderer) {
-
+	renderer.Shutdown(shaderProgram, vertexShader, fragmentShader);
 }
 
 void Shader::SetShader(Renderer& renderer) {
 	renderer.SetShader(shaderProgram);
-}
-
-void Shader::ShutdownShader(Renderer& renderer) {
-	renderer.Shutdown(shaderProgram, vertexShader, fragmentShader);
 }
 
 
@@ -50,12 +46,9 @@ bool ColorShader::Initialize(Renderer& renderer) {
 
 void ColorShader::Shutdown(Renderer& renderer) {
 	Shader::Shutdown(renderer);
-	ShutdownShader(renderer);
 }
-void ColorShader::Update(float elapsedTime) {
 
-}
-void ColorShader::Render(Renderer& renderer, ShaderParameter& shaderParam) {
+void ColorShader::Render(Renderer& renderer, const ShaderParameter& shaderParam) {
 	SetShader(renderer);
 	SetShaderParameters(renderer, shaderParam);
 }
@@ -74,7 +67,7 @@ bool ColorShader::InitializeShader(const char* vsFilename, const char* fsFilenam
 	return renderer.BindVertexAttrib(shaderProgram, vertexShader, fragmentShader, 2, inputPosition, inputColor);
 }
 
-bool ColorShader::SetShaderParameters(Renderer& renderer, ShaderParameter& shaderParam) {
+bool ColorShader::SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParam) {
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldMatrix, std::move(String("worldMatrix")))) {
 		return false;
 	}
@@ -86,6 +79,67 @@ bool ColorShader::SetShaderParameters(Renderer& renderer, ShaderParameter& shade
 	}
 
 	return true;
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+TextureShader::TextureShader(Object* pOwner) 
+	: Shader(pOwner)
+{
+	
+}
+
+TextureShader::~TextureShader() {
+
+}
+
+bool TextureShader::Initialize(Renderer& renderer) {
+	return InitializeShader("Texture.vs", "Texture.fs", renderer);
+}
+
+bool TextureShader::InitializeShader(const char* vsFilename, const char* fsFilename,  Renderer& renderer) {
+	shaderProgram = renderer.CreateShader();
+
+	if (!renderer.CompileVertexShader(vsFilename, vertexShader))
+		return false;
+
+	if (!renderer.CompileFragmentShader(fsFilename, fragmentShader))
+		return false;
+
+	String inputPosition("inputPosition");
+	String inputColor("inputColor");
+	String inputTexCoord("inputTexCoord");
+
+	return renderer.BindVertexAttrib(shaderProgram, vertexShader, fragmentShader, 3, inputPosition, inputColor, inputTexCoord);
+}
+
+bool TextureShader::SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParam) {
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldMatrix, std::move(String("worldMatrix")))) {
+		return false;
+	}
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.viewMatrix, std::move(String("viewMatrix")))) {
+		return false;
+	}
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.projectionMatrix, std::move(String("projectionMatrix")))) {
+		return false;
+	}
+
+	int textureUnit = shaderParam.textureUnit;
+	if (!renderer.SetShaderParameter(shaderProgram, textureUnit, String("shaderTexture"))) {
+		assert(0);
+		return false;
+	}
+
+
+	return true;
+}
+
+void TextureShader::Render(Renderer& renderer, const ShaderParameter& shaderParam) {
+	SetShader(renderer);
+
+	SetShaderParameters(renderer, shaderParam);
+}
+
+void TextureShader::Shutdown(Renderer& renderer) {
+	Shader::Shutdown(renderer);
 }
 
 /////////////////////////////Texture Shader//////////////////////////////////////////////////////////////////
@@ -100,18 +154,11 @@ PhongShader::~PhongShader() {
 }
 
 bool PhongShader::Initialize(Renderer& renderer) {
-	bool result;
-	result = InitializeShader("PhongLight.vs", "PhongLight.ps", renderer);
-	if (!result)
-		return false;
-
-	return true;
+	return InitializeShader("PhongLight.vs", "PhongLight.ps", renderer);
 }
 
-void PhongShader::Update(float elapsedTime) {
 
-}
-void PhongShader::Render(Renderer& renderer, ShaderParameter& shaderParameter) {
+void PhongShader::Render(Renderer& renderer, const ShaderParameter& shaderParameter) {
 	SetShader(renderer);
 	
 	SetShaderParameters(renderer, shaderParameter);
@@ -119,7 +166,6 @@ void PhongShader::Render(Renderer& renderer, ShaderParameter& shaderParameter) {
 
 void PhongShader::Shutdown(Renderer& renderer) {
 	Shader::Shutdown(renderer);
-	ShutdownShader(renderer);
 }
 
 bool PhongShader::InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer) {
@@ -137,7 +183,7 @@ bool PhongShader::InitializeShader(const char* vsFilename, const char* fsFilenam
 	return renderer.BindVertexAttrib(shaderProgram, vertexShader, fragmentShader, 3, inputPosition, inputTexCoord, inputNormal);
 }
 
-bool PhongShader::SetShaderParameters(Renderer& renderer, ShaderParameter& shaderParam) {
+bool PhongShader::SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParam) {
 
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldMatrix, String("worldMatrix"))) {
 		assert(0);

@@ -56,19 +56,15 @@ public:
 	void SetDrawMode(Renderer::DrawMode drawMode);
 	Renderer::DrawMode GetDrawMode() const { return drawMode; }
 
-	bool SetShaderParameter(unsigned int shaderProgram, Matrix<float, 4, 4>& matrix, const String& variableName);
-	bool SetShaderParameter(unsigned int shaderProgram, Vec4f& vec4, const String& variableName);
-	bool SetShaderParameter(unsigned int shaderProgram, Vec3f& vec3, const String& variableName);
-	bool SetShaderParameter(unsigned int shaderProgram, int integer, const String& variableName);
+	bool SetShaderParameter(unsigned int shaderProgram, const Vec4f& vec4, String variableName);
+	bool SetShaderParameter(unsigned int shaderProgram, const Vec3f& vec3, String variableName);
 
+	bool SetShaderParameter(unsigned int shaderProgram, Vec4f& vec4, String variableName);
+	bool SetShaderParameter(unsigned int shaderProgram, Vec3f& vec3, String variableName);
+	bool SetShaderParameter(unsigned int shaderProgram, int integer, String variableName);
 
-	bool SetShaderParameter(unsigned int shaderProgram, Matrix<float, 4, 4>& matrix, String&& variableName);
-	bool SetShaderParameter(unsigned int shaderProgram, const Matrix<float, 4, 4>& matrix, String&& variableName);
-
-
-	bool SetShaderParameter(unsigned int shaderProgram, Vec4f& vec4, String&& variableName);
-	bool SetShaderParameter(unsigned int shaderProgram, Vec3f& vec3, String&& variableName);
-	bool SetShaderParameter(unsigned int shaderProgram, int integer, String&& variableName);
+	bool SetShaderParameter(unsigned int shaderProgram, Matrix<float, 4, 4>& matrix, String variableName);
+	bool SetShaderParameter(unsigned int shaderProgram, const Matrix<float, 4, 4>& matrix, String variableName);
 
 
 	bool AllocateVertexBuffer(unsigned int& vertexArrayId, unsigned int& vertexBufferId, void* vertexData, VertexBufferBindCallback* pBindFunction, unsigned int numVertices, unsigned int sizeofVertex);

@@ -34,16 +34,14 @@ public:
 
 	virtual bool Initialize(Renderer& renderer) = 0;
 	virtual void Shutdown(Renderer& renderer);
-	virtual void Update(float elapsedTime) = 0;
 	void SetShader(Renderer& renderer);
 
-	virtual void Render(Renderer& renderer, ShaderParameter& shaderParam) = 0;
+	virtual void Render(Renderer& renderer, const ShaderParameter& shaderParam) = 0;
 	
-	virtual bool SetShaderParameters(Renderer& renderer, ShaderParameter& shaderParam) = 0;
+	virtual bool SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParam) = 0;
 protected:
 	virtual bool InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer) = 0;
-	void ShutdownShader(Renderer& gl);
-
+	
 	unsigned int vertexShader;
 	unsigned int fragmentShader;
 	unsigned int shaderProgram;
@@ -59,10 +57,24 @@ public:
 
 	bool Initialize(Renderer& renderer) override;
 	void Shutdown(Renderer& renderer) override;
-	void Update(float elapsedTime) override;
 	
-	void Render(Renderer& renderer, ShaderParameter& shaderParam) override;
-	virtual bool SetShaderParameters(Renderer& renderer, ShaderParameter& shaderParam);
+	void Render(Renderer& renderer, const ShaderParameter& shaderParam) override;
+	bool SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParam) override;
+protected:
+	bool InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer);
+};
+
+class TextureShader : public Shader {
+public:
+	TextureShader(Object* pOwner);
+	TextureShader(const TextureShader& other) = delete;
+	~TextureShader() override;
+
+	bool Initialize(Renderer& renderer) override;
+	void Shutdown(Renderer& renderer) override;
+	void Render(Renderer& renderer, const ShaderParameter& shaderParam) override;
+	
+	bool SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParam) override;
 protected:
 	bool InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer);
 };
@@ -76,10 +88,9 @@ public:
 
 	bool Initialize(Renderer& renderer) override;
 	void Shutdown(Renderer& renderer) override;
-	void Update(float elapsedTime) override;
-	void Render(Renderer& renderer, ShaderParameter& shaderParam) override;
+	void Render(Renderer& renderer, const ShaderParameter& shaderParam) override;
 	
-	virtual bool SetShaderParameters(Renderer& renderer, ShaderParameter& shaderParam);
+	bool SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParam) override;
 protected:
 	bool InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer);
 };

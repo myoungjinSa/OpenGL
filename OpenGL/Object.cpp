@@ -8,7 +8,9 @@
 #include "Logger.h"
 #include "BoundingVolume.h"
 #include "Renderer.h"
-
+#include "Shader.h"
+#include "Light.h"
+#include "Camera.h"
 
 void MakeWorldMatrix(const Vec3f& position, const Vec3f& look, const Vec3f& right, const Vec3f& up, Matrix<float, 4, 4>& worldMatrix) {
 	//Right
@@ -32,7 +34,6 @@ void MakeWorldMatrix(const Vec3f& position, const Vec3f& look, const Vec3f& righ
 	worldMatrix.value[14] = position.z;
 	worldMatrix.value[15] = 1.0f;
 }
-
 
 GameObject::GameObject() 
 	: pMesh(nullptr), albedoMap(nullptr), normalMap(nullptr)
@@ -200,6 +201,24 @@ bool GameObject::IntersectTriangle(const Ray& ray, const Triangle& triangle, dou
 	return true;
 }
 
+void GameObject::FillShaderParameter(ShaderParameter& shaderParam, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix, const Light& light, const Camera& Camera) {
+	Matrix<float, 4, 4> worldMatrix = Matrix<float, 4, 4>::Identity();
+	MakeWorldMatrix(GetPosition(), GetLook(), GetRight(), GetUp(), worldMatrix);
+	shaderParam.worldMatrix = worldMatrix;
+	shaderParam.viewMatrix = viewMatrix;
+	shaderParam.projectionMatrix = projectionMatrix;
+
+	shaderParam.lightPosition = light.GetPosition();
+	shaderParam.diffuseAlbedo = material->GetDiffuseAlbedo();
+	shaderParam.ambientAlbedo = material->GetAmbientAlbedo();
+	shaderParam.specularAlbedo = material->GetSpecularAlbedo();
+
+	shaderParam.cameraPosition = Camera.GetPosition();
+
+	shaderParam.textureUnit = material->GetTextureUnit(Material::TextureType::TEXTURE_ALBEDO);
+}
+
+
 ///////////////////////////////////////////////////////////////
 Cube::Cube()
 	:GameObject(), extent(1.0f, 1.0f, 1.0f)
@@ -235,6 +254,15 @@ Cube& Cube::operator=(const Cube& other) {
 bool Cube::Initialize(Renderer& renderer) {
 	GameObject::Initialize(renderer);
 
+	shader = std::make_shared<TextureShader>(this);
+	if (!shader)
+		return false;
+
+	if (!shader->Initialize(renderer)) {
+		LogError(L"Could not initialize the Default Shader\n");
+		return false;
+	}
+
 	//MeshBuilder Call
 	MeshBuilder meshBuilder;
 	meshBuilder.AddCube(transform.get()->GetPosition(), extent, RGBA::BLUE);
@@ -249,7 +277,7 @@ bool Cube::Initialize(Renderer& renderer) {
 
 	albedoMap = TextureLoader::GetTexture(renderer, L"에스파.webm");
 	//normalMap = TextureLoader::GetTexture(renderer, "Resource\\Texture\\BMP\\NormalMap.bmp");
-
+	
 	Vec3f diffuseColor(0.8f, 0.85f, 0.85f);
 	Vec4f ambientColor(0.3f, 0.3f, 0.3f, 1.0f);
 	Vec3f specularColor(1.0f, 1.0f, 1.0f);
@@ -270,6 +298,9 @@ bool Cube::Initialize(Renderer& renderer) {
 
 void Cube::Shutdown(Renderer& renderer) {
 	GameObject::Shutdown(renderer);
+	if(shader)
+		shader->Shutdown(renderer);
+
 	pMesh->Shutdown(renderer);
 }
 
@@ -277,23 +308,26 @@ void Cube::Update(float deltaTime) {
 
 }
 
-void Cube::Render(Renderer& renderer) {
-	GameObject::Render(renderer);
-	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
-	renderer.SetDepthTest(true);
-
-	pMesh->Render(renderer);
-}
-
-void Cube::Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix) {
-	GameObject::Render(renderer);
-	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
-	renderer.SetDepthTest(true);
+void Cube::Render(Renderer& renderer, const ShaderParameter& shaderParam) {	
+	GameObject::Render(renderer, shaderParam);
 	
-	pMesh->Render(renderer);
+	shader->Render(renderer, shaderParam);
+	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
+	renderer.SetDepthTest(true);
 
-	boundingVolume->Render(renderer, viewMatrix, projectionMatrix);
+	pMesh->Render(renderer);
+	boundingVolume->Render(renderer, shaderParam.viewMatrix, shaderParam.projectionMatrix);
 }
+
+//void Cube::Render(Renderer& renderer, ) {
+//	GameObject::Render(renderer);
+//	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
+//	renderer.SetDepthTest(true);
+//	
+//	pMesh->Render(renderer);
+//
+//	boundingVolume->Render(renderer, viewMatrix, projectionMatrix);
+//}
 
 
 Vec3f Cube::GetExtent() const {
@@ -356,8 +390,8 @@ bool Sphere::Initialize(Renderer& renderer) {
 		return false;
 
 	meshBuilder.CopyToMesh(renderer, pMesh.get(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
-
 	albedoMap = TextureLoader::GetTexture(renderer, L"에스파.webm");
+
 
 	Vec3f diffuseColor(0.8f, 0.85f, 0.85f);
 	Vec4f ambientColor(0.3f, 0.3f, 0.3f, 1.0f);
@@ -387,20 +421,14 @@ void Sphere::Update(float deltaTime) {
 
 }
 
-void Sphere::Render(Renderer& renderer) {
-	GameObject::Render(renderer);
+void Sphere::Render(Renderer& renderer, const ShaderParameter& shaderParam) {
+	GameObject::Render(renderer, shaderParam);
 	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
 	renderer.SetDepthTest(true);
 	pMesh->Render(renderer);
+	boundingVolume->Render(renderer, shaderParam.viewMatrix, shaderParam.projectionMatrix);
 }
 
-void Sphere::Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix) {
-	GameObject::Render(renderer);
-	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
-	renderer.SetDepthTest(true);
-	pMesh->Render(renderer);
-	boundingVolume->Render(renderer, viewMatrix, projectionMatrix);
-}
 
 
 ///////////////////////////////////////////////////
@@ -463,12 +491,9 @@ void Cylinder::Update(float deltaTime) {
 
 }
 
-void Cylinder::Render(Renderer& renderer) {
-	GameObject::Render(renderer);
+void Cylinder::Render(Renderer& renderer, const ShaderParameter& shaderParam) {
+	GameObject::Render(renderer, shaderParam);
 	pMesh->Render(renderer);
+	boundingVolume->Render(renderer, shaderParam.viewMatrix, shaderParam.projectionMatrix);
 }
 
-void Cylinder::Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix) {
-	GameObject::Render(renderer);
-	pMesh->Render(renderer);
-}

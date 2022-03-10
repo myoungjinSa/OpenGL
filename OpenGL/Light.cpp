@@ -42,23 +42,23 @@ void Light::SetPosition(const Vec3f& _position) {
 	position = _position;
 }
 
-Vec3f Light::GetPosition() {
+Vec3f Light::GetPosition()const {
 	return position;
 }
 
-Vec4f Light::GetDiffuseLight() {
+Vec4f Light::GetDiffuseLight() const{
 	return diffuseColor;
 }
 
-Vec4f Light::GetAmbientLight() {
+Vec4f Light::GetAmbientLight() const{
 	return ambientColor;
 }
 
-Vec4f Light::GetSpecularLight() {
+Vec4f Light::GetSpecularLight() const{
 	return specularColor;
 }
 
-Vec3f Light::GetDirection() {
+Vec3f Light::GetDirection() const{
 	return direction;
 }
 
