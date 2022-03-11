@@ -85,7 +85,7 @@ void GameObject::Rotate(float pitch, float yaw, float roll) {
 }
 
 bool GameObject::Initialize(Renderer& renderer) {
-	return true;
+	return false;
 }
 
 bool GameObject::Intersect(const Ray& ray, double& distance) {
@@ -268,7 +268,7 @@ bool Cube::Initialize(Renderer& renderer) {
 
 	meshBuilder.CopyToMesh(renderer, pMesh.get(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 
-	albedoMap = TextureLoader::GetTexture(renderer, L"¿¡½ºÆÄ.webm");
+	albedoMap = TextureLoader::GetTexture(renderer, L"IU-Celebrity.webm");
 	//normalMap = TextureLoader::GetTexture(renderer, "Resource\\Texture\\BMP\\NormalMap.bmp");
 	
 	Vec3f diffuseColor(0.8f, 0.85f, 0.85f);
@@ -298,7 +298,7 @@ void Cube::Shutdown(Renderer& renderer) {
 }
 
 void Cube::Update(float deltaTime) {
-
+	albedoMap->Update(deltaTime);
 }
 
 void Cube::Render(Renderer& renderer, const ShaderParameter& shaderParam) {	
@@ -362,6 +362,15 @@ Sphere& Sphere::operator=(const Sphere& other) {
 bool Sphere::Initialize(Renderer& renderer) {
 	GameObject::Initialize(renderer);
 
+	shader = std::make_shared<TextureShader>(this);
+	if (!shader)
+		return false;
+
+	if (!shader->Initialize(renderer)) {
+		LogError(L"Could not initialize the Default Shader\n");
+		return false;
+	}
+
 	//MeshBuilder Call
 	MeshBuilder meshBuilder;
 	meshBuilder.AddSphere(transform.get()->GetPosition(), radius, sectorCount, stackCount);
@@ -397,15 +406,18 @@ bool Sphere::Initialize(Renderer& renderer) {
 
 void Sphere::Shutdown(Renderer& renderer) {
 	GameObject::Shutdown(renderer);
+	if (shader)
+		shader->Shutdown(renderer);
 	pMesh->Shutdown(renderer);
 }
 
 void Sphere::Update(float deltaTime) {
-
+	albedoMap->Update(deltaTime);
 }
 
 void Sphere::Render(Renderer& renderer, const ShaderParameter& shaderParam) {
 	GameObject::Render(renderer, shaderParam);
+	shader->Render(renderer, shaderParam);
 	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
 	renderer.SetDepthTest(true);
 	pMesh->Render(renderer);

@@ -144,7 +144,7 @@ bool PictureFile::IsSupportedCodec(const Codec& codec) {
 }
 
 
-bool PictureFile::CreateVideoFrame(Picture& picture, const WString& filename, int64_t frameNo) {
+bool PictureFile::CreateVideoFrame(Picture& picture, std::unique_ptr<VideoFile>& _videoFile, const WString& filename, int64_t frameNo) {
 	bool bLoaded = false;
 	if (std::unique_ptr<VideoFile> videoFile = factoryPool.CreateVideoFile(filename)) {
 		if (!videoFile->OpenFile(filename, ePixelFormat::PIXEL_FORMAT_ARGB))
@@ -153,21 +153,24 @@ bool PictureFile::CreateVideoFrame(Picture& picture, const WString& filename, in
 		if (UpdateVideoFrame(picture, videoFile, frameNo)) {
 			bLoaded = true;
 		}
+		if (videoFile == nullptr) {
+			videoFile->Close();
+		}
 
-		videoFile->Close();
+		_videoFile = std::move(videoFile);
 	}
 
 	return bLoaded;
 }
-bool PictureFile::SeekVideoFrame(Picture& picture, std::unique_ptr<VideoFile>& videoFile, int64_t frameNo) {
+
+bool PictureFile::SeekVideoFrame(Picture& picture, std::unique_ptr<VideoFile>& videoFile, int64_t _pts) {
 	if (!videoFile->IsOpened())
 		return false;
 
 	VideoAudioInfo videoAudioInfo;
 	if (videoFile->GetVideoAudioInfo(videoAudioInfo)) {
 		if (picture.Create(videoAudioInfo.Video.imageSize)) {
-			int64_t pts = 0;
-			if (videoFile->Seek(pts)) {
+			if (videoFile->Seek(_pts)) {
 				if (videoFile->ReadAFrame()) {
 					if (!videoFile->Load(picture)) {
 						return false;
@@ -180,14 +183,14 @@ bool PictureFile::SeekVideoFrame(Picture& picture, std::unique_ptr<VideoFile>& v
 	return true;
 }
 
-bool PictureFile::UpdateVideoFrame(Picture& picture, std::unique_ptr<VideoFile>& videoFile, int64_t frameNo) {
+bool PictureFile::UpdateVideoFrame(Picture& picture, std::unique_ptr<VideoFile>& videoFile, int64_t _pts) {
 	if (!videoFile->IsOpened())
 		return false;
 
 	VideoAudioInfo videoAudioInfo;
 	if (videoFile->GetVideoAudioInfo(videoAudioInfo)) {
 		if (picture.Create(videoAudioInfo.Video.imageSize)) {
-			int64_t pts = 0;
+			//int64_t pts = _pts;
 			if (videoFile->ReadAFrame()) {
 				if (!videoFile->Load(picture)) {
 					return false;

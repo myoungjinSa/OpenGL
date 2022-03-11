@@ -34,9 +34,9 @@ bool Scene::BuildObject(Renderer& renderer) {
 	phongLight.SetPosition(0.0f, 0.0f, -10.0f);
 	phongLight.SetDirection(Vec3f::FORWARD);
 
-	GameObject* pObject = new Cube(Vec3f(3.0f, 3.0f, 3.0f));//new Sphere(2.0f, 16, 16);//new Cylinder(Vec3f::UP, Vec3f::RIGHT, Vec3f::FORWARD, 32);
+	GameObject* pObject = new Cube(Vec3f(2.0f, 2.0f, 2.0f));//new Sphere(2.0f, 16, 16);//new Cylinder(Vec3f::UP, Vec3f::RIGHT, Vec3f::FORWARD, 32);
 	objects.emplace_back(pObject);
-
+	
 	for (const auto& obj : objects) {
 		if (!obj->Initialize(renderer)) {
 			LogError(L"Could not initialize the model object\n");
@@ -59,13 +59,14 @@ bool Scene::BuildObject(Renderer& renderer) {
 	return true;
 }
 
-void Scene::Update(const float& elapsedTime) {
+void Scene::Update(double elapsedTime) {
 	assert(pCamera);
 	pCamera->Update(elapsedTime);
 
 	Gizmo.Update(*pCamera, elapsedTime);
 	for (const auto& obj : objects) {
-		obj->Rotate(MathUtils::DegreesToRadians(0.0f), MathUtils::DegreesToRadians(1.0f), MathUtils::DegreesToRadians(0.0f));
+		obj->Update(elapsedTime);
+		obj->Rotate(MathUtils::DegreesToRadians(0.0f), MathUtils::DegreesToRadians(0.2f), MathUtils::DegreesToRadians(0.0f));
 		//obj->Move(obj->GetLook(), 1.0f, elapsedTime);
 	}
 }

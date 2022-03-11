@@ -9,6 +9,8 @@
 
 Texture::Texture() 
 	: textureID(0)
+	, type(eType::TYPE_COUNT)
+	, filename()
 {
 
 }
@@ -17,20 +19,44 @@ Texture::~Texture() {
 
 }
 
-bool Texture::Initialize(Renderer& renderer, const WString& fileName, unsigned int textureUnit, bool wrap) {
+bool Texture::Initialize(Renderer& renderer, const WString& _fileName, unsigned int textureUnit, bool wrap) {
 	bool result;
 
+	renderContext = std::make_unique<RenderContext>(renderer);
 	int texID = 0;
-	result = Load(renderer, fileName, textureUnit, wrap, texID);
+	result = Load(renderer, _fileName, textureUnit, wrap, texID);
 	if (!result) {
 		return false;
 	}
-	
+	filename = _fileName;
 	textureID = (unsigned int)texID;
 
 	return true;
 }
 
+bool Texture::Update(float deltaTime) {
+	if (type != eType::TYPE_VIDEO)
+		return true;
+
+	renderContext->totalDeltaTime += deltaTime;
+	/*if (MathUtils::IsSame(renderContext->prevFrameNo + deltaTime, renderContext->totalDeltaTime)) {
+		return false;
+	}*/
+
+	renderContext->prevFrameNo = renderContext->totalDeltaTime;
+
+	Picture picture;
+	if (renderContext->preVideoFile) {
+		int64_t pts = renderContext->preVideoFile->CalcPts(renderContext->totalDeltaTime);
+		PictureFile::UpdateVideoFrame(picture, renderContext->preVideoFile, pts);
+	}
+
+	renderContext->renderer.BindTexture(picture.GetWidth(), picture.GetHeight(), textureID, (unsigned char*)picture.GetMemory());
+	renderContext->renderer.SetSampleMode(true);
+	renderContext->renderer.SetFiltering();
+	
+	return true;
+}
 void Texture::Shutdown() {
 	glDeleteTextures(1, &textureID);
 	return;
@@ -45,11 +71,16 @@ bool Texture::Load(Renderer& renderer, const WString& filename, unsigned int tex
 		if (!PictureFile::CreatePicture(picture, filename)) {
 			return false;
 		}
+		type = eType::TYPE_IMAGE;
 	}else if(PictureFile::IsVideoFile(filename)){
-		if (!PictureFile::CreateVideoFrame(picture, filename, 0)) {
+		int frameNo = 0;
+		if (!PictureFile::CreateVideoFrame(picture, renderContext->preVideoFile, filename, frameNo)) {
 			return false;
 		}
+		assert(renderContext->preVideoFile->IsOpened());
+		renderContext->prevFrameNo = frameNo;
 
+		type = eType::TYPE_VIDEO;
 	}
 	else {
 		assert(0);

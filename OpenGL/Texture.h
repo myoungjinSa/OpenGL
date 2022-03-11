@@ -1,14 +1,43 @@
 #pragma once
 #include "Common.h"
 #include "Types.h"
+#include "VideoFile.h"
+
 #include "./String/String.h"
 
 
 class Renderer;
 class TextureLoader;
+
 class Texture
 {
 public:
+	class RenderContext {
+	public:
+		Renderer& renderer;
+		float prevFrameNo;
+		float totalDeltaTime;
+		std::unique_ptr<VideoFile> preVideoFile;
+		
+
+		RenderContext(Renderer& _renderer) 
+			: renderer(_renderer)
+			, prevFrameNo(0.0f)
+			, totalDeltaTime(0.0f)
+		{
+		}
+	};
+
+	enum class eType {
+		TYPE_IMAGE,
+		TYPE_VIDEO,
+		TYPE_COUNT,
+	};
+
+	eType        type;
+	unsigned int textureID;
+	WString      filename;
+
 	Texture();
 	Texture(const Texture& other) = delete;
 	~Texture();
@@ -17,13 +46,14 @@ public:
 	void Shutdown();
 
 	bool IsNull()const { return textureID == 0; }
-
-public:
-	unsigned int textureID;
+	
+	bool Update(float elapsedTime);
 private:
 	bool Load(Renderer& renderer, const WString& fileName, unsigned int textureUnit, bool wrap, int& genTextureID);
+	
+	
+	std::unique_ptr<RenderContext> renderContext;
 };
-
 
 class TextureLoader {
 public:

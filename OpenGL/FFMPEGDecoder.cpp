@@ -56,6 +56,10 @@ bool FFMPGVideoReader::IsAudioValid() const {
 	return pFormatContext && audioStreamIndex != -1 && pAudioFrame && pAudioCodecContext && pPacket;
 }
 
+long long FFMPGVideoReader::CalcPts(float milliSec) const {
+	return milliSec * timeBase.den / timeBase.num;
+}
+
 bool FFMPGVideoReader::OpenFile(const WString& filename, ePixelFormat pixelFormat) {
 	pFormatContext = avformat_alloc_context();
 	if (!pFormatContext) {

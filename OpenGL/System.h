@@ -28,7 +28,7 @@ public:
 	LRESULT CALLBACK MessageHandler(HWND, UINT, WPARAM, LPARAM);
 
 private:
-	bool Frame(float elapsedTime);
+	bool Frame(double elapsedTime);
 	bool InitializeWindows(OpenGL* gl, int&, int&);
 	void ShutdownWindows();
 

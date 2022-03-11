@@ -11,7 +11,6 @@ public:
 	void Stop();
 	void Reset();
 
-
 	float GetEalapsedTime();
 	long long GetTotalTime() const;
 public:

@@ -19,7 +19,7 @@ public:
 	~Scene();
 
 	bool BuildObject(Renderer& gl);
-	void Update(const float& elapsedTime);
+	void Update(double elapsedTime);
 	bool Render(Renderer& renderer);
 	void Shutdown(Renderer& gl);
 

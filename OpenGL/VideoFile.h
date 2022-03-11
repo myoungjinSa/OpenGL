@@ -85,6 +85,8 @@ public:
 	virtual bool Seek(long long frameNo) { return false; }
 	virtual bool ReadAFrame() { return false; }
 	virtual bool Load(Picture& picture) { return false; }
+
+	virtual long long CalcPts(float millisec) const { return 0; }
 };
 
 #endif

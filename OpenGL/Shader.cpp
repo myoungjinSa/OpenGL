@@ -92,7 +92,7 @@ TextureShader::~TextureShader() {
 }
 
 bool TextureShader::Initialize(Renderer& renderer) {
-	return InitializeShader("Texture.vs", "Texture.fs", renderer);
+	return InitializeShader("Texture.vs", "Texture.ps", renderer);
 }
 
 bool TextureShader::InitializeShader(const char* vsFilename, const char* fsFilename,  Renderer& renderer) {

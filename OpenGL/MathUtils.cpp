@@ -1,7 +1,7 @@
 #include "MathUtils.h"
 #include "Matrix.h"
 #include <cmath>
-
+#include <float.h>
 
 
 const float MathUtils::PI = 3.14159265358f;
@@ -77,4 +77,12 @@ double MathUtils::Clamp(double inputValue, int min, int max) {
 	}
 	
 	return inputValue;
+}
+
+bool MathUtils::IsSame(double left, double right) {
+	return abs(left - right) < DBL_EPSILON;
+}
+
+bool MathUtils::IsSame(float left, float right) {
+	return abs(left - right) < FLT_EPSILON;
 }

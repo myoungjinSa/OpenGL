@@ -55,6 +55,11 @@ protected:
 class GameObject : public Object
 {
 public:
+	std::shared_ptr<RigidTransform> transform;
+	std::shared_ptr<Material> material;
+	std::shared_ptr<BoundingVolume> boundingVolume;
+	std::shared_ptr<Shader> shader;						//∞¥√º∫∞ ºŒ¿Ã¥ı
+	
 	explicit GameObject();
 	virtual ~GameObject();
 	virtual bool Initialize(Renderer& renderer);
@@ -84,11 +89,7 @@ public:
 	void FillShaderParameter(ShaderParameter& shaderParam, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix, const Light& light, const Camera& Camera);
 
 	virtual Vec3f GetExtent() const { return Vec3f(); }
-public:
-	std::shared_ptr<RigidTransform> transform;
-	std::shared_ptr<Material> material;
-	std::shared_ptr<BoundingVolume> boundingVolume;
-	std::shared_ptr<Shader> shader;						//∞¥√º∫∞ ºŒ¿Ã¥ı
+	
 protected:
 	std::vector<std::shared_ptr<Component>> components;
 

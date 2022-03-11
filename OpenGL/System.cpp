@@ -150,7 +150,7 @@ void System::Run()
 	return;
 }
 
-bool System::Frame(float elapsedTime)
+bool System::Frame(double elapsedTime)
 {
 	// Check if the user pressed escape and wants to exit the application.
 	if (KeyboardInput::IsKeyDown(KEY_ESCAPE))

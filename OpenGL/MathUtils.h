@@ -21,6 +21,9 @@ public:
 
 	static double Saturate(double v);
 
+	static bool IsSame(double left, double right);
+	static bool IsSame(float left, float right);
+
 	static const float PI;
 	static const float TWO_PI;
 	static const float HALF_PI;

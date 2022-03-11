@@ -41,6 +41,8 @@ public:
 	bool IsValid() const;
 	bool IsVideoValid() const;
 	bool IsAudioValid() const;
+
+	long long CalcPts(float millisec) const;
 private:
 	int width;
 	int height;
