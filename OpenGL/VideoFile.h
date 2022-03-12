@@ -5,7 +5,6 @@
 #include "Types.h"
 #include "Picture.h"
 
-
 class VideoAudioInfo;
 class WString;
 class VideoFormat {
@@ -81,12 +80,19 @@ public:
 
 	virtual bool GetVideoAudioInfo(VideoAudioInfo& VideoAudioInfo, Codec* pCodecInfo = nullptr) { return false; }
 	
+	virtual bool InitAudioDevice() { return false; }
+	virtual void ReleaseAudioDevice() { return; }
+
 	virtual bool Play() { return false; }
 	virtual bool Seek(long long frameNo) { return false; }
 	virtual bool ReadAFrame() { return false; }
 	virtual bool Load(Picture& picture) { return false; }
 
 	virtual long long CalcPts(float millisec) const { return 0; }
+
+	virtual bool IsValid() const = 0;
+	virtual bool IsVideoValid() const { return false; }
+	virtual bool IsAudioValid() const { return false; }
 };
 
 #endif

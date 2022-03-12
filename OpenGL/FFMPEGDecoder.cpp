@@ -1,5 +1,6 @@
 #include "FFMPEGDecoder.h"
 #include "PictureFile.h"
+#include "AudioDevice.h"
 
 #pragma warning(disable : 4996)
 #pragma comment(lib, "avdevice.lib")
@@ -9,6 +10,8 @@ extern "C" {
 #include <libavdevice/avdevice.h>
 }
 #include "Logger.h"
+
+constexpr int BUFFER_SIZE = 512;
 
 static const char* av_make_error(int errnum) {
 	static char str[AV_ERROR_MAX_STRING_SIZE];
@@ -33,12 +36,14 @@ FFMPGVideoReader::FFMPGVideoReader()
 	, audioStreamIndex(-1)
 	, pAudioCodecContext(nullptr)
 	, pAudioFrame(nullptr)
+	, pAudioDevice(nullptr)
+	, pRingbuffer(nullptr)
 {
 	avdevice_register_all();
 }
 
 FFMPGVideoReader::~FFMPGVideoReader() {
-
+	ReleaseAudioDevice();
 }
 
 bool FFMPGVideoReader::IsOpened() const {
@@ -207,6 +212,38 @@ void FFMPGVideoReader::Close() {
 	avcodec_free_context(&pAudioCodecContext);
 }
 
+bool FFMPGVideoReader::InitAudioDevice() {
+	if (!IsOpened() || !IsAudioValid())
+		return false;
+
+	if (pAudioDevice)
+		delete pAudioDevice;
+
+	pAudioDevice = new PortAudioDevice;
+	if (!pAudioDevice) {
+		LogError(L"Can't Create Audio Device\n");
+		return false;
+	}
+
+	pRingbuffer = new RingBuffer(8192, sampleRate * channelNum);
+	if (!pRingbuffer) {
+		LogError(L"Can't Create RingBuffer\n");
+		return false;
+	}
+
+	return pAudioDevice->Init(channelNum, sampleRate, BUFFER_SIZE, std::bind(&FFMPGVideoReader::AudioCallBack, this, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+}
+
+void FFMPGVideoReader::ReleaseAudioDevice() {
+	if (pAudioDevice) {
+		pAudioDevice->Stop();
+		pAudioDevice->Release();
+		delete pAudioDevice;
+	}
+	if (pRingbuffer)
+		delete pRingbuffer;
+}
+
 bool FFMPGVideoReader::GetVideoAudioInfo(VideoAudioInfo& videoAudioInfo, Codec* pCodec) {
 	if (!pFormatContext)
 		return false;
@@ -233,7 +270,7 @@ bool FFMPGVideoReader::ReadAFrame() {
 	if (!IsVideoValid())
 		return false;
 
-	int response = 0;
+	int response = 0; 
 	while (0 <= av_read_frame(pFormatContext, pPacket)) {
 		if (pPacket->stream_index == videoStreamIndex) {
 			//Video Stream
@@ -277,7 +314,20 @@ bool FFMPGVideoReader::ReadAFrame() {
 
 			//Done to construct one frame
 			av_packet_unref(pPacket);
-			return pAudioFrame->nb_samples;
+			pAudioFrame->nb_samples;
+
+
+			if (pRingbuffer) {
+				int size_1 = 0, size_2 = 0;
+				float *pBuffer1 = nullptr, *pBuffer2 = nullptr;
+
+				int samples = pAudioFrame->nb_samples;
+				pRingbuffer->WriteWait(samples * channelNum, &size_1, &pBuffer1, &size_2, &pBuffer2);
+				ReadAudioFrame(size_1, pBuffer1, size_2, pBuffer2);
+				pRingbuffer->WriteAdvance(samples * channelNum);
+			}
+
+			return true;
 		}
 		else {
 			//Packet originates from a diffrent stream, so ignore it
@@ -308,3 +358,58 @@ bool FFMPGVideoReader::Load(Picture& picture) {
 	sws_scale(pSwsScalerContext, pVideoFrame->data, pVideoFrame->linesize, 0, pVideoFrame->height, dest, dest_lineSize);
 	return true;
 } 
+
+void FFMPGVideoReader::ReadAudioFrame(int size1, float* pBuffer1, int size2, float* pBuffer2) {
+	ReadAudioFrameInternal(size1, pBuffer1, 0);
+	if (0 < size2) {
+		ReadAudioFrameInternal(size2, pBuffer2, size1);
+	}
+}
+
+void FFMPGVideoReader::ReadAudioFrameInternal(int size, float* pBuffer, int offset) {
+	if (!IsValid())
+		return;
+
+	if (sampleFormat == AV_SAMPLE_FMT_FLTP) {
+		assert(channelNum == 2);
+		assert(size <= pAudioFrame->nb_samples * channelNum);
+
+		float* ptrLeftIn = (float*)pAudioFrame->data[0];
+		float* ptrRightIn = (float*)pAudioFrame->data[1];
+
+		float* ptrOut = pBuffer;
+		float* ptrOutEnd = pBuffer + size;
+		while (ptrOut < ptrOutEnd) {
+			*ptrOut++ = *ptrLeftIn++;
+			*ptrOut++ = *ptrRightIn++;
+		}
+	}else {
+		LogDebug(L"Sample format not supported\n");
+		assert(0);
+	}
+}
+
+void FFMPGVideoReader::AudioCallBack(int numChannels, int bufferSize, float* pBuffer) {
+	//clear the entire output buffer
+	{
+		float* ptr = pBuffer;
+		float* ptr_end = pBuffer + bufferSize * numChannels;
+
+		while (ptr < ptr_end) {
+			*ptr++ = 0.0;
+		}
+	}
+
+	if (pRingbuffer) {
+		if (pRingbuffer->CanRead(numChannels * bufferSize)) {
+			int size_1 = 0, size_2 = 0;
+			float* pBuffer1 = nullptr, * pBuffer2 = nullptr;
+			pRingbuffer->Read(numChannels * bufferSize, &size_1, &pBuffer1, &size_2, &pBuffer2);
+			memcpy(pBuffer, pBuffer1, size_1 * sizeof(float));
+			if (0 < size_2) {
+				memcpy(pBuffer + size_1, pBuffer2, size_2 * sizeof(float));
+			}
+			pRingbuffer->ReadAdvance(numChannels * bufferSize);
+		}
+	}
+}

@@ -3,7 +3,7 @@
 #include "Input.h"
 #include "Scene.h"
 #include "Renderer.h"
-
+#include "Logger.h"
 
 System::System() 
 	: pOpenGL(nullptr),
@@ -150,7 +150,7 @@ void System::Run()
 	return;
 }
 
-bool System::Frame(double elapsedTime)
+bool System::Frame(float elapsedTime)
 {
 	// Check if the user pressed escape and wants to exit the application.
 	if (KeyboardInput::IsKeyDown(KEY_ESCAPE))

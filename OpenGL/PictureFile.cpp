@@ -150,6 +150,9 @@ bool PictureFile::CreateVideoFrame(Picture& picture, std::unique_ptr<VideoFile>&
 		if (!videoFile->OpenFile(filename, ePixelFormat::PIXEL_FORMAT_ARGB))
 			return false;
 
+		if (videoFile->IsAudioValid()) {
+			videoFile->InitAudioDevice();
+		}
 		if (UpdateVideoFrame(picture, videoFile, frameNo)) {
 			bLoaded = true;
 		}
@@ -198,6 +201,8 @@ bool PictureFile::UpdateVideoFrame(Picture& picture, std::unique_ptr<VideoFile>&
 			}
 		}
 	}
+
+
 	return true;
 }
 

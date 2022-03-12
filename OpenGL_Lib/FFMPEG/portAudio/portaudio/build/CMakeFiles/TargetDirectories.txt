@@ -1,5 +1,0 @@
-D:/FFMPEG/VideoApp/VideoApp/lib/portAudio/portaudio/build/CMakeFiles/INSTALL.dir
-D:/FFMPEG/VideoApp/VideoApp/lib/portAudio/portaudio/build/CMakeFiles/PortAudio.dir
-D:/FFMPEG/VideoApp/VideoApp/lib/portAudio/portaudio/build/CMakeFiles/uninstall.dir
-D:/FFMPEG/VideoApp/VideoApp/lib/portAudio/portaudio/build/CMakeFiles/ALL_BUILD.dir
-D:/FFMPEG/VideoApp/VideoApp/lib/portAudio/portaudio/build/CMakeFiles/ZERO_CHECK.dir

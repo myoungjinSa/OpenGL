@@ -1,4 +1,5 @@
 #include "Timer.h"
+#include "Logger.h"
 
 Timer::Timer()
 	: bStopped(false),
@@ -40,12 +41,20 @@ float Timer::GetEalapsedTime(){
 }
 
 void Timer::Tick(float fLockFps) {
-	std::chrono::steady_clock::time_point time = endTime;
+	using Frame = std::chrono::duration<int32_t, std::ratio<1, 60>>;
+	using MS = std::chrono::duration<float, std::milli>;
 
-	while (time - previousTimePoint < std::chrono::milliseconds{ 16 }) {
-		time = std::chrono::steady_clock::now();
-	}
-	previousTimePoint = endTime;
 	endTime = std::chrono::steady_clock::now();
+	previousTimePoint = endTime;
+	Frame fps{};
+
+	//while (true) {
+	//	fps = std::chrono::duration_cast<Frame>(std::chrono::steady_clock::now() - endTime);
+	//	if (1/*sec*/<= fps.count()) {
+	//		endTime = std::chrono::steady_clock::now();
+	//		//LogDebug(L"LastFrame: %.5lf, FPS: %.5lf\n", std::chrono::duration_cast<MS>(fps).count(), fps.count() * 60.0f);
+	//		break;
+	//	}
+	//}
 }
 
