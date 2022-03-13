@@ -34,7 +34,7 @@ bool Scene::BuildObject(Renderer& renderer) {
 	phongLight.SetPosition(0.0f, 0.0f, -10.0f);
 	phongLight.SetDirection(Vec3f::FORWARD);
 
-	GameObject* pObject = new Cube(Vec3f(2.0f, 2.0f, 2.0f));//new Sphere(2.0f, 16, 16);//new Cylinder(Vec3f::UP, Vec3f::RIGHT, Vec3f::FORWARD, 32);
+	GameObject* pObject = new Cube(Vec3f(2.0f, 2.0f, 2.0f));//new Cylinder(Vec3f::UP, Vec3f::RIGHT, Vec3f::FORWARD, 32);
 	objects.emplace_back(pObject);
 	
 	for (const auto& obj : objects) {

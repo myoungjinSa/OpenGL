@@ -155,6 +155,18 @@ void RigidTransform::CalculateRotationMatrix(Matrix<float, 4, 4>& rotationMatrix
 	}
 }
 
+void RigidTransform::SetScale(float sx, float sy, float sz) {
+	SetScale(Vec3f(sx, sy, sz));
+}
+
+void RigidTransform::SetScale(const Vec3f& _scale) {
+	scale = _scale;
+}
+
+Vec3f RigidTransform::GetScale() const {
+	return scale;
+}
+
 void RigidTransform::Move(const Vec3f& direction, float elapsedTime) {
 	position = GetPosition() + Normalize(direction) * elapsedTime * movingSpeed;
 	SetTransform();

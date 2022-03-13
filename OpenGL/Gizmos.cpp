@@ -43,7 +43,7 @@ Gizmos::GizmoImpl::GizmoImpl(Gizmos* _pOwner, Renderer& renderer)
 			if (!pGizmoMesh)
 				pGizmoMesh = std::make_shared<Mesh>();
 
-			meshBuilder.CopyToMesh(renderer, pGizmoMesh.get(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+			meshBuilder.CopyToMesh(renderer, *pGizmoMesh, &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 			return pGizmoMesh;
 			}, RGBA::RED, RGBA::YELLOW) 
 	};
@@ -56,7 +56,7 @@ Gizmos::GizmoImpl::GizmoImpl(Gizmos* _pOwner, Renderer& renderer)
 			if (!pGizmoMesh)
 				pGizmoMesh = std::make_shared<Mesh>();
 
-			meshBuilder.CopyToMesh(renderer, pGizmoMesh.get(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+			meshBuilder.CopyToMesh(renderer, *pGizmoMesh, &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 			return pGizmoMesh;
 			}, RGBA::GREEN, RGBA::YELLOW)
 	};
@@ -69,7 +69,7 @@ Gizmos::GizmoImpl::GizmoImpl(Gizmos* _pOwner, Renderer& renderer)
 			if (!pGizmoMesh)
 				pGizmoMesh = std::make_shared<Mesh>();
 
-			meshBuilder.CopyToMesh(renderer, pGizmoMesh.get(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+			meshBuilder.CopyToMesh(renderer, *pGizmoMesh, &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 			
 			return pGizmoMesh;
 			}, RGBA::BLUE, RGBA::YELLOW)
@@ -284,7 +284,7 @@ void Gizmos::GizmoImpl::Render(Renderer& renderer, const GizmoParameter& gizmoPa
 	//Calculate Center of Objects 
 
 	Matrix<float, 4, 4> worldMatrix = pOwner->transform->GetWorldMatrix();
-	MakeWorldMatrix(targets[0]->GetPosition(), Vec3f::FORWARD, Vec3f::RIGHT, Vec3f::UP, worldMatrix);
+	MakeWorldMatrix(targets[0]->GetPosition(), targets[0]->GetScale(), Vec3f::FORWARD, Vec3f::RIGHT, Vec3f::UP, worldMatrix);
 	shaderParam.worldMatrix = worldMatrix;
 	pOwner->transform->SetWorldMatrix(worldMatrix);
 	pCamera->GetViewMatrix(shaderParam.viewMatrix);

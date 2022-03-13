@@ -147,7 +147,7 @@ public:
 	void Begin();
 	void End();
 
-	void CopyToMesh(Renderer& renderers, Mesh* mesh, VertexBufferBindCallback* bindFunction, VertexCopyCallback* copyFunction, unsigned int sizeofVertex);
+	void CopyToMesh(Renderer& renderers, Mesh& mesh, VertexBufferBindCallback* bindFunction, VertexCopyCallback* copyFunction, unsigned int sizeofVertex);
 
 	void AddCylinder(const Vec3f& axis, const Vec3f& arm1, const Vec3f& arm2, uint32_t slices, const RGBA& color);
 	void AddSphere(const Vec3f& position, float radius, int sectorCount, int stackCount);

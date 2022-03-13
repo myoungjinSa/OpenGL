@@ -674,7 +674,7 @@ void MeshBuilder::AddIndex(int index) {
 	indices.emplace_back(index);
 }
 
-void MeshBuilder::CopyToMesh(Renderer& renderer, Mesh* pMesh, VertexBufferBindCallback* bindFunction, VertexCopyCallback* copyFunction, unsigned int sizeofVertex) {
+void MeshBuilder::CopyToMesh(Renderer& renderer, Mesh& mesh, VertexBufferBindCallback* bindFunction, VertexCopyCallback* copyFunction, unsigned int sizeofVertex) {
 	unsigned int vertexCount = vertices.size();
 	if (vertexCount == 0) {
 		return;
@@ -689,7 +689,7 @@ void MeshBuilder::CopyToMesh(Renderer& renderer, Mesh* pMesh, VertexBufferBindCa
 		copyFunction(vertices[vertexIndex], currentBufferIndex);
 		currentBufferIndex += vertexSize;
 	}
-	pMesh->Initialize(renderer, bindFunction, vertexBuffer, vertexCount, sizeofVertex, indices.data(), indices.size());
+	mesh.Initialize(renderer, bindFunction, vertexBuffer, vertexCount, sizeofVertex, indices.data(), indices.size());
 
 	delete[] vertexBuffer;
 	vertexBuffer = nullptr;
