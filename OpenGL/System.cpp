@@ -135,6 +135,12 @@ void System::Run()
 		}
 		else
 		{
+			// Check if the user pressed escape and wants to exit the application.
+			if (KeyboardInput::IsKeyDown(KEY_ESCAPE)) {
+				done = true;
+				continue;
+			}
+
 			timer.Tick(60.0f);
 			
 			// Otherwise do the frame processing.
@@ -152,13 +158,6 @@ void System::Run()
 
 bool System::Frame(float elapsedTime)
 {
-	// Check if the user pressed escape and wants to exit the application.
-	if (KeyboardInput::IsKeyDown(KEY_ESCAPE))
-	{
-		return false;
-	}
-
-
 	bool result = false;
 	if (pScene) {
 		pScene->Update(elapsedTime);

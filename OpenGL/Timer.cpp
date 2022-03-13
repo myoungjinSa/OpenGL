@@ -48,13 +48,13 @@ void Timer::Tick(float fLockFps) {
 	previousTimePoint = endTime;
 	Frame fps{};
 
-	//while (true) {
-	//	fps = std::chrono::duration_cast<Frame>(std::chrono::steady_clock::now() - endTime);
-	//	if (1/*sec*/<= fps.count()) {
-	//		endTime = std::chrono::steady_clock::now();
-	//		//LogDebug(L"LastFrame: %.5lf, FPS: %.5lf\n", std::chrono::duration_cast<MS>(fps).count(), fps.count() * 60.0f);
-	//		break;
-	//	}
-	//}
+	while (true) {
+		fps = std::chrono::duration_cast<Frame>(std::chrono::steady_clock::now() - endTime);
+		if (1/*sec*/<= fps.count()) {
+			endTime = std::chrono::steady_clock::now();
+			//LogDebug(L"LastFrame: %.5lf, FPS: %.5lf\n", std::chrono::duration_cast<MS>(fps).count(), fps.count() * 60.0f);
+			break;
+		}
+	}
 }
 

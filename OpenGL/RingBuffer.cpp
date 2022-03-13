@@ -62,7 +62,7 @@ void RingBuffer::WriteAdvance(int elements) {
 }
 
 bool RingBuffer::CanRead(int elements) {
-	return readPoint + elements <= writePoint;
+	return (readPoint + elements <= writePoint);
 }
 
 void RingBuffer::Read(int elements, int* size_1, float** buffer_1, int* size_2, float** buffer_2) {

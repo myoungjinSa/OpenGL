@@ -268,7 +268,7 @@ bool Cube::Initialize(Renderer& renderer) {
 
 	meshBuilder.CopyToMesh(renderer, pMesh.get(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 
-	albedoMap = TextureLoader::GetTexture(renderer, L"surfing.mov");
+	albedoMap = TextureLoader::GetTexture(renderer, L"¿¡½ºÆÄ.webm");
 	//normalMap = TextureLoader::GetTexture(renderer, "Resource\\Texture\\BMP\\NormalMap.bmp");
 	
 	Vec3f diffuseColor(0.8f, 0.85f, 0.85f);

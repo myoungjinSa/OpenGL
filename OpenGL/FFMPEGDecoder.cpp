@@ -316,7 +316,6 @@ bool FFMPGVideoReader::ReadAFrame() {
 			av_packet_unref(pPacket);
 			pAudioFrame->nb_samples;
 
-
 			if (pRingbuffer) {
 				int size_1 = 0, size_2 = 0;
 				float *pBuffer1 = nullptr, *pBuffer2 = nullptr;
@@ -327,8 +326,9 @@ bool FFMPGVideoReader::ReadAFrame() {
 				pRingbuffer->WriteAdvance(samples * channelNum);
 			}
 
-			return true;
+			continue;
 		}
+
 		else {
 			//Packet originates from a diffrent stream, so ignore it
 			av_packet_unref(pPacket);
