@@ -281,7 +281,7 @@ bool Cube::Initialize(Renderer& renderer) {
 	MeshBuilder meshBuilder;
 	meshBuilder.AddCube(transform.get()->GetPosition(), Vec3f(1.0f, 1.0f, 1.0f), RGBA::BLUE);
 	meshBuilder.CopyToMesh(renderer, *mesh, &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
-	diffuseMap = TextureLoader::GetTexture(renderer, L"박재범-GANADARA.mp4");
+	diffuseMap = TextureLoader::GetTexture(renderer, L"에스파-Savage.mp4");
 	
 	renderer.AllocateTextures(diffuseMap->textureID, 1);
 	renderer.BindTexture(diffuseMap->GetTextureID());
