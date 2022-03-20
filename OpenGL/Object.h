@@ -65,7 +65,7 @@ public:
 	std::shared_ptr<RigidTransform> transform;
 	std::shared_ptr<Material> material;
 	std::shared_ptr<BoundingVolume> boundingVolume;						
-	std::shared_ptr<Shader> shader;						//°´Ã¼º° ¼ÎÀÌ´õ
+	std::shared_ptr<Shader> shader;						//ï¿½ï¿½Ã¼ï¿½ï¿½ ï¿½ï¿½ï¿½Ì´ï¿½
 	
 	explicit GameObject();
 	virtual ~GameObject();
