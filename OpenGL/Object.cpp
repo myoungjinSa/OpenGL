@@ -281,8 +281,9 @@ bool Cube::Initialize(Renderer& renderer) {
 	MeshBuilder meshBuilder;
 	meshBuilder.AddCube(transform.get()->GetPosition(), Vec3f(1.0f, 1.0f, 1.0f), RGBA::BLUE);
 	meshBuilder.CopyToMesh(renderer, *mesh, &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
-	diffuseMap = TextureLoader::GetTexture(renderer, L"에스파-Savage.mp4");
-
+	diffuseMap = TextureLoader::GetTexture(renderer, L"박재범-GANADARA.mp4");
+	
+	renderer.AllocateTextures(diffuseMap->textureID, 1);
 	renderer.BindTexture(diffuseMap->GetTextureID());
 	renderer.SetImage(GL_TEXTURE_2D, diffuseMap->GetPicture().GetMemory(), diffuseMap->GetPicture().GetWidth(), diffuseMap->GetPicture().GetHeight());
 	renderer.SetSampleMode();
@@ -379,7 +380,8 @@ bool Sphere::Initialize(Renderer& renderer) {
 	meshBuilder.CopyToMesh(renderer, *mesh, &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 	diffuseMap = TextureLoader::GetTexture(renderer, L"surfing.mov");
 	
-	renderer.BindTexture(diffuseMap->GetTextureID());
+	renderer.AllocateTextures(diffuseMap->textureID, 1);
+	renderer.BindTexture(diffuseMap->textureID);
 	renderer.SetImage(GL_TEXTURE_2D, diffuseMap->GetPicture().GetMemory(), diffuseMap->GetPicture().GetWidth(), diffuseMap->GetPicture().GetHeight());
 	renderer.SetSampleMode();
 	renderer.SetFiltering();
@@ -449,32 +451,30 @@ bool Cubemap::Initialize(Renderer& renderer) {
 	}
 
 	MeshBuilder meshBuilder;
-	meshBuilder.AddCube(transform.get()->GetPosition(), Vec3f(1000.0f, 1000.0f, 1000.0f), RGBA::BLUE, false);
+	meshBuilder.AddCube(transform.get()->GetPosition(), Vec3f(100.0f, 100.0f, 100.0f), RGBA::BLUE, false);
 	meshBuilder.CopyToMesh(renderer, *mesh, &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 
+	std::array<std::shared_ptr<Texture>, 6> cubeTextures;
 	cubeTextures[0] = TextureLoader::GetTexture(renderer, L"skybox_right.png");
 	cubeTextures[1] = TextureLoader::GetTexture(renderer, L"skybox_left.png");
 	cubeTextures[2] = TextureLoader::GetTexture(renderer, L"skybox_top.png");
 	cubeTextures[3] = TextureLoader::GetTexture(renderer, L"skybox_bottom.png");
 	cubeTextures[4] = TextureLoader::GetTexture(renderer, L"skybox_front.png");
 	cubeTextures[5] = TextureLoader::GetTexture(renderer, L"skybox_back.png");
-
 	
-	Size2u imageSize(cubeTextures[0]->GetPicture().GetWidth(), cubeTextures[0]->GetPicture().GetHeight());
 	unsigned int cubemapTexture;
 	renderer.AllocateTextures(cubemapTexture, 1);
 	renderer.BindCubemapTexture(cubemapTexture);
 	renderer.SetSampleMode(true);
 	renderer.SetFiltering(true);
 
-	material = std::make_shared<Material>(Vec3f(1.0f, 1.0f, 1.0f), Vec4f(1.0f, 1.0f, 1.0f), Vec3f(1.0f, 1.0f, 1.0f), std::make_pair(Material::TextureType::TEXTURE_DIFFUSE, cubemapTexture));
-	
 	for (size_t iTexture = 0; iTexture < cubeTextures.size(); iTexture++) {
 		Size2u imageSize(cubeTextures[iTexture]->GetPicture().GetWidth(), cubeTextures[iTexture]->GetPicture().GetHeight());
 		renderer.SetImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + iTexture, cubeTextures[iTexture]->GetPicture().GetMemory(), imageSize.width, imageSize.height);
 	}
-
-
+	
+	material = std::make_shared<Material>(Vec3f(1.0f, 1.0f, 1.0f), Vec4f(1.0f, 1.0f, 1.0f), Vec3f(1.0f, 1.0f, 1.0f), std::make_pair(Material::TextureType::TEXTURE_DIFFUSE, cubemapTexture));
+	
 	return true;
 }
 
@@ -528,7 +528,8 @@ bool Cylinder::Initialize(Renderer& renderer) {
 	
 	diffuseMap = TextureLoader::GetTexture(renderer, L"Capture.bmp");
 
-	renderer.BindTexture(diffuseMap->GetTextureID());
+	renderer.AllocateTextures(diffuseMap->textureID, 1);
+	renderer.BindTexture(diffuseMap->textureID);
 	renderer.SetImage(GL_TEXTURE_2D, diffuseMap->GetPicture().GetMemory(), diffuseMap->GetPicture().GetWidth(), diffuseMap->GetPicture().GetHeight());
 	renderer.SetSampleMode();
 	renderer.SetFiltering();

@@ -37,6 +37,7 @@ public:
 	};
 
 	eType        type;
+	unsigned int textureID;
 	
 	Texture();
 	Texture(const Texture& other) = delete;
@@ -56,7 +57,6 @@ private:
 	
 	std::unique_ptr<RenderContext> renderContext;
 	Picture      picture;
-	unsigned int textureID;
 };
 
 class TextureLoader {

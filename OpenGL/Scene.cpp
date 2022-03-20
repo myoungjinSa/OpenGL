@@ -67,7 +67,7 @@ void Scene::Update(double elapsedTime) {
 	Gizmo.Update(*pCamera, elapsedTime);
 	for (const auto& obj : objects) {
 		obj->Update(elapsedTime);
-		//obj->Rotate(MathUtils::DegreesToRadians(0.0f), MathUtils::DegreesToRadians(1.0f), MathUtils::DegreesToRadians(0.0f));
+		obj->Rotate(MathUtils::DegreesToRadians(0.0f), MathUtils::DegreesToRadians(1.0f), MathUtils::DegreesToRadians(0.0f));
 		//obj->Move(obj->GetLook(), 1.0f, elapsedTime);
 	}
 }

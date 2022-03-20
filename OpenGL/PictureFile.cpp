@@ -274,8 +274,8 @@ bool GDIPictureFile::Create(Picture& picture, const WString& filename) {
 	}
 
 	Gdiplus::BitmapData bmpData;
-	bool isAlpha = Gdiplus::IsAlphaPixelFormat(bitmap.GetPixelFormat());
 	
+	bool isAlpha = Gdiplus::IsAlphaPixelFormat(bitmap.GetPixelFormat());
 	bmpData.Width = picture.GetWidth();
 	bmpData.Height = picture.GetHeight();
 	bmpData.Stride = picture.GetPitch();

@@ -168,8 +168,6 @@ public:
 	bool Initialize(Renderer& renderer) override;
 	void Shutdown(Renderer& renderer) override;
 	void Render(Renderer& renderer, const ShaderParameter& shaderParam) override;
-
-	std::array<std::shared_ptr<Texture>, 6> cubeTextures;
 };
 
 class Cylinder : public GameObject {

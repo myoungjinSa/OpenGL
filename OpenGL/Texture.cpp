@@ -29,7 +29,7 @@ bool Texture::Initialize(Renderer& renderer, const WString& _fileName) {
 	}
 
 	textureID = (unsigned int)texID;
-	renderer.AllocateTextures(textureID, 1);
+	//renderer.AllocateTextures(textureID, 1);
 	
 	return true;
 }
