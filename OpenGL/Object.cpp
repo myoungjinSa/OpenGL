@@ -281,7 +281,7 @@ bool Cube::Initialize(Renderer& renderer) {
 	MeshBuilder meshBuilder;
 	meshBuilder.AddCube(transform.get()->GetPosition(), Vec3f(1.0f, 1.0f, 1.0f), RGBA::BLUE);
 	meshBuilder.CopyToMesh(renderer, *mesh, &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
-	diffuseMap = TextureLoader::GetTexture(renderer, L"IU-strawberry moon.mp4");
+	diffuseMap = TextureLoader::GetTexture(renderer, L"¿¡½ºÆÄ-Savage.mp4");
 
 	renderer.BindTexture(diffuseMap->GetTextureID());
 	renderer.SetImage(GL_TEXTURE_2D, diffuseMap->GetPicture().GetMemory(), diffuseMap->GetPicture().GetWidth(), diffuseMap->GetPicture().GetHeight());
