@@ -72,11 +72,13 @@ public:
 	bool AllocateFrameBuffer(unsigned int& colorBuffer, unsigned int& depthBuffer, unsigned int& fbo);
 	bool AllocateTextures(unsigned int& textureID, unsigned int textureCount);
 	
-	
-	void BindTexture(unsigned int width, unsigned int height, unsigned int textureId, unsigned char* pPixelData);
-	void SetSampleMode(bool wrapMode);
-	void SetFiltering();
+	void BindTexture(unsigned int textureId);
+	void BindCubemapTexture(unsigned int textureId);
+	void SetImage(unsigned int target, void* pImage, unsigned int width, unsigned int height);
+	void SetSampleMode(bool bCubemap = false);
+	void SetFiltering(bool bCubemap = false);
 
+	void SetDepthFunc(unsigned int Func);
 
 	void DisableVertexAttribArray(size_t vertexAttribCount);
 	void ReleaseVertexBuffers(unsigned int& vertexBufferId, size_t bufferCount);

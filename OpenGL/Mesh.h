@@ -147,12 +147,12 @@ public:
 	void Begin();
 	void End();
 
-	void CopyToMesh(Renderer& renderers, Mesh* mesh, VertexBufferBindCallback* bindFunction, VertexCopyCallback* copyFunction, unsigned int sizeofVertex);
+	void CopyToMesh(Renderer& renderers, Mesh& mesh, VertexBufferBindCallback* bindFunction, VertexCopyCallback* copyFunction, unsigned int sizeofVertex);
 
 	void AddCylinder(const Vec3f& axis, const Vec3f& arm1, const Vec3f& arm2, uint32_t slices, const RGBA& color);
 	void AddSphere(const Vec3f& position, float radius, int sectorCount, int stackCount);
 	void AddCube(float sideLength, const RGBA& color);
-	void AddCube(const Vec3f& center, const Vec3f& extent, const RGBA& color);
+	void AddCube(const Vec3f& center, const Vec3f& extent, const RGBA& color, bool bLeftHand = true);
 	void AddQuad(const Vec3f& bottomLeft, const Vec3f& up, float upLength, const Vec3f& right, float rightLength, const Vec3f& normal, const RGBA& color = RGBA::WHITE, const Vec2f& uvOffset = Vec2f::ZERO, float uvStepSize = 1.0f);
 	void AddQuad(const Vec3f& center, const Vec3f& extent, const Vec3f& normal, const RGBA& color = RGBA::WHITE, const Vec2f& uvOffset = Vec2f::ZERO, float uvStepSize = 1.0f, bool bReversed = false);
 	void AddLathGeometry(const Vec3f& axis, const Vec3f& arm1, const Vec3f& arm2, int slices, const std::vector<Point2f>& points, const RGBA& color, const float epsilon = 0.0f);

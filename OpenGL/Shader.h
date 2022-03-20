@@ -17,9 +17,9 @@ struct ShaderParameter {
 	Matrix<float, 4, 4> projectionMatrix;
 
 	Vec3f lightPosition;
-	Vec4f diffuseAlbedo;
-	Vec4f specularAlbedo;
-	Vec4f ambientAlbedo;
+	Vec4f diffuse;
+	Vec4f specular;
+	Vec4f ambient;
 
 	Vec3f cameraPosition;
 
@@ -91,6 +91,22 @@ public:
 	void Render(Renderer& renderer, const ShaderParameter& shaderParam) override;
 	
 	bool SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParam) override;
+protected:
+	bool InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer);
+};
+
+class SkyboxShader : public Shader 
+{
+public:
+	SkyboxShader(Object* pOwner);
+	SkyboxShader(const SkyboxShader& other) = delete;
+	~SkyboxShader() override;
+
+	bool Initialize(Renderer& renderer) override;
+	void Shutdown(Renderer& renderer) override;
+	void Render(Renderer& renderer, const ShaderParameter& shaderParam) override;
+
+	bool SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParameter) override;
 protected:
 	bool InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer);
 };

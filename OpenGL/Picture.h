@@ -33,6 +33,8 @@ public:
 		STORAGE_BOUND,
 	};
 
+	eStorage storage;
+
 	Picture();
 	Picture(const Picture& other);
 	virtual ~Picture();
@@ -59,5 +61,4 @@ protected:
 	int   height;
 	int   bpp;
 	int   pitch;
-	eStorage storage;
 };

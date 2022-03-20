@@ -514,7 +514,7 @@ void MeshBuilder::AddCube(float sideLength, const RGBA& color) {
 	AddQuad(Vec3f::RIGHT * sideLength, Vec3f::UP, sideLength, Vec3f::FORWARD, sideLength, Vec3f::RIGHT, RGBA::YELLOW, Vec2f::ZERO, 1.0f);										//EAST
 }
 
-void MeshBuilder::AddCube(const Vec3f& center, const Vec3f& extent, const RGBA& color) {
+void MeshBuilder::AddCube(const Vec3f& center, const Vec3f& extent, const RGBA& color, bool bLeftHand) {
 	
 	//front
 	Vec3f leftTopFront = Vec3f(center.x - extent.x, center.y + extent.y, center.z - extent.z);
@@ -597,29 +597,56 @@ void MeshBuilder::AddCube(const Vec3f& center, const Vec3f& extent, const RGBA& 
 	SetNormal(sumNormals);
 	AddVertex(rightBottomBack);
 	
-	//Front
-	AddIndex(0); AddIndex(1); AddIndex(2);
-	AddIndex(1); AddIndex(3); AddIndex(2);
+	
+	if (bLeftHand) {
+		//Front
+		AddIndex(0); AddIndex(1); AddIndex(2);
+		AddIndex(1); AddIndex(3); AddIndex(2);
 
-	//Left
-	AddIndex(4); AddIndex(0); AddIndex(6);
-	AddIndex(0); AddIndex(2); AddIndex(6);
+		//Left
+		AddIndex(4); AddIndex(0); AddIndex(6);
+		AddIndex(0); AddIndex(2); AddIndex(6);
 
-	//Right
-	AddIndex(5); AddIndex(7); AddIndex(3);
-	AddIndex(5); AddIndex(3); AddIndex(1);
+		//Right
+		AddIndex(5); AddIndex(7); AddIndex(3);
+		AddIndex(5); AddIndex(3); AddIndex(1);
 
-	//Back
-	AddIndex(6); AddIndex(5); AddIndex(4);
-	AddIndex(6); AddIndex(7); AddIndex(5);
+		//Back
+		AddIndex(6); AddIndex(5); AddIndex(4);
+		AddIndex(6); AddIndex(7); AddIndex(5);
 
-	//Top
-	AddIndex(0); AddIndex(4); AddIndex(1);
-	AddIndex(4); AddIndex(5); AddIndex(1);
+		//Top
+		AddIndex(0); AddIndex(4); AddIndex(1);
+		AddIndex(4); AddIndex(5); AddIndex(1);
 
-	//Bottom
-	AddIndex(6); AddIndex(2); AddIndex(3);
-	AddIndex(6); AddIndex(3); AddIndex(7);
+		//Bottom
+		AddIndex(6); AddIndex(2); AddIndex(3);
+		AddIndex(6); AddIndex(3); AddIndex(7);
+	}else {
+		//Front
+		AddIndex(0);  AddIndex(2);  AddIndex(1);
+		AddIndex(1); AddIndex(2); AddIndex(3);
+
+		//Left
+		AddIndex(4); AddIndex(6); AddIndex(0);
+		AddIndex(0); AddIndex(6); AddIndex(2);
+
+		//Right
+		AddIndex(5); AddIndex(3); AddIndex(7);
+		AddIndex(5); AddIndex(1); AddIndex(3);
+
+		//Back
+		AddIndex(6); AddIndex(4); AddIndex(5);
+		AddIndex(6); AddIndex(5); AddIndex(7);
+
+		//Top
+		AddIndex(0); AddIndex(1); AddIndex(4);
+		AddIndex(4); AddIndex(1); AddIndex(5);
+
+		//Bottom
+		AddIndex(6); AddIndex(3); AddIndex(2);
+		AddIndex(6); AddIndex(7); AddIndex(3);
+	}
 }
 
 void MeshBuilder::AddLathGeometry(const Vec3f& axis, const Vec3f& arm1, const Vec3f& arm2, int slices, const std::vector<Point2f>& points, const RGBA& color, const float epsilon) {
@@ -674,7 +701,7 @@ void MeshBuilder::AddIndex(int index) {
 	indices.emplace_back(index);
 }
 
-void MeshBuilder::CopyToMesh(Renderer& renderer, Mesh* pMesh, VertexBufferBindCallback* bindFunction, VertexCopyCallback* copyFunction, unsigned int sizeofVertex) {
+void MeshBuilder::CopyToMesh(Renderer& renderer, Mesh& mesh, VertexBufferBindCallback* bindFunction, VertexCopyCallback* copyFunction, unsigned int sizeofVertex) {
 	unsigned int vertexCount = vertices.size();
 	if (vertexCount == 0) {
 		return;
@@ -689,7 +716,7 @@ void MeshBuilder::CopyToMesh(Renderer& renderer, Mesh* pMesh, VertexBufferBindCa
 		copyFunction(vertices[vertexIndex], currentBufferIndex);
 		currentBufferIndex += vertexSize;
 	}
-	pMesh->Initialize(renderer, bindFunction, vertexBuffer, vertexCount, sizeofVertex, indices.data(), indices.size());
+	mesh.Initialize(renderer, bindFunction, vertexBuffer, vertexCount, sizeofVertex, indices.data(), indices.size());
 
 	delete[] vertexBuffer;
 	vertexBuffer = nullptr;

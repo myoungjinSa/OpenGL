@@ -102,19 +102,34 @@ void RigidTransform::CalculateRotationMatrix(Matrix<float, 4, 4>& rotationMatrix
 		Matrix<double, 3, 3> m = q.GetRotationMatrix();
 		
 		rotationMatrix[0] = m[0];
-		rotationMatrix[1] = m[3];
-		rotationMatrix[2] = m[6];
+		rotationMatrix[1] = m[1];
+		rotationMatrix[2] = m[2];
 		rotationMatrix[3] = 0.0f;
-		
-		rotationMatrix[4] = m[1];
+
+		rotationMatrix[4] = m[3];
 		rotationMatrix[5] = m[4];
-		rotationMatrix[6] = m[7];
+		rotationMatrix[6] = m[5];
 		rotationMatrix[7] = 0.0f;
-		
-		rotationMatrix[8] = m[2];
-		rotationMatrix[9] = m[5];
+
+		rotationMatrix[8] = m[6];
+		rotationMatrix[9] = m[7];
 		rotationMatrix[10] = m[8];
 		rotationMatrix[11] = 0.0f;
+
+		//rotationMatrix[0] = m[0];
+		//rotationMatrix[1] = m[3];
+		//rotationMatrix[2] = m[6];
+		//rotationMatrix[3] = 0.0f;
+		//
+		//rotationMatrix[4] = m[1];
+		//rotationMatrix[5] = m[4];
+		//rotationMatrix[6] = m[7];
+		//rotationMatrix[7] = 0.0f;
+		//
+		//rotationMatrix[8] = m[2];
+		//rotationMatrix[9] = m[5];
+		//rotationMatrix[10] = m[8];
+		//rotationMatrix[11] = 0.0f;
 		
 		rotationMatrix[12] = 0.0f;
 		rotationMatrix[13] = 0.0f;
@@ -153,6 +168,18 @@ void RigidTransform::CalculateRotationMatrix(Matrix<float, 4, 4>& rotationMatrix
 		rotationMatrix[14] = 0.0f;
 		rotationMatrix[15] = 1.0f;
 	}
+}
+
+void RigidTransform::SetScale(float sx, float sy, float sz) {
+	SetScale(Vec3f(sx, sy, sz));
+}
+
+void RigidTransform::SetScale(const Vec3f& _scale) {
+	scale = _scale;
+}
+
+Vec3f RigidTransform::GetScale() const {
+	return scale;
 }
 
 void RigidTransform::Move(const Vec3f& direction, float elapsedTime) {

@@ -269,7 +269,7 @@ bool System::InitializeWindows(OpenGL* pOpenGL, int& screenWidth, int& screenHei
 
 	// Create a temporary window for the OpenGL extension setup.
 	hWnd = CreateWindowEx(WS_EX_APPWINDOW, applicationName, applicationName, WS_POPUP,
-		0, 0, 640, 480, NULL, NULL, hInstance, NULL);
+		0, 0, 1200, 800, NULL, NULL, hInstance, NULL);
 	if (hWnd == NULL)
 	{
 		return false;
@@ -311,8 +311,8 @@ bool System::InitializeWindows(OpenGL* pOpenGL, int& screenWidth, int& screenHei
 	}
 	else {
 		//If windowed then set it to 800x600 resolution
-		screenWidth  = 800;
-		screenHeight = 600;
+		screenWidth  = 1200;
+		screenHeight = 800;
 
 		// Place the window in the middle of the screen.
 		posX = (GetSystemMetrics(SM_CXSCREEN) - screenWidth) / 2;

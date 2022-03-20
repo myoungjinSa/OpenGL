@@ -22,9 +22,15 @@ public:
 	void GetPosition(std::array<float, 4>& position);
 	Matrix<float, 3, 3> GetRotationMatrix() const;
 
+
 	//Vec4f Rotate(const Vec4f& pos, const Vec3f& pivot, float pitch, float yaw, float roll);
 	Vec4f Rotate(const Vec3f& pos, const Vec3f& pivot, float pitch, float yaw, float roll);
 	void Rotate(float pitch, float yaw, float roll);
+	
+	void SetScale(float sx, float sy, float sz);
+	void SetScale(const Vec3f& size);
+	Vec3f GetScale() const;
+
 	void Move(const Vec3f& direction, float elapsedTime);
 
 	void SetLook(const Vec3f& look);

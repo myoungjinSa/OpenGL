@@ -12,21 +12,22 @@
 #include "Light.h"
 #include "Camera.h"
 
-void MakeWorldMatrix(const Vec3f& position, const Vec3f& look, const Vec3f& right, const Vec3f& up, Matrix<float, 4, 4>& worldMatrix) {
+void MakeWorldMatrix(const Vec3f& position, const Vec3f& scale, const Vec3f& look, const Vec3f& right, const Vec3f& up, Matrix<float, 4, 4>& worldMatrix) {
+	
 	//Right
-	worldMatrix.value[0] = right.x;
+	worldMatrix.value[0] = right.x * scale.x;
 	worldMatrix.value[1] = right.y;
 	worldMatrix.value[2] = right.z;
 
 	//Up
 	worldMatrix.value[4] = up.x;
-	worldMatrix.value[5] = up.y;
+	worldMatrix.value[5] = up.y * scale.y;
 	worldMatrix.value[6] = up.z;
 
 	//Look
 	worldMatrix.value[8] = look.x;
 	worldMatrix.value[9] = look.y;
-	worldMatrix.value[10] = look.z;
+	worldMatrix.value[10] = look.z * scale.z;
 
 	//Position
 	worldMatrix.value[12] = position.x;
@@ -36,25 +37,37 @@ void MakeWorldMatrix(const Vec3f& position, const Vec3f& look, const Vec3f& righ
 }
 
 GameObject::GameObject() 
-	: pMesh(nullptr), albedoMap(nullptr), normalMap(nullptr)
+	: diffuseMap(nullptr), normalMap(nullptr)
 {
+	mesh = std::make_shared<Mesh>();
 	transform = AddComponent<RigidTransform>();
 }
 
 GameObject::~GameObject() {
 
 }
-
-void GameObject::SetPosition(float x, float y, float z) {
-	transform.get()->SetPosition(x, y, z);
-}
-
 void GameObject::SetPosition(const Vec3f& _position) {
 	transform.get()->SetPosition(_position);
 }
 
+void GameObject::SetPosition(float x, float y, float z) {
+	SetPosition(Vec3f(x, y, z));
+}
+
 Vec3f GameObject::GetPosition() const {
 	return transform.get()->GetPosition();
+}
+
+void GameObject::SetScale(const Vec3f& _scale) {
+	transform.get()->SetScale(_scale);
+}
+
+void GameObject::SetScale(float sx, float sy, float sz) {
+	SetScale(Vec3f(sx, sy, sz));
+}
+
+Vec3f GameObject::GetScale() const {
+	return transform.get()->GetScale();
 }
 
 Vec3f GameObject::GetLook() const {
@@ -85,13 +98,17 @@ void GameObject::Rotate(float pitch, float yaw, float roll) {
 }
 
 bool GameObject::Initialize(Renderer& renderer) {
-	return false;
+	
+	return true;
+}
+void GameObject::Render(Renderer& renderer, const ShaderParameter& shaderParam) {
+	
 }
 
 bool GameObject::Intersect(const Ray& ray, double& distance) {
 	
-	for (size_t iTriangle = 0; iTriangle < pMesh->GetTriangleMeshCount(); iTriangle++) {
-		Triangle triangleMesh = pMesh->GetTriangleMesh(iTriangle);
+	for (size_t iTriangle = 0; iTriangle < mesh->GetTriangleMeshCount(); iTriangle++) {
+		Triangle triangleMesh = mesh->GetTriangleMesh(iTriangle);
 		Vec4f vertex0 = ::Transform(transform->GetWorldMatrix(), Vec4f(triangleMesh.vertices[0].position, 1.0f));
 		Vec4f vertex1 = ::Transform(transform->GetWorldMatrix(), Vec4f(triangleMesh.vertices[1].position, 1.0f));
 		Vec4f vertex2 = ::Transform(transform->GetWorldMatrix(), Vec4f(triangleMesh.vertices[2].position, 1.0f));
@@ -196,33 +213,35 @@ bool GameObject::IntersectTriangle(const Ray& ray, const Triangle& triangle, dou
 
 void GameObject::FillShaderParameter(ShaderParameter& shaderParam, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix, const Light& light, const Camera& Camera) {
 	Matrix<float, 4, 4> worldMatrix = Matrix<float, 4, 4>::Identity();
-	MakeWorldMatrix(GetPosition(), GetLook(), GetRight(), GetUp(), worldMatrix);
+	MakeWorldMatrix(GetPosition(), GetScale(), GetLook(), GetRight(), GetUp(), worldMatrix);
 	shaderParam.worldMatrix = worldMatrix;
 	shaderParam.viewMatrix = viewMatrix;
 	shaderParam.projectionMatrix = projectionMatrix;
 
 	shaderParam.lightPosition = light.GetPosition();
-	shaderParam.diffuseAlbedo = material->GetDiffuseAlbedo();
-	shaderParam.ambientAlbedo = material->GetAmbientAlbedo();
-	shaderParam.specularAlbedo = material->GetSpecularAlbedo();
+	shaderParam.diffuse = material->GetDiffuse();
+	shaderParam.ambient = material->GetAmbient();
+	shaderParam.specular = material->GetSpecular();
 
 	shaderParam.cameraPosition = Camera.GetPosition();
 
-	shaderParam.textureUnit = material->GetTextureUnit(Material::TextureType::TEXTURE_ALBEDO);
+	shaderParam.textureUnit = material->GetTextureUnit(Material::TextureType::TEXTURE_DIFFUSE);
 }
 
-
+Mesh& GameObject::GetMesh() const {
+	return *mesh;
+}
 ///////////////////////////////////////////////////////////////
 Cube::Cube()
-	:GameObject(), extent(1.0f, 1.0f, 1.0f)
+	:GameObject()
 {
 
 }
 
 Cube::Cube(const Vec3f& size)
-	: GameObject(), extent(size)
+	: GameObject()
 {
-
+	SetScale(size);
 }
 Cube::Cube(const Cube& other)
 {
@@ -237,8 +256,8 @@ Cube& Cube::operator=(const Cube& other) {
 	if (this == &other)
 		return *this;
 
-	if (0 < other.pMesh.use_count()) {
-		pMesh = other.pMesh;
+	if (0 < other.mesh.use_count()) {
+		mesh = other.mesh;
 	}
 
 	return *this;
@@ -247,7 +266,9 @@ Cube& Cube::operator=(const Cube& other) {
 bool Cube::Initialize(Renderer& renderer) {
 	GameObject::Initialize(renderer);
 
-	shader = std::make_shared<TextureShader>(this);
+	AddComponent<TextureShader>();
+	shader = GetComponent<Shader>();
+	//shader = std::make_shared<TextureShader>(this);
 	if (!shader)
 		return false;
 
@@ -258,33 +279,32 @@ bool Cube::Initialize(Renderer& renderer) {
 
 	//MeshBuilder Call
 	MeshBuilder meshBuilder;
-	meshBuilder.AddCube(transform.get()->GetPosition(), extent, RGBA::BLUE);
+	meshBuilder.AddCube(transform.get()->GetPosition(), Vec3f(1.0f, 1.0f, 1.0f), RGBA::BLUE);
+	meshBuilder.CopyToMesh(renderer, *mesh, &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+	diffuseMap = TextureLoader::GetTexture(renderer, L"에스파-savage.mp4");
 
-	if (!pMesh)
-		pMesh = std::make_shared<Mesh>();
+	renderer.BindTexture(diffuseMap->GetTextureID());
+	renderer.SetImage(GL_TEXTURE_2D, diffuseMap->GetPicture().GetMemory(), diffuseMap->GetPicture().GetWidth(), diffuseMap->GetPicture().GetHeight());
+	renderer.SetSampleMode();
+	renderer.SetFiltering();
 
-	if (!pMesh)
-		return false;
-
-	meshBuilder.CopyToMesh(renderer, pMesh.get(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
-
-	albedoMap = TextureLoader::GetTexture(renderer, L"에스파.webm");
 	//normalMap = TextureLoader::GetTexture(renderer, "Resource\\Texture\\BMP\\NormalMap.bmp");
 	
 	Vec3f diffuseColor(0.8f, 0.85f, 0.85f);
 	Vec4f ambientColor(0.3f, 0.3f, 0.3f, 1.0f);
 	Vec3f specularColor(1.0f, 1.0f, 1.0f);
-	material = std::make_shared<Material>(diffuseColor, ambientColor, specularColor, std::make_pair(Material::TextureType::TEXTURE_ALBEDO, albedoMap->textureID));
+	material = std::make_shared<Material>(diffuseColor, ambientColor, specularColor, std::make_pair(Material::TextureType::TEXTURE_DIFFUSE, diffuseMap->GetTextureID()));
 
 	AddComponent<BoundingBox>();
 	auto boundingBox = GetComponent<BoundingBox>();
 	
 	boundingBox->SetCenter(transform->GetPosition());
-	boundingBox->SetExtent(GetExtent());
+	boundingBox->SetExtent(GetScale());
 
 	boundingVolume = boundingBox;
 	if (!boundingVolume->Init(renderer))
 		return false;
+
 
 	return true;
 }
@@ -294,11 +314,11 @@ void Cube::Shutdown(Renderer& renderer) {
 	if(shader)
 		shader->Shutdown(renderer);
 
-	pMesh->Shutdown(renderer);
+	mesh->Shutdown(renderer);
 }
 
 void Cube::Update(float deltaTime) {
-	albedoMap->Update(deltaTime);
+	diffuseMap->Update(deltaTime);
 }
 
 void Cube::Render(Renderer& renderer, const ShaderParameter& shaderParam) {	
@@ -308,28 +328,10 @@ void Cube::Render(Renderer& renderer, const ShaderParameter& shaderParam) {
 	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
 	renderer.SetDepthTest(true);
 
-	pMesh->Render(renderer);
+	mesh->Render(renderer);
 	boundingVolume->Render(renderer, shaderParam.viewMatrix, shaderParam.projectionMatrix);
 }
 
-
-Vec3f Cube::GetExtent() const {
-	float maxX = 0.0, maxY = 0.0, maxZ = 0.0;
-
-	for (size_t iMesh = 0; iMesh < pMesh->GetTriangleMeshCount(); iMesh++) {
-		Triangle meshes = pMesh->GetTriangleMesh(iMesh);
-		for (size_t iVertex = 0; iVertex < 3; iVertex++) {
-			Vec3f pos = meshes.GetPosition(iVertex);
-			if (abs(maxX) < abs(pos.x))
-				maxX = pos.x;
-			if (abs(maxY) < abs(pos.y))
-				maxY = pos.y;
-			if (abs(maxZ) < abs(pos.z))
-				maxZ = pos.z;
-		}
-	}
-	return Vec3f(maxX, maxY, maxZ);
-}
 
 
 Sphere::Sphere(float _radius, int _stackCount, int _sectorCount)
@@ -352,8 +354,8 @@ Sphere& Sphere::operator=(const Sphere& other) {
 	if (this == &other)
 		return *this;
 
-	if (0 < other.pMesh.use_count()) {
-		pMesh = other.pMesh;
+	if (0 < other.mesh.use_count()) {
+		mesh = other.mesh;
 	}
 
 	return *this;
@@ -373,28 +375,27 @@ bool Sphere::Initialize(Renderer& renderer) {
 
 	//MeshBuilder Call
 	MeshBuilder meshBuilder;
-	meshBuilder.AddSphere(transform.get()->GetPosition(), radius, sectorCount, stackCount);
+	meshBuilder.AddSphere(transform.get()->GetPosition(), 1.0f, sectorCount, stackCount);
+	meshBuilder.CopyToMesh(renderer, *mesh, &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+	diffuseMap = TextureLoader::GetTexture(renderer, L"surfing.mov");
+	
+	renderer.BindTexture(diffuseMap->GetTextureID());
+	renderer.SetImage(GL_TEXTURE_2D, diffuseMap->GetPicture().GetMemory(), diffuseMap->GetPicture().GetWidth(), diffuseMap->GetPicture().GetHeight());
+	renderer.SetSampleMode();
+	renderer.SetFiltering();
 
-	if (!pMesh)
-		pMesh = std::make_shared<Mesh>();
-
-	if (!pMesh)
-		return false;
-
-	meshBuilder.CopyToMesh(renderer, pMesh.get(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
-	albedoMap = TextureLoader::GetTexture(renderer, L"에스파.webm");
-
-
+	SetScale(radius, radius, radius);
+	
 	Vec3f diffuseColor(0.8f, 0.85f, 0.85f);
 	Vec4f ambientColor(0.3f, 0.3f, 0.3f, 1.0f);
 	Vec3f specularColor(1.0f, 1.0f, 1.0f);
-	material = std::make_shared<Material>(diffuseColor, ambientColor, specularColor, std::make_pair(Material::TextureType::TEXTURE_ALBEDO, albedoMap->textureID));
+	material = std::make_shared<Material>(diffuseColor, ambientColor, specularColor, std::make_pair(Material::TextureType::TEXTURE_DIFFUSE, diffuseMap->GetTextureID()));
 
 	AddComponent<BoundingBox>();
 	auto boundingBox = GetComponent<BoundingBox>();
 
 	boundingBox->SetCenter(transform->GetPosition());
-	boundingBox->SetExtent(GetExtent());
+	boundingBox->SetExtent(GetScale());
 
 	boundingVolume = boundingBox;
 	if (!boundingVolume->Init(renderer)) {
@@ -408,11 +409,11 @@ void Sphere::Shutdown(Renderer& renderer) {
 	GameObject::Shutdown(renderer);
 	if (shader)
 		shader->Shutdown(renderer);
-	pMesh->Shutdown(renderer);
+	mesh->Shutdown(renderer);
 }
 
 void Sphere::Update(float deltaTime) {
-	albedoMap->Update(deltaTime);
+	diffuseMap->Update(deltaTime);
 }
 
 void Sphere::Render(Renderer& renderer, const ShaderParameter& shaderParam) {
@@ -420,11 +421,77 @@ void Sphere::Render(Renderer& renderer, const ShaderParameter& shaderParam) {
 	shader->Render(renderer, shaderParam);
 	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
 	renderer.SetDepthTest(true);
-	pMesh->Render(renderer);
+	mesh->Render(renderer);
 	boundingVolume->Render(renderer, shaderParam.viewMatrix, shaderParam.projectionMatrix);
 }
 
 
+///////////////////////////////////////////////////
+//Skybox
+Cubemap::Cubemap()
+	: GameObject()
+{
+
+}
+
+Cubemap::~Cubemap() {
+
+}
+
+bool Cubemap::Initialize(Renderer& renderer) {
+	shader = std::make_shared<SkyboxShader>(this);
+	if (!shader)
+		return false;
+
+	if (!shader->Initialize(renderer)) {
+		LogError(L"Could not initialize the Default Shader\n");
+		return false;
+	}
+
+	MeshBuilder meshBuilder;
+	meshBuilder.AddCube(transform.get()->GetPosition(), Vec3f(1000.0f, 1000.0f, 1000.0f), RGBA::BLUE, false);
+	meshBuilder.CopyToMesh(renderer, *mesh, &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+
+	cubeTextures[0] = TextureLoader::GetTexture(renderer, L"skybox_right.png");
+	cubeTextures[1] = TextureLoader::GetTexture(renderer, L"skybox_left.png");
+	cubeTextures[2] = TextureLoader::GetTexture(renderer, L"skybox_top.png");
+	cubeTextures[3] = TextureLoader::GetTexture(renderer, L"skybox_bottom.png");
+	cubeTextures[4] = TextureLoader::GetTexture(renderer, L"skybox_front.png");
+	cubeTextures[5] = TextureLoader::GetTexture(renderer, L"skybox_back.png");
+
+	
+	Size2u imageSize(cubeTextures[0]->GetPicture().GetWidth(), cubeTextures[0]->GetPicture().GetHeight());
+	unsigned int cubemapTexture;
+	renderer.AllocateTextures(cubemapTexture, 1);
+	renderer.BindCubemapTexture(cubemapTexture);
+	renderer.SetSampleMode(true);
+	renderer.SetFiltering(true);
+
+	material = std::make_shared<Material>(Vec3f(1.0f, 1.0f, 1.0f), Vec4f(1.0f, 1.0f, 1.0f), Vec3f(1.0f, 1.0f, 1.0f), std::make_pair(Material::TextureType::TEXTURE_DIFFUSE, cubemapTexture));
+	
+	for (size_t iTexture = 0; iTexture < cubeTextures.size(); iTexture++) {
+		Size2u imageSize(cubeTextures[iTexture]->GetPicture().GetWidth(), cubeTextures[iTexture]->GetPicture().GetHeight());
+		renderer.SetImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + iTexture, cubeTextures[iTexture]->GetPicture().GetMemory(), imageSize.width, imageSize.height);
+	}
+
+
+	return true;
+}
+
+void Cubemap::Shutdown(Renderer& renderer) {
+	GameObject::Shutdown(renderer);
+	if (shader)
+		shader->Shutdown(renderer);
+	mesh->Shutdown(renderer);
+}
+
+void Cubemap::Render(Renderer& renderer, const ShaderParameter& shaderParam) {
+	GameObject::Render(renderer, shaderParam);
+	shader->Render(renderer, shaderParam);
+	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
+	renderer.SetDepthTest(true);
+	mesh->Render(renderer);
+}
 
 ///////////////////////////////////////////////////
 Cylinder::Cylinder(const Vec3f& _axis, const Vec3f& _arm1, const Vec3f& _arm2, uint32_t slices) 
@@ -444,8 +511,8 @@ Cylinder& Cylinder::operator=(const Cylinder& other) {
 	if (this == &other)
 		return *this;
 
-	if (0 < other.pMesh.use_count()) {
-		pMesh = other.pMesh;
+	if (0 < other.mesh.use_count()) {
+		mesh = other.mesh;
 	}
 
 	return *this;
@@ -457,21 +524,20 @@ bool Cylinder::Initialize(Renderer& renderer) {
 	//MeshBuilder Call
 	MeshBuilder meshBuilder;
 	meshBuilder.AddCylinder(axis, arm1, arm2, sliceCount, RGBA::BLUE);
-
-	if (!pMesh)
-		pMesh = std::make_shared<Mesh>();
-
-	if (!pMesh)
-		return false;
-
-	meshBuilder.CopyToMesh(renderer, pMesh.get(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+	meshBuilder.CopyToMesh(renderer, *mesh, &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 	
-	albedoMap = TextureLoader::GetTexture(renderer, L"Capture.bmp");
+	diffuseMap = TextureLoader::GetTexture(renderer, L"Capture.bmp");
+
+	renderer.BindTexture(diffuseMap->GetTextureID());
+	renderer.SetImage(GL_TEXTURE_2D, diffuseMap->GetPicture().GetMemory(), diffuseMap->GetPicture().GetWidth(), diffuseMap->GetPicture().GetHeight());
+	renderer.SetSampleMode();
+	renderer.SetFiltering();
+
 
 	Vec3f diffuseColor(0.8f, 0.85f, 0.85f);
 	Vec4f ambientColor(0.3f, 0.3f, 0.3f, 1.0f);
 	Vec3f specularColor(1.0f, 1.0f, 1.0f);
-	material = std::make_shared<Material>(diffuseColor, ambientColor, specularColor, std::make_pair(Material::TextureType::TEXTURE_ALBEDO, albedoMap->textureID));
+	material = std::make_shared<Material>(diffuseColor, ambientColor, specularColor, std::make_pair(Material::TextureType::TEXTURE_DIFFUSE, diffuseMap->GetTextureID()));
 	
 	return true;
 }
@@ -479,7 +545,7 @@ bool Cylinder::Initialize(Renderer& renderer) {
 
 void Cylinder::Shutdown(Renderer& renderer) {
 	GameObject::Shutdown(renderer);
-	pMesh->Shutdown(renderer);
+	mesh->Shutdown(renderer);
 }
 
 void Cylinder::Update(float deltaTime) {
@@ -488,7 +554,29 @@ void Cylinder::Update(float deltaTime) {
 
 void Cylinder::Render(Renderer& renderer, const ShaderParameter& shaderParam) {
 	GameObject::Render(renderer, shaderParam);
-	pMesh->Render(renderer);
+	mesh->Render(renderer);
 	boundingVolume->Render(renderer, shaderParam.viewMatrix, shaderParam.projectionMatrix);
 }
 
+std::shared_ptr<GameObject>& ObjectFactory::CreateGameObject(Renderer& renderer, ObjectFactory::eObjectType objType, ObjectFactory::eShaderType shaderType) {
+	MeshBuilder meshBuilder;
+	Vec3f defaultPosition(0.0f, 0.0f, 0.0f);
+	Vec3f defaultExtent(2.0f, 2.0f, 2.0f);
+	switch (objType) {
+	case eObjectType::OBJECT_CUBE:				meshBuilder.AddCube(defaultPosition, defaultExtent,RGBA::BLUE);
+	case eObjectType::OBJECT_SPHERE:			meshBuilder.AddSphere(defaultPosition, 2, 12, 12);
+	case eObjectType::OBJECT_CYLINDER:			meshBuilder.AddCylinder(Vec3f::UP, Vec3f::RIGHT, Vec3f::FORWARD, 32, RGBA::GREEN);
+	}
+
+	std::shared_ptr<GameObject> gameObject = std::make_shared<GameObject>();
+	meshBuilder.CopyToMesh(renderer, gameObject->GetMesh(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+
+	switch (shaderType) {
+	case eShaderType::SHADER_COLOR: 	gameObject->AddComponent<ColorShader>();
+	case eShaderType::SHADER_TEXTURE:   gameObject->AddComponent<TextureShader>();
+	case eShaderType::SHADER_PHONG:		gameObject->AddComponent<PhongShader>();
+	}
+	
+	gameObject->shader = gameObject->GetComponent<Shader>();
+	return gameObject;
+}

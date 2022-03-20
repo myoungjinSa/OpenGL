@@ -41,6 +41,7 @@ private:
 	Light phongLight;
 	
 	Gizmos Gizmo;
+	Cubemap skybox;
 
 	Matrix<float, 4, 4> projectionMatrix;
 };

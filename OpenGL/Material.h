@@ -5,7 +5,7 @@
 class Material {
 public:
 	enum class TextureType : int{
-		TEXTURE_ALBEDO,
+		TEXTURE_DIFFUSE,
 		TEXTURE_NORMAL,
 		TEXTURE_COUNT
 	};
@@ -14,19 +14,19 @@ public:
 	Material(const Vec3f& diffuse, const Vec4f& albedo, const Vec3f& specular, const std::pair<TextureType, unsigned int>& mapInfo);
 	virtual ~Material();
 
-	Vec3f GetDiffuseAlbedo() { return diffuseAlbedo; }
-	Vec4f GetAmbientAlbedo() { return ambientAlbedo; }
-	Vec3f GetSpecularAlbedo() { return specularAlbedo; }
+	Vec3f GetDiffuse() { return diffuse; }
+	Vec4f GetAmbient() { return ambient; }
+	Vec3f GetSpecular() { return specular; }
 
-	void SetDiffuseAlbedo(const Vec3f& diffuse);
-	void SetAmbientAlbedo(const Vec4f& ambient);
-	void SetSpecularAlbedo(const Vec3f& specular);
+	void SetDiffuse(const Vec3f& diffuse);
+	void SetAmbient(const Vec4f& ambient);
+	void SetSpecular(const Vec3f& specular);
 
 	void SetTextureMap(const std::pair<TextureType, unsigned int>& maps);
 	unsigned int GetTextureUnit(TextureType textureType) const;
 private:
-	Vec3f diffuseAlbedo;
-	Vec4f ambientAlbedo;
-	Vec3f specularAlbedo;
+	Vec3f diffuse;
+	Vec4f ambient;
+	Vec3f specular;
 	std::vector<std::pair<TextureType, unsigned int>> maps;
 };

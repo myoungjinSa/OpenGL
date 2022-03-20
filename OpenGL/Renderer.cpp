@@ -80,30 +80,39 @@ bool Renderer::AllocateTextures(unsigned int& textureId, unsigned int textureCou
 	return true;
 }
 
-void Renderer::SetSampleMode(bool wrapMode) {
-	if (wrapMode) {
+void Renderer::SetSampleMode(bool bCubemap) {
+	if (bCubemap) {
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	}
+	else {
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	}
-	else {
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-	}
 }
 
-void Renderer::SetFiltering() {
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-
-	pGL->glGenerateMipmap(GL_TEXTURE_2D);
+void Renderer::SetFiltering(bool bCubemap) {
+	glTexParameteri(bCubemap ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(bCubemap ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	//pGL->glGenerateMipmap(bCubemap ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D);
 }
-void Renderer::BindTexture(unsigned int width, unsigned int height, unsigned int textureId, unsigned char* pPixelData) {
-	glEnable(GL_TEXTURE_2D);
-	//Set the unique texture unit in which to store the data
+void Renderer::BindTexture(unsigned int textureId) {
+	//glEnable(GL_TEXTURE_2D);
+	////Set the unique texture unit in which to store the data
 	pGL->glActiveTexture(GL_TEXTURE0 + textureId);
 
 	glBindTexture(GL_TEXTURE_2D, textureId);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, pPixelData);
+}
+
+void Renderer::BindCubemapTexture(unsigned int textureId) {
+	pGL->glActiveTexture(GL_TEXTURE0 + textureId);
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
+}
+
+void Renderer::SetImage(unsigned int target, void* pImage, unsigned int width, unsigned int height) {
+	glTexImage2D(target, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, pImage);
 }
 
 void Renderer::DisableVertexAttribArray(size_t vertexAttribCount) {
@@ -150,6 +159,9 @@ void Renderer::DrawIndexBuffer(unsigned int vertexArrayId, size_t indexCount) {
 		glDrawElements(GL_LINES, indexCount, GL_UNSIGNED_INT, 0);
 		break;
 	}
+}
+void Renderer::SetDepthFunc(unsigned int depthFunc) {
+	glDepthFunc(depthFunc);
 }
 
 
@@ -432,6 +444,7 @@ void Renderer::OutputLinkErrorMessage(OpenGL& gl, unsigned int programId) {
 		fout << infoLog[iLog];
 
 	fout.close();
+	delete[] infoLog;
 
 	MessageBox(hWnd, L"Error compiling linker. Check linker-error.txt for message", L"Linker Error", MB_OK);
 }
@@ -461,6 +474,7 @@ void Renderer::OutputShaderErrorMessage(OpenGL& gl, unsigned int shaderId, char*
 	}
 
 	fout.close();
+	delete[] infoLog;
 
 	//Convert the shader filename to a widechar string
 	size_t convertedChars = 0;

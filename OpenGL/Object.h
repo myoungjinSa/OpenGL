@@ -6,7 +6,7 @@
 #include "Transform.h"
 
 
-void MakeWorldMatrix(const Vec3f& position, const Vec3f& look, const Vec3f& right, const Vec3f& up, Matrix<float, 4, 4>& worldMatrix);
+void MakeWorldMatrix(const Vec3f& position, const Vec3f& scale, const Vec3f& look, const Vec3f& right, const Vec3f& up, Matrix<float, 4, 4>& worldMatrix);
 class Material;
 class Mesh;
 class Texture;
@@ -20,7 +20,13 @@ class Light;
 class Camera;
 class ShaderParameter;
 
+
 class Object {
+public:
+	class ObjectVisitor {
+		virtual bool Visit(Object& obj) = 0;
+	};
+
 protected:
 	template<typename T> std::shared_ptr<T> AddComponent() {
 		static_assert(std::is_base_of<Component, T>::value, "T must derive from Component");
@@ -44,20 +50,21 @@ protected:
 		}
 		return nullptr;
 	}
-
+	
+	Object() {}
 	virtual ~Object() {}
-
+	
 	std::vector<std::shared_ptr<Component>> components;
-
 };
 
-
+class ObjectFactory;
 class GameObject : public Object
 {
+	friend class ObjectFactory;
 public:
 	std::shared_ptr<RigidTransform> transform;
 	std::shared_ptr<Material> material;
-	std::shared_ptr<BoundingVolume> boundingVolume;
+	std::shared_ptr<BoundingVolume> boundingVolume;						
 	std::shared_ptr<Shader> shader;						//∞¥√º∫∞ ºŒ¿Ã¥ı
 	
 	explicit GameObject();
@@ -65,7 +72,7 @@ public:
 	virtual bool Initialize(Renderer& renderer);
 	virtual void Shutdown(Renderer& renderer) {}
 	virtual void Render(Renderer& renderer) {}
-	virtual void Render(Renderer& renderer, const ShaderParameter& shaderParam) {}
+	virtual void Render(Renderer& renderer, const ShaderParameter& shaderParam);
 	
 	virtual void Update(float deltaTime){}
 
@@ -74,6 +81,10 @@ public:
 	void SetPosition(float x, float y, float z);
 	void SetPosition(const Vec3f& _position);
 	Vec3f GetPosition() const;
+
+	void SetScale(float sx, float sy, float sz);
+	void SetScale(const Vec3f& _scale);
+	Vec3f GetScale() const;
 
 	Vec3f GetLook() const;
 	Vec3f GetRight() const;
@@ -89,14 +100,15 @@ public:
 	void FillShaderParameter(ShaderParameter& shaderParam, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix, const Light& light, const Camera& Camera);
 
 	virtual Vec3f GetExtent() const { return Vec3f(); }
+
+	Mesh& GetMesh() const;
 	
 protected:
 	std::vector<std::shared_ptr<Component>> components;
 
-	std::shared_ptr<Mesh> pMesh;
-	std::shared_ptr<Texture> albedoMap;
+	std::shared_ptr<Mesh> mesh;
+	std::shared_ptr<Texture> diffuseMap;
 	std::shared_ptr<Texture> normalMap;
-
 };
 
 class Cube : public GameObject {
@@ -113,15 +125,9 @@ public:
 	
 	void Update(float deltaTime) override;
 
-	Vec3f GetExtent() const override;
-
 	Cube& operator=(const Cube& other);
 	Cube& operator=(Cube&& other) noexcept = delete;
-
-private:
-	Vec3f extent;
 };
-
 
 class Sphere : public GameObject {
 public:
@@ -138,12 +144,32 @@ public:
 
 	Sphere& operator=(const Sphere& other);
 	Sphere& operator=(Sphere&& other) noexcept = delete;
-
-	Vec3f GetExtent() const override { return Vec3f(radius, radius, radius); }
 private:
 	float radius;
 	int stackCount;
 	int sectorCount;
+};
+
+
+class Cubemap : public GameObject {
+public:
+	enum class eCubemapIndex {
+		CUBEMAP_RIGHT,
+		CUBEMAP_LEFT,
+		CUBEMAP_TOP,
+		CUBEMAP_BOTTOM,
+		CUBEMAP_FRONT,
+		CUBEMAP_BACK
+	};
+
+	explicit Cubemap();
+	~Cubemap()override;
+
+	bool Initialize(Renderer& renderer) override;
+	void Shutdown(Renderer& renderer) override;
+	void Render(Renderer& renderer, const ShaderParameter& shaderParam) override;
+
+	std::array<std::shared_ptr<Texture>, 6> cubeTextures;
 };
 
 class Cylinder : public GameObject {
@@ -160,11 +186,32 @@ public:
 	void Update(float deltaTime) override;
 
 	Cylinder& operator=(const Cylinder& other);
-
-	Vec3f GetExtent() const override { return Vec3f(); }
 private:
 	Vec3f axis;
 	Vec3f arm1;
 	Vec3f arm2;
 	float sliceCount;
+};
+
+class ObjectFactory {
+public:
+	enum class eObjectType {
+		OBJECT_CUBE,
+		OBJECT_SPHERE,
+		OBJECT_CYLINDER,
+	};
+	enum class eShaderType {
+		SHADER_COLOR,
+		SHADER_TEXTURE,
+		SHADER_PHONG,
+
+		SHADER_DEFAULT = SHADER_COLOR,
+	};
+
+	std::shared_ptr<GameObject>& CreateGameObject(Renderer& renderer, eObjectType objType, eShaderType shaderType = eShaderType::SHADER_DEFAULT);
+};
+
+class ObjectPicker : public Object::ObjectVisitor {
+public:
+	ObjectPicker();
 };

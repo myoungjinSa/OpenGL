@@ -10,27 +10,27 @@
 Texture::Texture() 
 	: textureID(0)
 	, type(eType::TYPE_COUNT)
-	, filename()
 {
 
 }
 
 Texture::~Texture() {
-
+	
 }
 
-bool Texture::Initialize(Renderer& renderer, const WString& _fileName, unsigned int textureUnit, bool wrap) {
+bool Texture::Initialize(Renderer& renderer, const WString& _fileName) {
 	bool result;
 
 	renderContext = std::make_unique<RenderContext>(renderer);
 	int texID = 0;
-	result = Load(renderer, _fileName, textureUnit, wrap, texID);
+	result = Load(_fileName, texID);
 	if (!result) {
 		return false;
 	}
-	filename = _fileName;
-	textureID = (unsigned int)texID;
 
+	textureID = (unsigned int)texID;
+	renderer.AllocateTextures(textureID, 1);
+	
 	return true;
 }
 
@@ -45,14 +45,14 @@ bool Texture::Update(float deltaTime) {
 
 	renderContext->prevFrameNo = renderContext->totalDeltaTime;
 
-	Picture picture;
 	if (renderContext->preVideoFile) {
 		int64_t pts = renderContext->preVideoFile->CalcPts(renderContext->totalDeltaTime);
 		PictureFile::UpdateVideoFrame(picture, renderContext->preVideoFile, pts);
 	}
 
-	renderContext->renderer.BindTexture(picture.GetWidth(), picture.GetHeight(), textureID, (unsigned char*)picture.GetMemory());
-	renderContext->renderer.SetSampleMode(true);
+	renderContext->renderer.BindTexture(textureID);
+	renderContext->renderer.SetImage(GL_TEXTURE_2D, picture.GetMemory(), picture.GetWidth(), picture.GetHeight());
+	renderContext->renderer.SetSampleMode(false);
 	renderContext->renderer.SetFiltering();
 	
 	return true;
@@ -62,15 +62,20 @@ void Texture::Shutdown() {
 	return;
 }
 
-bool Texture::Load(Renderer& renderer, const WString& filename, unsigned int textureUnit, bool wrap, int& genTextureID) {
+bool Texture::Load(const WString& filename, int& genTextureID) {
+	if (!picture.IsNull()) {
+		picture.Destroy();
+	}
+
 	if (!FileUtils::DoesFileExist(filename)) {
 		return false;
 	}
-	Picture picture;
+	
 	if (PictureFile::IsImageFile(filename)) {
 		if (!PictureFile::CreatePicture(picture, filename)) {
 			return false;
 		}
+
 		type = eType::TYPE_IMAGE;
 	}else if(PictureFile::IsVideoFile(filename)){
 		int frameNo = 0;
@@ -87,17 +92,12 @@ bool Texture::Load(Renderer& renderer, const WString& filename, unsigned int tex
 		return false;
 	}
 	
-	renderer.AllocateTextures(textureID, 1);
-	renderer.BindTexture(picture.GetWidth(), picture.GetHeight(), textureID, (unsigned char*)picture.GetMemory());
-	renderer.SetSampleMode(true);
-	renderer.SetFiltering();
-
 	genTextureID = textureID;
 	return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////
-std::vector<std::pair<WString&&, std::shared_ptr<Texture>>> TextureLoader::textures;
+std::vector<std::pair<WString, std::shared_ptr<Texture>>> TextureLoader::textures;
 TextureLoader::TextureLoader() {
 	textures.clear();
 }
@@ -135,7 +135,7 @@ bool TextureLoader::Load(Renderer& renderer, const WString& filename) {
 	if (!texture)
 		return false;
 
-	if(!texture->Initialize(renderer, filename, 0,  true))
+	if(!texture->Initialize(renderer, filename))
 		return false;
 
 	textures.emplace_back(std::make_pair(filename, texture));

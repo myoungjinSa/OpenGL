@@ -68,13 +68,13 @@ bool ColorShader::InitializeShader(const char* vsFilename, const char* fsFilenam
 }
 
 bool ColorShader::SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParam) {
-	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldMatrix, std::move(String("worldMatrix")))) {
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldMatrix, String("worldMatrix"))) {
 		return false;
 	}
-	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.viewMatrix, std::move(String("viewMatrix")))) {
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.viewMatrix, String("viewMatrix"))) {
 		return false;
 	}
-	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.projectionMatrix, std::move(String("projectionMatrix")))) {
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.projectionMatrix, String("projectionMatrix"))) {
 		return false;
 	}
 
@@ -112,13 +112,13 @@ bool TextureShader::InitializeShader(const char* vsFilename, const char* fsFilen
 }
 
 bool TextureShader::SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParam) {
-	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldMatrix, std::move(String("worldMatrix")))) {
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldMatrix, String("worldMatrix"))) {
 		return false;
 	}
-	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.viewMatrix, std::move(String("viewMatrix")))) {
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.viewMatrix, String("viewMatrix"))) {
 		return false;
 	}
-	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.projectionMatrix, std::move(String("projectionMatrix")))) {
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.projectionMatrix, String("projectionMatrix"))) {
 		return false;
 	}
 
@@ -211,19 +211,19 @@ bool PhongShader::SetShaderParameters(Renderer& renderer, const ShaderParameter&
 	}
 
 
-	Vec3f diffuseAlbedo = Vec3f(shaderParam.diffuseAlbedo.x, shaderParam.diffuseAlbedo.y, shaderParam.diffuseAlbedo.z);
-	Vec3f ambientAlbedo = Vec3f(shaderParam.ambientAlbedo.x, shaderParam.ambientAlbedo.y, shaderParam.ambientAlbedo.z);
-	Vec3f specular = Vec3f(shaderParam.specularAlbedo.x, shaderParam.specularAlbedo.y, shaderParam.specularAlbedo.z);
+	Vec3f diffuse = Vec3f(shaderParam.diffuse.x, shaderParam.diffuse.y, shaderParam.diffuse.z);
+	Vec3f ambient = Vec3f(shaderParam.ambient.x, shaderParam.ambient.y, shaderParam.ambient.z);
+	Vec3f specular = Vec3f(shaderParam.specular.x, shaderParam.specular.y, shaderParam.specular.z);
 
-	if (!renderer.SetShaderParameter(shaderProgram, diffuseAlbedo, String("diffuseAlbedo"))) {
+	if (!renderer.SetShaderParameter(shaderProgram, diffuse, String("diffuseColor"))) {
 		assert(0);
 		return false;
 	}
-	if (!renderer.SetShaderParameter(shaderProgram, specular, String("specularAlbedo"))) {
+	if (!renderer.SetShaderParameter(shaderProgram, specular, String("specularColor"))) {
 		assert(0);
 		return false;
 	}
-	if (!renderer.SetShaderParameter(shaderProgram, ambientAlbedo, String("ambientAlbedo"))) {
+	if (!renderer.SetShaderParameter(shaderProgram, ambient, String("ambientColor"))) {
 		assert(0);
 		return false;
 	}
@@ -237,3 +237,66 @@ bool PhongShader::SetShaderParameters(Renderer& renderer, const ShaderParameter&
 	return true;
 }
 
+
+/////////////////////////////////////////////////////////////////////////////////////////////
+//Skybox Shader
+
+SkyboxShader::SkyboxShader(Object* pOwner)
+	:Shader(pOwner)
+{
+
+}
+
+SkyboxShader::~SkyboxShader() {
+
+}
+
+bool SkyboxShader::Initialize(Renderer& renderer) {
+	return InitializeShader("Skybox.vs", "Skybox.ps", renderer);
+}
+
+void SkyboxShader::Render(Renderer& renderer, const ShaderParameter& shaderParameter) {
+	SetShader(renderer);
+
+	SetShaderParameters(renderer, shaderParameter);
+}
+
+void SkyboxShader::Shutdown(Renderer& renderer) {
+	Shader::Shutdown(renderer);
+}
+
+
+
+
+bool SkyboxShader::InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer) {
+	shaderProgram = renderer.CreateShader();
+
+	if (!renderer.CompileVertexShader(vsFilename, vertexShader))
+		return false;
+
+	if (!renderer.CompileFragmentShader(fsFilename, fragmentShader))
+		return false;
+
+	String inputPosition("inputPosition");
+	return renderer.BindVertexAttrib(shaderProgram, vertexShader, fragmentShader, 1, inputPosition);
+}
+
+bool SkyboxShader::SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParam) {
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.viewMatrix, String("viewMatrix"))) {
+		assert(0);
+		return false;
+	}
+
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.projectionMatrix, String("projectionMatrix"))) {
+		assert(0);
+		return false;
+	}
+
+	int textureUnit = shaderParam.textureUnit;
+	if (!renderer.SetShaderParameter(shaderProgram, textureUnit, String("shaderTexture"))) {
+		assert(0);
+		return false;
+	}
+
+	return true;
+}

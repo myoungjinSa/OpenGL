@@ -1,17 +1,17 @@
 #include "Material.h"
 
 Material::Material()
-	: diffuseAlbedo()
-	, ambientAlbedo()
-	, specularAlbedo()
+	: diffuse()
+	, ambient()
+	, specular()
 {
 
 }
 
 Material::Material(const Vec3f& diffuse, const Vec4f& albedo, const Vec3f& specular, const std::pair<TextureType, unsigned int>& mapInfo) 
-	: diffuseAlbedo(diffuse)
-	, ambientAlbedo(albedo)
-	, specularAlbedo(specular)
+	: diffuse(diffuse)
+	, ambient(albedo)
+	, specular(specular)
 {
 	maps.clear();
 	maps.push_back(mapInfo);
@@ -21,16 +21,16 @@ Material::~Material() {
 
 }
 
-void Material::SetDiffuseAlbedo(const Vec3f& diffuse) {
-	diffuseAlbedo = diffuse;
+void Material::SetDiffuse(const Vec3f& _diffuse) {
+	diffuse = _diffuse;
 }
 
-void Material::SetAmbientAlbedo(const Vec4f& ambient) {
-	ambientAlbedo = ambient;
+void Material::SetAmbient(const Vec4f& _ambient) {
+	ambient = _ambient;
 }
 
-void Material::SetSpecularAlbedo(const Vec3f& specular) {
-	specularAlbedo = specular;
+void Material::SetSpecular(const Vec3f& _specular) {
+	specular = _specular;
 }
 
 void Material::SetTextureMap(const std::pair<TextureType, unsigned int>& textureMap) {

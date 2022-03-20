@@ -31,10 +31,11 @@ Scene::~Scene() {
 }
 
 bool Scene::BuildObject(Renderer& renderer) {	
+	skybox.Initialize(renderer);
 	phongLight.SetPosition(0.0f, 0.0f, -10.0f);
 	phongLight.SetDirection(Vec3f::FORWARD);
 
-	GameObject* pObject = new Cube(Vec3f(2.0f, 2.0f, 2.0f));//new Sphere(2.0f, 16, 16);//new Cylinder(Vec3f::UP, Vec3f::RIGHT, Vec3f::FORWARD, 32);
+	GameObject* pObject = new Cube(Vec3f(1.0f, 1.0f, 1.0f));//new Cylinder(Vec3f::UP, Vec3f::RIGHT, Vec3f::FORWARD, 32);
 	objects.emplace_back(pObject);
 	
 	for (const auto& obj : objects) {
@@ -51,7 +52,7 @@ bool Scene::BuildObject(Renderer& renderer) {
 	}
 
 	pCamera->Initialize(renderer);
-	pCamera->SetPosition(0.0f, 0.0f, -10.0f);
+	pCamera->SetPosition(0.0f, 0.0f, -5.0f);
 	pCamera->SetViewport(Rect2f(0.0f, 0.0f, renderer.GetRenderTargetWidth(), renderer.GetRenderTargetHeight()));
 	
 	Gizmo.Initialize(renderer);
@@ -66,7 +67,7 @@ void Scene::Update(double elapsedTime) {
 	Gizmo.Update(*pCamera, elapsedTime);
 	for (const auto& obj : objects) {
 		obj->Update(elapsedTime);
-		obj->Rotate(MathUtils::DegreesToRadians(0.0f), MathUtils::DegreesToRadians(0.2f), MathUtils::DegreesToRadians(0.0f));
+		//obj->Rotate(MathUtils::DegreesToRadians(0.0f), MathUtils::DegreesToRadians(1.0f), MathUtils::DegreesToRadians(0.0f));
 		//obj->Move(obj->GetLook(), 1.0f, elapsedTime);
 	}
 }
@@ -74,6 +75,12 @@ void Scene::Update(double elapsedTime) {
 bool Scene::Render(Renderer& renderer) {
 	renderer.BeginRender();
 	pCamera->BuildPerspectiveFovLHMatrix(projectionMatrix, pCamera->GetViewport(), SCREEN_NEAR, SCREEN_DEPTH);
+
+	renderer.SetDepthFunc(GL_LEQUAL);
+	ShaderParameter shaderParmaeter;
+	skybox.FillShaderParameter(shaderParmaeter, GetViewMatrix(), GetProjectionMatrix(), phongLight, *pCamera);
+	skybox.Render(renderer, shaderParmaeter);
+	renderer.SetDepthFunc(GL_LESS);
 
 	Matrix<float, 4, 4> worldMatrix;
 	for (size_t iObj = 0; iObj < objects.size(); iObj++) {
@@ -90,6 +97,7 @@ void Scene::Shutdown(Renderer& renderer) {
 	for (const auto& obj : objects)
 		obj->Shutdown(renderer);
 
+	skybox.Shutdown(renderer);
 	if (pCamera)
 		pCamera->Shutdown(renderer);
 }

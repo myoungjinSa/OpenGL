@@ -60,7 +60,7 @@ bool BoundingBox::Init(Renderer& renderer) {
 	BoundingVolume::Init(renderer);
 
 	MeshBuilder meshBuilder;
-	meshBuilder.AddCube(center, extent, RGBA::GREEN);
+	meshBuilder.AddCube(center, Vec3f(1.0f, 1.0f, 1.0f), RGBA::GREEN);
 
 	if (!pMesh)
 		pMesh = std::make_shared<Mesh>();
@@ -68,7 +68,7 @@ bool BoundingBox::Init(Renderer& renderer) {
 	if (!pMesh)
 		return false;
 
-	meshBuilder.CopyToMesh(renderer, pMesh.get(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+	meshBuilder.CopyToMesh(renderer, *pMesh, &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 
 }
 
@@ -153,7 +153,7 @@ void BoundingBox::Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatr
 	
 	ShaderParameter shaderParam;
 	Matrix<float, 4, 4> worldMatrix = Matrix<float, 4, 4>::Identity();
-	MakeWorldMatrix(pGameObject->GetPosition(), pGameObject->GetLook(), pGameObject->GetRight(), pGameObject->GetUp(), worldMatrix);
+	MakeWorldMatrix(pGameObject->GetPosition(), pGameObject->GetScale(), pGameObject->GetLook(), pGameObject->GetRight(), pGameObject->GetUp(), worldMatrix);
 
 	shaderParam.worldMatrix = worldMatrix;
 	shaderParam.viewMatrix = viewMatrix;

@@ -11,6 +11,7 @@ class TextureLoader;
 
 class Texture
 {
+	friend class Renderer;
 public:
 	class RenderContext {
 	public:
@@ -31,28 +32,31 @@ public:
 	enum class eType {
 		TYPE_IMAGE,
 		TYPE_VIDEO,
+		TYPE_CUBEMAP,
 		TYPE_COUNT,
 	};
 
 	eType        type;
-	unsigned int textureID;
-	WString      filename;
-
+	
 	Texture();
 	Texture(const Texture& other) = delete;
-	~Texture();
+	virtual ~Texture();
 
-	bool Initialize(Renderer& renderer, const WString& fileName, unsigned int textureUnit, bool wrap);
+	bool Initialize(Renderer& renderer, const WString& fileName);
 	void Shutdown();
+
+	unsigned int GetTextureID() const {	return textureID;}
+	Picture& GetPicture() { return picture; }
 
 	bool IsNull()const { return textureID == 0; }
 	
 	bool Update(float elapsedTime);
 private:
-	bool Load(Renderer& renderer, const WString& fileName, unsigned int textureUnit, bool wrap, int& genTextureID);
-	
+	bool Load(const WString& fileName, int& genTextureID);
 	
 	std::unique_ptr<RenderContext> renderContext;
+	Picture      picture;
+	unsigned int textureID;
 };
 
 class TextureLoader {
@@ -65,7 +69,7 @@ public:
 private:
 	static bool Load(Renderer& renderer, const WString& filename);
 
-	static std::vector<std::pair<WString&&, std::shared_ptr<Texture>>> textures;
+	static std::vector<std::pair<WString, std::shared_ptr<Texture>>> textures;
 };
 
 class RenderTarget {
