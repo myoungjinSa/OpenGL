@@ -5,7 +5,7 @@
 
 
 const float MathUtils::PI = 3.14159265358f;
-const float MathUtils::TWO_PI = 3.14159265358f * 2.0f;
+const float MathUtils::TWO_PI = 6.28318530718f;
 const float MathUtils::HALF_PI = 3.14159265358f / 2.0f;
 
 

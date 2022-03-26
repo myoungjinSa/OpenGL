@@ -38,7 +38,7 @@ Gizmos::GizmoImpl::GizmoImpl(Gizmos* _pOwner, Renderer& renderer)
 	meshComponents[eInteract::TRANSLATE_X] = {
 		GizmoMeshComponent([&]() -> std::shared_ptr<Mesh> {
 			MeshBuilder meshBuilder;
-			meshBuilder.AddLathGeometry(Vec3f(1.0f, 0.0f, 0.0f), Vec3f(0.0f, 1.0f, 0.0f), Vec3f(0.0f, 0.0f, 1.0f), 16, arrowPoints, RGBA::RED);
+			meshBuilder.AddCylinder(Vec3f(1.0f, 0.0f, 0.0f), Vec3f(0.0f, 0.1f, 0.0f), Vec3f(0.0f, 0.0f, 0.1f), 32, RGBA::RED);
 			std::shared_ptr<Mesh> pGizmoMesh;
 			if (!pGizmoMesh)
 				pGizmoMesh = std::make_shared<Mesh>();
@@ -51,7 +51,7 @@ Gizmos::GizmoImpl::GizmoImpl(Gizmos* _pOwner, Renderer& renderer)
 	meshComponents[eInteract::TRANSLATE_Y] = {
 		GizmoMeshComponent([&]() -> std::shared_ptr<Mesh> {
 			MeshBuilder meshBuilder;
-			meshBuilder.AddLathGeometry(Vec3f(0.0f, 1.0f, 0.0f), Vec3f(0.0f, 0.0f, 1.0f), Vec3f(1.0f, 0.0f, 0.0f), 16, arrowPoints, RGBA::GREEN);
+			meshBuilder.AddCylinder(Vec3f(0.0f, 1.0f, 0.0f), Vec3f(0.0f, 0.0f, 0.1f), Vec3f(0.1f, 0.0f, 0.0f), 32, RGBA::GREEN);
 			std::shared_ptr<Mesh> pGizmoMesh;
 			if (!pGizmoMesh)
 				pGizmoMesh = std::make_shared<Mesh>();
@@ -64,7 +64,7 @@ Gizmos::GizmoImpl::GizmoImpl(Gizmos* _pOwner, Renderer& renderer)
 	meshComponents[eInteract::TRANSLATE_Z] = { 
 		GizmoMeshComponent([&]() -> std::shared_ptr<Mesh> {
 			MeshBuilder meshBuilder;
-			meshBuilder.AddLathGeometry(Vec3f(0.0f, 0.0f, 1.0f), Vec3f(1.0f, 0.0f, 0.0f), Vec3f(0.0f, 1.0f, 0.0f), 16, arrowPoints, RGBA::BLUE);
+			meshBuilder.AddCylinder(Vec3f(0.0f, 0.0f, 1.0f), Vec3f(0.1f, 0.0f, 0.0f), Vec3f(0.0f, 0.1f, 0.0f), 32, RGBA::BLUE);
 			std::shared_ptr<Mesh> pGizmoMesh;
 			if (!pGizmoMesh)
 				pGizmoMesh = std::make_shared<Mesh>();
@@ -400,7 +400,7 @@ void Gizmos::Update(const Camera& camera, float deltaTime) {
 void Gizmos::Render(Renderer& renderer, Camera* pCamera, const Scene& scene) {
 	if (targets.empty())
 		return;
-
+	
 	GizmoParameter parameter;
 	parameter.attachTargets.reserve(targets.size());
 	for (const auto& t : targets) {

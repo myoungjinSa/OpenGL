@@ -88,7 +88,11 @@ bool Scene::Render(Renderer& renderer) {
 		objects[iObj]->FillShaderParameter(shaderParmaeter, GetViewMatrix(), GetProjectionMatrix(), phongLight, *pCamera);
 		objects[iObj]->Render(renderer, shaderParmaeter);
 	}
+
+	renderer.SetDepthTest(false);
 	Gizmo.Render(renderer, pCamera, *this);
+	renderer.SetDepthTest(true);
+
 	renderer.EndRender();
 	return true;
 }

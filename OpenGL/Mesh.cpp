@@ -22,7 +22,6 @@ byte* ReadBufferData(void* pBuffer, size_t targetDataSize) {
 	return pReturn;
 }
 
-static const float tau = 6.28318530718f;
 
 Vertex::Vertex() 
 	:position(), uv0(), normal(), color()
@@ -213,7 +212,11 @@ void Mesh::Shutdown(Renderer& renderer) {
 }
 
 void Mesh::Render(Renderer& renderer) {
-	renderer.DrawIndexBuffer(vertexArrayId, indexCount);
+	if (DoesHaveIndexBuffer()) {
+		renderer.DrawIndexBuffer(vertexArrayId, indexCount);
+	}else {
+		renderer.DrawVertexBuffer(vertexArrayId, 0, vertexCount);
+	}
 }
 
 
@@ -379,7 +382,7 @@ void MeshBuilder::AddCylinder(const Vec3f& axis, const Vec3f& arm1, const Vec3f&
 
 	SetColor(color);
 	for (uint32_t iSlice = 0; iSlice <= sliceCount; ++iSlice) {
-		const float tex_s = static_cast<float>(iSlice) / sliceCount, angle = (float)(iSlice % sliceCount) * tau / sliceCount;
+		const float tex_s = static_cast<float>(iSlice) / sliceCount, angle = (float)(iSlice % sliceCount) * MathUtils::TWO_PI / sliceCount;
 		const Vec3f arm = arm1 * std::cos(angle) + arm2 * std::sin(angle);
 		
 		SetPosition(arm);
@@ -406,7 +409,7 @@ void MeshBuilder::AddCylinder(const Vec3f& axis, const Vec3f& arm1, const Vec3f&
 	//Generate caps
 	uint32_t base = (uint32_t)vertices.size();
 	for (uint32_t iSlice = 0; iSlice < sliceCount; ++iSlice) {
-		const float angle = static_cast<float>(iSlice % sliceCount) * tau / sliceCount;
+		const float angle = static_cast<float>(iSlice % sliceCount) * MathUtils::TWO_PI / sliceCount;
 		const float cosAngle = std::cos(angle);
 		const float sinAngle = std::sin(angle);
 		
@@ -435,6 +438,59 @@ void MeshBuilder::AddCylinder(const Vec3f& axis, const Vec3f& arm1, const Vec3f&
 	}
 }
 
+void MeshBuilder::AddCone(float halfWidth, float halfHegiht, float halfDepth, double angleStep, const RGBA& color) {
+	
+	float fReciprocalPrecisition = (float)(angleStep / MathUtils::TWO_PI);
+
+	int iSectorCount = 0;
+	
+	for (double coverAngle1 = 0.0f; coverAngle1 < MathUtils::TWO_PI; coverAngle1 += angleStep) {
+		double coverAngle2 = coverAngle1 + angleStep;
+		float widthPart1 = (float)(halfWidth * cos(coverAngle1));
+		float widthPart2 = (float)(halfWidth * cos(coverAngle2));
+		float depthPart1 = (float)(halfDepth * sin(coverAngle1));
+		float depthPart2 = (float)(halfDepth * sin(coverAngle2));
+
+		float fTextureOffsetS1 = iSectorCount * fReciprocalPrecisition;
+		float fTextureOffsetS2 = (iSectorCount + 1) * fReciprocalPrecisition;
+
+		SetColor(color);
+		SetPosition(0.0f, halfHegiht + halfHegiht, 0.0f);
+		SetUV(fTextureOffsetS1, 1.0f);
+		SetNormal(Vec3f((widthPart1 + widthPart2) / 2.0f, 0.0f, (depthPart1 + depthPart2) / 2.0f));
+		vertices.push_back(stamp);
+
+		SetColor(color);
+		SetPosition(widthPart2, 0.0f, depthPart2);
+		SetUV(fTextureOffsetS2, 0.0f);
+		SetNormal(Vec3f((widthPart1 + widthPart2) / 2.0f, 0.0f, (depthPart1 + depthPart2) / 2.0f));
+		vertices.push_back(stamp);
+
+		SetColor(color);
+		SetPosition(widthPart1, 0.0f, depthPart1);
+		SetUV(fTextureOffsetS2, 0.0f);
+		SetNormal(Vec3f((widthPart1 + widthPart2) / 2.0f, 0.0f, (depthPart1 + depthPart2) / 2.0f));
+		vertices.push_back(stamp);
+
+		iSectorCount++;
+	}
+
+	//Cone Bottom
+	for (double bottomAngle = 0; bottomAngle < MathUtils::TWO_PI; bottomAngle += angleStep) {
+		SetColor(color);
+		SetNormal(Vec3f(0.0f, -1.0f, 0.0f));
+
+		double c = cos(bottomAngle);
+		double s = sin(bottomAngle);
+
+		float fTextureOffsetS = 0.5f + (float)(0.5f * c);
+		float fTextureOffsetT = 0.5f + (float)(0.5f * s);
+
+		SetUV(fTextureOffsetS, fTextureOffsetT);
+		SetPosition((float)(halfWidth * c), 0.0f, (float)(halfDepth * s));
+		vertices.push_back(stamp);
+	}
+}
 
 void MeshBuilder::AddSphere(const Vec3f& center, float radius, int sectorCount, int stackCount) {
 	const float PI = acos(-1);
@@ -649,9 +705,10 @@ void MeshBuilder::AddCube(const Vec3f& center, const Vec3f& extent, const RGBA& 
 	}
 }
 
-void MeshBuilder::AddLathGeometry(const Vec3f& axis, const Vec3f& arm1, const Vec3f& arm2, int slices, const std::vector<Point2f>& points, const RGBA& color, const float epsilon) {
+
+void MeshBuilder::AddLathe(const Vec3f& axis, const Vec3f& arm1, const Vec3f& arm2, int slices, const std::vector<Point2f>& points, const RGBA& color, const float epsilon) {
 	for (int iSlice = 0; iSlice <= slices; ++iSlice) {
-		const float angle = (static_cast<float>(iSlice % slices) * tau / slices) + (tau / 8.0f), cosAngle = std::cos(angle), sinAngle = std::sin(angle);
+		const float angle = (static_cast<float>(iSlice % slices) * MathUtils::TWO_PI / slices) + (MathUtils::TWO_PI / 8.0f), cosAngle = std::cos(angle), sinAngle = std::sin(angle);
 		Matrix<float, 3, 3> mat = Matrix<float, 3, 3>::Identity();
 		Vec3f radius = arm1 * cosAngle + arm2 * sinAngle;
 		

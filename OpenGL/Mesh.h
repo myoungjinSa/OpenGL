@@ -75,6 +75,7 @@ public:
 	Mesh(const Mesh& other) = delete;
 	virtual ~Mesh();
 
+	bool DoesHaveIndexBuffer() const { return 0 < indexCount; }
 	bool Initialize(Renderer& renderer, VertexBufferBindCallback* pBindFuction, void* vertexData, unsigned int numVertices, unsigned int sizeofVertex, unsigned int* indexData, unsigned int numIndices);
 	void BindToVAO(const OpenGL& gl, Shader* pShader,GLuint vaoID);
 	void Shutdown(Renderer& renderer);
@@ -155,8 +156,9 @@ public:
 	void AddCube(const Vec3f& center, const Vec3f& extent, const RGBA& color, bool bLeftHand = true);
 	void AddQuad(const Vec3f& bottomLeft, const Vec3f& up, float upLength, const Vec3f& right, float rightLength, const Vec3f& normal, const RGBA& color = RGBA::WHITE, const Vec2f& uvOffset = Vec2f::ZERO, float uvStepSize = 1.0f);
 	void AddQuad(const Vec3f& center, const Vec3f& extent, const Vec3f& normal, const RGBA& color = RGBA::WHITE, const Vec2f& uvOffset = Vec2f::ZERO, float uvStepSize = 1.0f, bool bReversed = false);
-	void AddLathGeometry(const Vec3f& axis, const Vec3f& arm1, const Vec3f& arm2, int slices, const std::vector<Point2f>& points, const RGBA& color, const float epsilon = 0.0f);
-	
+	void AddLathe(const Vec3f& axis, const Vec3f& arm1, const Vec3f& arm2, int slices, const std::vector<Point2f>& points, const RGBA& color, const float epsilon = 0.0f);
+	void AddCone(float halfWidth, float halfHegiht, float halfDepth, double angleStep, const RGBA& color);
+
 	void AddVertex(const Vec3f& position);
 	void AddIndex(int index);
 

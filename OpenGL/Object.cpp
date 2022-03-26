@@ -455,12 +455,12 @@ bool Cubemap::Initialize(Renderer& renderer) {
 	meshBuilder.CopyToMesh(renderer, *mesh, &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 
 	std::array<std::shared_ptr<Texture>, 6> cubeTextures;
-	cubeTextures[0] = TextureLoader::GetTexture(renderer, L"skybox_right.png");
-	cubeTextures[1] = TextureLoader::GetTexture(renderer, L"skybox_left.png");
-	cubeTextures[2] = TextureLoader::GetTexture(renderer, L"skybox_top.png");
-	cubeTextures[3] = TextureLoader::GetTexture(renderer, L"skybox_bottom.png");
-	cubeTextures[4] = TextureLoader::GetTexture(renderer, L"skybox_front.png");
-	cubeTextures[5] = TextureLoader::GetTexture(renderer, L"skybox_back.png");
+	cubeTextures[0] = TextureLoader::GetTexture(renderer, L"SkyBox_Right.png");
+	cubeTextures[1] = TextureLoader::GetTexture(renderer, L"SkyBox_Left.png");
+	cubeTextures[2] = TextureLoader::GetTexture(renderer, L"SkyBox_Top.png");
+	cubeTextures[3] = TextureLoader::GetTexture(renderer, L"SkyBox_Bottom.png");
+	cubeTextures[4] = TextureLoader::GetTexture(renderer, L"SkyBox_Front.png");
+	cubeTextures[5] = TextureLoader::GetTexture(renderer, L"SkyBox_Back.png");
 	
 	unsigned int cubemapTexture;
 	renderer.AllocateTextures(cubemapTexture, 1);
