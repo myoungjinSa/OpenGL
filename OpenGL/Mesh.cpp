@@ -173,7 +173,7 @@ Vec2f Triangle::GetUV(size_t index) const {
 
 
 Mesh::Mesh()
-	:meshes(), vertexList(), vertexCount(0), vertexArrayId(0), vertexBufferId(0), indexCount(0), indexBufferId(0)
+	:triangles(), vertexList(), vertexCount(0), vertexArrayId(0), vertexBufferId(0), indexCount(0), indexBufferId(0)
 {
 
 }
@@ -186,18 +186,18 @@ Mesh::~Mesh() {
 	vertexList.clear();
 }
 
-bool Mesh::Initialize(Renderer& renderer, VertexBufferBindCallback* pBindFuction, void* vertexData, unsigned int numVertices, unsigned int sizeofVertex, unsigned int* indexData, unsigned int numIndices) {
+bool Mesh::Initialize(Renderer& renderer, VertexBufferBindCallback* pBindFunction, void* vertexData, unsigned int numVertices, unsigned int sizeofVertex, unsigned int* indexData, unsigned int numIndices) {
 	vertexCount = numVertices;
 	indexCount = numIndices;
 
-	renderer.AllocateVertexBuffer(vertexArrayId, vertexBufferId, vertexData, pBindFuction, numVertices, sizeofVertex);
+	renderer.AllocateVertexBuffer(vertexArrayId, vertexBufferId, vertexData, pBindFunction, numVertices, sizeofVertex);
 	renderer.AllocateIndexBuffer(indexBufferId, indexCount, indexData);
 
 	BuildVertexList(vertexData);
 	BuildIndexList(indexData);
 
-	BuildTriangleMeshes();
-	
+	BuildTriangles();
+
 	return true;
 }
 
@@ -220,11 +220,11 @@ void Mesh::Render(Renderer& renderer) {
 }
 
 
-bool Mesh::BuildTriangleMeshes() {
+bool Mesh::BuildTriangles() {
 	for (size_t iIndex = 0; iIndex < indexCount; iIndex += 3) {
 		Vertex* v = vertexList.at(indexList[iIndex]);
 		std::tuple<const Vertex*, const Vertex*, const Vertex*> vTuple = std::make_tuple(vertexList.at(indexList[iIndex]), vertexList.at(indexList[iIndex + 1]), vertexList.at(indexList[iIndex + 2]));
-		meshes.push_back(Triangle(*std::get<0>(vTuple), *std::get<1>(vTuple), *std::get<2>(vTuple)));
+		triangles.push_back(Triangle(*std::get<0>(vTuple), *std::get<1>(vTuple), *std::get<2>(vTuple)));
 	}
 	return true;
 }
@@ -283,16 +283,18 @@ bool Mesh::BuildIndexList(unsigned int* indicesData) {
 }
 
 size_t Mesh::GetTriangleMeshCount() const {
-	return meshes.size();
+	return triangles.size();
 }
 const Triangle& Mesh::GetTriangleMesh(size_t index) const {
-	if (meshes.size() <= index) {
+	if (triangles.size() <= index) {
 		LogError(L"Triangle::GetTriangleMesh() - Index is out of range");
 		assert(0);
-		return *meshes.end();
+		return *triangles.end();
 	}
-	return meshes.at(index);
+	return triangles.at(index);
 }
+
+
 
 ///////////////////////////////// Mesh Builder /////////////////////////////
 MeshBuilder::MeshBuilder() 
@@ -308,6 +310,9 @@ void MeshBuilder::Begin() {
 void MeshBuilder::End() {
 	if (startIndex < vertices.size())
 		startIndex = vertices.size();
+
+	vertices.clear();
+	indices.clear();
 }
 
 //PivotÀÌ ¿ÞÂÊ ¾Æ·¡
@@ -438,8 +443,60 @@ void MeshBuilder::AddCylinder(const Vec3f& axis, const Vec3f& arm1, const Vec3f&
 	}
 }
 
-void MeshBuilder::AddCone(float halfWidth, float halfHegiht, float halfDepth, double angleStep, const RGBA& color) {
-	
+void MeshBuilder::AddXAxisCone(const Vec3f& centerOffset, float halfWidth, float halfHeight, float halfDepth, double angleStep, const RGBA& color) {
+
+	float fReciprocalPrecisition = (float)(angleStep / MathUtils::TWO_PI);
+
+	int iSectorCount = 0;
+
+	for (double coverAngle1 = 0.0f; coverAngle1 < MathUtils::TWO_PI; coverAngle1 += angleStep) {
+		double coverAngle2 = coverAngle1 + angleStep;
+		float heightPart1 = (float)(halfHeight * cos(coverAngle1));
+		float heightPart2 = (float)(halfHeight * cos(coverAngle2));
+		float depthPart1 = (float)(halfDepth * sin(coverAngle1));
+		float depthPart2 = (float)(halfDepth * sin(coverAngle2));
+
+		float fTextureOffsetS1 = iSectorCount * fReciprocalPrecisition;
+		float fTextureOffsetS2 = (iSectorCount + 1) * fReciprocalPrecisition;
+
+		SetColor(color);
+		SetPosition(centerOffset + Vec3f(halfWidth + halfWidth, 0.0f, 0.0f));
+		SetUV(fTextureOffsetS1, 1.0f);
+		SetNormal(Vec3f(0.0f, (heightPart1 + heightPart2) / 2.0f, (depthPart1 + depthPart2) / 2.0f));
+		vertices.push_back(stamp);
+
+		SetColor(color);
+		SetPosition(centerOffset + Vec3f(0.0f, heightPart2, depthPart2));
+		SetUV(fTextureOffsetS2, 0.0f);
+		SetNormal(Vec3f(0.0f, (heightPart1 + heightPart2) / 2.0f, (depthPart1 + depthPart2) / 2.0f));
+		vertices.push_back(stamp);
+
+		SetColor(color);
+		SetPosition(centerOffset + Vec3f(0.0f, heightPart1, depthPart1));
+		SetUV(fTextureOffsetS2, 0.0f);
+		SetNormal(Vec3f(0.0f, (heightPart1 + heightPart2) / 2.0f, (depthPart1 + depthPart2) / 2.0f));
+		vertices.push_back(stamp);
+
+		iSectorCount++;
+	}
+
+	//Cone Bottom
+	for (double bottomAngle = 0; bottomAngle < MathUtils::TWO_PI; bottomAngle += angleStep) {
+		SetColor(color);
+		SetNormal(Vec3f(-1.0f, 0.0f, 0.0f));
+
+		double c = cos(bottomAngle);
+		double s = sin(bottomAngle);
+
+		float fTextureOffsetS = 0.5f + (float)(0.5f * c);
+		float fTextureOffsetT = 0.5f + (float)(0.5f * s);
+
+		SetUV(fTextureOffsetS, fTextureOffsetT);
+		SetPosition(centerOffset + Vec3f(0.0f, (float)(halfHeight * c), (float)(halfDepth * s)));
+		vertices.push_back(stamp);
+	}
+}
+void MeshBuilder::AddYAxisCone(const Vec3f& centerOffset, float halfWidth, float halfHeight, float halfDepth, double angleStep, const RGBA& color) {
 	float fReciprocalPrecisition = (float)(angleStep / MathUtils::TWO_PI);
 
 	int iSectorCount = 0;
@@ -455,19 +512,19 @@ void MeshBuilder::AddCone(float halfWidth, float halfHegiht, float halfDepth, do
 		float fTextureOffsetS2 = (iSectorCount + 1) * fReciprocalPrecisition;
 
 		SetColor(color);
-		SetPosition(0.0f, halfHegiht + halfHegiht, 0.0f);
+		SetPosition(centerOffset + Vec3f(0.0f, halfHeight + halfHeight, 0.0f));
 		SetUV(fTextureOffsetS1, 1.0f);
 		SetNormal(Vec3f((widthPart1 + widthPart2) / 2.0f, 0.0f, (depthPart1 + depthPart2) / 2.0f));
 		vertices.push_back(stamp);
 
 		SetColor(color);
-		SetPosition(widthPart2, 0.0f, depthPart2);
+		SetPosition(centerOffset + Vec3f(widthPart2, 0.0f, depthPart2));
 		SetUV(fTextureOffsetS2, 0.0f);
 		SetNormal(Vec3f((widthPart1 + widthPart2) / 2.0f, 0.0f, (depthPart1 + depthPart2) / 2.0f));
 		vertices.push_back(stamp);
 
 		SetColor(color);
-		SetPosition(widthPart1, 0.0f, depthPart1);
+		SetPosition(centerOffset + Vec3f(widthPart1 ,0.0f, depthPart1));
 		SetUV(fTextureOffsetS2, 0.0f);
 		SetNormal(Vec3f((widthPart1 + widthPart2) / 2.0f, 0.0f, (depthPart1 + depthPart2) / 2.0f));
 		vertices.push_back(stamp);
@@ -487,10 +544,64 @@ void MeshBuilder::AddCone(float halfWidth, float halfHegiht, float halfDepth, do
 		float fTextureOffsetT = 0.5f + (float)(0.5f * s);
 
 		SetUV(fTextureOffsetS, fTextureOffsetT);
-		SetPosition((float)(halfWidth * c), 0.0f, (float)(halfDepth * s));
+		SetPosition(centerOffset + Vec3f((float)(halfWidth * c), 0.0f, (float)(halfDepth * s)));
 		vertices.push_back(stamp);
 	}
 }
+
+void MeshBuilder::AddZAxisCone(const Vec3f& centerOffset, float halfWidth, float halfHeight, float halfDepth, double angleStep, const RGBA& color) {
+	float fReciprocalPrecisition = (float)(angleStep / MathUtils::TWO_PI);
+
+	int iSectorCount = 0;
+
+	for (double coverAngle1 = 0.0f; coverAngle1 < MathUtils::TWO_PI; coverAngle1 += angleStep) {
+		double coverAngle2 = coverAngle1 + angleStep;
+		float heightPart1 = (float)(halfHeight * cos(coverAngle1));
+		float heightPart2 = (float)(halfHeight * cos(coverAngle2));
+		float widthPart1 = (float)(halfWidth * sin(coverAngle1));
+		float widthPart2 = (float)(halfWidth * sin(coverAngle2));
+
+		float fTextureOffsetS1 = iSectorCount * fReciprocalPrecisition;
+		float fTextureOffsetS2 = (iSectorCount + 1) * fReciprocalPrecisition;
+
+		SetColor(color);
+		SetPosition(centerOffset + Vec3f(0.0f, 0.0f, halfDepth + halfDepth));
+		SetUV(fTextureOffsetS1, 1.0f);
+		SetNormal(Vec3f((widthPart1 + widthPart2) / 2.0f, (heightPart1 + heightPart2) / 2.0f, 0.0f));
+		vertices.push_back(stamp);
+
+		SetColor(color);
+		SetPosition(centerOffset + Vec3f(widthPart2, heightPart2, 0.0f));
+		SetUV(fTextureOffsetS2, 0.0f);
+		SetNormal(Vec3f((widthPart1 + widthPart2) / 2.0f, (heightPart1 + heightPart2) / 2.0f, 0.0f));
+		vertices.push_back(stamp);
+
+		SetColor(color);
+		SetPosition(centerOffset + Vec3f(widthPart1, heightPart1, 0.0f));
+		SetUV(fTextureOffsetS2, 0.0f);
+		SetNormal(Vec3f((widthPart1 + widthPart2) / 2.0f, (heightPart1 + heightPart2) / 2.0, 0.0f));
+		vertices.push_back(stamp);
+
+		iSectorCount++;
+	}
+
+	//Cone Bottom
+	for (double bottomAngle = 0; bottomAngle < MathUtils::TWO_PI; bottomAngle += angleStep) {
+		SetColor(color);
+		SetNormal(Vec3f(0.0f, 0.0f, -1.0f));
+
+		double c = cos(bottomAngle);
+		double s = sin(bottomAngle);
+
+		float fTextureOffsetS = 0.5f + (float)(0.5f * c);
+		float fTextureOffsetT = 0.5f + (float)(0.5f * s);
+
+		SetUV(fTextureOffsetS, fTextureOffsetT);
+		SetPosition(centerOffset + Vec3f((float)(halfWidth * c), (float)(halfHeight * s), 0.0f));
+		vertices.push_back(stamp);
+	}
+}
+
 
 void MeshBuilder::AddSphere(const Vec3f& center, float radius, int sectorCount, int stackCount) {
 	const float PI = acos(-1);
@@ -759,7 +870,7 @@ void MeshBuilder::AddIndex(int index) {
 }
 
 void MeshBuilder::CopyToMesh(Renderer& renderer, Mesh& mesh, VertexBufferBindCallback* bindFunction, VertexCopyCallback* copyFunction, unsigned int sizeofVertex) {
-	unsigned int vertexCount = vertices.size();
+	unsigned int vertexCount = vertices.size() - startIndex;
 	if (vertexCount == 0) {
 		return;
 	}
@@ -769,7 +880,7 @@ void MeshBuilder::CopyToMesh(Renderer& renderer, Mesh& mesh, VertexBufferBindCal
 
 	byte* vertexBuffer = new byte[vertexBufferSize];
 	byte* currentBufferIndex = vertexBuffer;
-	for (unsigned int vertexIndex = 0; vertexIndex < vertexCount; vertexIndex++) {
+	for (unsigned int vertexIndex = startIndex; vertexIndex < vertexCount; vertexIndex++) {
 		copyFunction(vertices[vertexIndex], currentBufferIndex);
 		currentBufferIndex += vertexSize;
 	}

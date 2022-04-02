@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <array>
+#include <list>
 #include "Types.h"
 #include "Compositor.h"
 #include "Matrix.h"
@@ -9,6 +10,7 @@
 class Renderer; 
 class Shader;
 class OpenGL;
+class Mesh;
 //the master Vertex. this is a superset of all possible vertex data.
 struct VertexMaster {
 	Vec3f position;
@@ -65,7 +67,6 @@ public:
 	std::array<Vertex, 3> vertices;
 };
 
-
 class Mesh
 {
 	typedef unsigned int GLuint;
@@ -83,7 +84,7 @@ public:
 
 	bool BuildVertexList(void* vertexData);
 	bool BuildIndexList(unsigned int* indicesData);
-	bool BuildTriangleMeshes();
+	bool BuildTriangles();
 
 	Mesh& operator=(const Mesh& other) = delete;
 	Mesh& operator=(Mesh&& other) = delete;
@@ -94,11 +95,10 @@ protected:
 	std::vector<Vertex*> vertexList;
 	std::vector<unsigned int> indexList;
 
-	std::vector<Triangle> meshes;
+	std::vector<Triangle> triangles;
 	int vertexCount, indexCount;
 	unsigned int vertexArrayId, vertexBufferId, indexBufferId;
 };
-
 
 class MeshBuilder {
 
@@ -157,7 +157,9 @@ public:
 	void AddQuad(const Vec3f& bottomLeft, const Vec3f& up, float upLength, const Vec3f& right, float rightLength, const Vec3f& normal, const RGBA& color = RGBA::WHITE, const Vec2f& uvOffset = Vec2f::ZERO, float uvStepSize = 1.0f);
 	void AddQuad(const Vec3f& center, const Vec3f& extent, const Vec3f& normal, const RGBA& color = RGBA::WHITE, const Vec2f& uvOffset = Vec2f::ZERO, float uvStepSize = 1.0f, bool bReversed = false);
 	void AddLathe(const Vec3f& axis, const Vec3f& arm1, const Vec3f& arm2, int slices, const std::vector<Point2f>& points, const RGBA& color, const float epsilon = 0.0f);
-	void AddCone(float halfWidth, float halfHegiht, float halfDepth, double angleStep, const RGBA& color);
+	void AddXAxisCone(const Vec3f& centerOffset, float halfWidth, float halfHegiht, float halfDepth, double angleStep, const RGBA& color);
+	void AddYAxisCone(const Vec3f& centerOffset, float halfWidth, float halfHegiht, float halfDepth, double angleStep, const RGBA& color);
+	void AddZAxisCone(const Vec3f& centerOffset, float halfWidth, float halfHegiht, float halfDepth, double angleStep, const RGBA& color);
 
 	void AddVertex(const Vec3f& position);
 	void AddIndex(int index);
@@ -170,7 +172,6 @@ public:
 private:
 	VertexMaster stamp;
 	unsigned int startIndex;
-
 };
 
 

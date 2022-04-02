@@ -10,10 +10,10 @@
 #include "String/String.h"
 #include "Input.h"
 
-Gizmos::GizmoImpl::GizmoMeshComponent::GizmoMeshComponent(std::function<std::shared_ptr<Mesh>()> meshBuildFunction, const RGBA& _baseColor, const RGBA& _highlightColor) 
+Gizmos::GizmoImpl::GizmoMeshComponent::GizmoMeshComponent(std::function<std::list<std::shared_ptr<Mesh>>()> meshBuildFunction, const RGBA& _baseColor, const RGBA& _highlightColor) 
 	: baseColor(_baseColor), highlightColor(_highlightColor)
 {
-	pGizmoMesh = meshBuildFunction();
+	gizmoMeshes = meshBuildFunction();
 }
 
 
@@ -22,7 +22,7 @@ Gizmos::GizmoImpl::GizmoMeshComponent::GizmoMeshComponent(const GizmoMeshCompone
 }
 
 const Gizmos::GizmoImpl::GizmoMeshComponent& Gizmos::GizmoImpl::GizmoMeshComponent::operator=(const Gizmos::GizmoImpl::GizmoMeshComponent& other) {
-	pGizmoMesh = other.pGizmoMesh;
+	gizmoMeshes = other.gizmoMeshes;
 	baseColor = other.baseColor;
 	highlightColor = other.highlightColor;
 	return *this;
@@ -36,42 +36,63 @@ Gizmos::GizmoImpl::GizmoImpl(Gizmos* _pOwner, Renderer& renderer)
 	std::vector<Point2f> ring_points = { { +0.025f, 1 },{ -0.025f, 1 },{ -0.025f, 1 },{ -0.025f, 1.1f },{ -0.025f, 1.1f },{ +0.025f, 1.1f },{ +0.025f, 1.1f },{ +0.025f, 1 } };
 	
 	meshComponents[eInteract::TRANSLATE_X] = {
-		GizmoMeshComponent([&]() -> std::shared_ptr<Mesh> {
+		GizmoMeshComponent([&]() -> std::list<std::shared_ptr<Mesh>> {
+			std::list<std::shared_ptr<Mesh>> gizmoMeshes;
+			
 			MeshBuilder meshBuilder;
-			meshBuilder.AddCylinder(Vec3f(1.0f, 0.0f, 0.0f), Vec3f(0.0f, 0.1f, 0.0f), Vec3f(0.0f, 0.0f, 0.1f), 32, RGBA::RED);
-			std::shared_ptr<Mesh> pGizmoMesh;
-			if (!pGizmoMesh)
-				pGizmoMesh = std::make_shared<Mesh>();
+			gizmoMeshes.push_back(std::make_shared<Mesh>());
+			meshBuilder.Begin();
+			meshBuilder.AddCylinder(Vec3f(0.25f, 0.0f, 0.0f), Vec3f(0.0f, 0.01f, 0.0f), Vec3f(0.0f, 0.0f, 0.01f), 32, RGBA::RED);
+			meshBuilder.CopyToMesh(renderer, *gizmoMeshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+			meshBuilder.End();
 
-			meshBuilder.CopyToMesh(renderer, *pGizmoMesh, &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
-			return pGizmoMesh;
+			gizmoMeshes.push_back(std::make_shared<Mesh>());
+			meshBuilder.Begin();
+			meshBuilder.AddXAxisCone(Vec3f(0.25f, 0.0f, 0.0f), 0.1f, 0.05f, 0.05f, 0.1f, RGBA::RED);
+			meshBuilder.CopyToMesh(renderer, *gizmoMeshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+			meshBuilder.End();
+				
+			return gizmoMeshes;
 			}, RGBA::RED, RGBA::YELLOW) 
 	};
 
 	meshComponents[eInteract::TRANSLATE_Y] = {
-		GizmoMeshComponent([&]() -> std::shared_ptr<Mesh> {
+		GizmoMeshComponent([&]() -> std::list<std::shared_ptr<Mesh>> {
+			std::list<std::shared_ptr<Mesh>> gizmoMeshes;
 			MeshBuilder meshBuilder;
-			meshBuilder.AddCylinder(Vec3f(0.0f, 1.0f, 0.0f), Vec3f(0.0f, 0.0f, 0.1f), Vec3f(0.1f, 0.0f, 0.0f), 32, RGBA::GREEN);
-			std::shared_ptr<Mesh> pGizmoMesh;
-			if (!pGizmoMesh)
-				pGizmoMesh = std::make_shared<Mesh>();
+			gizmoMeshes.push_back(std::make_shared<Mesh>());
+			meshBuilder.Begin();
+			meshBuilder.AddCylinder(Vec3f(0.0f, 0.25f, 0.0f), Vec3f(0.0f, 0.0f, 0.01f), Vec3f(0.01f, 0.0f, 0.0f), 32, RGBA::GREEN);
+			meshBuilder.CopyToMesh(renderer, *gizmoMeshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+			meshBuilder.End();
+			
+			gizmoMeshes.push_back(std::make_shared<Mesh>());
+			meshBuilder.Begin();
+			meshBuilder.AddYAxisCone(Vec3f(0.0f, 0.25f, 0.0f), 0.05f, 0.1f, 0.05f, 0.1f, RGBA::GREEN);
+			meshBuilder.CopyToMesh(renderer, *gizmoMeshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+			meshBuilder.End();
 
-			meshBuilder.CopyToMesh(renderer, *pGizmoMesh, &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
-			return pGizmoMesh;
+
+			return gizmoMeshes;
 			}, RGBA::GREEN, RGBA::YELLOW)
 	};
 
 	meshComponents[eInteract::TRANSLATE_Z] = { 
-		GizmoMeshComponent([&]() -> std::shared_ptr<Mesh> {
+		GizmoMeshComponent([&]() ->std::list<std::shared_ptr<Mesh>> {
+			std::list<std::shared_ptr<Mesh>> gizmoMeshes;
 			MeshBuilder meshBuilder;
-			meshBuilder.AddCylinder(Vec3f(0.0f, 0.0f, 1.0f), Vec3f(0.1f, 0.0f, 0.0f), Vec3f(0.0f, 0.1f, 0.0f), 32, RGBA::BLUE);
-			std::shared_ptr<Mesh> pGizmoMesh;
-			if (!pGizmoMesh)
-				pGizmoMesh = std::make_shared<Mesh>();
+			gizmoMeshes.push_back(std::make_shared<Mesh>());
+			meshBuilder.Begin();
+			meshBuilder.AddCylinder(Vec3f(0.0f, 0.0f, 0.25f), Vec3f(0.01f, 0.0f, 0.0f), Vec3f(0.0f, 0.01f, 0.0f), 32, RGBA::BLUE);
+			meshBuilder.CopyToMesh(renderer, *gizmoMeshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+			meshBuilder.End();
 
-			meshBuilder.CopyToMesh(renderer, *pGizmoMesh, &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
-			
-			return pGizmoMesh;
+			gizmoMeshes.push_back(std::make_shared<Mesh>());
+			meshBuilder.Begin();
+			meshBuilder.AddZAxisCone(Vec3f(0.0f, 0.0f, 0.25f), 0.05f, 0.05f, 0.1f, 0.1f, RGBA::BLUE);
+			meshBuilder.CopyToMesh(renderer, *gizmoMeshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+			meshBuilder.End();
+			return gizmoMeshes;
 			}, RGBA::BLUE, RGBA::YELLOW)
 	};
 
@@ -117,71 +138,74 @@ bool Gizmos::GizmoImpl::IntersectInternal(const Ray& ray, const Vec3f& v0, const
 }
 
 bool Gizmos::GizmoImpl::IntersectTranslationGizmos(const Ray& ray, double& distance) {
-	std::shared_ptr<Mesh> translationXMesh = meshComponents[eInteract::TRANSLATE_X].pGizmoMesh;
+	std::list<std::shared_ptr<Mesh>> translationXMeshes = meshComponents[eInteract::TRANSLATE_X].gizmoMeshes;
 	double best_t = std::numeric_limits<double>::infinity(), t;
 	int32_t best_tri = -1;
-	for (uint32_t iTriangle = 0; iTriangle < translationXMesh.get()->GetTriangleMeshCount(); iTriangle++) {
-		Triangle triangleMesh = translationXMesh->GetTriangleMesh(iTriangle);
-		Vec4f vertex0 = ::Transform(pOwner->transform->GetWorldMatrix(), Vec4f(triangleMesh.vertices[0].position, 1.0f));
-		Vec4f vertex1 = ::Transform(pOwner->transform->GetWorldMatrix(), Vec4f(triangleMesh.vertices[1].position, 1.0f));
-		Vec4f vertex2 = ::Transform(pOwner->transform->GetWorldMatrix(), Vec4f(triangleMesh.vertices[2].position, 1.0f));
-		if (pOwner->IntersectTriangle(ray, Vec3f(vertex0.x, vertex0.y, vertex0.z), Vec3f(vertex1.x, vertex1.y, vertex1.z), Vec3f(vertex2.x, vertex2.y, vertex2.z), t) && t < best_t) {
-			best_t = t;
-			best_tri = iTriangle;
-			distance = best_t;
-			interactionState.active = true;
-			interactionState.originalPosition = pOwner->GetPosition();
-			interactionState.interationMode = eInteract::TRANSLATE_X;
-			//interactionState.rayOrigin = ray.GetPosition();
-			interactionState.rayDirection = ray.GetDirection();
-			interactionState.clickOffset = ray.GetPosition() + ray.GetDirection() * distance;
-		}
-	}
-
-
-	best_t = std::numeric_limits<double>::infinity();
-	t = -1;
-
-	std::shared_ptr<Mesh> translationYMesh = meshComponents[eInteract::TRANSLATE_Y].pGizmoMesh;
-	for (uint32_t iTriangle = 0; iTriangle < translationYMesh.get()->GetTriangleMeshCount(); iTriangle++) {
-		Triangle triangleMesh = translationYMesh->GetTriangleMesh(iTriangle);
-		Vec4f vertex0 = ::Transform(pOwner->transform->GetWorldMatrix(), Vec4f(triangleMesh.vertices[0].position, 1.0f));
-		Vec4f vertex1 = ::Transform(pOwner->transform->GetWorldMatrix(), Vec4f(triangleMesh.vertices[1].position, 1.0f));
-		Vec4f vertex2 = ::Transform(pOwner->transform->GetWorldMatrix(), Vec4f(triangleMesh.vertices[2].position, 1.0f));
-		if (pOwner->IntersectTriangle(ray, Vec3f(vertex0.x, vertex0.y, vertex0.z), Vec3f(vertex1.x, vertex1.y, vertex1.z), Vec3f(vertex2.x, vertex2.y, vertex2.z), t) && t < best_t) {
-			best_t = t;
-			best_tri = iTriangle;
-			distance = best_t;
-			interactionState.active = true;
-			interactionState.originalPosition = pOwner->GetPosition();
-			interactionState.interationMode = eInteract::TRANSLATE_Y;
-			//interactionState.rayOrigin = ray.GetPosition();
-			interactionState.rayDirection = ray.GetDirection();
-			interactionState.clickOffset = ray.GetPosition() + ray.GetDirection() * distance;
+	for (auto& translationXMesh : translationXMeshes) {
+		for (uint32_t iTriangle = 0; iTriangle < translationXMesh->GetTriangleMeshCount(); iTriangle++) {
+			Triangle triangleMesh = translationXMesh->GetTriangleMesh(iTriangle);
+			Vec4f vertex0 = ::Transform(pOwner->transform->GetWorldMatrix(), Vec4f(triangleMesh.vertices[0].position, 1.0f));
+			Vec4f vertex1 = ::Transform(pOwner->transform->GetWorldMatrix(), Vec4f(triangleMesh.vertices[1].position, 1.0f));
+			Vec4f vertex2 = ::Transform(pOwner->transform->GetWorldMatrix(), Vec4f(triangleMesh.vertices[2].position, 1.0f));
+			if (pOwner->IntersectTriangle(ray, Vec3f(vertex0.x, vertex0.y, vertex0.z), Vec3f(vertex1.x, vertex1.y, vertex1.z), Vec3f(vertex2.x, vertex2.y, vertex2.z), t) && t < best_t) {
+				best_t = t;
+				best_tri = iTriangle;
+				distance = best_t;
+				interactionState.active = true;
+				interactionState.originalPosition = pOwner->GetPosition();
+				interactionState.interationMode = eInteract::TRANSLATE_X;
+				//interactionState.rayOrigin = ray.GetPosition();
+				interactionState.rayDirection = ray.GetDirection();
+				interactionState.clickOffset = ray.GetPosition() + ray.GetDirection() * distance;
+			}
 		}
 	}
 
 	best_t = std::numeric_limits<double>::infinity();
 	t = -1;
-	std::shared_ptr<Mesh> translationZMesh = meshComponents[eInteract::TRANSLATE_Z].pGizmoMesh;
-	for (uint32_t iTriangle = 0; iTriangle < translationZMesh.get()->GetTriangleMeshCount(); iTriangle++) {
-		Triangle triangleMesh = translationZMesh->GetTriangleMesh(iTriangle);
-		Vec4f vertex0 = ::Transform(pOwner->transform->GetWorldMatrix(), Vec4f(triangleMesh.vertices[0].position, 1.0f));
-		Vec4f vertex1 = ::Transform(pOwner->transform->GetWorldMatrix(), Vec4f(triangleMesh.vertices[1].position, 1.0f));
-		Vec4f vertex2 = ::Transform(pOwner->transform->GetWorldMatrix(), Vec4f(triangleMesh.vertices[2].position, 1.0f));
-		if (pOwner->IntersectTriangle(ray, Vec3f(vertex0.x, vertex0.y, vertex0.z), Vec3f(vertex1.x, vertex1.y, vertex1.z), Vec3f(vertex2.x, vertex2.y, vertex2.z), t) && t < best_t) {
-			best_t = t;
-			best_tri = iTriangle;
-			distance = best_t;
-			interactionState.active = true;
-			interactionState.originalPosition = pOwner->GetPosition();
-			interactionState.interationMode = eInteract::TRANSLATE_Z;
-			interactionState.rayOrigin = ray.GetPosition();
-			interactionState.rayDirection = ray.GetDirection();
-			interactionState.clickOffset = ray.GetPosition() + ray.GetDirection() * distance;
+
+	std::list<std::shared_ptr<Mesh>> translationYMeshes = meshComponents[eInteract::TRANSLATE_Y].gizmoMeshes;
+	for (auto& translationYMesh : translationYMeshes) {
+		for (uint32_t iTriangle = 0; iTriangle < translationYMesh.get()->GetTriangleMeshCount(); iTriangle++) {
+			Triangle triangleMesh = translationYMesh->GetTriangleMesh(iTriangle);
+			Vec4f vertex0 = ::Transform(pOwner->transform->GetWorldMatrix(), Vec4f(triangleMesh.vertices[0].position, 1.0f));
+			Vec4f vertex1 = ::Transform(pOwner->transform->GetWorldMatrix(), Vec4f(triangleMesh.vertices[1].position, 1.0f));
+			Vec4f vertex2 = ::Transform(pOwner->transform->GetWorldMatrix(), Vec4f(triangleMesh.vertices[2].position, 1.0f));
+			if (pOwner->IntersectTriangle(ray, Vec3f(vertex0.x, vertex0.y, vertex0.z), Vec3f(vertex1.x, vertex1.y, vertex1.z), Vec3f(vertex2.x, vertex2.y, vertex2.z), t) && t < best_t) {
+				best_t = t;
+				best_tri = iTriangle;
+				distance = best_t;
+				interactionState.active = true;
+				interactionState.originalPosition = pOwner->GetPosition();
+				interactionState.interationMode = eInteract::TRANSLATE_Y;
+				//interactionState.rayOrigin = ray.GetPosition();
+				interactionState.rayDirection = ray.GetDirection();
+				interactionState.clickOffset = ray.GetPosition() + ray.GetDirection() * distance;
+			}
 		}
 	}
-
+	best_t = std::numeric_limits<double>::infinity();
+	t = -1;
+	std::list<std::shared_ptr<Mesh>> translationZMeshes = meshComponents[eInteract::TRANSLATE_Z].gizmoMeshes;
+	for (auto& translationZMesh : translationZMeshes) {
+		for (uint32_t iTriangle = 0; iTriangle < translationZMesh.get()->GetTriangleMeshCount(); iTriangle++) {
+			Triangle triangleMesh = translationZMesh->GetTriangleMesh(iTriangle);
+			Vec4f vertex0 = ::Transform(pOwner->transform->GetWorldMatrix(), Vec4f(triangleMesh.vertices[0].position, 1.0f));
+			Vec4f vertex1 = ::Transform(pOwner->transform->GetWorldMatrix(), Vec4f(triangleMesh.vertices[1].position, 1.0f));
+			Vec4f vertex2 = ::Transform(pOwner->transform->GetWorldMatrix(), Vec4f(triangleMesh.vertices[2].position, 1.0f));
+			if (pOwner->IntersectTriangle(ray, Vec3f(vertex0.x, vertex0.y, vertex0.z), Vec3f(vertex1.x, vertex1.y, vertex1.z), Vec3f(vertex2.x, vertex2.y, vertex2.z), t) && t < best_t) {
+				best_t = t;
+				best_tri = iTriangle;
+				distance = best_t;
+				interactionState.active = true;
+				interactionState.originalPosition = pOwner->GetPosition();
+				interactionState.interationMode = eInteract::TRANSLATE_Z;
+				interactionState.rayOrigin = ray.GetPosition();
+				interactionState.rayDirection = ray.GetDirection();
+				interactionState.clickOffset = ray.GetPosition() + ray.GetDirection() * distance;
+			}
+		}
+	}
 	if (best_t == -1) {
 		pOwner->impl->interactionState.active = false;
 		return false;
@@ -291,10 +315,13 @@ void Gizmos::GizmoImpl::Render(Renderer& renderer, const GizmoParameter& gizmoPa
 	shaderParam.projectionMatrix = scene.GetProjectionMatrix();
 
 	defaultShader->Render(renderer, shaderParam);
-	meshComponents[eInteract::TRANSLATE_X].pGizmoMesh->Render(renderer);
-	meshComponents[eInteract::TRANSLATE_Y].pGizmoMesh->Render(renderer);
-	meshComponents[eInteract::TRANSLATE_Z].pGizmoMesh->Render(renderer);
-
+	
+	for (auto& gizmoMesh : meshComponents[eInteract::TRANSLATE_X].gizmoMeshes)
+		gizmoMesh->Render(renderer);
+	for (auto& gizmoMesh : meshComponents[eInteract::TRANSLATE_Y].gizmoMeshes)
+		gizmoMesh->Render(renderer);
+	for (auto& gizmoMesh : meshComponents[eInteract::TRANSLATE_Z].gizmoMeshes)
+		gizmoMesh->Render(renderer);	
 }
 
 Gizmos::Gizmos() 

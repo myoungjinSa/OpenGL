@@ -1,6 +1,7 @@
 #pragma once
 #include <memory>
 #include <vector>
+#include <list>
 #include "Matrix.h"
 #include "Component.h"
 #include "Transform.h"
@@ -9,6 +10,7 @@
 void MakeWorldMatrix(const Vec3f& position, const Vec3f& scale, const Vec3f& look, const Vec3f& right, const Vec3f& up, Matrix<float, 4, 4>& worldMatrix);
 class Material;
 class Mesh;
+class Meshes;
 class Texture;
 class Renderer;
 class Ray;
@@ -69,6 +71,10 @@ public:
 	
 	explicit GameObject();
 	virtual ~GameObject();
+	
+	GameObject(const GameObject& other) = delete;
+	const GameObject& operator=(const GameObject& other) = delete;
+
 	virtual bool Initialize(Renderer& renderer);
 	virtual void Shutdown(Renderer& renderer) {}
 	virtual void Render(Renderer& renderer) {}
@@ -100,13 +106,10 @@ public:
 	void FillShaderParameter(ShaderParameter& shaderParam, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix, const Light& light, const Camera& Camera);
 
 	virtual Vec3f GetExtent() const { return Vec3f(); }
-
-	Mesh& GetMesh() const;
-	
 protected:
 	std::vector<std::shared_ptr<Component>> components;
-
-	std::shared_ptr<Mesh> mesh;
+	
+	std::list<std::shared_ptr<Mesh>> meshes;
 	std::shared_ptr<Texture> diffuseMap;
 	std::shared_ptr<Texture> normalMap;
 };
@@ -115,7 +118,7 @@ class Cube : public GameObject {
 public:
 	Cube();
 	Cube(const Vec3f& size);
-	Cube(const Cube& other);
+	Cube(const Cube& other) = delete;
 	Cube(Cube&& other) noexcept = delete;
 	virtual ~Cube();
 
@@ -125,14 +128,14 @@ public:
 	
 	void Update(float deltaTime) override;
 
-	Cube& operator=(const Cube& other);
+	Cube& operator=(const Cube& other) = delete;
 	Cube& operator=(Cube&& other) noexcept = delete;
 };
 
 class Sphere : public GameObject {
 public:
 	explicit Sphere(float _radius, int _stackCount, int _sectorCount);
-	Sphere(const Sphere& other);
+	Sphere(const Sphere& other) = delete;
 	Sphere(Sphere&& other) noexcept = delete;
 	~Sphere() override;
 
@@ -142,7 +145,7 @@ public:
 	
 	void Update(float deltaTime) override;
 
-	Sphere& operator=(const Sphere& other);
+	Sphere& operator=(const Sphere& other) = delete;
 	Sphere& operator=(Sphere&& other) noexcept = delete;
 private:
 	float radius;
@@ -173,7 +176,7 @@ public:
 class Cylinder : public GameObject {
 public:
 	explicit Cylinder(const Vec3f& _axis, const Vec3f& arm1, const Vec3f& arm2, uint32_t slices);
-	Cylinder(const Cylinder& other);
+	Cylinder(const Cylinder& other) = delete;
 	Cylinder(Cylinder&& other) noexcept = delete;
 	~Cylinder() override;
 	
@@ -183,7 +186,7 @@ public:
 	
 	void Update(float deltaTime) override;
 
-	Cylinder& operator=(const Cylinder& other);
+	Cylinder& operator=(const Cylinder& other) = delete;
 private:
 	Vec3f axis;
 	Vec3f arm1;
@@ -191,23 +194,23 @@ private:
 	float sliceCount;
 };
 
-class ObjectFactory {
-public:
-	enum class eObjectType {
-		OBJECT_CUBE,
-		OBJECT_SPHERE,
-		OBJECT_CYLINDER,
-	};
-	enum class eShaderType {
-		SHADER_COLOR,
-		SHADER_TEXTURE,
-		SHADER_PHONG,
-
-		SHADER_DEFAULT = SHADER_COLOR,
-	};
-
-	std::shared_ptr<GameObject>& CreateGameObject(Renderer& renderer, eObjectType objType, eShaderType shaderType = eShaderType::SHADER_DEFAULT);
-};
+//class ObjectFactory {
+//public:
+//	enum class eObjectType {
+//		OBJECT_CUBE,
+//		OBJECT_SPHERE,
+//		OBJECT_CYLINDER,
+//	};
+//	enum class eShaderType {
+//		SHADER_COLOR,
+//		SHADER_TEXTURE,
+//		SHADER_PHONG,
+//
+//		SHADER_DEFAULT = SHADER_COLOR,
+//	};
+//
+//	std::shared_ptr<GameObject>& CreateGameObject(Renderer& renderer, eObjectType objType, eShaderType shaderType = eShaderType::SHADER_DEFAULT);
+//};
 
 class ObjectPicker : public Object::ObjectVisitor {
 public:

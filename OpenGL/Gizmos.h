@@ -2,6 +2,7 @@
 #include <map>
 #include <memory>
 #include <functional>
+#include <list>
 #include "Matrix.h"
 #include "Types.h"
 #include "Mesh.h"
@@ -65,16 +66,17 @@ public:
 		};
 
 		struct GizmoMeshComponent {
-			std::shared_ptr<Mesh> pGizmoMesh;
+			std::list<std::shared_ptr<Mesh>> gizmoMeshes;
 			RGBA baseColor;
 			RGBA highlightColor;
 
 			GizmoMeshComponent() = default;
-			GizmoMeshComponent(std::function<std::shared_ptr<Mesh>()> meshBuildFunction, const RGBA& _baseColor, const RGBA& _highlightColor);
+			GizmoMeshComponent(std::function<std::list<std::shared_ptr<Mesh>>()> meshBuildFunction, const RGBA& _baseColor, const RGBA& _highlightColor);
 			GizmoMeshComponent(const GizmoMeshComponent& other);
 
 			const GizmoMeshComponent& operator=(const GizmoMeshComponent& other);
 
+			size_t GetMeshCount() const { return gizmoMeshes.size(); }
 		};
 
 		GizmoImpl(Gizmos* pOwner, Renderer& renderer);
