@@ -53,7 +53,7 @@ bool OpenGL::InitializeExtensions(HWND hWnd) {
 	return true;
 }
 
-bool OpenGL::InitializeOpenGL(HWND hWnd, int _screenWidth, int _screenHeight, float screenDepth, float screenNear, bool vSync) {
+bool OpenGL::InitializeOpenGL(HWND hWnd, int _screenWidth, int _screenHeight, bool vSync) {
 	int attributeListInt[19] = { 0, };
 	int pixelFormat[1] = { 0, };
 	unsigned int formatCount = 0;

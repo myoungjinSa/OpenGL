@@ -114,6 +114,8 @@ protected:
 	std::shared_ptr<Texture> normalMap;
 };
 
+
+
 class Cube : public GameObject {
 public:
 	Cube();
@@ -211,8 +213,3 @@ private:
 //
 //	std::shared_ptr<GameObject>& CreateGameObject(Renderer& renderer, eObjectType objType, eShaderType shaderType = eShaderType::SHADER_DEFAULT);
 //};
-
-class ObjectPicker : public Object::ObjectVisitor {
-public:
-	ObjectPicker();
-};

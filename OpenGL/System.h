@@ -10,10 +10,16 @@
 #define GET_X_LPARAM(lp)	((int)(short)LOWORD(lp))
 #define GET_Y_LPARAM(lp)	((int)(short)HIWORD(lp))
 
+inline bool IsKeyDown(int key) {
+	return (GetAsyncKeyState(key) & 0x8000) != 0;
+}
+
+
 class OpenGL;
 class Input;
 class Renderer;
 class Scene;
+class SceneEdit;
 class System
 {
 public:
@@ -44,6 +50,7 @@ private:
 	Input* pInput;
 	Renderer* pRenderer;
 	Scene* pScene;
+	SceneEdit* pSceneEdit;
 	Timer timer;
 };
 

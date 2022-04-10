@@ -401,7 +401,6 @@ void Gizmos::ProcessEvent(Event& e) {
 
 }
 
-
 void Gizmos::Attach(GameObject& pGameObject) {	
 	if(IsAlreadyAttached())
 		Detach();

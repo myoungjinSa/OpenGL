@@ -363,69 +363,81 @@ template class Rect<double>;
 
 template<typename T> inline
 Rect<T>::Rect() 
-	:x(0), y(0), width(0), height(0)
+	:left(0), top(0), right(0), bottom(0)
 {
 
 }
 template<typename T> inline
-Rect<T>::Rect(T _x, T _y, T _width, T _height)
-	:x(_x), y(_y), width(_width), height(_height)
+Rect<T>::Rect(T _left, T _top, T _right, T _bottom)
+	:left(_left), top(_top), right(_right), bottom(_bottom)
 {}
 
 template<typename T> inline
 Rect<T>::Rect(const Rect<T>& rect) 
-	:x(rect.x), y(rect.y), width(rect.width), height(rect.height)
+	:left(rect.left), top(rect.top), right(rect.right), bottom(rect.bottom)
 {}
 
 template<typename T> inline
 Rect<T>::Rect(Rect<T>&& rect) noexcept 
-	:x(std::move(rect.x)), y(std::move(rect.y)), width(std::move(rect.width)), height(std::move(rect.height))
+	:left(std::move(rect.left)), top(std::move(rect.top)), right(std::move(rect.right)), bottom(std::move(rect.bottom))
 {}
 
 
 template<typename T> inline
 Rect<T>::Rect(const Point2<T>& pt1, const Point2<T>& pt2) {
-	x = std::min(pt1.x, pt2.x);
-	y = std::min(pt1.y, pt2.y);
-	width = std::max(pt1.x, pt2.x) - x;
-	height = std::max(pt1.y, pt2.y) - y;
+	left = std::min(pt1.x, pt2.x);
+	top = std::min(pt1.x, pt2.y);
+	right = std::max(pt1.x, pt2.x) - left;
+	bottom = std::max(pt1.y, pt2.y) - top;
 }
 
 template<typename T> inline
 Rect<T>& Rect<T>::operator=(const Rect<T>& rect) {
-	x = rect.x;
-	y = rect.y;
-	width = rect.width;
-	height = rect.height;
+	left = rect.left;
+	top = rect.top;
+	right = rect.right;
+	bottom = rect.bottom;
 	return *this;
 }
 
 template<typename T> inline
 Rect<T>& Rect<T>::operator=(Rect<T>&& rect) noexcept {
-	x = std::move(rect.x);
-	y = std::move(rect.y);
-	width = std::move(rect.width);
-	height = std::move(rect.height);
+	left = std::move(rect.left);
+	top = std::move(rect.top);
+	right = std::move(rect.right);
+	bottom = std::move(rect.bottom);
 	return *this;
 }
 
 template<typename T> inline
 Point2<T> Rect<T>::TopLeft() const {
-	return Point2<T>(x, y);
+	return Point2<T>(left, top);
 }
 
 template<typename T> inline
 Point2<T> Rect<T>::BottomRight() const {
-	return Point2<T>(x + width, y + height);
+	return Point2<T>(right, bottom);
 }
 
 template<typename T> inline
 Size<T> Rect<T>::GetSize() const {
-	return Size<T>(width, height);
+	return Size<T>(right - left, bottom - top);
 }
 
 template<typename T> inline
+T Rect<T>::GetWidth() const {
+	return T(right - left);
+}
+template<typename T> inline
+T Rect<T>::GetHeight() const {
+	return T(bottom - top);
+}
+
+
+template<typename T> inline
 T Rect<T>::Area() const {
+	T width = GetWidth();
+	T height = GetHeight();
 	const T result = width * height;
 	assert(!std::numeric_limits<T>::is_integer || width == 0 || result / width == height);
 	return result;
@@ -433,11 +445,11 @@ T Rect<T>::Area() const {
 
 template <typename T> inline
 bool Rect<T>::Empty() const {
-	return width <= 0 || height <= 0;
+	return GetWidth() <= 0 || GetHeight() <= 0;
 }
 template<typename T> inline
 bool Rect<T>::Contains(const Point2<T>& pt) const {
-	return x <= pt.x && pt.x < x + width && y <= pt.y && pt.y < y + height;
+	return left <= pt.x && pt.x < right && top <= pt.y && pt.y < bottom;
 }
 
 template<typename T> static inline

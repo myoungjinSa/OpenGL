@@ -149,6 +149,7 @@
     <ClCompile Include="Camera.cpp" />
     <ClCompile Include="Collision.cpp" />
     <ClCompile Include="Component.cpp" />
+    <ClCompile Include="Drag.cpp" />
     <ClCompile Include="FFMPEGDecoder.cpp" />
     <ClCompile Include="FileIO.cpp" />
     <ClCompile Include="Gizmos.cpp" />
@@ -171,6 +172,7 @@
     <ClCompile Include="RGBA.cpp" />
     <ClCompile Include="RingBuffer.cpp" />
     <ClCompile Include="Scene.cpp" />
+    <ClCompile Include="SceneEdit.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="String\String.cpp" />
     <ClCompile Include="System.cpp" />
@@ -190,6 +192,7 @@
     <ClInclude Include="Common.h" />
     <ClInclude Include="Component.h" />
     <ClInclude Include="Compositor.h" />
+    <ClInclude Include="Drag.h" />
     <ClInclude Include="FFMPEGDecoder.h" />
     <ClInclude Include="FileIO.h" />
     <ClInclude Include="Gizmos.h" />
@@ -213,6 +216,7 @@
     <ClInclude Include="RGBA.h" />
     <ClInclude Include="RingBuffer.h" />
     <ClInclude Include="Scene.h" />
+    <ClInclude Include="SceneEdit.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="String\String.h" />
     <ClInclude Include="System.h" />

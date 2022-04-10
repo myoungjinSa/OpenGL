@@ -3,14 +3,46 @@
 #include "Logger.h"
 #include "Quaternion.h"
 
+Viewport::Viewport() 
+	: rect()
+{
+
+}
+
+Viewport::Viewport(const Rect2f& rect) 
+{
+	SetViewport(rect);
+}
+
+
+void Viewport::SetViewport(const Rect2f& _rect) {
+	if (_rect.Empty())
+		return;
+
+	rect = _rect;
+
+	if (rect.GetWidth() <= 0.0f) {
+		rect.right = rect.left + 1.0f;
+	}
+	if (rect.GetHeight() <= 0.0f) {
+		rect.bottom = rect.top + 1.0f;
+	}
+
+	halfWidth = rect.GetWidth() / 2.0f;
+	halfHeight = rect.GetHeight() / 2.0f;
+
+	centerX = (rect.left + rect.right) / 2.0f;
+	centerY = (rect.top + rect.bottom) / 2.0f;
+}
+
 Camera::Camera()
 	:GameObject()
-	,width(0)
-	,height(0)
 	,viewMatrix()
 	,oldMousePoint()
 	,xAngle(0.0f)
 	,yAngle(0.0f)
+	,Near(0.1f)
+	,Far(1000.0f)
 {
 	
 }
@@ -91,13 +123,7 @@ void Camera::MatrixRotationYawPitchRoll(Matrix<float, 3, 3>& matrix, float yaw, 
 
 
 void Camera::SetViewport(const Rect2f& _viewport) {
-	if (_viewport.Empty())
-		return;
-
-
-	SetWidth(_viewport.width);
-	SetHeight(_viewport.height);
-	viewport = _viewport;
+	viewport.SetViewport(_viewport);
 }
 
 void Camera::BuildViewMatrix(Vec3f lookAt, Vec3f up) {
@@ -143,7 +169,7 @@ void Camera::GetViewMatrix(Matrix<float, 4, 4>& Matrix) const {
 	}
 }
 
-void Camera::BuildPerspectiveFovLHMatrix(Matrix<float, 4, 4>& matrix, const Rect2f& viewport, float screenNear, float screenDepth) {
+void Camera::BuildPerspectiveFovLHMatrix(Matrix<float, 4, 4>& matrix) {
 	float fov = GetFov();
 	matrix[0] = (1.0f / (GetAspectRatio() * tan(fov * 0.5f)));
 	matrix[1] = 0.0f;
@@ -157,12 +183,12 @@ void Camera::BuildPerspectiveFovLHMatrix(Matrix<float, 4, 4>& matrix, const Rect
 
 	matrix[8] = 0.0f;
 	matrix[9] = 0.0f;
-	matrix[10] = screenDepth / (screenDepth - screenNear);
+	matrix[10] = Far / (Far - Near);
 	matrix[11] = 1.0f;
 
 	matrix[12] = 0.0f;
 	matrix[13] = 0.0f;
-	matrix[14] = (-screenNear * screenDepth) / (screenDepth - screenNear);
+	matrix[14] = (-Near * Far) / (Far - Near);
 	matrix[15] = 0.0f;
 }
 

@@ -2,12 +2,15 @@
 #include "OpenGL.h"
 #include "Input.h"
 #include "Scene.h"
+#include "SceneEdit.h"
 #include "Renderer.h"
 #include "Logger.h"
+#include "RayCast.h"
 
 System::System() 
 	: pOpenGL(nullptr),
 	pScene(nullptr),
+	pSceneEdit(nullptr),
 	pInput(nullptr),
 	pRenderer(nullptr),
 	screenHeight(0),
@@ -72,10 +75,21 @@ bool System::Initialize() {
 	if (!pScene->BuildObject(*pRenderer)) {
 		return false;
 	}
+
+	pSceneEdit = new SceneEdit(*pScene);
+	if (!pSceneEdit)
+	{
+		return false;
+	}
+
+
 	return true;
 }
 
 void System::Shutdown() {
+	if (pSceneEdit) {
+		delete pSceneEdit;
+	}
 	if (pScene) {
 		pScene->Shutdown(*pRenderer);
 		delete pScene;
@@ -206,7 +220,14 @@ LRESULT CALLBACK System::MessageHandler(HWND hwnd, UINT umsg, WPARAM wParam, LPA
 		MouseInput::ProcessLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		
 		if (pScene) {
-			pScene->Picking(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), screenWidth, screenHeight);
+			Ray ray = pScene->GetRay(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), screenWidth, screenHeight);
+
+			if (pSceneEdit && pSceneEdit->PickObject(ray)) {
+				LogDebug(L"Picked\n");
+			}else {
+				LogDebug(L"Not Picked\n");
+			}
+			//pScene->Picking(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), screenWidth, screenHeight);
 		}
 		return 0;
 	}
@@ -324,7 +345,7 @@ bool System::InitializeWindows(OpenGL* pOpenGL, int& screenWidth, int& screenHei
 		posX, posY, screenWidth, screenHeight, NULL, NULL, hInstance, NULL);
 
 	// Initialize OpenGL now that the window has been created.
-	result = pOpenGL->InitializeOpenGL(hWnd, screenWidth, screenHeight, SCREEN_DEPTH, SCREEN_NEAR, VSYNC_ENABLED);
+	result = pOpenGL->InitializeOpenGL(hWnd, screenWidth, screenHeight, VSYNC_ENABLED);
 	if (!result)
 	{
 		MessageBox(hWnd, L"Could not initialize OpenGL, check if video card supports OpenGL 4.0.", L"Error", MB_OK);

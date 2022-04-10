@@ -95,7 +95,7 @@ public:
 	~OpenGL();
 
 	bool InitializeExtensions(HWND hWnd);
-	bool InitializeOpenGL(HWND hWnd, int screenWidth, int screenHeight, float screenDepth, float screenNear, bool vSync);
+	bool InitializeOpenGL(HWND hWnd, int screenWidth, int screenHeight, bool vSync);
 	void Shutdown(HWND hWnd);
 
 	void BeginScene(float red, float green, float blue, float alpha);

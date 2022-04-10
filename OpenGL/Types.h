@@ -105,7 +105,7 @@ public:
 	typedef T value_type;
 
 	Rect();
-	Rect(T x, T y, T width, T height);
+	Rect(T _left, T _top, T _right, T _bottom);
 	Rect(const Rect& rect);
 	Rect(Rect&& rect) noexcept;
 	Rect(const Point2<T>& pt1, const Point2<T>& pt2);
@@ -122,10 +122,13 @@ public:
 
 	bool Contains(const Point2<T>& pt) const;
 
-	T x;
-	T y;
-	T width;
-	T height;
+	T GetWidth() const;
+	T GetHeight() const;
+	
+	T left;
+	T top;
+	T right;
+	T bottom;
 
 };
 

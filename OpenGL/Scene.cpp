@@ -1,6 +1,5 @@
 #include "Common.h"
 #include "Shader.h"
-#include "Camera.h"
 #include "Scene.h"
 #include "Renderer.h"
 #include "RayCast.h"
@@ -10,8 +9,7 @@
 
 
 Scene::Scene() 
-	:pCamera(nullptr),
-	 projectionMatrix(),
+	:projectionMatrix(),
 	 Gizmo()
 {
 
@@ -23,11 +21,6 @@ Scene::~Scene() {
 		delete obj;
 	}
 	objects.clear();
-
-	if (pCamera) {
-		delete pCamera;
-		pCamera = nullptr;
-	}
 }
 
 bool Scene::BuildObject(Renderer& renderer) {	
@@ -45,26 +38,20 @@ bool Scene::BuildObject(Renderer& renderer) {
 		}
 	}
 
-	pCamera = new Camera();
-	if (!pCamera) {
-		assert(0);
-		return false;
-	}
-
-	pCamera->Initialize(renderer);
-	pCamera->SetPosition(0.0f, 0.0f, -5.0f);
-	pCamera->SetViewport(Rect2f(0.0f, 0.0f, renderer.GetRenderTargetWidth(), renderer.GetRenderTargetHeight()));
-	
+	camera.Initialize(renderer);
+	camera.SetPosition(0.0f, 0.0f, -5.0f);
+	camera.SetViewport(Rect2f(0.0f, 0.0f, renderer.GetRenderTargetWidth(), renderer.GetRenderTargetHeight()));
+	camera.SetNear(1.0f);
+	camera.SetFar(100000.0f);
 	Gizmo.Initialize(renderer);
 
 	return true;
 }
 
 void Scene::Update(double elapsedTime) {
-	assert(pCamera);
-	pCamera->Update(elapsedTime);
+	camera.Update(elapsedTime);
 
-	Gizmo.Update(*pCamera, elapsedTime);
+	Gizmo.Update(camera, elapsedTime);
 	for (const auto& obj : objects) {
 		obj->Update(elapsedTime);
 		obj->Rotate(MathUtils::DegreesToRadians(0.0f), MathUtils::DegreesToRadians(1.0f), MathUtils::DegreesToRadians(0.0f));
@@ -74,23 +61,23 @@ void Scene::Update(double elapsedTime) {
 
 bool Scene::Render(Renderer& renderer) {
 	renderer.BeginRender();
-	pCamera->BuildPerspectiveFovLHMatrix(projectionMatrix, pCamera->GetViewport(), SCREEN_NEAR, SCREEN_DEPTH);
+	camera.BuildPerspectiveFovLHMatrix(projectionMatrix);
 
 	renderer.SetDepthFunc(GL_LEQUAL);
 	ShaderParameter shaderParmaeter;
-	skybox.FillShaderParameter(shaderParmaeter, GetViewMatrix(), GetProjectionMatrix(), phongLight, *pCamera);
+	skybox.FillShaderParameter(shaderParmaeter, GetViewMatrix(), GetProjectionMatrix(), phongLight, camera);
 	skybox.Render(renderer, shaderParmaeter);
 	renderer.SetDepthFunc(GL_LESS);
 
 	Matrix<float, 4, 4> worldMatrix;
 	for (size_t iObj = 0; iObj < objects.size(); iObj++) {
 		ShaderParameter shaderParmaeter;
-		objects[iObj]->FillShaderParameter(shaderParmaeter, GetViewMatrix(), GetProjectionMatrix(), phongLight, *pCamera);
+		objects[iObj]->FillShaderParameter(shaderParmaeter, GetViewMatrix(), GetProjectionMatrix(), phongLight, camera);
 		objects[iObj]->Render(renderer, shaderParmaeter);
 	}
 
 	renderer.SetDepthTest(false);
-	Gizmo.Render(renderer, pCamera, *this);
+	Gizmo.Render(renderer, &camera, *this);
 	renderer.SetDepthTest(true);
 
 	renderer.EndRender();
@@ -102,14 +89,13 @@ void Scene::Shutdown(Renderer& renderer) {
 		obj->Shutdown(renderer);
 
 	skybox.Shutdown(renderer);
-	if (pCamera)
-		pCamera->Shutdown(renderer);
+
+	camera.Shutdown(renderer);
 }
 
 Matrix<float, 4, 4> Scene::GetViewMatrix() const {
 	Matrix<float, 4, 4> viewMatrix;
-	if (pCamera)
-		pCamera->GetViewMatrix(viewMatrix);
+	camera.GetViewMatrix(viewMatrix);
 
 	return viewMatrix;
 }
@@ -125,29 +111,19 @@ GameObject* Scene::GetGameObject(uint32_t idx) const{
 }
 
 Vec3f Scene::GetCameraPosition() const {
-	assert(pCamera);
-	return pCamera->GetPosition();
+	return camera.GetPosition();
 }
 size_t Scene::GetObjectCount() const {
 	return objects.size();
 }
-void Scene::Picking(int x, int y, int screenWidth, int screenHeight) {
-	RayCast rayCast(*this);
+GameObject* Scene::GetGameObject(size_t iIndex) const {
+	return objects.at(iIndex);
+}
 
-	GameObject* pHitObject = rayCast.HitTest(*this, x, y, screenWidth, screenHeight);
-	
-	if (pHitObject) {
-		if (Gizmo.IsAlreadyAttached()) {
-			const GameObject& pAttachedObjects = Gizmo.GetAttachedObjects(0);
-			if (GameObject* pGizmo = rayCast.HitTest(Gizmo, x, y, screenWidth, screenHeight)) {
-				
-				//pGizmo->
-			}
-
-		}else {
-			Gizmo.Attach(*pHitObject);
-		}
-	}
+Ray Scene::GetRay(int x, int y, int screenWidth, int screenHeight) const{
+	RayCast raycast;
+	Ray ray = raycast.GetRay(x, y, screenWidth, screenHeight, GetViewMatrix(), GetProjectionMatrix());
+	return ray;
 }
 
 bool Scene::IntersectObjects(const Ray& ray) const {
@@ -158,5 +134,64 @@ bool Scene::IntersectObjects(const Ray& ray) const {
 	}
 	return false;
 }
+
+GameObjectPicker::sPickedInfo::sPickedInfo(GameObject* _pObject, float _distance)
+	: pObject(_pObject)
+	, distance(_distance)
+{
+}
+
+GameObjectPicker::GameObjectPicker() {
+
+}
+GameObjectPicker::GameObjectPicker(const Ray& _ray, float _near, float _far)
+	: ray(_ray)
+	, Near(_near)
+	, Far(_far)
+{
+
+}
+void GameObjectPicker::Clear() {
+	pickedList.clear();
+}
+bool GameObjectPicker::HitTest(const Scene& scene) {
+	bool bPicked = false;
+	for (size_t iObj = 0; iObj < scene.GetObjectCount(); iObj++) {
+		GameObject* pGameObject = scene.GetGameObject(iObj);
+		if (!pGameObject)
+			continue;
+
+		double distance = 0.0;
+		if (pGameObject->Intersect(ray, distance)) {
+			InsertPicked(*pGameObject, distance);
+			bPicked = true;
+		}
+	}
+
+	return bPicked;
+}
+
+bool GameObjectPicker::InsertPicked(GameObject& object, float distance) {
+	if (IsAlreadyExist(object))
+		return false;
+		
+	if (pickedList.empty()) {
+		pickedList.push_back(sPickedInfo(&object, distance));
+	}else {
+
+	}
+	return true;
+}
+
+bool GameObjectPicker::IsAlreadyExist(const GameObject& object) const{
+	for (PickedList::const_iterator iPicked = pickedList.begin(); iPicked != pickedList.end(); iPicked++) {
+		const sPickedInfo& pickedInfo = *iPicked;
+		if (pickedInfo.pObject == &object) {
+			return true;
+		}
+	}
+	return false;
+}
+
 
 

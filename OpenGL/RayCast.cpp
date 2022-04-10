@@ -1,11 +1,16 @@
 #include "RayCast.h"
 #include "MathUtils.h"
-#include "Scene.h"
 #include "Object.h"
 #include "Logger.h"
 #include "Transform.h"
 
+Ray::Ray() 
+	: length(1.0f)
+	, direction()
+	, position()
+{
 
+}
 Ray::Ray(const Vec3f& _position, const Vec3f& _direction, float _length) 
 	: position(_position), direction(_direction), length(_length)
 {
@@ -20,8 +25,7 @@ Ray::~Ray() {
 ///////////////////////////////////////////////////////////////////////////
 //RayCast
 
-RayCast::RayCast(Scene& _targetScene)
-	: targetScene(_targetScene)
+RayCast::RayCast()
 {
 
 }
@@ -45,35 +49,47 @@ void RayCast::Detransform(float scale, Ray& ray) {
 Ray RayCast::Detransform(const RigidTransform& transform, const Ray& ray) {
 	return Ray(transform.DetransformPoint(ray.GetPosition()), transform.DetransformVector(ray.GetDirection()), 10000.0f);
 }
+//
+//GameObject* RayCast::HitTest(Object& target, float x, float y, int screenWidth, int screenHeight, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix) {
+//	Vec3f rayDirection = CalculateRayDirection(viewMatrix, projectionMatrix, x, y, screenWidth, screenHeight);
+//	
+//	Matrix<float, 4, 4> inversedViewMatrix = Inverse(viewMatrix);
+//	
+//	Vec3f rayWorldPos = Vec3f();
+//	rayWorldPos.x = inversedViewMatrix.value[12];
+//	rayWorldPos.y = inversedViewMatrix.value[13];
+//	rayWorldPos.z = inversedViewMatrix.value[14];
+//
+//	Ray ray(rayWorldPos, rayDirection, 10000.0f);
+//
+//	if (dynamic_cast<Scene*>(&target)) {
+//		for (size_t iObj = 0; iObj < targetScene.GetObjectCount(); iObj++) {
+//			if (targetScene.IntersectObjects(ray)) {
+//				return targetScene.GetGameObject(iObj);
+//			}
+//		}
+//	}else if (Gizmos* pGizmo = dynamic_cast<Gizmos*>(&target)) {
+//		double distance = 0.0;
+//		if (pGizmo->Intersect(ray, distance)) {
+//			return pGizmo;
+//		}
+//	}
+//	
+//	return nullptr;
+//}
 
-GameObject* RayCast::HitTest(Object& target, float x, float y, int screenWidth, int screenHeight) {
-	Vec3f rayDirection = CalculateRayDirection(targetScene, x, y, screenWidth, screenHeight);
-	//LogInfo(L"Ray: x = %5lf, y = %5lf, z = %5lf\n", rayDirection.x, rayDirection.y, rayDirection.z);
-
-	Matrix<float, 4, 4> inversedViewMatrix = Inverse(targetScene.GetViewMatrix());
+Ray RayCast::GetRay(float x, float y, int screenWidth, int screenHeight, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix) {
+	Vec3f rayDirection = CalculateRayDirection(viewMatrix, projectionMatrix, x, y, screenWidth, screenHeight);
+		
+	Matrix<float, 4, 4> inversedViewMatrix = Inverse(viewMatrix);
 	
-
 	Vec3f rayWorldPos = Vec3f();
 	rayWorldPos.x = inversedViewMatrix.value[12];
 	rayWorldPos.y = inversedViewMatrix.value[13];
 	rayWorldPos.z = inversedViewMatrix.value[14];
-
-	Ray ray(rayWorldPos, rayDirection, 10000.0f);
-
-	if (dynamic_cast<Scene*>(&target)) {
-		for (size_t iObj = 0; iObj < targetScene.GetObjectCount(); iObj++) {
-			if (targetScene.IntersectObjects(ray)) {
-				return targetScene.GetGameObject(iObj);
-			}
-		}
-	}else if (Gizmos* pGizmo = dynamic_cast<Gizmos*>(&target)) {
-		double distance = 0.0;
-		if (pGizmo->Intersect(ray, distance)) {
-			return pGizmo;
-		}
-	}
 	
-	return nullptr;
+	Ray ray(rayWorldPos, rayDirection, 10000.0f);
+	return ray;
 }
 Vec2f RayCast::GetNormalizedDeviceCoords(float x, float y, int screenWidth, int screenHeight) {
 	float newX = (2.0f * x) / screenWidth - 1.0f;
@@ -81,13 +97,13 @@ Vec2f RayCast::GetNormalizedDeviceCoords(float x, float y, int screenWidth, int 
 	return Vec2f(newX, newY);
 }
 
-Vec3f RayCast::CalculateRayDirection(const Scene& targetScene, float x, float y, int screenWidth, int screenHeight) {
+Vec3f RayCast::CalculateRayDirection(const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix, float x, float y, int screenWidth, int screenHeight) {
 	float newX = x; float newY = y;
 	Vec2f normalizedCoords = GetNormalizedDeviceCoords(x, y, screenWidth, screenHeight);
 	Vec4f rayClip = Vec4f(normalizedCoords.x, normalizedCoords.y, -1.0f, 1.0f);
-	Vec4f rayEye = ConvertToEyeCoords(rayClip, targetScene.GetProjectionMatrix());
-	Vec3f worldRayDirection = ConvertToWorldCoords(rayEye, targetScene.GetViewMatrix());
-
+	Vec4f rayEye = ConvertToEyeCoords(rayClip, projectionMatrix);
+	Vec3f worldRayDirection = ConvertToWorldCoords(rayEye, viewMatrix);
+	
 	return worldRayDirection;
 }
 Vec4f RayCast::ConvertToEyeCoords(const Vec4f& rayClip, const Matrix<float, 4, 4>& _projectionMatrix) const {
