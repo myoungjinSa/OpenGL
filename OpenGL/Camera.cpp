@@ -79,8 +79,8 @@ void Camera::Update(float deltaTime) {
 	Matrix<float, 3, 3> rotationMatrix = Matrix<float, 3, 3>::Identity();
 	MatrixRotationYawPitchRoll(rotationMatrix, yaw, pitch, roll);
 
-	lookAt = Transform(rotationMatrix, lookAt);
-	up = Transform(rotationMatrix, up);
+	Transform(rotationMatrix, lookAt);
+	Transform(rotationMatrix, up);
 
 	//LogDebug(L"lookAt - (%.8lf, %.8lf, %.8lf) up - (%.8lf, %.8lf, %.8lf)\n", lookAt.x, lookAt.y, lookAt.z, up.x, up.y, up.z);
 

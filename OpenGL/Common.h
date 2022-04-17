@@ -6,7 +6,6 @@
 #include <algorithm>
 #include <memory>
 #include "MathUtils.h"
-#include "Types.h"
 
 
 #define Min(a, b) ((a < b)) ? a : b

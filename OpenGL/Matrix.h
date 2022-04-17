@@ -367,8 +367,9 @@ public:
 	Vector2(T s);
 	Vector2(const Vector2<T>& v) = default;
 	void SetXY(T x, T y);
+	bool IsZero() const;
 
-	T CalculateMagnitude();
+	T GetLength();
 	float CalculateTheta();
 	void Normalize();
 	Vector2 Multiply(const Vector2<T>& v);	
@@ -413,13 +414,13 @@ Vector2<T>::Vector2(T s)
 }
 
 template<typename T> inline
-T Vector2<T>::CalculateMagnitude() {
+T Vector2<T>::GetLength() {
 	return sqrt(x * x) + (y * y);
 }
 
 template<typename T> inline
 void Vector2<T>::Normalize() {
-	T len = CalculateMagnitude();
+	T len = GetLength();
 	if (len == T(0))
 		return;
 	x /= len;
@@ -442,6 +443,11 @@ Vector2<T> Vector2<T>::Multiply(const Vector2<T>& v) {
 template<typename T> inline
 void Vector2<T>::SetXY(T _x, T _y) {
 	x = _x; y = _y; 
+}
+
+template<typename T> inline
+bool Vector2<T>::IsZero() const{
+	return x == T(0) && y == T(0);
 }
 
 ///////////////////////////////////
@@ -585,11 +591,12 @@ public:
 	Vector3(const Matrix<T, 1, 3>& mat);
 	Vector3(const Vector3<T>& v) = default;
 	void SetXYZ(T x, T y, T z);
+	bool IsZero() const;
 
 	Vector3 Cross(const Vector3& v) const;
 	T DotProduct(const Vector3& v)const;
 	void Normalize();
-	T CalculateMagnitude() const;
+	T GetLength() const;
 	static Vector3 GetMidPoint(const Vector3& start, const Vector3& end);
 	Vector3 Multiply(const Vector3<T>& v);
 
@@ -666,7 +673,7 @@ T Vector3<T>::DotProduct(const Vector3<T>& v) const {
 
 template<typename T>
 void Vector3<T>::Normalize() {
-	T len = CalculateMagnitude();
+	T len = GetLength();
 	if (len == T(0))
 		return;
 	x /= len;
@@ -684,7 +691,7 @@ T* Vector3<T>::ConvertToValue() {
 }
 
 template<typename T> 
-T Vector3<T>::CalculateMagnitude() const {
+T Vector3<T>::GetLength() const {
 	return sqrt((x * x) + (y * y) + (z * z));
 }
 
@@ -693,6 +700,10 @@ void Vector3<T>::SetXYZ(T _x, T _y, T _z) {
 	x = _x; y = _y; z = _z;
 }
 
+template<typename T> inline
+bool Vector3<T>::IsZero() const {
+	return x == T(0) && y == T(0) && z == T(0);
+}
 
 /// <summary>
 /// operator
@@ -875,11 +886,12 @@ public:
 	Vector4(const Vector4<T>& other) = default;
 	Vector4(const Matrix<T, 1, 4>& mat);
 	void SetXYZW(T x, T y, T z, T w);
+	bool IsZero() const;
 
 	T* ConvertToValue();
 
 	///////////////////////////////////////////////
-	T CalculateMagnitude() const;
+	T GetLength() const;
 	void Normalize();
 	static Vector4 GetMidPoint(const Vector4& start, const Vector4& end);
 
@@ -957,7 +969,12 @@ void Vector4<T>::SetXYZW(T _x, T _y, T _z, T _w) {
 }
 
 template<typename T> inline
-T Vector4<T>::CalculateMagnitude() const
+bool Vector4<T>::IsZero() const {
+	return x == T(0) && y == T(0) && z == T(0) && w == T(0);
+}
+
+template<typename T> inline
+T Vector4<T>::GetLength() const
 {
 	return sqrt((x * x) + (y * y) + (z * z) + (w * w));
 }
@@ -965,7 +982,7 @@ T Vector4<T>::CalculateMagnitude() const
 template<typename T> inline
 void Vector4<T>::Normalize()
 {
-	T length = CalculateMagnitude();
+	T length = GetLength();
 	if (length == T(0))
 	{
 		return;

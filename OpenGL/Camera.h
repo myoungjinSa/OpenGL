@@ -1,5 +1,6 @@
 #pragma once
 #include "Common.h"
+#include "Types.h"
 #include "Object.h"
 #include "Observer.h"
 
@@ -47,8 +48,6 @@ public:
 	float GetAspectRatio() const { return viewport.GetWidth() / viewport.GetHeight(); }
 	
 	void ProcessEvent(Event& e) override;
-
-	Vec3f GetExtent() const { return Vec3f(0.0f, 0.0f, 0.0f); }
 
 private:
 	void MatrixRotationYawPitchRoll(Matrix<float, 3, 3>& Matrix, float, float, float);

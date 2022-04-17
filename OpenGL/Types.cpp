@@ -1,5 +1,5 @@
 #include "Types.h"
-#include <algorithm>
+#include "Common.h"
 
 
 template<typename T> 
@@ -551,3 +551,58 @@ Rect<T> operator | (const Rect<T>& a, const Rect<T>& b)
 	return c |= b;
 }
 
+
+
+///////////////////////////////////////////////////////////
+//Volume
+
+template<typename T> inline
+void Volume<T>::SetCenter(const Vector3<T>& center) {
+	min += center;
+	max += center;
+}
+
+template<typename T> inline
+bool Volume<T>::IsEmpty() const {
+	return max.x <= min.x || max.y <= min.y || max.z <= min.z;
+}
+
+template<typename T> inline
+void Volume<T>::SetZero() {
+	max.SetXYZ(T(0), T(0), T(0));
+	min.SetXYZ(T(0), T(0), T(0));
+}
+
+template<typename T> inline
+void Volume<T>::Normalize() {
+	if (max.x < min.x) std::swap(min.x, max.x);
+	if (max.y < min.y) std::swap(min.y, max.y);
+	if (max.z < min.z) std::swap(min.z, max.z);
+}
+
+template<typename T> inline
+void Volume<T>::operator|=(const Vector3<T>& vector) {
+	min.x = min(min.x, vector.x);
+	min.y = min(min.y, vector.y);
+	min.z = min(min.z, vector.z);
+
+	max.x = max(max.x, vector.x);
+	max.y = max(max.y, vector.y);
+	max.z = max(max.z, vector.z);
+}
+
+template<typename T> inline
+void Volume<T>::operator|=(const Volume& other) {
+	if (IsZero()) {
+		*this = other;
+	}
+	else {
+		min.x = min(min.x, other.min.x);
+		min.y = min(min.y, other.min.y);
+		min.z = min(min.z, other.min.z);
+
+		max.x = max(max.x, other.max.x);
+		max.y = max(max.y, other.max.y);
+		max.z = max(max.z, other.max.z);
+	}
+}

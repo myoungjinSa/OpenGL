@@ -215,7 +215,7 @@ public:
 
 
 	void ScaledAxis(const Vector3<double>& w) {
-		double theta = w.CalculateMagnitude();
+		double theta = w.GetLength();
 
 		if (theta > 0.0001) {
 			double s = sin(theta / 2.0);

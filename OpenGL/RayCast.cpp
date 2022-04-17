@@ -6,13 +6,12 @@
 
 Ray::Ray() 
 	: length(1.0f)
-	, direction()
-	, position()
+	, line()
 {
 
 }
 Ray::Ray(const Vec3f& _position, const Vec3f& _direction, float _length) 
-	: position(_position), direction(_direction), length(_length)
+	: line(_position, _direction), length(_length)
 {
 
 }
@@ -78,7 +77,7 @@ Ray RayCast::Detransform(const RigidTransform& transform, const Ray& ray) {
 //	return nullptr;
 //}
 
-Ray RayCast::GetRay(float x, float y, int screenWidth, int screenHeight, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix) {
+Ray RayCast::GetRay(float x, float y, size_t screenWidth, size_t screenHeight, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix) {
 	Vec3f rayDirection = CalculateRayDirection(viewMatrix, projectionMatrix, x, y, screenWidth, screenHeight);
 		
 	Matrix<float, 4, 4> inversedViewMatrix = Inverse(viewMatrix);

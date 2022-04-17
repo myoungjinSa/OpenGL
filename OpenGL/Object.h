@@ -2,7 +2,7 @@
 #include <memory>
 #include <vector>
 #include <list>
-#include "Matrix.h"
+#include "Types.h"
 #include "Component.h"
 #include "Transform.h"
 
@@ -105,7 +105,8 @@ public:
 
 	void FillShaderParameter(ShaderParameter& shaderParam, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix, const Light& light, const Camera& Camera);
 
-	virtual Vec3f GetExtent() const { return Vec3f(); }
+	void GetWorldBoundingBox(Volumef& volume)const;
+	void GetLocalBoundingBox(Volumef& volume)const;
 protected:
 	std::vector<std::shared_ptr<Component>> components;
 	
@@ -113,7 +114,6 @@ protected:
 	std::shared_ptr<Texture> diffuseMap;
 	std::shared_ptr<Texture> normalMap;
 };
-
 
 
 class Cube : public GameObject {
@@ -196,6 +196,17 @@ private:
 	float sliceCount;
 };
 
+class GameObjects : public std::vector<GameObject*>
+{
+public:
+	GameObjects();
+	~GameObjects();
+
+	void Add(GameObject& gameObj);
+	
+
+	bool Clear();
+};
 //class ObjectFactory {
 //public:
 //	enum class eObjectType {

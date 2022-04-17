@@ -1,6 +1,6 @@
 #pragma once
 #include <array>
-#include "Matrix.h"
+#include "Types.h"
 #include "Component.h"
 
 class Object;

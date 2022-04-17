@@ -228,6 +228,20 @@ void GameObject::FillShaderParameter(ShaderParameter& shaderParam, const Matrix<
 	shaderParam.textureUnit = material->GetTextureUnit(Material::TextureType::TEXTURE_DIFFUSE);
 }
 
+void GameObject::GetWorldBoundingBox(Volumef& volume) const{
+	GetLocalBoundingBox(volume);
+	
+	Vec3f worldPosition = GetPosition();
+	volume.Move(worldPosition);
+}
+
+void GameObject::GetLocalBoundingBox(Volumef& volume) const{
+	if (!volume.IsZero())
+		return;
+
+	volume = boundingVolume->GetVolume();
+}
+
 ///////////////////////////////////////////////////////////////
 Cube::Cube()
 	:GameObject()
@@ -542,6 +556,30 @@ void Cylinder::Render(Renderer& renderer, const ShaderParameter& shaderParam) {
 	boundingVolume->Render(renderer, shaderParam.viewMatrix, shaderParam.projectionMatrix);
 }
 
+
+GameObjects::GameObjects() {
+
+}
+
+GameObjects::~GameObjects() {
+
+}
+
+void GameObjects::Add(GameObject& gameObj) {
+	GameObjects::iterator iObj = std::find(begin(), end(), &gameObj);
+	if (iObj != end())
+		return;
+	
+	push_back(&gameObj);
+}
+
+bool GameObjects::Clear() {
+	while (!empty()) {
+		delete back();
+		pop_back();
+	}
+	return true;
+}
 //std::shared_ptr<GameObject>& ObjectFactory::CreateGameObject(Renderer& renderer, ObjectFactory::eObjectType objType, ObjectFactory::eShaderType shaderType) {
 //	MeshBuilder meshBuilder;
 //	Vec3f defaultPosition(0.0f, 0.0f, 0.0f);

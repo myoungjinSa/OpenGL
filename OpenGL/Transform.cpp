@@ -89,7 +89,7 @@ Vec4f RigidTransform::Rotate(const Vec3f& pos, const Vec3f& pivot, float pitch, 
 	
 
 	Vec4f rotatedVector(pos, 1.0f);
-	rotatedVector = ::Transform(rotationMatrix, rotatedVector);
+	rotatedVector = Transform(rotationMatrix, rotatedVector);
 	return rotatedVector;
 }
 

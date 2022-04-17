@@ -8,14 +8,14 @@ Drag::Drag()
 
 }
 
-void Drag::Begin(const Point2d& point) {
+void Drag::Begin(const Point2i& point) {
 	beginPoint = point;
 	endPoint = point;
 	bTracking = true;
 	bTracked = false;
 }
 
-void Drag::Track(const Point2d& point) {
+void Drag::Track(const Point2i& point) {
 	endPoint = point;
 	if (!bTracked) {
 		if (bTracking) {

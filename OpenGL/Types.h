@@ -139,5 +139,115 @@ typedef Rect<double> Rect2d;
 
 ////////////////////////2D Point /////////////////////////////////////
 
+template<typename T> class Volume {
+public:
+	Vector3<T> min;
+	Vector3<T> max;
 
+	Volume() {}
+	Volume(const Vector3<T>& _min, const Vector3<T>& _max) {
+		min = _min;
+		max = _max;
+	}
 
+	T GetXSize() const { return max.x - min.x; }
+	T GetYSize() const { return max.y - min.y; }
+	T GetZSize() const { return max.z - min.z; }
+
+	Vector3<T> GetSize() const { return Vector3<T>(max.x - min.x, max.y - min.y, max.z - min.z); }
+	Vector3<T> GetCenter() const { return Vector3<T>((max.x + min.x) / 2.0f, (max.y + min.y) / 2.0f, (max.z + min.z) / 2.0f); }
+	void SetCenter(const Vector3<T>& center);
+	void SetZero();
+
+	bool IsZero() const { return (min.IsZero() && max.IsZero()); }
+	bool IsEmpty() const;
+
+	void Inflate(const Vector3<T>& delta) { min -= delta; max += delta; }
+	void Move(const Vector3<T>& offset) { min += offset; max += offset; }
+	void Normalize();
+
+	operator Rect<T>() const { return Rect<T>(min.x, min.y, max.x, max.y); }
+
+	Volume operator*(T factor) const { return Volume(min * factor, max * factor); }
+	Volume operator*(Vector3<T> vol) const { return Volume(min * vol, max * vol); }
+	Volume operator+(Vector3<T> vol) const { return Volume(min + vol, max + vol); }
+	Volume operator-(Vector3<T> vol) const { return Volume(min - vol, max - vol); }
+
+	void operator|=(const Vector3<T>& vector);
+	void operator|=(const Volume& other);
+};
+typedef Volume<int>    Volumei;
+typedef Volume<float>  Volumef;
+typedef Volume<double> Volumed;
+
+template<typename T> class Line {
+public:
+	Vector3<T> point;
+	Vector3<T> direction;
+
+	Line(){}
+	Line(const Vector3<T>& _point, const Vector3<T>& _direction) { point = _point; direction = _direction; }
+};
+
+typedef Line<int>    Linei;
+typedef Line<float>  Linef;
+typedef Line<double> Lined;
+///////////////////////////////////////////////////////////////////////////////////
+
+template<typename T> class Plane {
+public:
+	Vector3<T> normal;
+	T          distance;
+
+	Plane(){}
+	Plane(const Vector3<T>& _normal, T _distance) { normal = _normal; distance = _distance; }
+
+	bool operator==(const Plane& other) const { return normal == other.normal && distance == other.distance; }
+
+	void Build(const Vec3f& v1, const Vec3f& v2, const Vec3f& v3) {
+		Vec3f edge1 = v2 - v1;
+		Vec3f edge2 = v3 - v2;
+		normal = edge1.Cross(edge2);
+
+		normal.Normalize();
+		distance = -normal.DotProduct(v1);
+	}
+
+	void Set(const Vec3f &_normal, T _distance) {
+		normal = _normal;
+		distance = _distance;
+	}
+
+	void Set(const Vec4f& plane) {
+		normal.SetXYZ(plane.x, plane.y, plane.z);
+		distance = plane.w;
+	}
+
+	T GetDistance(const Vec3f& point) const {
+		return normal.DotProduct(point) + distance;
+	}
+
+	Vector3<T> GetIntersection(const Line<T>& line) const{
+		T t = (-distance - line.point.DotProduct(normal)) / line.direction.DotProduct(normal);
+		return line.point + line.direction * t;
+	}
+
+	bool IsIntersected(const Line<T>& line) const{
+		if (line.direction.DotProduct(normal))
+			return true;
+
+		return false;
+	}
+
+	bool Normalize() {
+		T length = normal.GetLength();
+		if (length == 0)
+			return false;
+
+		normal /= length;
+		distance /= length;
+		return true;
+	}
+
+	Plane operator-() const { return Plane(-normal, -distance); }
+};

@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include "Light.h"
-#include "Matrix.h"
+#include "Types.h"
 #include "Object.h"
 #include "Gizmos.h"
 #include "Camera.h"
@@ -33,6 +33,8 @@ public:
 	void SetRay(const Ray& _ray) { if(ray.IsValid()) ray = _ray; }
 	void SetNear(float _near) { Near = _near; }
 	void SetFar(float _far) { Far = _far; }
+
+	GameObjects GetSelectedObjects()const;
 private:
 	Ray			ray;
 	PickedList	pickedList;
@@ -62,7 +64,8 @@ public:
 	size_t	GetObjectCount() const;
 	GameObject* GetGameObject(size_t iIndex) const;
 
-	Ray     GetRay(int x, int y, int screenWidth, int screneHeight) const;
+	Ray		GetRay(const Point2i& pt, const Size2u& size)const;
+	Ray     GetRay(int x, int y, size_t screenWidth, size_t screneHeight) const;
 	bool	IntersectObjects(const Ray& ray) const;
 	
 	GameObject* GetGameObject(uint32_t idx) const;
@@ -70,12 +73,15 @@ public:
 	Vec3f GetCameraPosition()const;
 	const Camera& GetCamera() const { return camera; }
 
+	Size2u GetSceneSize() const { return sceneSize; }
 private:
+	Size2u sceneSize;
 	Camera camera;
 	Gizmos Gizmo;
 
 	//std::shared_ptr<Shader> DefaultShader;
-	std::vector<GameObject*> objects;
+	//std::vector<GameObject*> objects;
+	GameObjects gameObjects;
 	Light phongLight;
 	Cubemap skybox;
 

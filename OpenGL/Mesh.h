@@ -4,7 +4,6 @@
 #include <list>
 #include "Types.h"
 #include "Compositor.h"
-#include "Matrix.h"
 #include "RGBA.h"
 
 class Renderer; 

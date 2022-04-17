@@ -17,10 +17,7 @@ Scene::Scene()
 
 Scene::~Scene() {
 
-	for (auto& obj : objects) {
-		delete obj;
-	}
-	objects.clear();
+	gameObjects.Clear();
 }
 
 bool Scene::BuildObject(Renderer& renderer) {	
@@ -29,9 +26,9 @@ bool Scene::BuildObject(Renderer& renderer) {
 	phongLight.SetDirection(Vec3f::FORWARD);
 
 	GameObject* pObject = new Cube(Vec3f(1.0f, 1.0f, 1.0f));//new Cylinder(Vec3f::UP, Vec3f::RIGHT, Vec3f::FORWARD, 32);
-	objects.emplace_back(pObject);
-	
-	for (const auto& obj : objects) {
+	gameObjects.Add(*pObject);
+
+	for (const auto& obj : gameObjects) {
 		if (!obj->Initialize(renderer)) {
 			LogError(L"Could not initialize the model object\n");
 			return false;
@@ -44,15 +41,15 @@ bool Scene::BuildObject(Renderer& renderer) {
 	camera.SetNear(1.0f);
 	camera.SetFar(100000.0f);
 	Gizmo.Initialize(renderer);
-
+	
+	sceneSize = Size2u(renderer.GetRenderTargetWidth(), renderer.GetRenderTargetHeight());
 	return true;
 }
 
 void Scene::Update(double elapsedTime) {
 	camera.Update(elapsedTime);
 
-	Gizmo.Update(camera, elapsedTime);
-	for (const auto& obj : objects) {
+	for (const auto& obj : gameObjects) {
 		obj->Update(elapsedTime);
 		obj->Rotate(MathUtils::DegreesToRadians(0.0f), MathUtils::DegreesToRadians(1.0f), MathUtils::DegreesToRadians(0.0f));
 		//obj->Move(obj->GetLook(), 1.0f, elapsedTime);
@@ -70,10 +67,10 @@ bool Scene::Render(Renderer& renderer) {
 	renderer.SetDepthFunc(GL_LESS);
 
 	Matrix<float, 4, 4> worldMatrix;
-	for (size_t iObj = 0; iObj < objects.size(); iObj++) {
+	for (size_t iObj = 0; iObj < gameObjects.size(); iObj++) {
 		ShaderParameter shaderParmaeter;
-		objects[iObj]->FillShaderParameter(shaderParmaeter, GetViewMatrix(), GetProjectionMatrix(), phongLight, camera);
-		objects[iObj]->Render(renderer, shaderParmaeter);
+		gameObjects[iObj]->FillShaderParameter(shaderParmaeter, GetViewMatrix(), GetProjectionMatrix(), phongLight, camera);
+		gameObjects[iObj]->Render(renderer, shaderParmaeter);
 	}
 
 	renderer.SetDepthTest(false);
@@ -85,7 +82,7 @@ bool Scene::Render(Renderer& renderer) {
 }
 
 void Scene::Shutdown(Renderer& renderer) {
-	for (const auto& obj : objects)
+	for (const auto& obj : gameObjects)
 		obj->Shutdown(renderer);
 
 	skybox.Shutdown(renderer);
@@ -104,23 +101,27 @@ Matrix<float, 4, 4> Scene::GetProjectionMatrix() const {
 }
 
 GameObject* Scene::GetGameObject(uint32_t idx) const{
-	if (objects.size() <= idx)
+	if (gameObjects.size() <= idx)
 		return nullptr;
 
-	return objects[idx];
+	return gameObjects[idx];
 }
 
 Vec3f Scene::GetCameraPosition() const {
 	return camera.GetPosition();
 }
 size_t Scene::GetObjectCount() const {
-	return objects.size();
+	return gameObjects.size();
 }
 GameObject* Scene::GetGameObject(size_t iIndex) const {
-	return objects.at(iIndex);
+	return gameObjects.at(iIndex);
 }
 
-Ray Scene::GetRay(int x, int y, int screenWidth, int screenHeight) const{
+Ray Scene::GetRay(const Point2i& pt, const Size2u& size) const {
+	return GetRay(pt.x, pt.y, size.width, size.height);
+}
+
+Ray Scene::GetRay(int x, int y, size_t screenWidth, size_t screenHeight) const{
 	RayCast raycast;
 	Ray ray = raycast.GetRay(x, y, screenWidth, screenHeight, GetViewMatrix(), GetProjectionMatrix());
 	return ray;
@@ -128,8 +129,8 @@ Ray Scene::GetRay(int x, int y, int screenWidth, int screenHeight) const{
 
 bool Scene::IntersectObjects(const Ray& ray) const {
 	double distance = 0.0;
-	for (size_t iObj = 0; iObj < objects.size(); iObj++) {
-		if (objects[iObj]->Intersect(ray, distance))
+	for (size_t iObj = 0; iObj < gameObjects.size(); iObj++) {
+		if (gameObjects[iObj]->Intersect(ray, distance))
 			return true;
 	}
 	return false;
@@ -193,5 +194,12 @@ bool GameObjectPicker::IsAlreadyExist(const GameObject& object) const{
 	return false;
 }
 
-
+GameObjects GameObjectPicker::GetSelectedObjects()const {
+	GameObjects gameObjects;
+	for (PickedList::const_iterator iPicked = pickedList.begin(); iPicked != pickedList.end(); iPicked++) {
+		const sPickedInfo& pickedInfo = *iPicked;
+		gameObjects.push_back(pickedInfo.pObject);
+	}
+	return gameObjects;
+}
 

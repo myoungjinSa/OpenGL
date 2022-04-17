@@ -1,5 +1,5 @@
 #pragma once
-#include "Matrix.h"
+#include "Types.h"
 #include "Shader.h"
 
 class GameObject;
@@ -14,17 +14,16 @@ public:
 	void SetLength(float _length) { length = _length; }
 	float GetLength() const { return length; }
 
-	Vec3f GetDirection() const { return direction; }
-	void SetDirection(const Vec3f& dir) { direction = dir; }
+	Vec3f GetDirection() const { return line.direction; }
+	void SetDirection(const Vec3f& dir) { line.direction = dir; }
 	
-	Vec3f GetPosition() const { return position; }
-	void SetPosition(const Vec3f& pos) { position = pos; }
+	Vec3f GetPosition() const { return line.point; }
+	void SetPosition(const Vec3f& pos) { line.point = pos; }
 
 	bool IsValid() const { return 0.0f < length ? true : false; }
 private:
 	float length;
-	Vec3f direction;
-	Vec3f position;
+	Linef line;
 };
 
 class RayCast {
@@ -38,7 +37,7 @@ public:
 	void		Detransform(float scale, Ray& ray);
 	Ray			Detransform(const RigidTransform& transform, const Ray& ray);
 
-	Ray			GetRay(float x, float y, int screenWidth, int screenHeight, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix);
+	Ray			GetRay(float x, float y, size_t screenWidth, size_t screenHeight, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix);
 	//GameObject* HitTest(Object& target, float x, float y, int screenWidth, int screenHeight, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix);
 private:
 	Vec3f CalculateRayDirection(const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix, float x, float y, int screenWidth, int screenHeight);

@@ -74,9 +74,6 @@ bool BoundingBox::Init(Renderer& renderer) {
 
 bool BoundingBox::IsIn(const Vec3f& pos) {
 
-
-
-
 	return true;
 }
 
@@ -138,6 +135,12 @@ bool BoundingBox::IntersectAABB(const Ray& ray) {
 	return true;
 }
 
+Volumef BoundingBox::GetVolume() {
+	Volumef volume;
+	GetMinMaxRange(volume);
+	return volume;
+}
+
 void BoundingBox::GetMinMaxRange(Vec3f& min, Vec3f& max) {
 	min.x = center.x - fabs(extent.x);		//right
 	min.y = center.y - fabs(extent.y);		//down
@@ -146,6 +149,10 @@ void BoundingBox::GetMinMaxRange(Vec3f& min, Vec3f& max) {
 	max.x = center.x + fabs(extent.x);		//left
 	max.y = center.y + fabs(extent.y);		//up
 	max.z = center.z + fabs(extent.z);		//front
+}
+
+void BoundingBox::GetMinMaxRange(Volumef& volume) {
+	GetMinMaxRange(volume.min, volume.max);
 }
 
 void BoundingBox::Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix) {
@@ -194,4 +201,24 @@ void BoundingSphere::SetCenter(const Vec3f& _center) {
 
 void BoundingSphere::SetRadius(float _radius) {
 	radius = _radius;
+}
+
+void BoundingSphere::GetMinMaxRange(Vec3f& min, Vec3f& max) {
+	min.x = center.x - radius;		//right
+	min.y = center.y - radius;		//down
+	min.z = center.z - radius;		//back
+
+	max.x = center.x + radius;		//left
+	max.y = center.y + radius;		//up
+	max.z = center.z + radius;		//front
+}
+
+void BoundingSphere::GetMinMaxRange(Volumef& volume) {
+	GetMinMaxRange(volume.min, volume.max);
+}
+
+Volumef BoundingSphere::GetVolume() {
+	Volumef volume;
+	GetMinMaxRange(volume);
+	return volume;
 }

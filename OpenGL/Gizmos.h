@@ -3,12 +3,10 @@
 #include <memory>
 #include <functional>
 #include <list>
-#include "Matrix.h"
 #include "Types.h"
 #include "Mesh.h"
 #include "RGBA.h"
 #include "Object.h"
-#include "Observer.h"
 
 struct GizmoParameter {
 	float snap_translation{ 0.f };      // World-scale units used for snapping translation
@@ -30,7 +28,7 @@ class ColorShader;
 class Scene;
 class Ray;
 
-class Gizmos final : public GameObject, public Observer 
+class Gizmos final : public GameObject
 {
 public:
 	enum class eTransformMode {
@@ -38,85 +36,39 @@ public:
 		ROTATE,
 		SCALE
 	};
+
+	enum class eInteract {
+		NONE,
+		TRANSLATE_X, TRANSLATE_Y, TRANSLATE_Z,
+		TRANSLATE_YZ, TRANSLATE_XZ, TRANSLATE_XY,
+		TRANSLATE_XYZ,
+		ROTATE_X, ROTATE_Y, ROTATE_Z,
+		SCALE_X, SCALE_Y, SCALE_Z,
+		SCALE_XYZ
+	};
+
+	struct GizmoMeshComponent {
+		std::list<std::shared_ptr<Mesh>> gizmoMeshes;
+		RGBA baseColor;
+		RGBA highlightColor;
+
+		GizmoMeshComponent() = default;
+		GizmoMeshComponent(std::function<std::list<std::shared_ptr<Mesh>>()> meshBuildFunction, const RGBA& _baseColor, const RGBA& _highlightColor);
+		GizmoMeshComponent(const GizmoMeshComponent& other);
+
+		const GizmoMeshComponent& operator=(const GizmoMeshComponent& other);
+
+		size_t GetMeshCount() const { return gizmoMeshes.size(); }
+	};
 	
 	Gizmos();
-	
-	class GizmoImpl {
-	public:
-		enum class eInteract {
-			NONE,
-			TRANSLATE_X, TRANSLATE_Y, TRANSLATE_Z,
-			TRANSLATE_YZ, TRANSLATE_XZ, TRANSLATE_XY,
-			TRANSLATE_XYZ,
-			ROTATE_X, ROTATE_Y, ROTATE_Z,
-			SCALE_X, SCALE_Y, SCALE_Z,
-			SCALE_XYZ
-		};
 
-		struct InteractionState {
-			bool active{ false };
-			bool hover{ false };
-			Vec3f originalPosition;
-			Vec4f originalOrientation;
-			Vec3f originalScale;
-			Vec3f rayOrigin;
-			Vec3f rayDirection;
-			Vec3f clickOffset;
-			eInteract interationMode;
-		};
-
-		struct GizmoMeshComponent {
-			std::list<std::shared_ptr<Mesh>> gizmoMeshes;
-			RGBA baseColor;
-			RGBA highlightColor;
-
-			GizmoMeshComponent() = default;
-			GizmoMeshComponent(std::function<std::list<std::shared_ptr<Mesh>>()> meshBuildFunction, const RGBA& _baseColor, const RGBA& _highlightColor);
-			GizmoMeshComponent(const GizmoMeshComponent& other);
-
-			const GizmoMeshComponent& operator=(const GizmoMeshComponent& other);
-
-			size_t GetMeshCount() const { return gizmoMeshes.size(); }
-		};
-
-		GizmoImpl(Gizmos* pOwner, Renderer& renderer);
-		
-		bool Intersect(const Ray& ray, double& distance);
-		void Update(const Camera& Camera, float deltaTime);
-		void Translate(const Vec3f& axis, const Vec3f& cameraPosition, Vec3f& position);
-
-		void Render(Renderer& renderer, const GizmoParameter& parameter, Camera* pCamera, const Scene& scene);
-
-
-		std::shared_ptr<ColorShader> defaultShader;
-		std::map<eInteract, GizmoMeshComponent> meshComponents;
-		InteractionState interactionState;
-		bool localToggle;
-		bool dragging;
-		bool hasClicked;					 // State to describe if the user has pressed the left mouse button during the last frame
-		bool hasReleased;				     // State to describe if the user has released the left mouse button during the last frame
-
-		Gizmos* pOwner;
-	private:
-		bool IntersectInternal(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, double* hit_t);
-		bool IntersectTranslationGizmos(const Ray& ray, double& distance);
-		bool IntersectRotationGizmos(const Ray& ray, double& distance);
-		bool IntersectScaleGizmos(const Ray& ray, double& distance);
-
-		void DragTranslation(const Vec3f& planeNormal, Vec3f& position);
-
-	};
 	bool Initialize(Renderer& renderer);
 
 	void Attach(GameObject& Target);
 	void Detach();
 
-	void Update(const Camera& camera, float deltaTime);
 	void Render(Renderer& renderer, Camera* pCamera, const Scene& scene);
-
-	bool Intersect(const Ray& ray, double& distance);
-	void ProcessEvent(Event& e) override;
-
 
 	bool IsAlreadyAttached() const;
 	const GameObject& GetAttachedObjects(uint32_t index) const;
@@ -124,12 +76,12 @@ public:
 	float ScaleByDistanceToTarget(const Vec3f& targetPos, float yfov, float pixelScale) const;
 	eTransformMode GetMode() const;
 
-	static bool Transform(const String& name, Gizmos& gizmo, RigidTransform& tr);
-	
 private:
 	eTransformMode transformMode;
-	std::unique_ptr<GizmoImpl> impl;
-	std::vector<GameObject*> targets;
+	GameObjects targets;
+
+	std::shared_ptr<ColorShader> defaultShader;
+	std::map<eInteract, GizmoMeshComponent> meshComponents;
 
 	Point2i oldMousePoint;
 };
