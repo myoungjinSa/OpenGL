@@ -29,7 +29,12 @@ bool SceneEdit::PickObject(const Ray& _ray) {
 		return false;
 	}
 
-
+	if (scene.Gizmo.IsAlreadyAttached()) {
+		double distance = 0.0;
+		picker.HitTest(scene.Gizmo, distance);
+		
+		return true;
+	}
 	//Show Gizmo
 	//..
 	const GameObjectPicker::PickedList& pickedObjects = picker.GetPickedList();
@@ -54,28 +59,40 @@ Vec3f SceneEdit::CalcDragOffsetInWorld(const GameObject& baseObject, const Point
 	Volumef volume;
 	baseObject.GetWorldBoundingBox(volume);
 
-	Matrix<float, 4, 4> worldMatrix = Matrix<float, 4, 4>::Identity();
+	Matrix<float, 3, 3> worldMatrix = Matrix<float, 3, 3>::Identity();
 	
-	Vec4f vertices[8];
-	vertices[0] = Transform(worldMatrix, Vec4f(volume.min.x, volume.max.y, volume.max.z, 1.0f));
-	vertices[1] = Transform(worldMatrix, Vec4f(volume.max.x, volume.max.y, volume.max.z, 1.0f));
-	vertices[2] = Transform(worldMatrix, Vec4f(volume.max.x, volume.max.y, volume.min.z, 1.0f));
-	vertices[3] = Transform(worldMatrix, Vec4f(volume.min.x, volume.max.y, volume.min.z, 1.0f));
-	vertices[4] = Transform(worldMatrix, Vec4f(volume.min.x, volume.min.y, volume.max.z, 1.0f));
-	vertices[5] = Transform(worldMatrix, Vec4f(volume.max.x, volume.min.y, volume.max.z, 1.0f));
-	vertices[6] = Transform(worldMatrix, Vec4f(volume.max.x, volume.min.y, volume.min.z, 1.0f));
-	vertices[7] = Transform(worldMatrix, Vec4f(volume.min.x, volume.min.y, volume.min.z, 1.0f));
+	Vec3f vertices[8];
+	vertices[0] = Transform(worldMatrix, Vec3f(volume.min.x, volume.max.y, volume.max.z));
+	vertices[1] = Transform(worldMatrix, Vec3f(volume.max.x, volume.max.y, volume.max.z));
+	vertices[2] = Transform(worldMatrix, Vec3f(volume.max.x, volume.max.y, volume.min.z));
+	vertices[3] = Transform(worldMatrix, Vec3f(volume.min.x, volume.max.y, volume.min.z));
+	vertices[4] = Transform(worldMatrix, Vec3f(volume.min.x, volume.min.y, volume.max.z));
+	vertices[5] = Transform(worldMatrix, Vec3f(volume.max.x, volume.min.y, volume.max.z));
+	vertices[6] = Transform(worldMatrix, Vec3f(volume.max.x, volume.min.y, volume.min.z));
+	vertices[7] = Transform(worldMatrix, Vec3f(volume.min.x, volume.min.y, volume.min.z));
 
+	Planef plane;
+	Gizmos::GizmoHandle::eHandle handleType = scene.Gizmo.GetEditingHandle();
+	switch (handleType) {
+	case Gizmos::GizmoHandle::eHandle::TRANSLATE_X:
+	case Gizmos::GizmoHandle::eHandle::TRANSLATE_Y:
+		plane.Build(vertices[0], vertices[4], vertices[5]);
+		break;
+	case Gizmos::GizmoHandle::eHandle::TRANSLATE_Z:
+		plane.Build(vertices[0], vertices[1], vertices[2]);
+		break;
+	}
 
+	Vec3f distance = plane.GetIntersection(curRay.GetLine()) - plane.GetIntersection(prevRay.GetLine());	
 
-	return Vec3f();
+	return distance;
 }
 void SceneEdit::MoveSelectedObject(GameObjects& selection) {
 	if (selection.empty())
 		return;
 
 	Vec3f offset = CalcDragOffsetInWorld(*selection.at(0), drag.GetBeginPoint(), drag.GetEndPoint());
-
+	selection.at(0)->SetPosition(offset);
 }
 
 void SceneEdit::MoveSelectedObject(GameObjects& selection, const Vec3f& offset) {

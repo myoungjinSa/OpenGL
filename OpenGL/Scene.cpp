@@ -39,7 +39,7 @@ bool Scene::BuildObject(Renderer& renderer) {
 	camera.SetPosition(0.0f, 0.0f, -5.0f);
 	camera.SetViewport(Rect2f(0.0f, 0.0f, renderer.GetRenderTargetWidth(), renderer.GetRenderTargetHeight()));
 	camera.SetNear(1.0f);
-	camera.SetFar(100000.0f);
+	camera.SetFar(1000.0f);
 	Gizmo.Initialize(renderer);
 	
 	sceneSize = Size2u(renderer.GetRenderTargetWidth(), renderer.GetRenderTargetHeight());
@@ -51,7 +51,7 @@ void Scene::Update(double elapsedTime) {
 
 	for (const auto& obj : gameObjects) {
 		obj->Update(elapsedTime);
-		obj->Rotate(MathUtils::DegreesToRadians(0.0f), MathUtils::DegreesToRadians(1.0f), MathUtils::DegreesToRadians(0.0f));
+		//obj->Rotate(MathUtils::DegreesToRadians(0.0f), MathUtils::DegreesToRadians(1.0f), MathUtils::DegreesToRadians(0.0f));
 		//obj->Move(obj->GetLook(), 1.0f, elapsedTime);
 	}
 }
@@ -62,14 +62,14 @@ bool Scene::Render(Renderer& renderer) {
 
 	renderer.SetDepthFunc(GL_LEQUAL);
 	ShaderParameter shaderParmaeter;
-	skybox.FillShaderParameter(shaderParmaeter, GetViewMatrix(), GetProjectionMatrix(), phongLight, camera);
+	skybox.FillShaderParameter(shaderParmaeter, GetViewMatrix(), projectionMatrix, phongLight, camera);
 	skybox.Render(renderer, shaderParmaeter);
 	renderer.SetDepthFunc(GL_LESS);
 
 	Matrix<float, 4, 4> worldMatrix;
 	for (size_t iObj = 0; iObj < gameObjects.size(); iObj++) {
 		ShaderParameter shaderParmaeter;
-		gameObjects[iObj]->FillShaderParameter(shaderParmaeter, GetViewMatrix(), GetProjectionMatrix(), phongLight, camera);
+		gameObjects[iObj]->FillShaderParameter(shaderParmaeter, GetViewMatrix(), projectionMatrix, phongLight, camera);
 		gameObjects[iObj]->Render(renderer, shaderParmaeter);
 	}
 
@@ -155,6 +155,20 @@ GameObjectPicker::GameObjectPicker(const Ray& _ray, float _near, float _far)
 void GameObjectPicker::Clear() {
 	pickedList.clear();
 }
+
+bool GameObjectPicker::HitTest(Gizmos& gizmos, double& distance) {
+	if (gizmos.Intersect(ray, distance)) {
+		return true;
+	}
+	return false;
+}
+bool GameObjectPicker::HitTest(GameObject& obj, double& distance) {
+	if (obj.Intersect(ray, distance)) {
+		InsertPicked(obj, distance);
+		return true;
+	}
+	return false;
+}
 bool GameObjectPicker::HitTest(const Scene& scene) {
 	bool bPicked = false;
 	for (size_t iObj = 0; iObj < scene.GetObjectCount(); iObj++) {
@@ -163,10 +177,7 @@ bool GameObjectPicker::HitTest(const Scene& scene) {
 			continue;
 
 		double distance = 0.0;
-		if (pGameObject->Intersect(ray, distance)) {
-			InsertPicked(*pGameObject, distance);
-			bPicked = true;
-		}
+		bPicked = HitTest(*pGameObject, distance);
 	}
 
 	return bPicked;

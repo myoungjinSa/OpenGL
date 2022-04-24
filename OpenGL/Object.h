@@ -99,10 +99,6 @@ public:
 	void Move(const Vec3f& dir, float movingSpeed, float elapsedTime);
 	void Rotate(float pitch, float yaw, float roll);
 
-	bool IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, double& distance);
-	bool IntersectTriangle(const Ray& ray, const Triangle& triangle, double& distance);
-	bool IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, bool bFrontOnly, double& distance);
-
 	void FillShaderParameter(ShaderParameter& shaderParam, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix, const Light& light, const Camera& Camera);
 
 	void GetWorldBoundingBox(Volumef& volume)const;
@@ -114,6 +110,10 @@ protected:
 	std::shared_ptr<Texture> diffuseMap;
 	std::shared_ptr<Texture> normalMap;
 };
+
+bool IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, double& distance);
+bool IntersectTriangle(const Ray& ray, const Triangle& triangle, double& distance);
+bool IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, bool bFrontOnly, double& distance);
 
 
 class Cube : public GameObject {

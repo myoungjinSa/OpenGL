@@ -251,3 +251,7 @@ public:
 
 	Plane operator-() const { return Plane(-normal, -distance); }
 };
+
+typedef Plane<int>    Planei;
+typedef Plane<float>  Planef;
+typedef Plane<double> Planed;

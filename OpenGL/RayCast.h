@@ -21,6 +21,8 @@ public:
 	void SetPosition(const Vec3f& pos) { line.point = pos; }
 
 	bool IsValid() const { return 0.0f < length ? true : false; }
+
+	Linef GetLine() const { return line; }
 private:
 	float length;
 	Linef line;

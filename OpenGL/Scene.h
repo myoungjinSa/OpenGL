@@ -27,6 +27,8 @@ public:
 	GameObjectPicker(const Ray& ray , float _near, float _far);
 	PickedList GetPickedList() const { return pickedList; }
 
+	bool HitTest(Gizmos& gizmos, double& distance);
+	bool HitTest(GameObject& obj, double& distance);
 	bool HitTest(const Scene& scene);
 	void Clear();
 

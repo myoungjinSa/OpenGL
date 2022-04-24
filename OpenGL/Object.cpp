@@ -120,96 +120,6 @@ bool GameObject::Intersect(const Ray& ray, double& distance) {
 	
 	return false;
 }
-bool GameObject::IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, bool bFrontOnly, double& distance) {
-	Vec3f edge1 = v1 - v0;
-	Vec3f edge2 = v2 - v0;
-
-	Vec3f pVec = ray.GetDirection().Cross(edge2);
-
-	float det = edge1.DotProduct(pVec);
-
-	Vec3f tVec;
-	if (det > 0) {
-		tVec = v0 - ray.GetPosition();
-	}else {
-		//BackFace 
-		if (bFrontOnly)
-			return false;
-
-		tVec = v0 - ray.GetPosition();
-		det = -det;
-	}
-
-	if (det < 0.0001f)
-		return false;
-
-
-	float u = tVec.DotProduct(pVec);
-	if (u < 0 || u > det)
-		return false;
-
-	Vec3f qVec = tVec.Cross(edge1);
-
-	float v = ray.GetDirection().DotProduct(qVec);
-	if (v < 0 || u + v > det)
-		return false;
-
-	distance = edge2.DotProduct(qVec) / det;
-
-	return true;
-}
-
-bool GameObject::IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, double& distance) {
-	auto e1 = v1 - v0, e2 = v2 - v0, h = Cross(ray.GetDirection(), e2);
-	auto a = DotProduct(e1, h);
-	if (std::abs(a) == 0) return false;
-
-	float f = 1 / a;
-	auto s = ray.GetPosition() - v0;
-	auto u = f * DotProduct(s, h);
-	if (u < 0 || u > 1) return false;
-
-	auto q = Cross(s, e1);
-	auto v = f * DotProduct(ray.GetDirection(), q);
-	if (v < 0 || u + v > 1) return false;
-
-	auto t = f * DotProduct(e2, q);
-	if (t < 0) return false;
-
-	distance = t;
-	
-	return true;
-}
-
-bool GameObject::IntersectTriangle(const Ray& ray, const Triangle& triangle, double& distance) {
-	Vec3f v0 = triangle.GetPosition(0);
-	Vec3f v1 = triangle.GetPosition(1);
-	Vec3f v2 = triangle.GetPosition(2);
-
-	auto e1 = v1 - v0;
-	auto e2 = v2 - v0;
-	auto h = Cross(ray.GetDirection(), e2);
-	
-	auto a = DotProduct(e1, h);
-	if (std::abs(a) == 0)
-		return false;
-
-	float f = 1 / a;
-	auto s = ray.GetPosition() - v0;
-	auto u = f * DotProduct(s, h);
-	if (u < 0 || u > 1) return false;
-
-	auto q = Cross(s, e1);
-	auto v = f * DotProduct(ray.GetDirection(), q);
-	if (v < 0 || u + v > 1) return false;
-
-	auto t = f * DotProduct(e2, q);
-	if (t < 0) return false;
-
-	distance = t;
-
-	return true;
-}
 
 void GameObject::FillShaderParameter(ShaderParameter& shaderParam, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix, const Light& light, const Camera& Camera) {
 	Matrix<float, 4, 4> worldMatrix = Matrix<float, 4, 4>::Identity();
@@ -241,6 +151,99 @@ void GameObject::GetLocalBoundingBox(Volumef& volume) const{
 
 	volume = boundingVolume->GetVolume();
 }
+
+bool IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, bool bFrontOnly, double& distance) {
+	Vec3f edge1 = v1 - v0;
+	Vec3f edge2 = v2 - v0;
+
+	Vec3f pVec = ray.GetDirection().Cross(edge2);
+
+	float det = edge1.DotProduct(pVec);
+
+	Vec3f tVec;
+	if (det > 0) {
+		tVec = v0 - ray.GetPosition();
+	}
+	else {
+		//BackFace 
+		if (bFrontOnly)
+			return false;
+
+		tVec = v0 - ray.GetPosition();
+		det = -det;
+	}
+
+	if (det < 0.0001f)
+		return false;
+
+
+	float u = tVec.DotProduct(pVec);
+	if (u < 0 || u > det)
+		return false;
+
+	Vec3f qVec = tVec.Cross(edge1);
+
+	float v = ray.GetDirection().DotProduct(qVec);
+	if (v < 0 || u + v > det)
+		return false;
+
+	distance = edge2.DotProduct(qVec) / det;
+
+	return true;
+}
+
+bool IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, double& distance) {
+	auto e1 = v1 - v0, e2 = v2 - v0, h = Cross(ray.GetDirection(), e2);
+	auto a = DotProduct(e1, h);
+	if (std::abs(a) == 0) return false;
+
+	float f = 1 / a;
+	auto s = ray.GetPosition() - v0;
+	auto u = f * DotProduct(s, h);
+	if (u < 0 || u > 1) return false;
+
+	auto q = Cross(s, e1);
+	auto v = f * DotProduct(ray.GetDirection(), q);
+	if (v < 0 || u + v > 1) return false;
+
+	auto t = f * DotProduct(e2, q);
+	if (t < 0) return false;
+
+	distance = t;
+
+	return true;
+}
+
+bool IntersectTriangle(const Ray& ray, const Triangle& triangle, double& distance) {
+	Vec3f v0 = triangle.GetPosition(0);
+	Vec3f v1 = triangle.GetPosition(1);
+	Vec3f v2 = triangle.GetPosition(2);
+
+	auto e1 = v1 - v0;
+	auto e2 = v2 - v0;
+	auto h = Cross(ray.GetDirection(), e2);
+
+	auto a = DotProduct(e1, h);
+	if (std::abs(a) == 0)
+		return false;
+
+	float f = 1 / a;
+	auto s = ray.GetPosition() - v0;
+	auto u = f * DotProduct(s, h);
+	if (u < 0 || u > 1) return false;
+
+	auto q = Cross(s, e1);
+	auto v = f * DotProduct(ray.GetDirection(), q);
+	if (v < 0 || u + v > 1) return false;
+
+	auto t = f * DotProduct(e2, q);
+	if (t < 0) return false;
+
+	distance = t;
+
+	return true;
+}
+
 
 ///////////////////////////////////////////////////////////////
 Cube::Cube()
@@ -282,7 +285,7 @@ bool Cube::Initialize(Renderer& renderer) {
 	meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 	meshBuilder.End();
 
-	diffuseMap = TextureLoader::GetTexture(renderer, L"레드벨벳-Feel My Rythm.mp4");
+	diffuseMap = TextureLoader::GetTexture(renderer, L"오마이걸-Real Love.mp4");
 	
 	renderer.AllocateTextures(diffuseMap->textureID, 1);
 	renderer.BindTexture(diffuseMap->GetTextureID());

@@ -10,23 +10,118 @@
 #include "String/String.h"
 #include "Input.h"
 
-Gizmos::GizmoMeshComponent::GizmoMeshComponent(std::function<std::list<std::shared_ptr<Mesh>>()> meshBuildFunction, const RGBA& _baseColor, const RGBA& _highlightColor) 
-	: baseColor(_baseColor), highlightColor(_highlightColor)
+Gizmos::GizmoHandle::GizmoHandle(const Gizmos& _owner, std::function<std::list<std::shared_ptr<Mesh>>()> meshBuildFunction, const RGBA& _baseColor, const RGBA& _highlightColor, GizmoHandle::eHandle handleType)
+	: owner(_owner), baseColor(_baseColor), highlightColor(_highlightColor), type(handleType)
 {
-	gizmoMeshes = meshBuildFunction();
+	meshes = meshBuildFunction();
 }
 
 
-Gizmos::GizmoMeshComponent::GizmoMeshComponent(const GizmoMeshComponent& other) {
+Gizmos::GizmoHandle::GizmoHandle(const GizmoHandle& other)
+	: owner(other.owner)
+{
 	operator=(other);
 }
 
-const Gizmos::GizmoMeshComponent& Gizmos::GizmoMeshComponent::operator=(const Gizmos::GizmoMeshComponent& other) {
-	gizmoMeshes = other.gizmoMeshes;
+const Gizmos::GizmoHandle& Gizmos::GizmoHandle::operator=(const Gizmos::GizmoHandle& other) {
+	meshes = other.meshes;
 	baseColor = other.baseColor;
 	highlightColor = other.highlightColor;
 	return *this;
 }
+
+bool Gizmos::GizmoHandle::Intersect(const Ray& ray, double& distance) const {
+	for (const auto& mesh : meshes) {
+		for (size_t iTriangle = 0; iTriangle < mesh->GetTriangleMeshCount(); iTriangle++) {
+			Triangle triangleMesh = mesh->GetTriangleMesh(iTriangle);
+			Vec4f vertex0 = ::Transform(owner.transform->GetWorldMatrix(), Vec4f(triangleMesh.vertices[0].position, 1.0f));
+			Vec4f vertex1 = ::Transform(owner.transform->GetWorldMatrix(), Vec4f(triangleMesh.vertices[1].position, 1.0f));
+			Vec4f vertex2 = ::Transform(owner.transform->GetWorldMatrix(), Vec4f(triangleMesh.vertices[2].position, 1.0f));
+
+			if (IntersectTriangle(ray, Vec3f(vertex0.x, vertex0.y, vertex0.z), Vec3f(vertex1.x, vertex1.y, vertex1.z), Vec3f(vertex2.x, vertex2.y, vertex2.z), distance)) {
+				return true;
+			}
+		}
+	}
+
+	return false;
+}
+void Gizmos::GizmoHandle::Render(Renderer& renderer) const {
+	for (auto& mesh : meshes) {
+		mesh->Render(renderer);
+	}
+}
+
+bool Gizmos::GizmoHandles::Add(const Gizmos::GizmoHandle& handle) {
+	const auto& ret = insert(std::pair<GizmoHandle::eHandle, GizmoHandle>(handle.type, handle));
+	if (ret.second == false) {
+		//Does Already exist;
+		return false;
+	}
+
+	return true;
+}
+
+bool Gizmos::GizmoHandles::DoesExist(GizmoHandle::eHandle handleType)const {
+	return count(handleType) != 0 ? true : false;
+}
+
+Gizmos::GizmoHandle::eHandle Gizmos::GizmoHandles::Intersect(const Ray& ray, double& distance, eTransformMode transformMode)const {
+	GizmoHandle::eHandle handle = GizmoHandle::eHandle::NONE;
+	bool bIntersect = false;
+	switch (transformMode) {
+	case eTransformMode::TRANSLATE:
+	{
+		double tempDistance = distance;
+		bIntersect = at(GizmoHandle::eHandle::TRANSLATE_X).Intersect(ray, tempDistance);
+		if (bIntersect) {
+			handle = GizmoHandle::eHandle::TRANSLATE_X;
+			distance = tempDistance;
+		}
+
+		bIntersect = at(GizmoHandle::eHandle::TRANSLATE_Y).Intersect(ray, tempDistance);
+		
+		if (bIntersect) {
+			if (tempDistance < distance)
+				handle = GizmoHandle::eHandle::TRANSLATE_Y;
+		}
+		
+		bIntersect = at(GizmoHandle::eHandle::TRANSLATE_Z).Intersect(ray, tempDistance);
+		if (bIntersect) {
+			if (tempDistance < distance)
+				handle = GizmoHandle::eHandle::TRANSLATE_Z;
+		}
+
+		break;
+	}
+
+	}
+
+	return handle;
+}
+void Gizmos::GizmoHandles::Render(Renderer& renderer, eTransformMode transformMode) const {
+	
+	switch (transformMode) {
+	case eTransformMode::TRANSLATE:
+	{
+		at(GizmoHandle::eHandle::TRANSLATE_X).Render(renderer);
+		at(GizmoHandle::eHandle::TRANSLATE_Y).Render(renderer);
+		at(GizmoHandle::eHandle::TRANSLATE_Z).Render(renderer);
+		break;
+	}
+	case eTransformMode::ROTATE:
+	{
+
+		break;
+	}
+	case eTransformMode::SCALE:
+	{
+
+		break;
+	}
+	}
+}
+
 
 //Gizmos::GizmoImpl::GizmoImpl(Gizmos* _pOwner, Renderer& renderer) 
 //	: pOwner(_pOwner), hasClicked(false), hasReleased(false), localToggle(false), dragging(false)
@@ -335,17 +430,14 @@ Gizmos::Gizmos()
 Gizmos::eTransformMode Gizmos::GetMode() const {
 	return transformMode;
 }
+
+Gizmos::GizmoHandle::eHandle Gizmos::GetEditingHandle() const {
+	return context.editingHandle;
+}
+
 bool Gizmos::Initialize(Renderer& renderer) {
-	//impl = std::make_unique<GizmoImpl>(this, renderer);
-	//if (!impl)
-	//	return false;
-
-	std::vector<Point2f> arrowPoints = { {0.25f, 0.0f} , {0.25f, 0.25f}, {1.0f, 0.10f}, {1.2f, 0.0f} };
-	std::vector<Point2f> mace_points = { { 0.25f, 0 }, { 0.25f, 0.05f },{ 1, 0.05f },{ 1, 0.1f },{ 1.25f, 0.1f }, { 1.25f, 0 } };
-	std::vector<Point2f> ring_points = { { +0.025f, 1 },{ -0.025f, 1 },{ -0.025f, 1 },{ -0.025f, 1.1f },{ -0.025f, 1.1f },{ +0.025f, 1.1f },{ +0.025f, 1.1f },{ +0.025f, 1 } };
-
-	meshComponents[eInteract::TRANSLATE_X] = {
-		GizmoMeshComponent([&]() -> std::list<std::shared_ptr<Mesh>> {
+	Gizmos::GizmoHandle translationXHandle {
+		Gizmos::GizmoHandle(*this, [&]() -> std::list<std::shared_ptr<Mesh>> {
 			std::list<std::shared_ptr<Mesh>> gizmoMeshes;
 
 			MeshBuilder meshBuilder;
@@ -362,11 +454,13 @@ bool Gizmos::Initialize(Renderer& renderer) {
 			meshBuilder.End();
 
 			return gizmoMeshes;
-			}, RGBA::RED, RGBA::YELLOW)
+			}, RGBA::RED, RGBA::YELLOW, Gizmos::GizmoHandle::eHandle::TRANSLATE_X)
 	};
 
-	meshComponents[eInteract::TRANSLATE_Y] = {
-		GizmoMeshComponent([&]() -> std::list<std::shared_ptr<Mesh>> {
+	handles.Add(translationXHandle);
+
+	Gizmos::GizmoHandle translationYHandle{
+		GizmoHandle(*this, [&]() -> std::list<std::shared_ptr<Mesh>> {
 			std::list<std::shared_ptr<Mesh>> gizmoMeshes;
 			MeshBuilder meshBuilder;
 			gizmoMeshes.push_back(std::make_shared<Mesh>());
@@ -383,11 +477,14 @@ bool Gizmos::Initialize(Renderer& renderer) {
 
 
 			return gizmoMeshes;
-			}, RGBA::GREEN, RGBA::YELLOW)
+			}, RGBA::GREEN, RGBA::YELLOW, Gizmos::GizmoHandle::eHandle::TRANSLATE_Y)
 	};
 
-	meshComponents[eInteract::TRANSLATE_Z] = {
-		GizmoMeshComponent([&]() ->std::list<std::shared_ptr<Mesh>> {
+	handles.Add(translationYHandle);
+
+
+	Gizmos::GizmoHandle translationZHandle {
+		GizmoHandle(*this, [&]() ->std::list<std::shared_ptr<Mesh>> {
 			std::list<std::shared_ptr<Mesh>> gizmoMeshes;
 			MeshBuilder meshBuilder;
 			gizmoMeshes.push_back(std::make_shared<Mesh>());
@@ -402,8 +499,16 @@ bool Gizmos::Initialize(Renderer& renderer) {
 			meshBuilder.CopyToMesh(renderer, *gizmoMeshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 			meshBuilder.End();
 			return gizmoMeshes;
-			}, RGBA::BLUE, RGBA::YELLOW)
+			}, RGBA::BLUE, RGBA::YELLOW, Gizmos::GizmoHandle::eHandle::TRANSLATE_Z)
 	};
+
+	handles.Add(translationZHandle);
+
+#ifdef _DEBUG
+	if (!VerifyGizmos()) {
+		assert(0);
+	}
+#endif 
 
 	defaultShader = std::make_shared<ColorShader>(this);
 
@@ -433,24 +538,37 @@ float Gizmos::ScaleByDistanceToTarget(const Vec3f& targetPos, float yfov, float 
 	return std::tan(yfov) * dist;
 }
 
-//bool Gizmos::Intersect(const Ray& ray, double& distance) {
-//	if (targets.empty())
-//		return false;
-//
-//	Gizmos::eTransformMode transformMode = GetMode();	
-//	//기즈모 스케일 처리가 들어가야함
-//			
-//	switch (transformMode) {
-//	case Gizmos::eTransformMode::TRANSLATE: 	return IntersectTranslationGizmos(ray, distance);
-//	case Gizmos::eTransformMode::ROTATE:		return IntersectRotationGizmos(ray, distance);
-//	case Gizmos::eTransformMode::SCALE:			return IntersectScaleGizmos(ray, distance);
-//	default:
-//		assert(0);
-//		break;
-//	}
-//	
-//	return true;
-//}
+#ifdef _DEBUG
+bool Gizmos::VerifyGizmos() const{
+	if (!handles.DoesExist(GizmoHandle::eHandle::TRANSLATE_X))	return false;
+	if (!handles.DoesExist(GizmoHandle::eHandle::TRANSLATE_Y))	return false;
+	if (!handles.DoesExist(GizmoHandle::eHandle::TRANSLATE_Z))	return false;
+
+	return true;
+}
+#endif
+bool Gizmos::Intersect(const Ray& ray, double& distance) {
+	if (targets.empty())
+		return false;
+
+	Gizmos::eTransformMode transformMode = GetMode();	
+	//기즈모 스케일 처리가 들어가야함
+			
+	switch (transformMode) {
+	case Gizmos::eTransformMode::TRANSLATE:
+	{
+		context.editingHandle = handles.Intersect(ray, distance, transformMode);
+	}
+	break;
+	/*case Gizmos::eTransformMode::ROTATE:		return IntersectRotationGizmos(ray, distance);
+	case Gizmos::eTransformMode::SCALE:			return IntersectScaleGizmos(ray, distance);*/
+	default:
+		assert(0);
+		break;
+	}
+	
+	return context.editingHandle == GizmoHandle::eHandle::NONE ? false : true;
+}
 
 //void Gizmos::ProcessEvent(Event& e) {
 //	if (MouseInput::MouseEvent* pMouseEvent = dynamic_cast<MouseInput::MouseEvent*>(&e)) {
@@ -485,6 +603,7 @@ float Gizmos::ScaleByDistanceToTarget(const Vec3f& targetPos, float yfov, float 
 //	}
 //
 //}
+
 
 void Gizmos::Attach(GameObject& pGameObject) {	
 	if(IsAlreadyAttached())
@@ -530,10 +649,5 @@ void Gizmos::Render(Renderer& renderer, Camera* pCamera, const Scene& scene) {
 	
 	defaultShader->Render(renderer, shaderParam);
 	
-	for (auto& gizmoMesh : meshComponents[eInteract::TRANSLATE_X].gizmoMeshes)
-		gizmoMesh->Render(renderer);
-	for (auto& gizmoMesh : meshComponents[eInteract::TRANSLATE_Y].gizmoMeshes)
-		gizmoMesh->Render(renderer);
-	for (auto& gizmoMesh : meshComponents[eInteract::TRANSLATE_Z].gizmoMeshes)
-		gizmoMesh->Render(renderer);	
+	handles.Render(renderer, GetMode());
 }
