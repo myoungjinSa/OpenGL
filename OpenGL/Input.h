@@ -53,8 +53,7 @@ public:
 			LBUTTON_UP,
 			RBUTTON_DOWN,
 			RBUTTON_UP,
-			LEFT_BUTTON_DRAG,
-			RIGHT_BUTTON_DRAG,
+			MOUSE_MOVE,
 			MOUSE_STATE_COUNT
 		};
 		MouseEvent(MOUSE_STATE mouseState, const Point2i& mousePos);
@@ -84,10 +83,10 @@ public:
 	static void Notify(MouseInput::MouseEvent& e);
 
 	static Point2i oldMousePoint;
-private:
 	static bool leftButtonDown;
 	static bool rightButtonDown;
 	static bool dragging;
+private:
 	static Point2i mousePoint;
 	static float yAngle;
 	static float xAngle;

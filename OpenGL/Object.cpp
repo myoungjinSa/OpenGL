@@ -81,15 +81,13 @@ Vec3f GameObject::GetUp() const {
 	return transform.get()->GetUp();
 }
 
+void GameObject::Move(const Vec3f& offset) {
+	transform->Move(offset);
+}
+
 void GameObject::Move(const Vec3f& dir, float movingSpeed, float elapsedTime) {
-	std::weak_ptr<RigidTransform> weak_tr = transform;
-	{
-		std::shared_ptr<RigidTransform> shared_tr = weak_tr.lock();
-		if (shared_tr) {
-			shared_tr->SetMovingSpeed(movingSpeed);
-			shared_tr->Move(dir, elapsedTime);
-		}
-	}
+	transform->SetMovingSpeed(movingSpeed);
+	transform->Move(dir, elapsedTime);
 }
 
 void GameObject::Rotate(float pitch, float yaw, float roll) {

@@ -96,6 +96,7 @@ public:
 	Vec3f GetRight() const;
 	Vec3f GetUp() const;
 
+	void Move(const Vec3f& offset);
 	void Move(const Vec3f& dir, float movingSpeed, float elapsedTime);
 	void Rotate(float pitch, float yaw, float roll);
 

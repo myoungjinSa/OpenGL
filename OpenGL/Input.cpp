@@ -155,23 +155,15 @@ void MouseInput::ProcessMouseMove(int x, int y) {
 	if (mousePoint.x == x && mousePoint.y == y)
 		return;
 
-	if (dragging) {
-		int dragX = x;
-		int dragY = y;
+	int dragX = x;
+	int dragY = y;
 
-		mousePoint.x = dragX;
-		mousePoint.y = dragY;
-		//dragY = y;
+	mousePoint.x = dragX;
+	mousePoint.y = dragY;
+	//dragY = y;
 
-		if (rightButtonDown) {
-			MouseEvent e(MouseEvent::MOUSE_STATE::RIGHT_BUTTON_DRAG, Point2i(mousePoint.x, mousePoint.y));
-			Notify(e);
-		}
-		if (leftButtonDown) {
-			MouseEvent e(MouseEvent::MOUSE_STATE::LEFT_BUTTON_DRAG, Point2i(mousePoint.x, mousePoint.y));
-			Notify(e);
-		}
-	}
+	MouseEvent e(MouseEvent::MOUSE_STATE::MOUSE_MOVE, Point2i(mousePoint.x, mousePoint.y));
+	Notify(e);
 }
 
 float MouseInput::GetXAngle() {

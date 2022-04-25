@@ -31,6 +31,7 @@ public:
 	void SetScale(const Vec3f& size);
 	Vec3f GetScale() const;
 
+	void Move(const Vec3f& offset);
 	void Move(const Vec3f& direction, float elapsedTime);
 
 	void SetLook(const Vec3f& look);

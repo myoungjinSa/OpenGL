@@ -2,15 +2,25 @@
 #include "RayCast.h"
 #include "Input.h"
 
+
+void SceneEdit::ObjectMemento::Set(const GameObject& gameObject) {
+	position = gameObject.GetPosition();
+}
+void SceneEdit::ObjectMemento::Restore(GameObject& gameObject) {
+	gameObject.SetPosition(position);
+}
+
 SceneEdit::SceneEdit(class Scene& _scene)
 	: scene(_scene)
 {
 	picker.SetNear(scene.GetCamera().GetNear());
 	picker.SetFar(scene.GetCamera().GetFar());
+
+	MouseInput::Attach(this);
 }
 
 SceneEdit::~SceneEdit() {
-
+	MouseInput::Detach(this);
 }
 
 bool SceneEdit::PickObject(const Ray& _ray) {
@@ -24,7 +34,6 @@ bool SceneEdit::PickObject(const Ray& _ray) {
 	if (!picker.HitTest(scene)) {
 		picker.Clear();
 		scene.Gizmo.Detach();
-		MouseInput::Detach(this);
 
 		return false;
 	}
@@ -37,22 +46,19 @@ bool SceneEdit::PickObject(const Ray& _ray) {
 	}
 	//Show Gizmo
 	//..
-	const GameObjectPicker::PickedList& pickedObjects = picker.GetPickedList();
-	scene.Gizmo.Attach(*pickedObjects.front().pObject);
-
-	MouseInput::Attach(this);
+	const GameObjects& selectedObjects = picker.GetSelectedObjects();
+	if (!selectedObjects.empty()) {
+		scene.Gizmo.Attach(*selectedObjects.at(0));
+	}
 
 	return true;
 }
 
-void SceneEdit::GetTransform(Vec4f& transform) {
-
-}
-//Vec3f SceneEdit::CalcDragOffsetInWorld(const Point2d& prev, const Point2d& cur) {
-//
-//}
-
 Vec3f SceneEdit::CalcDragOffsetInWorld(const GameObject& baseObject, const Point2i& prev, const Point2i& cur) {
+	Gizmos::GizmoHandle::eHandle handleType = scene.Gizmo.GetEditingHandle();
+	if (handleType == Gizmos::GizmoHandle::eHandle::NONE)
+		return Vec3f();
+
 	Ray curRay = scene.GetRay(cur, scene.GetSceneSize());
 	Ray prevRay = scene.GetRay(prev, scene.GetSceneSize());
 
@@ -72,7 +78,6 @@ Vec3f SceneEdit::CalcDragOffsetInWorld(const GameObject& baseObject, const Point
 	vertices[7] = Transform(worldMatrix, Vec3f(volume.min.x, volume.min.y, volume.min.z));
 
 	Planef plane;
-	Gizmos::GizmoHandle::eHandle handleType = scene.Gizmo.GetEditingHandle();
 	switch (handleType) {
 	case Gizmos::GizmoHandle::eHandle::TRANSLATE_X:
 	case Gizmos::GizmoHandle::eHandle::TRANSLATE_Y:
@@ -92,15 +97,10 @@ void SceneEdit::MoveSelectedObject(GameObjects& selection) {
 		return;
 
 	Vec3f offset = CalcDragOffsetInWorld(*selection.at(0), drag.GetBeginPoint(), drag.GetEndPoint());
-	selection.at(0)->SetPosition(offset);
-}
 
-void SceneEdit::MoveSelectedObject(GameObjects& selection, const Vec3f& offset) {
-	
-}
-
-void SceneEdit::MoveSelectedObject(GameObjects& selection, const Vec3f& offset, const Vec3f& distance) {
-
+	GameObject& selectedObj = *selection.at(0);
+	objMemento.Restore(selectedObj);
+	selectedObj.Move(offset);
 }
 
 void SceneEdit::ProcessEvent(Event& e) {
@@ -112,23 +112,32 @@ void SceneEdit::ProcessEvent(Event& e) {
 		Point2i newMousePoint = pMouseEvent->mousePoint;
 
 		if (pMouseEvent->mouseState == MouseInput::MouseEvent::MOUSE_STATE::LBUTTON_DOWN) {
-			
 			drag.Begin(newMousePoint);
+
+			const GameObjects& selectedObjects = picker.GetSelectedObjects();
+			if(!selectedObjects.empty())
+				objMemento.Set(*selectedObjects.at(0));
 		}
 		if (pMouseEvent->mouseState == MouseInput::MouseEvent::MOUSE_STATE::LBUTTON_UP) {
 			drag.End();
 		}
 
-		if (pMouseEvent->mouseState == MouseInput::MouseEvent::MOUSE_STATE::LEFT_BUTTON_DRAG) {
+		if (pMouseEvent->mouseState == MouseInput::MouseEvent::MOUSE_STATE::MOUSE_MOVE) {
 			drag.Track(newMousePoint);
 
 			if (drag.IsTracked()) {
 				DoDrag(eDragMode::DRAG_MODE_MOVING);
+			}else {
+				DoFocus(newMousePoint);
 			}
 		}
 	}
 }
 
+void SceneEdit::DoFocus(const Point2i& pt) {
+	Ray curRay = scene.GetRay(pt, scene.GetSceneSize());
+
+}
 void SceneEdit::DoDrag(eDragMode dragMode) {
 	if (dragMode == eDragMode::DRAG_MODE_MOVING) {
 		GameObjects selectedObjects = picker.GetSelectedObjects();

@@ -182,6 +182,11 @@ Vec3f RigidTransform::GetScale() const {
 	return scale;
 }
 
+void RigidTransform::Move(const Vec3f& offset) {
+	position = GetPosition() + offset;
+	SetTransform();
+}
+
 void RigidTransform::Move(const Vec3f& direction, float elapsedTime) {
 	position = GetPosition() + Normalize(direction) * elapsedTime * movingSpeed;
 	SetTransform();

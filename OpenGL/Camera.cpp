@@ -202,17 +202,18 @@ void Camera::ProcessEvent(Event& e) {
 		Point2i newMousePoint = pMouseEvent->mousePoint;
 		Vec2f mouseDelta(newMousePoint.x - oldMousePoint.x, newMousePoint.y - oldMousePoint.y);
 		
-		if (pMouseEvent->mouseState == MouseInput::MouseEvent::MOUSE_STATE::RIGHT_BUTTON_DRAG) {
-			if (sqrtf(newMousePoint.x - oldMousePoint.x + newMousePoint.y - oldMousePoint.y) > 50.0f)
-			{
-				oldMousePoint = newMousePoint;
-				return;
-			}
-			const float rotationSpeed = 0.5f;
+		if (pMouseEvent->mouseState == MouseInput::MouseEvent::MOUSE_STATE::MOUSE_MOVE) {
+			if (MouseInput::rightButtonDown) {
+				if (sqrtf(newMousePoint.x - oldMousePoint.x + newMousePoint.y - oldMousePoint.y) > 50.0f)
+				{
+					oldMousePoint = newMousePoint;
+					return;
+				}
+				const float rotationSpeed = 0.5f;
 
-			xAngle += (newMousePoint.y - oldMousePoint.y) / 3.6f;
-			yAngle += (newMousePoint.x - oldMousePoint.x) / 3.6f;
-	
+				xAngle += (newMousePoint.y - oldMousePoint.y) / 3.6f;
+				yAngle += (newMousePoint.x - oldMousePoint.x) / 3.6f;
+			}
 		}
 		oldMousePoint = newMousePoint;
 	}

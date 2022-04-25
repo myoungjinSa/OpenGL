@@ -16,17 +16,26 @@ public:
 		DRAG_MODE_MOVING,
 		DRAG_MODE_SIZING,
 	};
+
+	class ObjectMemento {
+	public:
+		ObjectMemento() = default;
+
+		void Set(const GameObject& object);
+		void Restore(GameObject& object);
+
+		Vec3f position;
+	};
+
 	SceneEdit(Scene& _scene);
 	~SceneEdit();
 
+	void DoFocus(const Point2i& pt);
 	void DoDrag(eDragMode dragMode);
 
-	void GetTransform(Vec4f& transform);
 	bool PickObject(const Ray& ray);
 
 	void MoveSelectedObject(GameObjects& selection);
-	void MoveSelectedObject(GameObjects& Selection, const Vec3f& offset);
-	void MoveSelectedObject(GameObjects& Selection, const Vec3f& offset, const Vec3f& distance);
 
 	void ProcessEvent(Event& e);
 private:
@@ -35,6 +44,7 @@ private:
 	Drag drag;
 	eDragMode dragMode;
 	DragContext dragContext;
-	
+	ObjectMemento objMemento;
+
 	Vec3f CalcDragOffsetInWorld(const GameObject& baseObject, const Point2i& prev, const Point2i& cur);
 };
