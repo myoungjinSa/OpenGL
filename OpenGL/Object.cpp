@@ -45,6 +45,8 @@ GameObject::GameObject()
 GameObject::~GameObject() {
 
 }
+
+
 void GameObject::SetPosition(const Vec3f& _position) {
 	transform.get()->SetPosition(_position);
 }
@@ -98,7 +100,7 @@ bool GameObject::Initialize(Renderer& renderer) {
 	
 	return true;
 }
-void GameObject::Render(Renderer& renderer, const ShaderParameter& shaderParam) {
+void GameObject::Render(Renderer& renderer, ShaderParameter& shaderParam) {
 	
 }
 
@@ -283,7 +285,7 @@ bool Cube::Initialize(Renderer& renderer) {
 	meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 	meshBuilder.End();
 
-	diffuseMap = TextureLoader::GetTexture(renderer, L"오마이걸-Real Love.mp4");
+	diffuseMap = TextureLoader::GetTexture(renderer, L"레드벨벳-Feel My Rythm.mp4");
 	
 	renderer.AllocateTextures(diffuseMap->textureID, 1);
 	renderer.BindTexture(diffuseMap->GetTextureID());
@@ -326,7 +328,7 @@ void Cube::Update(float deltaTime) {
 	diffuseMap->Update(deltaTime);
 }
 
-void Cube::Render(Renderer& renderer, const ShaderParameter& shaderParam) {	
+void Cube::Render(Renderer& renderer, ShaderParameter& shaderParam) {	
 	GameObject::Render(renderer, shaderParam);
 	
 	shader->Render(renderer, shaderParam);
@@ -413,7 +415,7 @@ void Sphere::Update(float deltaTime) {
 	diffuseMap->Update(deltaTime);
 }
 
-void Sphere::Render(Renderer& renderer, const ShaderParameter& shaderParam) {
+void Sphere::Render(Renderer& renderer, ShaderParameter& shaderParam) {
 	GameObject::Render(renderer, shaderParam);
 	shader->Render(renderer, shaderParam);
 	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
@@ -488,7 +490,7 @@ void Cubemap::Shutdown(Renderer& renderer) {
 	}
 }
 
-void Cubemap::Render(Renderer& renderer, const ShaderParameter& shaderParam) {
+void Cubemap::Render(Renderer& renderer, ShaderParameter& shaderParam) {
 	GameObject::Render(renderer, shaderParam);
 	shader->Render(renderer, shaderParam);
 	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
@@ -549,7 +551,7 @@ void Cylinder::Update(float deltaTime) {
 
 }
 
-void Cylinder::Render(Renderer& renderer, const ShaderParameter& shaderParam) {
+void Cylinder::Render(Renderer& renderer, ShaderParameter& shaderParam) {
 	GameObject::Render(renderer, shaderParam);
 	for (auto& mesh : meshes) {
 		mesh->Render(renderer);

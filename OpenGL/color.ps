@@ -3,7 +3,13 @@
 ////////////////////////////////////////////////////////////////////////////////
 #version 400
 
+struct FocusInfo{
+	vec4 focusingColor;
+	int  focusObjNo;
+};
 
+uniform int       objNo;
+uniform FocusInfo focusInfo;
 /////////////////////
 // INPUT VARIABLES //
 /////////////////////
@@ -16,10 +22,9 @@ in vec3 color;
 out vec4 outputColor;
 
 
-////////////////////////////////////////////////////////////////////////////////
-// Pixel Shader
-////////////////////////////////////////////////////////////////////////////////
 void main(void)
 {
-	outputColor = vec4(color, 1.0f);
+	vec4 finalColor;
+	finalColor = (objNo == focusInfo.focusObjNo) ? focusInfo.focusingColor : vec4(color, 1.0f);
+	outputColor = finalColor;
 }

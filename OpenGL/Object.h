@@ -78,7 +78,7 @@ public:
 	virtual bool Initialize(Renderer& renderer);
 	virtual void Shutdown(Renderer& renderer) {}
 	virtual void Render(Renderer& renderer) {}
-	virtual void Render(Renderer& renderer, const ShaderParameter& shaderParam);
+	virtual void Render(Renderer& renderer, ShaderParameter& shaderParam);
 	
 	virtual void Update(float deltaTime){}
 
@@ -104,6 +104,8 @@ public:
 
 	void GetWorldBoundingBox(Volumef& volume)const;
 	void GetLocalBoundingBox(Volumef& volume)const;
+
+	std::list<std::shared_ptr<Mesh>>& GetMeshes() { return meshes; }
 protected:
 	std::vector<std::shared_ptr<Component>> components;
 	
@@ -127,7 +129,7 @@ public:
 
 	bool Initialize(Renderer& renderer) override;
 	void Shutdown(Renderer& renderer) override;
-	void Render(Renderer& renderer, const ShaderParameter& shaderParam) override;
+	void Render(Renderer& renderer, ShaderParameter& shaderParam) override;
 	
 	void Update(float deltaTime) override;
 
@@ -144,7 +146,7 @@ public:
 
 	bool Initialize(Renderer& renderer) override;
 	void Shutdown(Renderer& renderer) override;
-	void Render(Renderer& renderer, const ShaderParameter& shaderParam) override;
+	void Render(Renderer& renderer, ShaderParameter& shaderParam) override;
 	
 	void Update(float deltaTime) override;
 
@@ -173,7 +175,7 @@ public:
 
 	bool Initialize(Renderer& renderer) override;
 	void Shutdown(Renderer& renderer) override;
-	void Render(Renderer& renderer, const ShaderParameter& shaderParam) override;
+	void Render(Renderer& renderer, ShaderParameter& shaderParam) override;
 };
 
 class Cylinder : public GameObject {
@@ -185,7 +187,7 @@ public:
 	
 	bool Initialize(Renderer& renderer) override;
 	void Shutdown(Renderer& renderer) override;
-	void Render(Renderer& renderer, const ShaderParameter& shaderParam) override;
+	void Render(Renderer& renderer, ShaderParameter& shaderParam) override;
 	
 	void Update(float deltaTime) override;
 

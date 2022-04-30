@@ -27,6 +27,7 @@ public:
 		Vec3f position;
 	};
 
+
 	SceneEdit(Scene& _scene);
 	~SceneEdit();
 

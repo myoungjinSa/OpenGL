@@ -10,7 +10,7 @@
 
 Scene::Scene() 
 	:projectionMatrix(),
-	 Gizmo()
+	 gizmos()
 {
 
 }
@@ -40,7 +40,7 @@ bool Scene::BuildObject(Renderer& renderer) {
 	camera.SetViewport(Rect2f(0.0f, 0.0f, renderer.GetRenderTargetWidth(), renderer.GetRenderTargetHeight()));
 	camera.SetNear(1.0f);
 	camera.SetFar(1000.0f);
-	Gizmo.Initialize(renderer);
+	gizmos.Initialize(renderer);
 	
 	sceneSize = Size2u(renderer.GetRenderTargetWidth(), renderer.GetRenderTargetHeight());
 	return true;
@@ -74,7 +74,7 @@ bool Scene::Render(Renderer& renderer) {
 	}
 
 	renderer.SetDepthTest(false);
-	Gizmo.Render(renderer, &camera, *this);
+	gizmos.Render(renderer, &camera, *this);
 	renderer.SetDepthTest(true);
 
 	renderer.EndRender();
@@ -141,6 +141,8 @@ GameObjectPicker::sPickedInfo::sPickedInfo(GameObject* _pObject, float _distance
 	, distance(_distance)
 {
 }
+
+
 
 GameObjectPicker::GameObjectPicker() {
 

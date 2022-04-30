@@ -21,6 +21,7 @@ public:
 		float   distance;
 	};
 
+
 	typedef std::list<sPickedInfo> PickedList;
 
 	GameObjectPicker();
@@ -80,7 +81,7 @@ public:
 private:
 	Size2u sceneSize;
 	Camera camera;
-	Gizmos Gizmo;
+	Gizmos gizmos;
 
 	//std::shared_ptr<Shader> DefaultShader;
 	//std::vector<GameObject*> objects;

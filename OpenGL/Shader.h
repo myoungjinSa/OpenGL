@@ -11,17 +11,25 @@ class Renderer;
 class Ray;
 class BoundingVolume;
 
+typedef struct FocusInfo {
+	Vec4f highlightColor;
+	int   focusObjNo;
+}FocusInfo;
+
 struct ShaderParameter {
 	Matrix<float, 4, 4> worldMatrix;
 	Matrix<float, 4, 4> viewMatrix;
 	Matrix<float, 4, 4> projectionMatrix;
 
+	int   objNo;
 	Vec3f lightPosition;
 	Vec4f diffuse;
 	Vec4f specular;
 	Vec4f ambient;
 
 	Vec3f cameraPosition;
+	
+	FocusInfo focusInfo;
 
 	int textureUnit;
 };

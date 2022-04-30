@@ -77,6 +77,10 @@ bool ColorShader::SetShaderParameters(Renderer& renderer, const ShaderParameter&
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.projectionMatrix, String("projectionMatrix"))) {
 		return false;
 	}
+	
+	renderer.SetShaderParameter(shaderProgram, (int)shaderParam.objNo, String("objNo"));
+	renderer.SetShaderParameter(shaderProgram, shaderParam.focusInfo.highlightColor, String("focusInfo.focusingColor"));
+	renderer.SetShaderParameter(shaderProgram, (int)shaderParam.focusInfo.focusObjNo, String("focusInfo.focusObjNo"));
 
 	return true;
 }

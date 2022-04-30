@@ -1,7 +1,7 @@
 #include "SceneEdit.h"
 #include "RayCast.h"
 #include "Input.h"
-
+#include "Logger.h"
 
 void SceneEdit::ObjectMemento::Set(const GameObject& gameObject) {
 	position = gameObject.GetPosition();
@@ -9,6 +9,7 @@ void SceneEdit::ObjectMemento::Set(const GameObject& gameObject) {
 void SceneEdit::ObjectMemento::Restore(GameObject& gameObject) {
 	gameObject.SetPosition(position);
 }
+
 
 SceneEdit::SceneEdit(class Scene& _scene)
 	: scene(_scene)
@@ -33,14 +34,14 @@ bool SceneEdit::PickObject(const Ray& _ray) {
 
 	if (!picker.HitTest(scene)) {
 		picker.Clear();
-		scene.Gizmo.Detach();
+		scene.gizmos.Detach();
 
 		return false;
 	}
 
-	if (scene.Gizmo.IsAlreadyAttached()) {
+	if (scene.gizmos.IsAlreadyAttached()) {
 		double distance = 0.0;
-		picker.HitTest(scene.Gizmo, distance);
+		picker.HitTest(scene.gizmos, distance);
 		
 		return true;
 	}
@@ -48,14 +49,14 @@ bool SceneEdit::PickObject(const Ray& _ray) {
 	//..
 	const GameObjects& selectedObjects = picker.GetSelectedObjects();
 	if (!selectedObjects.empty()) {
-		scene.Gizmo.Attach(*selectedObjects.at(0));
+		scene.gizmos.Attach(*selectedObjects.at(0));
 	}
 
 	return true;
 }
 
 Vec3f SceneEdit::CalcDragOffsetInWorld(const GameObject& baseObject, const Point2i& prev, const Point2i& cur) {
-	Gizmos::GizmoHandle::eHandle handleType = scene.Gizmo.GetEditingHandle();
+	Gizmos::GizmoHandle::eHandle handleType = scene.gizmos.GetEditingHandle();
 	if (handleType == Gizmos::GizmoHandle::eHandle::NONE)
 		return Vec3f();
 
@@ -135,8 +136,16 @@ void SceneEdit::ProcessEvent(Event& e) {
 }
 
 void SceneEdit::DoFocus(const Point2i& pt) {
+	//LogDebug(L"Do Focus - pt.x : %5d, pt.y : %5d\n", pt.x, pt.y);
 	Ray curRay = scene.GetRay(pt, scene.GetSceneSize());
+	double distance = DBL_MAX;
 
+	picker.SetRay(curRay);
+	if (scene.gizmos.IsAlreadyAttached()) {
+		if (picker.HitTest(scene.gizmos, distance)) {
+			LogDebug(L"Do Focus\n");
+		}
+	}
 }
 void SceneEdit::DoDrag(eDragMode dragMode) {
 	if (dragMode == eDragMode::DRAG_MODE_MOVING) {

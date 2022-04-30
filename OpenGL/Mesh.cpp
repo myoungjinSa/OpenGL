@@ -221,10 +221,17 @@ void Mesh::Render(Renderer& renderer) {
 
 
 bool Mesh::BuildTriangles() {
-	for (size_t iIndex = 0; iIndex < indexCount; iIndex += 3) {
-		Vertex* v = vertexList.at(indexList[iIndex]);
-		std::tuple<const Vertex*, const Vertex*, const Vertex*> vTuple = std::make_tuple(vertexList.at(indexList[iIndex]), vertexList.at(indexList[iIndex + 1]), vertexList.at(indexList[iIndex + 2]));
-		triangles.push_back(Triangle(*std::get<0>(vTuple), *std::get<1>(vTuple), *std::get<2>(vTuple)));
+	if (DoesHaveIndexBuffer()) {
+		for (size_t iIndex = 0; iIndex < indexCount; iIndex += 3) {
+			Vertex* v = vertexList.at(indexList[iIndex]);
+			std::tuple<const Vertex*, const Vertex*, const Vertex*> vTuple = std::make_tuple(vertexList.at(indexList[iIndex]), vertexList.at(indexList[iIndex + 1]), vertexList.at(indexList[iIndex + 2]));
+			triangles.push_back(Triangle(*std::get<0>(vTuple), *std::get<1>(vTuple), *std::get<2>(vTuple)));
+		}
+	}else {
+		for (size_t iVertex = 0; iVertex < vertexCount; iVertex += 3) {
+			std::tuple<const Vertex*, const Vertex*, const Vertex*> vTuple = std::make_tuple(vertexList.at(iVertex), vertexList.at(iVertex + 1), vertexList.at(iVertex + 2));
+			triangles.push_back(Triangle(*std::get<0>(vTuple), *std::get<1>(vTuple), *std::get<2>(vTuple)));
+		}
 	}
 	return true;
 }

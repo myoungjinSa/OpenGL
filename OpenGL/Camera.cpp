@@ -56,9 +56,7 @@ bool Camera::Initialize(Renderer& renderer) {
 	return true;
 }
 
-void Camera::Render(Renderer& renderer) {
 
-}
 
 void Camera::Shutdown(Renderer& renderer) {
 	MouseInput::Detach(this);

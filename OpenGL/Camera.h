@@ -30,9 +30,9 @@ public:
 	~Camera();
 
 	bool Initialize(Renderer& renderer) override;
-	void Render(Renderer& renderer) override;
 	void Shutdown(Renderer& renderer) override;
 	void Update(float deltaTime) override;
+	void Render(Renderer& renderer, ShaderParameter& shaderParam)override {}
 
 	void GetViewMatrix(Matrix<float, 4, 4>& Matrix) const;
 	void BuildPerspectiveFovLHMatrix(Matrix<float, 4, 4>& matrix);

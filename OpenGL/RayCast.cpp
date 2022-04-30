@@ -48,34 +48,6 @@ void RayCast::Detransform(float scale, Ray& ray) {
 Ray RayCast::Detransform(const RigidTransform& transform, const Ray& ray) {
 	return Ray(transform.DetransformPoint(ray.GetPosition()), transform.DetransformVector(ray.GetDirection()), 10000.0f);
 }
-//
-//GameObject* RayCast::HitTest(Object& target, float x, float y, int screenWidth, int screenHeight, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix) {
-//	Vec3f rayDirection = CalculateRayDirection(viewMatrix, projectionMatrix, x, y, screenWidth, screenHeight);
-//	
-//	Matrix<float, 4, 4> inversedViewMatrix = Inverse(viewMatrix);
-//	
-//	Vec3f rayWorldPos = Vec3f();
-//	rayWorldPos.x = inversedViewMatrix.value[12];
-//	rayWorldPos.y = inversedViewMatrix.value[13];
-//	rayWorldPos.z = inversedViewMatrix.value[14];
-//
-//	Ray ray(rayWorldPos, rayDirection, 10000.0f);
-//
-//	if (dynamic_cast<Scene*>(&target)) {
-//		for (size_t iObj = 0; iObj < targetScene.GetObjectCount(); iObj++) {
-//			if (targetScene.IntersectObjects(ray)) {
-//				return targetScene.GetGameObject(iObj);
-//			}
-//		}
-//	}else if (Gizmos* pGizmo = dynamic_cast<Gizmos*>(&target)) {
-//		double distance = 0.0;
-//		if (pGizmo->Intersect(ray, distance)) {
-//			return pGizmo;
-//		}
-//	}
-//	
-//	return nullptr;
-//}
 
 Ray RayCast::GetRay(float x, float y, size_t screenWidth, size_t screenHeight, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix) {
 	Vec3f rayDirection = CalculateRayDirection(viewMatrix, projectionMatrix, x, y, screenWidth, screenHeight);

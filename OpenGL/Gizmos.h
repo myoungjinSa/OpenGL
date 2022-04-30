@@ -7,6 +7,7 @@
 #include "Mesh.h"
 #include "RGBA.h"
 #include "Object.h"
+#include "BoundingVolume.h"
 
 struct GizmoParameter {
 	float snap_translation{ 0.f };      // World-scale units used for snapping translation
@@ -38,7 +39,7 @@ public:
 	};
 
 
-	class GizmoHandle{
+	class GizmoHandle : public GameObject{
 	public:
 		enum class eHandle {
 			NONE,
@@ -50,36 +51,24 @@ public:
 			SCALE_XYZ
 		};
 		const Gizmos& owner;
-		std::list<std::shared_ptr<Mesh>> meshes;
 		RGBA baseColor;
-		RGBA highlightColor;
 		eHandle type;
 
 		GizmoHandle() = default;
-		GizmoHandle(const Gizmos& owner, std::function<std::list<std::shared_ptr<Mesh>>()> meshBuildFunction, const RGBA& _baseColor, const RGBA& _highlightColor, eHandle handleType);
+		GizmoHandle(const Gizmos& owner, std::function<bool(Gizmos::GizmoHandle&, Renderer&)> _meshBuildFunction, const RGBA& _baseColor, const RGBA& _highlightColor, eHandle handleType);
 		GizmoHandle(const GizmoHandle& other);
 
-		bool Intersect(const Ray& ray, double& distance) const;
-		void Render(Renderer& renderer) const;
+		bool Initialize(Renderer& renderer) override;
+		bool Intersect(const Ray& ray, double& distance);
+		void Render(Renderer& renderer, ShaderParameter& shaderParam) override;
+		void Shutdown(Renderer& renderer) override;
 
 		const GizmoHandle& operator=(const GizmoHandle& other);
 
-
-		//size_t GetMeshCount() const { return gizmoMeshes.size(); }
+	private:
+		std::shared_ptr<ColorShader> defaultShader;
+		std::function<bool(Gizmos::GizmoHandle&, Renderer&)> meshBuildFunction;
 	};
-	
-
-	class GizmoHandles : public std::map<GizmoHandle::eHandle, GizmoHandle> {
-	public:
-		bool Add(const GizmoHandle& handle);
-
-		bool DoesExist(GizmoHandle::eHandle handleType) const;
-		void Render(Renderer& renderer, eTransformMode transformMode) const;
-	
-		GizmoHandle::eHandle Intersect(const Ray& ray, double& distance, eTransformMode transformMode)const;
-	};
-	
-
 	class GizmoContext {
 	public:
 		GizmoContext() {
@@ -88,6 +77,17 @@ public:
 
 		GizmoHandle::eHandle editingHandle;
 	};
+
+	class GizmoHandles : public std::map<GizmoHandle::eHandle, GizmoHandle> {
+	public:
+		bool Add(const GizmoHandle& handle);
+
+		bool DoesExist(GizmoHandle::eHandle handleType) const;
+		void Render(Renderer& renderer, ShaderParameter& shaderParam, eTransformMode transformMode) ;
+	
+		GizmoHandle::eHandle Intersect(const Ray& ray, double& distance, eTransformMode transformMode);
+	};
+	
 	Gizmos();
 
 	bool Initialize(Renderer& renderer);
@@ -98,6 +98,7 @@ public:
 	void Attach(GameObject& Target);
 	void Detach();
 
+	void Focus(GizmoHandle::eHandle handleType);
 	void Render(Renderer& renderer, Camera* pCamera, const Scene& scene);
 
 	bool IsAlreadyAttached() const;
@@ -106,13 +107,12 @@ public:
 	float ScaleByDistanceToTarget(const Vec3f& targetPos, float yfov, float pixelScale) const;
 	eTransformMode GetMode() const;
 
-	GizmoHandle::eHandle GetEditingHandle() const;
+	GizmoHandle::eHandle GetEditingHandle() const { return context.editingHandle; }
 private:
 	GizmoContext context;
 	eTransformMode transformMode;
 	GameObjects targets;
 
-	std::shared_ptr<ColorShader> defaultShader;
 	GizmoHandles handles;
 
 	Point2i oldMousePoint;
