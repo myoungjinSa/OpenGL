@@ -90,8 +90,29 @@ Vec3f SceneEdit::CalcDragOffsetInWorld(const GameObject& baseObject, const Point
 	}
 
 	Vec3f distance = plane.GetIntersection(curRay.GetLine()) - plane.GetIntersection(prevRay.GetLine());	
+	
+	return ClampDragOffset(handleType, distance);
+}
 
-	return distance;
+Vec3f SceneEdit::ClampDragOffset(Gizmos::GizmoHandle::eHandle handleType, const Vec3f& offset) {
+	if (handleType == Gizmos::GizmoHandle::eHandle::NONE)
+		return offset;
+
+	Vec3f newOffset = offset;
+	switch (handleType) {
+	case Gizmos::GizmoHandle::eHandle::TRANSLATE_X:
+		newOffset = Vec3f(offset.x, 0.0f, 0.0f);
+		break;
+	case Gizmos::GizmoHandle::eHandle::TRANSLATE_Y:
+		newOffset = Vec3f(0.0f, offset.y, 0.0f);
+		break;
+	case Gizmos::GizmoHandle::eHandle::TRANSLATE_Z:
+		newOffset = Vec3f(0.0f, 0.0f, offset.z);
+		break;
+	default:
+		break;
+	}
+	return newOffset;
 }
 void SceneEdit::MoveSelectedObject(GameObjects& selection) {
 	if (selection.empty())
@@ -136,14 +157,12 @@ void SceneEdit::ProcessEvent(Event& e) {
 }
 
 void SceneEdit::DoFocus(const Point2i& pt) {
-	//LogDebug(L"Do Focus - pt.x : %5d, pt.y : %5d\n", pt.x, pt.y);
 	Ray curRay = scene.GetRay(pt, scene.GetSceneSize());
 	double distance = DBL_MAX;
 
 	picker.SetRay(curRay);
 	if (scene.gizmos.IsAlreadyAttached()) {
 		if (picker.HitTest(scene.gizmos, distance)) {
-			LogDebug(L"Do Focus\n");
 		}
 	}
 }

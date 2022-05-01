@@ -48,4 +48,5 @@ private:
 	ObjectMemento objMemento;
 
 	Vec3f CalcDragOffsetInWorld(const GameObject& baseObject, const Point2i& prev, const Point2i& cur);
+	Vec3f ClampDragOffset(Gizmos::GizmoHandle::eHandle handleType, const Vec3f& offset);
 };
