@@ -865,7 +865,19 @@ void MeshBuilder::AddLathe(const Vec3f& axis, const Vec3f& arm1, const Vec3f& ar
 	//ComputeNormals();
 }
 
+void MeshBuilder::AddGrid(int xStart, int zStart, int width, int length, const Vec3f& scale, const RGBA& color, std::function<float(int, int)> CalcHeightFunction) {
+	
+	for (int i = 0, zTile = zStart; zTile < (zStart + length); zTile++) {
+		for (int xTile = xStart; xTile < (xStart + width); xTile++) {
+			float height = CalcHeightFunction(xTile, zTile);
+			SetPosition(xTile * scale.x, height, zTile * scale.z);
+			SetColor(color);
+			vertices.push_back(stamp);
+			//SetUV((float)xTile / , );
+		}
+	}
 
+}
 void MeshBuilder::AddVertex(const Vec3f& _position) {
 	stamp.position = _position;
 	vertices.emplace_back(stamp);

@@ -176,6 +176,7 @@
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="String\String.cpp" />
     <ClCompile Include="System.cpp" />
+    <ClCompile Include="Terrain.cpp" />
     <ClCompile Include="Texture.cpp" />
     <ClCompile Include="TGAReader\tga_reader.c" />
     <ClCompile Include="Thread.cpp" />
@@ -220,6 +221,7 @@
     <ClInclude Include="Shader.h" />
     <ClInclude Include="String\String.h" />
     <ClInclude Include="System.h" />
+    <ClInclude Include="Terrain.h" />
     <ClInclude Include="Texture.h" />
     <ClInclude Include="TGAReader\tga_reader.h" />
     <ClInclude Include="Thread.h" />

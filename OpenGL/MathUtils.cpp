@@ -9,8 +9,9 @@ const float MathUtils::TWO_PI = 6.28318530718f;
 const float MathUtils::HALF_PI = 3.14159265358f / 2.0f;
 
 
-float MathUtils::Lerp(float fraction, float startValue, float endValue) {
-	return startValue + fraction * (endValue - startValue);
+
+float MathUtils::Lerp(float a, float b, float t) {
+	return (1.0f - t) * a + t * b ;
 }
 
 float MathUtils::DegreesToRadians(float degrees)

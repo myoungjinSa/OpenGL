@@ -6,7 +6,7 @@
 class MathUtils
 {
 public:
-	static float Lerp(float fraction, float startValue, float endValue);
+	static float Lerp(float a, float b, float t);
 	static float DegreesToRadians(float degree);
 	static float RadiansToDegrees(float radian);
 

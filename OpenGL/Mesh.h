@@ -149,6 +149,7 @@ public:
 
 	void CopyToMesh(Renderer& renderers, Mesh& mesh, VertexBufferBindCallback* bindFunction, VertexCopyCallback* copyFunction, unsigned int sizeofVertex);
 
+	void AddGrid(int xStart, int zStart, int width, int length, const Vec3f& scale, const RGBA& color, std::function<float(int, int)> CalcHeightFunction);
 	void AddCylinder(const Vec3f& axis, const Vec3f& arm1, const Vec3f& arm2, uint32_t slices, const RGBA& color);
 	void AddSphere(const Vec3f& position, float radius, int sectorCount, int stackCount);
 	void AddCube(float sideLength, const RGBA& color);
@@ -159,6 +160,7 @@ public:
 	void AddXAxisCone(const Vec3f& centerOffset, float halfWidth, float halfHegiht, float halfDepth, double angleStep, const RGBA& color);
 	void AddYAxisCone(const Vec3f& centerOffset, float halfWidth, float halfHegiht, float halfDepth, double angleStep, const RGBA& color);
 	void AddZAxisCone(const Vec3f& centerOffset, float halfWidth, float halfHegiht, float halfDepth, double angleStep, const RGBA& color);
+
 
 	void AddVertex(const Vec3f& position);
 	void AddIndex(int index);
