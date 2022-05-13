@@ -101,7 +101,17 @@ bool GameObject::Initialize(Renderer& renderer) {
 	return true;
 }
 void GameObject::Render(Renderer& renderer, ShaderParameter& shaderParam) {
-	
+	switch (renderer.GetRenderMode()) {
+	case Renderer::RenderMode::SOLID:
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		break;
+	case Renderer::RenderMode::WIREFRAME:
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		break;
+	default:
+		assert(0);
+		break;
+	}
 }
 
 bool GameObject::Intersect(const Ray& ray, double& distance) {
@@ -135,7 +145,8 @@ void GameObject::FillShaderParameter(ShaderParameter& shaderParam, const Matrix<
 
 	shaderParam.cameraPosition = Camera.GetPosition();
 
-	shaderParam.textureUnit = material->GetTextureUnit(Material::TextureType::TEXTURE_DIFFUSE);
+	if(material->DoesHaveTexture())
+		shaderParam.textureUnit = material->GetTextureUnit(Material::TextureType::TEXTURE_DIFFUSE);
 }
 
 void GameObject::GetWorldBoundingBox(Volumef& volume) const{
@@ -285,7 +296,7 @@ bool Cube::Initialize(Renderer& renderer) {
 	meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 	meshBuilder.End();
 
-	diffuseMap = TextureLoader::GetTexture(renderer, L"레드벨벳-Feel My Rythm.mp4");
+	diffuseMap = TextureLoader::GetTexture(renderer, L"오마이걸-Real Love.mp4");
 	
 	renderer.AllocateTextures(diffuseMap->textureID, 1);
 	renderer.BindTexture(diffuseMap->GetTextureID());

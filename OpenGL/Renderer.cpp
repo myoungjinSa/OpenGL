@@ -491,3 +491,7 @@ void Renderer::SetDepthTest(bool bEnable) {
 void Renderer::SetDrawMode(Renderer::DrawMode _drawMode) {
 	drawMode = _drawMode;
 }
+
+void Renderer::SetRenderMode(Renderer::RenderMode _renderMode) {
+	renderMode = _renderMode;
+}

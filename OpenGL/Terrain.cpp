@@ -4,9 +4,13 @@
 #include "PictureFile.h"
 #include "Shader.h"
 #include "Logger.h"
+#include "Renderer.h"
+#include "Material.h"
+#include "BoundingVolume.h"
+#include "Texture.h"
 
-TerrainHeightImage::TerrainHeightImage(int _width, int _length, const Vec3f& _scale)
-	: pHeightMapPixels(nullptr), width(_width), length(_length), scale(_scale)
+TerrainHeightImage::TerrainHeightImage(const Vec3f& _scale)
+	: pHeightMapPixels(nullptr), width(0), length(0), scale(_scale)
 {
 	
 }
@@ -25,6 +29,9 @@ bool TerrainHeightImage::Load(const WString& filename) {
 		return false;
 	}
 
+	width = heightMap.GetWidth();
+	length = heightMap.GetHeight();
+	
 	pHeightMapPixels = new unsigned char[width * length];
 	
 	unsigned char* pMemory = (unsigned char*)heightMap.GetMemory();
@@ -92,14 +99,15 @@ float TerrainHeightImage::GetHeight(float fx, float fz, bool bReverseQuad) const
 	return height;
 }
 
-Terrain::Terrain(int gridX, int gridZ) {
-
-}
-
+Terrain::Terrain(int _gridX, int _gridZ)
+	: gridX(_gridX), gridZ(_gridZ)
+{}
+	
 bool Terrain::Initialize(Renderer& renderer) {
 	GameObject::Initialize(renderer);
 
-	shader = std::make_shared<ColorShader>(this);
+	AddComponent<TextureShader>();
+	shader = GetComponent<Shader>();
 	if (!shader)
 		return false;
 
@@ -108,18 +116,45 @@ bool Terrain::Initialize(Renderer& renderer) {
 		return false;
 	}
 
+	Vec3f scale = Vec3f(1.0f, 1.0f, 1.0f);
+	std::unique_ptr<TerrainHeightImage> heightImage = std::make_unique<TerrainHeightImage>(scale);
+	if (!heightImage->Load(L"HeightMap.png")) {
+		assert(0);
+		return false;
+	}
+
 	MeshBuilder meshBuilder;
 	meshes.push_back(std::make_shared<Mesh>());
 	meshBuilder.Begin();
-	//meshBuilder.AddGrid();
+	meshBuilder.AddGrid(0, 0, 512, 512, scale, RGBA::FOREST_GREEN, *heightImage);
+	meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 	meshBuilder.End();
 
+	Vec3f diffuseColor(0.8f, 0.85f, 0.85f);
+	Vec4f ambientColor(0.3f, 0.3f, 0.3f, 1.0f);
+	Vec3f specularColor(1.0f, 1.0f, 1.0f);
 
+	diffuseMap = TextureLoader::GetTexture(renderer, L"HeightMap.png");
 
+	renderer.AllocateTextures(diffuseMap->textureID, 1);
+	renderer.BindTexture(diffuseMap->GetTextureID());
+	renderer.SetImage(GL_TEXTURE_2D, diffuseMap->GetPicture().GetMemory(), diffuseMap->GetPicture().GetWidth(), diffuseMap->GetPicture().GetHeight());
+	renderer.SetSampleMode();
+	renderer.SetFiltering();
+
+	material = std::make_shared<Material>(diffuseColor, ambientColor, specularColor, std::make_pair(Material::TextureType::TEXTURE_DIFFUSE, diffuseMap->GetTextureID()));
+
+	return true;
 }
 
 void Terrain::Shutdown(Renderer& renderer) {
+	GameObject::Shutdown(renderer);
+	if (shader)
+		shader->Shutdown(renderer);
 
+	for (auto& mesh : meshes) {
+		mesh->Shutdown(renderer);
+	}
 }
 
 void Terrain::Render(Renderer& renderer) {
@@ -127,7 +162,17 @@ void Terrain::Render(Renderer& renderer) {
 }
 
 void Terrain::Render(Renderer& renderer, ShaderParameter& shaderParam) {
+	GameObject::Render(renderer, shaderParam);
 
+	shader->Render(renderer, shaderParam);
+
+	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
+	renderer.SetDepthTest(true);
+
+	for (auto& mesh : meshes) {
+		mesh->Render(renderer);
+	}
+	//boundingVolume->Render(renderer, shaderParam.viewMatrix, shaderParam.projectionMatrix);
 }
 
 void Terrain::Update(float deltaTime) {

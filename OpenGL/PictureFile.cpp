@@ -208,6 +208,9 @@ bool PictureFile::UpdateVideoFrame(Picture& picture, std::unique_ptr<VideoFile>&
 
 
 bool PictureFile::CreatePicture(Picture& picture, const WString& filename) {
+	if (!FileUtils::DoesFileExist(filename)) {
+		return false;
+	}
 	static GDIPictureFile pictureFile;
 	if (!pictureFile.Create(picture, filename)) {
 		return false;

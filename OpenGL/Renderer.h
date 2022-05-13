@@ -33,6 +33,11 @@ public:
 		NUM_DRAW_MODES
 	};
 
+	enum class RenderMode : unsigned int {
+		SOLID,
+		WIREFRAME
+	};
+
 	Renderer();
 	Renderer(const Renderer&) = delete;
 	~Renderer();
@@ -52,8 +57,10 @@ public:
 	
 	void SetDepthTest(bool bEnable);
 	void SetDrawMode(Renderer::DrawMode drawMode);
+	void SetRenderMode(RenderMode renderMode);
 	Renderer::DrawMode GetDrawMode() const { return drawMode; }
-
+	Renderer::RenderMode GetRenderMode() const { return renderMode; }
+	
 	bool SetShaderParameter(unsigned int shaderProgram, const Vec4f& vec4, String variableName);
 	bool SetShaderParameter(unsigned int shaderProgram, const Vec3f& vec3, String variableName);
 
@@ -99,5 +106,6 @@ private:
 	//PhongShader* pShader;
 	HWND hWnd;
 	DrawMode drawMode;
+	RenderMode renderMode;
 };
 

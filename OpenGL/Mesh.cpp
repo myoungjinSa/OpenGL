@@ -3,6 +3,7 @@
 #include "Renderer.h"
 #include "Logger.h"
 #include "Transform.h"
+#include "Terrain.h"
 
 #include <tuple>
 #include <string>
@@ -865,18 +866,34 @@ void MeshBuilder::AddLathe(const Vec3f& axis, const Vec3f& arm1, const Vec3f& ar
 	//ComputeNormals();
 }
 
-void MeshBuilder::AddGrid(int xStart, int zStart, int width, int length, const Vec3f& scale, const RGBA& color, std::function<float(int, int)> CalcHeightFunction) {
-	
-	for (int i = 0, zTile = zStart; zTile < (zStart + length); zTile++) {
-		for (int xTile = xStart; xTile < (xStart + width); xTile++) {
-			float height = CalcHeightFunction(xTile, zTile);
-			SetPosition(xTile * scale.x, height, zTile * scale.z);
+void MeshBuilder::AddGrid(int xStart, int zStart, int xTileCount, int zTileCount, const Vec3f& scale, const RGBA& color, const TerrainHeightImage& terrainContext) {
+	xTileCount = xTileCount + 1;
+	zTileCount = zTileCount + 1;
+
+	int heightMapWidth = terrainContext.GetWidth();
+	int heightMapLength = terrainContext.GetLength();
+	for (int zTile = zStart; zTile < (zStart + zTileCount); zTile++) {
+		for (int xTile = xStart; xTile < (xStart + xTileCount); xTile++) {
+			float height = terrainContext.GetHeight(xTile, zTile);
 			SetColor(color);
+			SetPosition(xTile * scale.x, -height / 135.0f  - 5.0f, zTile * scale.z);
+			SetUV(Vec2f(float(xTile) / float(heightMapWidth - 1), float(heightMapLength - 1 - zTile) / float(heightMapLength - 1)));
 			vertices.push_back(stamp);
-			//SetUV((float)xTile / , );
 		}
 	}
 
+	for (int zTile = 0; zTile < zTileCount - 1; zTile++) {
+		for (int xTile = 0; xTile < xTileCount - 1; xTile++) {
+			int leftTop = zTile * xTileCount + xTile;
+			AddIndex(leftTop);
+			AddIndex(xTileCount + leftTop);
+			AddIndex(leftTop + 1);
+
+			AddIndex(leftTop + 1);
+			AddIndex(xTileCount + leftTop);
+			AddIndex(xTileCount + leftTop + 1);
+		}
+	}
 }
 void MeshBuilder::AddVertex(const Vec3f& _position) {
 	stamp.position = _position;

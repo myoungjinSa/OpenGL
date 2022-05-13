@@ -11,6 +11,7 @@ public:
 	};
 
 	Material();
+	Material(const Vec3f& diffuse, const Vec4f& albedo, const Vec3f& specular);
 	Material(const Vec3f& diffuse, const Vec4f& albedo, const Vec3f& specular, const std::pair<TextureType, unsigned int>& mapInfo);
 	virtual ~Material();
 
@@ -22,6 +23,7 @@ public:
 	void SetAmbient(const Vec4f& ambient);
 	void SetSpecular(const Vec3f& specular);
 
+	bool DoesHaveTexture() const { return !maps.empty(); }
 	void SetTextureMap(const std::pair<TextureType, unsigned int>& maps);
 	unsigned int GetTextureUnit(TextureType textureType) const;
 private:

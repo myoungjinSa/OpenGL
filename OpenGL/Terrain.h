@@ -7,7 +7,7 @@ class WString;
 class Picture;
 class TerrainHeightImage {
 public:
-	TerrainHeightImage(int width, int length, const Vec3f& scale);
+	TerrainHeightImage(const Vec3f& scale);
 	~TerrainHeightImage();
 
 	int GetWidth() const { return width; }
@@ -41,5 +41,6 @@ private:
 	const int maxSize = 800;
 	const float maxHeight = 40;
 
-	
+	int gridX;
+	int gridZ;
 };

@@ -5,7 +5,7 @@
 #include "RayCast.h"
 #include "Logger.h"
 #include "Material.h"
-
+#include "Terrain.h"
 
 
 Scene::Scene() 
@@ -25,8 +25,11 @@ bool Scene::BuildObject(Renderer& renderer) {
 	phongLight.SetPosition(0.0f, 0.0f, -10.0f);
 	phongLight.SetDirection(Vec3f::FORWARD);
 
-	GameObject* pObject = new Cube(Vec3f(1.0f, 1.0f, 1.0f));//new Cylinder(Vec3f::UP, Vec3f::RIGHT, Vec3f::FORWARD, 32);
-	gameObjects.Add(*pObject);
+	terrain = std::make_unique<Terrain>(100, 100);
+	terrain->Initialize(renderer);
+
+	//GameObject* pObject = new Cube(Vec3f(1.0f, 1.0f, 1.0f));//new Cylinder(Vec3f::UP, Vec3f::RIGHT, Vec3f::FORWARD, 32);
+	//gameObjects.Add(*pObject);
 
 	for (const auto& obj : gameObjects) {
 		if (!obj->Initialize(renderer)) {
@@ -49,6 +52,7 @@ bool Scene::BuildObject(Renderer& renderer) {
 void Scene::Update(double elapsedTime) {
 	camera.Update(elapsedTime);
 
+	terrain->Update(elapsedTime);
 	for (const auto& obj : gameObjects) {
 		obj->Update(elapsedTime);
 		//obj->Rotate(MathUtils::DegreesToRadians(0.0f), MathUtils::DegreesToRadians(1.0f), MathUtils::DegreesToRadians(0.0f));
@@ -65,6 +69,11 @@ bool Scene::Render(Renderer& renderer) {
 	skybox.FillShaderParameter(shaderParmaeter, GetViewMatrix(), projectionMatrix, phongLight, camera);
 	skybox.Render(renderer, shaderParmaeter);
 	renderer.SetDepthFunc(GL_LESS);
+
+
+	terrain->FillShaderParameter(shaderParmaeter, GetViewMatrix(), projectionMatrix, phongLight, camera);
+	terrain->Render(renderer, shaderParmaeter);
+
 
 	Matrix<float, 4, 4> worldMatrix;
 	for (size_t iObj = 0; iObj < gameObjects.size(); iObj++) {
@@ -85,6 +94,7 @@ void Scene::Shutdown(Renderer& renderer) {
 	for (const auto& obj : gameObjects)
 		obj->Shutdown(renderer);
 
+	terrain->Shutdown(renderer);
 	skybox.Shutdown(renderer);
 
 	camera.Shutdown(renderer);

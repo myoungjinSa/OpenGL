@@ -8,6 +8,14 @@ Material::Material()
 
 }
 
+Material::Material(const Vec3f& diffuse, const Vec4f& _ambient, const Vec3f& specular)
+	: diffuse(diffuse)
+	, ambient(_ambient)
+	, specular(specular)
+{
+
+}
+
 Material::Material(const Vec3f& diffuse, const Vec4f& albedo, const Vec3f& specular, const std::pair<TextureType, unsigned int>& mapInfo) 
 	: diffuse(diffuse)
 	, ambient(albedo)

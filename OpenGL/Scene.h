@@ -7,6 +7,7 @@
 #include "Camera.h"
 #include "RayCast.h"
 
+class Terrain;
 class Shader;
 class ShaderParameter;
 class Renderer;
@@ -88,6 +89,7 @@ private:
 	GameObjects gameObjects;
 	Light phongLight;
 	Cubemap skybox;
+	std::unique_ptr<Terrain> terrain;
 
 	Matrix<float, 4, 4> projectionMatrix;
 };
