@@ -874,14 +874,35 @@ void MeshBuilder::AddGrid(int xStart, int zStart, int xTileCount, int zTileCount
 	int heightMapLength = terrainContext.GetLength();
 	for (int zTile = zStart; zTile < (zStart + zTileCount); zTile++) {
 		for (int xTile = xStart; xTile < (xStart + xTileCount); xTile++) {
-			float height = terrainContext.GetHeight(xTile, zTile);
 			SetColor(color);
-			SetPosition(xTile * scale.x, -height / 135.0f  - 5.0f, zTile * scale.z);
+
+			float height = terrainContext.GetHeight(xTile, zTile);
+			SetPosition(xTile * scale.x, height, zTile * scale.z);
 			SetUV(Vec2f(float(xTile) / float(heightMapWidth - 1), float(heightMapLength - 1 - zTile) / float(heightMapLength - 1)));
 			vertices.push_back(stamp);
 		}
 	}
 
+	//AddIndex(((xTileCount * 2) * (zTileCount - 1)) + ((zTileCount - 1) - 1));
+	//for (int zTile = 0; zTile < zTileCount - 1; zTile++) {
+	//	if ((zTile % 2) == 0) {
+	//		for (int xTile = 0; xTile < xTileCount; xTile++) {
+	//			if ((xTile == 0) && (0 < zTile)) {
+	//				AddIndex(xTile + (zTile * xTileCount));
+	//			}
+	//			AddIndex(xTile + (zTile * xTileCount));
+	//			AddIndex(xTile + (zTile * xTileCount) + xTileCount);
+	//		}
+	//	}else {
+	//		for (int xTile = xTileCount - 1; 0 <= xTile; xTile--) {
+	//			if (xTile == (xTileCount - 1)) {
+	//				AddIndex(xTile + (zTile * xTileCount));
+	//			}
+	//			AddIndex(xTile + (zTile * xTileCount));
+	//			AddIndex((xTile + (zTile * xTileCount) + xTileCount));
+	//		}
+	//	}
+	//}
 	for (int zTile = 0; zTile < zTileCount - 1; zTile++) {
 		for (int xTile = 0; xTile < xTileCount - 1; xTile++) {
 			int leftTop = zTile * xTileCount + xTile;

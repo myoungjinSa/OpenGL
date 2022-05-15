@@ -38,11 +38,11 @@ void Viewport::SetViewport(const Rect2f& _rect) {
 Camera::Camera()
 	:GameObject()
 	,viewMatrix()
-	,oldMousePoint()
-	,xAngle(0.0f)
-	,yAngle(0.0f)
 	,Near(0.1f)
 	,Far(1000.0f)
+	,xAngle(0.0f)
+	,yAngle(0.0f)
+	
 {
 	
 }
@@ -60,43 +60,33 @@ bool Camera::Initialize(Renderer& renderer) {
 
 void Camera::Shutdown(Renderer& renderer) {
 	MouseInput::Detach(this);
-	KeyboardInput::Detach(this);
+	MouseInput::Detach(this);
 }
 
 void Camera::Update(float deltaTime) {
-	float yaw = 0.0f, pitch = 0.0f, roll = 0.0f;
-
 	const float rotationSpeed = 0.0174532925f;
 	
+	float pitch = 0.0f, yaw = 0.0f, roll = 0.0f;
 	pitch = xAngle * rotationSpeed;
 	yaw = yAngle * rotationSpeed;
-	roll = 0.0f;
 
-	Vec3f up(0.0f, 1.0f, 0.0f), lookAt(0.0f, 0.0f, 1.0f);
-	
 	Matrix<float, 3, 3> rotationMatrix = Matrix<float, 3, 3>::Identity();
 	MatrixRotationYawPitchRoll(rotationMatrix, yaw, pitch, roll);
-
-	Transform(rotationMatrix, lookAt);
-	Transform(rotationMatrix, up);
-
-	//LogDebug(L"lookAt - (%.8lf, %.8lf, %.8lf) up - (%.8lf, %.8lf, %.8lf)\n", lookAt.x, lookAt.y, lookAt.z, up.x, up.y, up.z);
-
+	BuildViewMatrix(rotationMatrix);
+	
 	float movingSpeed = transform.get()->GetMovingSpeed();
 	if (KeyboardInput::IsKeyDown(KEY_D)) {
 		Move(GetRight() * 1.0f, movingSpeed, deltaTime);
 	}
-	else if (KeyboardInput::IsKeyDown(KEY_A)) {
+	if (KeyboardInput::IsKeyDown(KEY_A)) {
 		Move(GetRight() * -1.0f, movingSpeed, deltaTime);
 	}
-	else if (KeyboardInput::IsKeyDown(KEY_W)) {
+	if (KeyboardInput::IsKeyDown(KEY_W)) {
 		Move(GetLook(), movingSpeed, deltaTime);
 	}
-	else if (KeyboardInput::IsKeyDown(KEY_S)) {
+	if (KeyboardInput::IsKeyDown(KEY_S)) {
 		Move(GetLook() * -1.0f, movingSpeed, deltaTime);
 	}
-
-	BuildViewMatrix(GetPosition() + lookAt, up);
 }
 
 void Camera::MatrixRotationYawPitchRoll(Matrix<float, 3, 3>& matrix, float yaw, float pitch, float roll) {
@@ -124,10 +114,16 @@ void Camera::SetViewport(const Rect2f& _viewport) {
 	viewport.SetViewport(_viewport);
 }
 
-void Camera::BuildViewMatrix(Vec3f lookAt, Vec3f up) {
+void Camera::BuildViewMatrix(const Matrix<float, 3, 3>& rotationMatrix) {
+	Vec3f up(0.0f, 1.0f, 0.0f), lookAt(0.0f, 0.0f, 1.0f), right(1.0f, 0.0f, 0.0f);
+
+	lookAt = Transform(rotationMatrix, lookAt);
+	up = Transform(rotationMatrix, up);
+	right = Normalize(Cross(up, lookAt));
+
 	Vec3f xAxis, yAxis, zAxis;
 	Vec3f position = transform.get()->GetPosition();
-	zAxis = Normalize(lookAt - position);
+	zAxis = Normalize(lookAt);
 
 	xAxis = Cross(up, zAxis);
 	xAxis = Normalize(xAxis);
@@ -159,12 +155,22 @@ void Camera::BuildViewMatrix(Vec3f lookAt, Vec3f up) {
 	viewMatrix.value[15] = 1.0f;
 }
 
-
-
 void Camera::GetViewMatrix(Matrix<float, 4, 4>& Matrix) const {
 	for (int iVal = 0; iVal < Matrix.rows * Matrix.cols; iVal++) {
 		Matrix[iVal] = viewMatrix[iVal];
 	}
+}
+
+Vec3f Camera::GetRight()const{
+	return Vec3f(viewMatrix.Col(0));
+}
+
+Vec3f Camera::GetUp() const {
+	return Vec3f(viewMatrix.Col(1));
+}
+
+Vec3f Camera::GetLook() const {
+	return Vec3f(viewMatrix.Col(2));
 }
 
 void Camera::BuildPerspectiveFovLHMatrix(Matrix<float, 4, 4>& matrix) {
@@ -190,35 +196,19 @@ void Camera::BuildPerspectiveFovLHMatrix(Matrix<float, 4, 4>& matrix) {
 	matrix[15] = 0.0f;
 }
 
-
 void Camera::ProcessEvent(Event& e) {
 	if (MouseInput::MouseEvent* pMouseEvent = dynamic_cast<MouseInput::MouseEvent*>(&e)) {
-		if (pMouseEvent->mouseState == MouseInput::MouseEvent::MOUSE_STATE::MOUSE_STATE_COUNT)
+		if (pMouseEvent->mouseState == MouseInput::MouseEvent::MOUSE_STATE::MOUSE_STATE_COUNT) {
 			return;
-		
+		}
 
-		Point2i newMousePoint = pMouseEvent->mousePoint;
-		Vec2f mouseDelta(newMousePoint.x - oldMousePoint.x, newMousePoint.y - oldMousePoint.y);
-		
+		Point2i newMousePoint = pMouseEvent->newMousePoint;
+		Point2i oldMousePoint = pMouseEvent->oldMousePoint;
 		if (pMouseEvent->mouseState == MouseInput::MouseEvent::MOUSE_STATE::MOUSE_MOVE) {
 			if (MouseInput::rightButtonDown) {
-				if (sqrtf(newMousePoint.x - oldMousePoint.x + newMousePoint.y - oldMousePoint.y) > 50.0f)
-				{
-					oldMousePoint = newMousePoint;
-					return;
-				}
-				const float rotationSpeed = 0.5f;
-
-				xAngle += (newMousePoint.y - oldMousePoint.y) / 3.6f;
-				yAngle += (newMousePoint.x - oldMousePoint.x) / 3.6f;
+				xAngle += (newMousePoint.y - oldMousePoint.y) / 3.0f;
+				yAngle += (newMousePoint.x - oldMousePoint.x) / 3.0f;
 			}
 		}
-		oldMousePoint = newMousePoint;
-	}
-
-	if (dynamic_cast<KeyboardInput::KeyboardEvent*>(&e)) {
-		//LogDebug(L"Keyboard Event Occured.\n");
-
-
 	}
 }

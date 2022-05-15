@@ -589,6 +589,10 @@ public:
 	Vector3(T s);
 	//explicit Vector3(const T* values);
 	Vector3(const Matrix<T, 1, 3>& mat);
+	Vector3(const Matrix<T, 1, 4>& mat);
+	Vector3(const Matrix<T, 3, 1>& mat);
+	Vector3(const Matrix<T, 4, 1>& mat);
+
 	Vector3(const Vector3<T>& v) = default;
 	void SetXYZ(T x, T y, T z);
 	bool IsZero() const;
@@ -640,10 +644,32 @@ Vector3<T>::Vector3(T s)
 
 template<typename T> inline
 Vector3<T>::Vector3(const Matrix<T, 1, 3>& mat) {
-	x = mat.Row(0).Col(0);
-	y = mat.Row(0).Col(1);
-	z = mat.Row(0).Col(2);
+	x = mat.Row(0).value[0];
+	y = mat.Row(0).value[1];
+	z = mat.Row(0).value[2];
 }
+
+template<typename T> inline
+Vector3<T>::Vector3(const Matrix<T, 1, 4>& mat) {
+	x = mat.Row(0).value[0];
+	y = mat.Row(0).value[1];
+	z = mat.Row(0).value[2];
+}
+
+template<typename T> inline
+Vector3<T>::Vector3(const Matrix<T, 3, 1>& mat) {
+	x = mat.Col(0).value[0];
+	y = mat.Col(0).value[1];
+	z = mat.Col(0).value[2];
+}
+
+template<typename T> inline
+Vector3<T>::Vector3(const Matrix<T, 4, 1>& mat) {
+	x = mat.Col(0).value[0];
+	y = mat.Col(0).value[1];
+	z = mat.Col(0).value[2];
+}
+
 
 template<typename T> inline
 Vector3<T> Vector3<T>::Multiply(const Vector3<T>& v) {
@@ -885,6 +911,7 @@ public:
 	Vector4(const Vector3<T>& base, float w);
 	Vector4(const Vector4<T>& other) = default;
 	Vector4(const Matrix<T, 1, 4>& mat);
+	Vector4(const Matrix<T, 4, 1>& mat);
 	void SetXYZW(T x, T y, T z, T w);
 	bool IsZero() const;
 
@@ -949,6 +976,14 @@ Vector4<T>::Vector4(const Matrix<T, 1, 4>& matrix) {
 	y = matrix.Row(0).value[1];
 	z = matrix.Row(0).value[2];
 	w = matrix.Row(0).value[3];
+}
+
+template<typename T>
+Vector4<T>::Vector4(const Matrix<T, 4, 1>& matrix) {
+	x = matrix.Col(0).value[0];
+	y = matrix.Col(0).value[1];
+	z = matrix.Col(0).value[2];
+	w = matrix.Col(0).value[3];
 }
 
 

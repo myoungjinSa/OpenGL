@@ -1,12 +1,12 @@
 #pragma once
 #include <vector>
-#include "Light.h"
 #include "Types.h"
 #include "Object.h"
 #include "Gizmos.h"
 #include "Camera.h"
 #include "RayCast.h"
 
+class Light;
 class Terrain;
 class Shader;
 class ShaderParameter;
@@ -87,7 +87,7 @@ private:
 	//std::shared_ptr<Shader> DefaultShader;
 	//std::vector<GameObject*> objects;
 	GameObjects gameObjects;
-	Light phongLight;
+	std::unique_ptr<Light> phongLight;
 	Cubemap skybox;
 	std::unique_ptr<Terrain> terrain;
 

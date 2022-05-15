@@ -23,13 +23,10 @@ class Renderer
 {
 public:
 	enum class DrawMode : unsigned int {
-		QUADS,
-		QUAD_STRIP,
 		POINTS,
 		LINES,
-		LINE_LOOP,
-		POLYGON,
 		TRIANGLES,
+		TRIANGLE_STRIP,
 		NUM_DRAW_MODES
 	};
 

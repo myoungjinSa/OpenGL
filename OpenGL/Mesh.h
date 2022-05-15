@@ -19,7 +19,6 @@ struct VertexMaster {
 	//Vec2f uv1;
 	//Vec3f tangent;
 	//Vec3f bitangent;
-	//Vec3f normal;
 };
 typedef unsigned char byte;
 typedef void (VertexCopyCallback)(const VertexMaster& source, byte* destination);

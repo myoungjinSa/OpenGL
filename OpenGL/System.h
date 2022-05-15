@@ -34,6 +34,7 @@ public:
 	LRESULT CALLBACK MessageHandler(HWND, UINT, WPARAM, LPARAM);
 
 private:
+	void ProcessInput();
 	bool Frame(float elapsedTime);
 	bool InitializeWindows(OpenGL* gl, int&, int&);
 	void ShutdownWindows();

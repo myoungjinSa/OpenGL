@@ -14,6 +14,10 @@ class BoundingVolume;
 typedef struct FocusInfo {
 	Vec4f highlightColor;
 	int   focusObjNo;
+
+	FocusInfo() {
+		focusObjNo = -1;
+	}
 }FocusInfo;
 
 struct ShaderParameter {

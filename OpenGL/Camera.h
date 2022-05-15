@@ -22,7 +22,7 @@ private:
 	float centerX;
 	float centerY;
 };
-class Camera : public GameObject, public Observer
+class Camera : public GameObject, Observer
 {
 public:
 	Camera();
@@ -47,12 +47,15 @@ public:
 	float GetFar() const { return Far; }
 	float GetAspectRatio() const { return viewport.GetWidth() / viewport.GetHeight(); }
 	
+	Vec3f GetRight() const;
+	Vec3f GetUp() const;
+	Vec3f GetLook() const;
+
 	void ProcessEvent(Event& e) override;
 
 private:
 	void MatrixRotationYawPitchRoll(Matrix<float, 3, 3>& Matrix, float, float, float);
-	void BuildViewMatrix(Vec3f, Vec3f);
-
+	void BuildViewMatrix(const Matrix<float, 3, 3>& rotationMatrix);
 
 	Viewport viewport;
 	Matrix<float, 4, 4> viewMatrix;
@@ -60,9 +63,6 @@ private:
 	float Near;
 	float Far;
 
-	Point2i oldMousePoint;
-
-	float xAngle;
-	float yAngle;
+	float xAngle, yAngle;
 };
 

@@ -98,9 +98,9 @@ public:
 
 	void Move(const Vec3f& offset);
 	void Move(const Vec3f& dir, float movingSpeed, float elapsedTime);
-	void Rotate(float pitch, float yaw, float roll);
+	virtual void Rotate(float pitch, float yaw, float roll);
 
-	void FillShaderParameter(ShaderParameter& shaderParam, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix, const Light& light, const Camera& Camera);
+	void FillShaderParameter(ShaderParameter& shaderParam, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix, const Light& light, const Camera& Camera, int iObjNo);
 
 	void GetWorldBoundingBox(Volumef& volume)const;
 	void GetLocalBoundingBox(Volumef& volume)const;

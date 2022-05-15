@@ -131,7 +131,7 @@ bool GameObject::Intersect(const Ray& ray, double& distance) {
 	return false;
 }
 
-void GameObject::FillShaderParameter(ShaderParameter& shaderParam, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix, const Light& light, const Camera& Camera) {
+void GameObject::FillShaderParameter(ShaderParameter& shaderParam, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix, const Light& light, const Camera& Camera, int iObj) {
 	Matrix<float, 4, 4> worldMatrix = Matrix<float, 4, 4>::Identity();
 	MakeWorldMatrix(GetPosition(), GetScale(), GetLook(), GetRight(), GetUp(), worldMatrix);
 	shaderParam.worldMatrix = worldMatrix;
@@ -144,6 +144,7 @@ void GameObject::FillShaderParameter(ShaderParameter& shaderParam, const Matrix<
 	shaderParam.specular = material->GetSpecular();
 
 	shaderParam.cameraPosition = Camera.GetPosition();
+	shaderParam.objNo = iObj;
 
 	if(material->DoesHaveTexture())
 		shaderParam.textureUnit = material->GetTextureUnit(Material::TextureType::TEXTURE_DIFFUSE);

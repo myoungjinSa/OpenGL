@@ -172,6 +172,7 @@ void System::Run()
 
 bool System::Frame(float elapsedTime)
 {
+	ProcessInput();
 	bool result = false;
 	if (pScene) {
 		pScene->Update(elapsedTime);
@@ -227,13 +228,11 @@ LRESULT CALLBACK System::MessageHandler(HWND hwnd, UINT umsg, WPARAM wParam, LPA
 			}else {
 				LogDebug(L"Not Picked\n");
 			}
-			//pScene->Picking(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), screenWidth, screenHeight);
 		}
 		return 0;
 	}
 	case WM_MOUSEMOVE:
 	{	
-		
 		MouseInput::ProcessMouseMove(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
 		return 0;
 	}
@@ -251,7 +250,15 @@ LRESULT CALLBACK System::MessageHandler(HWND hwnd, UINT umsg, WPARAM wParam, LPA
 	}
 }
 
-
+void System::ProcessInput() {
+	if (GetCapture() == hWnd) {
+		POINT ptCursorPos;
+		SetCursor(NULL);
+		GetCursorPos(&ptCursorPos);
+		ScreenToClient(hWnd, &ptCursorPos);
+		MouseInput::ProcessMouseMove(ptCursorPos.x, ptCursorPos.y);
+	}
+}
 bool System::InitializeWindows(OpenGL* pOpenGL, int& screenWidth, int& screenHeight) {
 	WNDCLASSEX wc;
 	DEVMODE dmScreenSettings;

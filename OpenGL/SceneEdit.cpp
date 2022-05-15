@@ -131,7 +131,7 @@ void SceneEdit::ProcessEvent(Event& e) {
 			return;
 		}
 
-		Point2i newMousePoint = pMouseEvent->mousePoint;
+		Point2i newMousePoint = pMouseEvent->newMousePoint;
 
 		if (pMouseEvent->mouseState == MouseInput::MouseEvent::MOUSE_STATE::LBUTTON_DOWN) {
 			drag.Begin(newMousePoint);

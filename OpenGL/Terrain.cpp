@@ -116,7 +116,7 @@ bool Terrain::Initialize(Renderer& renderer) {
 		return false;
 	}
 
-	Vec3f scale = Vec3f(1.0f, 1.0f, 1.0f);
+	Vec3f scale = Vec3f(0.8f, 1.0f, 1.25f);
 	std::unique_ptr<TerrainHeightImage> heightImage = std::make_unique<TerrainHeightImage>(scale);
 	if (!heightImage->Load(L"HeightMap.png")) {
 		assert(0);

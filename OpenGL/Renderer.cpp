@@ -139,6 +139,9 @@ void Renderer::DrawVertexBuffer(unsigned int vertexArrayId, size_t startPos, siz
 	pGL->glBindVertexArray(vertexArrayId);
 
 	switch (drawMode) {
+	case DrawMode::TRIANGLE_STRIP:
+		glDrawArrays(GL_TRIANGLE_STRIP, startPos, vertexCount);
+		break;
 	case DrawMode::TRIANGLES:
 		glDrawArrays(GL_TRIANGLES, startPos, vertexCount);
 		break;

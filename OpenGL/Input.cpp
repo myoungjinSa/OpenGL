@@ -34,10 +34,14 @@ void KeyboardInput::KeyUp(unsigned int input)
 
 bool KeyboardInput::IsKeyDown(unsigned int input)
 {
+#if defined(_WIN64) || defined(_WIN32)
+	return (GetAsyncKeyState(input) & 0x8000) ? true : false;
+#else
 	if (!keyCodes[input].second)
 		return false;
 
 	return true;
+#endif
 }
 
 bool KeyboardInput::LoadKeyCodes(String&& keyFileName) {
@@ -95,12 +99,11 @@ void KeyboardInput::KeyboardEvent::GetInfo() {
 //MouseInput
 
 
-float MouseInput::xAngle = 0.0f;
-float MouseInput::yAngle = 0.0f;
-bool MouseInput::dragging = false;
 bool MouseInput::leftButtonDown = false;
 bool MouseInput::rightButtonDown = false;
 Point2i MouseInput::mousePoint;
+Point2i MouseInput::oldMousePoint;
+Drag MouseInput::drag;
 std::vector<Observer*> MouseInput::observers;
 
 bool MouseInput::Initialize() {
@@ -109,45 +112,45 @@ bool MouseInput::Initialize() {
 }
 void MouseInput::ProcessLButtonDown(int x, int y) {
 	leftButtonDown = true;
-	dragging = !dragging;
-	if (dragging) {
-		mousePoint.x = x;
-		mousePoint.y = y;
 
-		MouseEvent e(MouseEvent::MOUSE_STATE::LBUTTON_DOWN, Point2i(mousePoint.x, mousePoint.y));
-		Notify(e);
-	}
+	mousePoint.x = x;
+	mousePoint.y = y;
+
+	drag.Begin(mousePoint);
+
+	MouseEvent e(MouseEvent::MOUSE_STATE::LBUTTON_DOWN, mousePoint, oldMousePoint);
+	Notify(e);
 }
 
 
 void MouseInput::ProcessLButtonUp(int x, int y) {
 	leftButtonDown = false;
-	if (dragging) {
-		dragging = false;
-		MouseEvent e(MouseEvent::MOUSE_STATE::LBUTTON_UP, Point2i(x, y));
-		Notify(e);
-	}
+
+	drag.End();
+
+	MouseEvent e(MouseEvent::MOUSE_STATE::LBUTTON_UP, Point2i(x, y), oldMousePoint);
+	Notify(e);
 }
 
 void MouseInput::ProcessRButtonDown(int x, int y) {
 	rightButtonDown = true;
-	dragging = !dragging;
-	if (dragging) {
-		mousePoint.x = x;
-		mousePoint.y = y;
 
-		MouseEvent e(MouseEvent::MOUSE_STATE::RBUTTON_DOWN, Point2i(mousePoint.x, mousePoint.y));
-		Notify(e);
-	}
+	mousePoint.x = x;
+	mousePoint.y = y;
+
+	drag.Begin(mousePoint);
+
+	MouseEvent e(MouseEvent::MOUSE_STATE::RBUTTON_DOWN, Point2i(mousePoint.x, mousePoint.y), oldMousePoint);
+	Notify(e);
 }
 
 void MouseInput::ProcessRButtonUp(int x, int y) {
 	rightButtonDown = false;
-	if (dragging) {
-		dragging = false;
-		MouseEvent e(MouseEvent::MOUSE_STATE::RBUTTON_UP, Point2i(x, y));
-		Notify(e);
-	}
+
+	drag.End();
+
+	MouseEvent e(MouseEvent::MOUSE_STATE::RBUTTON_UP, Point2i(x, y), oldMousePoint);
+	Notify(e);
 }
 
 
@@ -160,20 +163,19 @@ void MouseInput::ProcessMouseMove(int x, int y) {
 
 	mousePoint.x = dragX;
 	mousePoint.y = dragY;
-	//dragY = y;
 
-	MouseEvent e(MouseEvent::MOUSE_STATE::MOUSE_MOVE, Point2i(mousePoint.x, mousePoint.y));
+	drag.Track(mousePoint);
+
+	Point2i newMousePoint = mousePoint;
+	if (drag.IsTracked()) {
+
+	}
+		
+	MouseEvent e(MouseEvent::MOUSE_STATE::MOUSE_MOVE, newMousePoint, oldMousePoint);
 	Notify(e);
-}
 
-float MouseInput::GetXAngle() {
-	return xAngle;
+	oldMousePoint = newMousePoint;
 }
-
-float MouseInput::GetYAngle() {
-	return yAngle;
-}
-
 
 void MouseInput::Attach(Observer* pObserver) {
 	observers.push_back(pObserver);
@@ -195,8 +197,10 @@ void MouseInput::Notify(MouseInput::MouseEvent& e) {
 	}
 }
 
-MouseInput::MouseEvent::MouseEvent(MOUSE_STATE _mouseState, const Point2i& _mousePoint) {
-	mousePoint = _mousePoint;
+MouseInput::MouseEvent::MouseEvent(MOUSE_STATE _mouseState, const Point2i& _newMousePoint, const Point2i& _oldMousePoint) {
+	newMousePoint = _newMousePoint;
+	oldMousePoint = _oldMousePoint;
+
 	mouseState = _mouseState;
 }
 void MouseInput::MouseEvent::GetInfo() {

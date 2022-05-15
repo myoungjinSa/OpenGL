@@ -4,7 +4,7 @@
 #include "String/String.h"
 #include "KeyCode.h"
 #include "Observer.h"
-
+#include "Drag.h"
 
 class KeyboardInput
 {
@@ -26,7 +26,6 @@ public:
 	KeyboardInput();
 	KeyboardInput(const KeyboardInput& other) = delete;
 	~KeyboardInput();
-
 
 	static bool Initialize();
 	static void KeyDown(unsigned int key);
@@ -56,10 +55,11 @@ public:
 			MOUSE_MOVE,
 			MOUSE_STATE_COUNT
 		};
-		MouseEvent(MOUSE_STATE mouseState, const Point2i& mousePos);
+		MouseEvent(MOUSE_STATE mouseState, const Point2i& newMousePoint, const Point2i& oldMousePoint);
 		void GetInfo() override;
 
-		Point2i mousePoint;
+		Point2i oldMousePoint;
+		Point2i newMousePoint;
 		MOUSE_STATE mouseState;
 	};
 
@@ -74,22 +74,21 @@ public:
 	static void ProcessLButtonDown(int x, int y);
 	static void ProcessMouseMove(int x, int y);
 
-	static float GetXAngle();
-	static float GetYAngle();
-
 	static void Attach(Observer* observer);
 	static bool Detach(Observer* observer);
 
 	static void Notify(MouseInput::MouseEvent& e);
 
-	static Point2i oldMousePoint;
 	static bool leftButtonDown;
 	static bool rightButtonDown;
-	static bool dragging;
-private:
-	static Point2i mousePoint;
-	static float yAngle;
-	static float xAngle;
 
+	static Point2i oldMousePoint;
+	static Point2i mousePoint;
+
+	static float xAngle;
+	static float yAngle;
+
+private:
+	static Drag  drag;
 	static std::vector<Observer*> observers;
 };

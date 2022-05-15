@@ -3,7 +3,7 @@
 #include "Quaternion.h"
 
 RigidTransform::RigidTransform(Object* _owner)
-	: Component(_owner), position(0.0f, 0.0f, 0.0f), orientation(0.0, 0.0, 0.0, 1.0), scale(1.0f, 1.0f, 1.0f), movingSpeed(1.0f)
+	: Component(_owner), position(0.0f, 0.0f, 0.0f), orientation(0.0, 0.0, 0.0, 1.0), scale(1.0f, 1.0f, 1.0f), movingSpeed(2.0f)
 {
 	worldMatrix = Matrix<float, 4, 4>::Identity();
 }

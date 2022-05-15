@@ -6,7 +6,7 @@
 #include "Logger.h"
 #include "Material.h"
 #include "Terrain.h"
-
+#include "Light.h"
 
 Scene::Scene() 
 	:projectionMatrix(),
@@ -22,14 +22,15 @@ Scene::~Scene() {
 
 bool Scene::BuildObject(Renderer& renderer) {	
 	skybox.Initialize(renderer);
-	phongLight.SetPosition(0.0f, 0.0f, -10.0f);
-	phongLight.SetDirection(Vec3f::FORWARD);
+	phongLight = std::make_unique<Light>();
+	phongLight->SetPosition(0.0f, 0.0f, -10.0f);
+	phongLight->SetDirection(Vec3f::FORWARD);
 
 	terrain = std::make_unique<Terrain>(100, 100);
 	terrain->Initialize(renderer);
 
-	//GameObject* pObject = new Cube(Vec3f(1.0f, 1.0f, 1.0f));//new Cylinder(Vec3f::UP, Vec3f::RIGHT, Vec3f::FORWARD, 32);
-	//gameObjects.Add(*pObject);
+	GameObject* pObject = new Cube(Vec3f(1.0f, 1.0f, 1.0f));//new Cylinder(Vec3f::UP, Vec3f::RIGHT, Vec3f::FORWARD, 32);
+	gameObjects.Add(*pObject);
 
 	for (const auto& obj : gameObjects) {
 		if (!obj->Initialize(renderer)) {
@@ -66,19 +67,21 @@ bool Scene::Render(Renderer& renderer) {
 
 	renderer.SetDepthFunc(GL_LEQUAL);
 	ShaderParameter shaderParmaeter;
-	skybox.FillShaderParameter(shaderParmaeter, GetViewMatrix(), projectionMatrix, phongLight, camera);
+	skybox.FillShaderParameter(shaderParmaeter, GetViewMatrix(), projectionMatrix, *phongLight, camera, 0);
 	skybox.Render(renderer, shaderParmaeter);
 	renderer.SetDepthFunc(GL_LESS);
 
-
-	terrain->FillShaderParameter(shaderParmaeter, GetViewMatrix(), projectionMatrix, phongLight, camera);
+	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLE_STRIP);
+	renderer.SetRenderMode(Renderer::RenderMode::WIREFRAME);
+	terrain->FillShaderParameter(shaderParmaeter, GetViewMatrix(), projectionMatrix, *phongLight, camera, 0);
 	terrain->Render(renderer, shaderParmaeter);
-
+	renderer.SetRenderMode(Renderer::RenderMode::SOLID);
+	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
 
 	Matrix<float, 4, 4> worldMatrix;
 	for (size_t iObj = 0; iObj < gameObjects.size(); iObj++) {
 		ShaderParameter shaderParmaeter;
-		gameObjects[iObj]->FillShaderParameter(shaderParmaeter, GetViewMatrix(), projectionMatrix, phongLight, camera);
+		gameObjects[iObj]->FillShaderParameter(shaderParmaeter, GetViewMatrix(), projectionMatrix, *phongLight, camera, iObj);
 		gameObjects[iObj]->Render(renderer, shaderParmaeter);
 	}
 
