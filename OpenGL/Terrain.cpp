@@ -126,8 +126,8 @@ bool Terrain::Initialize(Renderer& renderer) {
 	MeshBuilder meshBuilder;
 	meshes.push_back(std::make_shared<Mesh>());
 	meshBuilder.Begin();
-	meshBuilder.AddGrid(0, 0, 512, 512, scale, RGBA::FOREST_GREEN, *heightImage);
-	meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+	meshBuilder.AddGrid(0, 0, 5, 5, scale, RGBA::FOREST_GREEN, *heightImage);
+	meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex), Mesh::TriangleType::MeshType_Strip);
 	meshBuilder.End();
 
 	Vec3f diffuseColor(0.8f, 0.85f, 0.85f);
@@ -166,7 +166,6 @@ void Terrain::Render(Renderer& renderer, ShaderParameter& shaderParam) {
 
 	shader->Render(renderer, shaderParam);
 
-	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
 	renderer.SetDepthTest(true);
 
 	for (auto& mesh : meshes) {

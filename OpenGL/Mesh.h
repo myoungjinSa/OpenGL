@@ -69,6 +69,12 @@ class Mesh
 {
 	typedef unsigned int GLuint;
 public:
+	enum class TriangleType : unsigned char {
+		MeshType_List,
+		MeshType_Strip
+	};
+
+
 	Mesh();
 	Mesh(Mesh&& other) = delete;
 	Mesh(const Mesh& other) = delete;
@@ -82,7 +88,7 @@ public:
 
 	bool BuildVertexList(void* vertexData);
 	bool BuildIndexList(unsigned int* indicesData);
-	bool BuildTriangles();
+	bool BuildTriangles(TriangleType triangleType);
 
 	Mesh& operator=(const Mesh& other) = delete;
 	Mesh& operator=(Mesh&& other) = delete;
@@ -100,9 +106,8 @@ protected:
 
 class TerrainHeightImage;
 class MeshBuilder {
-
 public:
-	enum MeshDataFlag {
+	enum MeshDataFlag : unsigned char {
 		POSITION_BIT = 0,
 		COLOR_BIT,
 		UV0_BIT,
@@ -117,6 +122,7 @@ public:
 		BONE_INDICES_BIT,
 		NUM_MESH_DATA
 	};
+
 	struct PlaneData {
 		PlaneData() {};
 		PlaneData(const Vec3f& _initialPosition, const Vec3f& _right, const Vec3f& _up)
@@ -143,11 +149,10 @@ public:
 
 	//QUERIES//////////////////////////////////////////////////////////////////////////
 	inline bool IsInMask(const MeshDataFlag flag) { return ((dataMask & (1 << flag)) != 0); };
-
 	void Begin();
 	void End();
 
-	void CopyToMesh(Renderer& renderers, Mesh& mesh, VertexBufferBindCallback* bindFunction, VertexCopyCallback* copyFunction, unsigned int sizeofVertex);
+	void CopyToMesh(Renderer& renderers, Mesh& mesh, VertexBufferBindCallback* bindFunction, VertexCopyCallback* copyFunction, unsigned int sizeofVertex, Mesh::TriangleType triangleType = Mesh::TriangleType::MeshType_List);
 
 	void AddGrid(int xStart, int zStart, int width, int length, const Vec3f& scale, const RGBA& color, const TerrainHeightImage& HeightContext);
 	void AddCylinder(const Vec3f& axis, const Vec3f& arm1, const Vec3f& arm2, uint32_t slices, const RGBA& color);
@@ -161,9 +166,10 @@ public:
 	void AddYAxisCone(const Vec3f& centerOffset, float halfWidth, float halfHegiht, float halfDepth, double angleStep, const RGBA& color);
 	void AddZAxisCone(const Vec3f& centerOffset, float halfWidth, float halfHegiht, float halfDepth, double angleStep, const RGBA& color);
 
-
 	void AddVertex(const Vec3f& position);
 	void AddIndex(int index);
+
+	void SetMeshType(Mesh::TriangleType triangleType);
 
 	void ComputeNormals();
 

@@ -197,8 +197,6 @@ bool Mesh::Initialize(Renderer& renderer, VertexBufferBindCallback* pBindFunctio
 	BuildVertexList(vertexData);
 	BuildIndexList(indexData);
 
-	BuildTriangles();
-
 	return true;
 }
 
@@ -221,18 +219,33 @@ void Mesh::Render(Renderer& renderer) {
 }
 
 
-bool Mesh::BuildTriangles() {
-	if (DoesHaveIndexBuffer()) {
-		for (size_t iIndex = 0; iIndex < indexCount; iIndex += 3) {
-			Vertex* v = vertexList.at(indexList[iIndex]);
-			std::tuple<const Vertex*, const Vertex*, const Vertex*> vTuple = std::make_tuple(vertexList.at(indexList[iIndex]), vertexList.at(indexList[iIndex + 1]), vertexList.at(indexList[iIndex + 2]));
-			triangles.push_back(Triangle(*std::get<0>(vTuple), *std::get<1>(vTuple), *std::get<2>(vTuple)));
+bool Mesh::BuildTriangles(TriangleType triangleType) {
+	if (triangleType == TriangleType::MeshType_List) {
+		if (DoesHaveIndexBuffer()) {
+			for (size_t iIndex = 0; iIndex < indexCount; iIndex += 3) {
+				std::tuple<const Vertex*, const Vertex*, const Vertex*> vTuple = std::make_tuple(vertexList.at(indexList[iIndex]), vertexList.at(indexList[iIndex + 1]), vertexList.at(indexList[iIndex + 2]));
+				triangles.push_back(Triangle(*std::get<0>(vTuple), *std::get<1>(vTuple), *std::get<2>(vTuple)));
+			}
 		}
-	}else {
-		for (size_t iVertex = 0; iVertex < vertexCount; iVertex += 3) {
-			std::tuple<const Vertex*, const Vertex*, const Vertex*> vTuple = std::make_tuple(vertexList.at(iVertex), vertexList.at(iVertex + 1), vertexList.at(iVertex + 2));
-			triangles.push_back(Triangle(*std::get<0>(vTuple), *std::get<1>(vTuple), *std::get<2>(vTuple)));
+		else {
+			for (size_t iVertex = 0; iVertex < vertexCount; iVertex += 3) {
+				std::tuple<const Vertex*, const Vertex*, const Vertex*> vTuple = std::make_tuple(vertexList.at(iVertex), vertexList.at(iVertex + 1), vertexList.at(iVertex + 2));
+				triangles.push_back(Triangle(*std::get<0>(vTuple), *std::get<1>(vTuple), *std::get<2>(vTuple)));
+			}
 		}
+	}
+	else if (triangleType == TriangleType::MeshType_Strip) {
+		/*if (DoesHaveIndexBuffer()) {
+			for (size_t iIndex = 0; iIndex < indexCount - 2; iIndex++) {
+				std::tuple<const Vertex*, const Vertex*, const Vertex*> vTuple = std::make_tuple(vertexList.at(indexList[iIndex]), vertexList.at(indexList[iIndex + 1]), vertexList.at(indexList[iIndex + 2]));
+				triangles.push_back(Triangle(*std::get<0>(vTuple), *std::get<1>(vTuple), *std::get<2>(vTuple)));
+			}
+		}else {
+			for (size_t iVertex = 0; iVertex < vertexCount - 2; iVertex ++) {
+				std::tuple<const Vertex*, const Vertex*, const Vertex*> vTuple = std::make_tuple(vertexList.at(iVertex), vertexList.at(iVertex + 1), vertexList.at(iVertex + 2));
+				triangles.push_back(Triangle(*std::get<0>(vTuple), *std::get<1>(vTuple), *std::get<2>(vTuple)));
+			}
+		}*/
 	}
 	return true;
 }
@@ -877,44 +890,44 @@ void MeshBuilder::AddGrid(int xStart, int zStart, int xTileCount, int zTileCount
 			SetColor(color);
 
 			float height = terrainContext.GetHeight(xTile, zTile);
-			SetPosition(xTile * scale.x, height, zTile * scale.z);
+			SetPosition(xTile * scale.x, -5.0f, zTile * scale.z);
 			SetUV(Vec2f(float(xTile) / float(heightMapWidth - 1), float(heightMapLength - 1 - zTile) / float(heightMapLength - 1)));
 			vertices.push_back(stamp);
 		}
 	}
 
-	//AddIndex(((xTileCount * 2) * (zTileCount - 1)) + ((zTileCount - 1) - 1));
-	//for (int zTile = 0; zTile < zTileCount - 1; zTile++) {
-	//	if ((zTile % 2) == 0) {
-	//		for (int xTile = 0; xTile < xTileCount; xTile++) {
-	//			if ((xTile == 0) && (0 < zTile)) {
-	//				AddIndex(xTile + (zTile * xTileCount));
-	//			}
-	//			AddIndex(xTile + (zTile * xTileCount));
-	//			AddIndex(xTile + (zTile * xTileCount) + xTileCount);
-	//		}
-	//	}else {
-	//		for (int xTile = xTileCount - 1; 0 <= xTile; xTile--) {
-	//			if (xTile == (xTileCount - 1)) {
-	//				AddIndex(xTile + (zTile * xTileCount));
-	//			}
-	//			AddIndex(xTile + (zTile * xTileCount));
-	//			AddIndex((xTile + (zTile * xTileCount) + xTileCount));
-	//		}
-	//	}
-	//}
-	for (int zTile = 0; zTile < zTileCount - 1; zTile++) {
-		for (int xTile = 0; xTile < xTileCount - 1; xTile++) {
-			int leftTop = zTile * xTileCount + xTile;
+
+	int indexPointer = 0;
+	for (int zTile = 0; zTile < zTileCount; zTile++) {
+		for (int xTile = 0; xTile < xTileCount; xTile++) {
+			int leftTop = zTile * xTileCount + indexPointer++;
+			int leftBottom = xTileCount + leftTop;
 			AddIndex(leftTop);
 			AddIndex(xTileCount + leftTop);
-			AddIndex(leftTop + 1);
-
-			AddIndex(leftTop + 1);
-			AddIndex(xTileCount + leftTop);
-			AddIndex(xTileCount + leftTop + 1);
+		
+			if (zTile < zTileCount) {
+				if (leftTop == (zTile + 1) * xTileCount - 1) {
+					AddIndex(leftBottom);
+					AddIndex((zTile + 1) * xTileCount);
+				}
+			}
 		}
+		indexPointer = 0;
 	}
+
+	//for (int zTile = 0; zTile < zTileCount - 1; zTile++) {
+	//	for (int xTile = 0; xTile < xTileCount - 1; xTile++) {
+	//		int leftTop = zTile * xTileCount + xTile;
+	//		AddIndex(leftTop);
+	//		AddIndex(xTileCount + leftTop);
+	//		AddIndex(leftTop + 1);
+
+	//		AddIndex(leftTop + 1);
+	//		AddIndex(xTileCount + leftTop);
+	//		AddIndex(xTileCount + leftTop + 1);
+	//	}
+	//}
+
 }
 void MeshBuilder::AddVertex(const Vec3f& _position) {
 	stamp.position = _position;
@@ -926,7 +939,7 @@ void MeshBuilder::AddIndex(int index) {
 	indices.emplace_back(index);
 }
 
-void MeshBuilder::CopyToMesh(Renderer& renderer, Mesh& mesh, VertexBufferBindCallback* bindFunction, VertexCopyCallback* copyFunction, unsigned int sizeofVertex) {
+void MeshBuilder::CopyToMesh(Renderer& renderer, Mesh& mesh, VertexBufferBindCallback* bindFunction, VertexCopyCallback* copyFunction, unsigned int sizeofVertex, Mesh::TriangleType triangleType) {
 	unsigned int vertexCount = vertices.size() - startIndex;
 	if (vertexCount == 0) {
 		return;
@@ -942,6 +955,7 @@ void MeshBuilder::CopyToMesh(Renderer& renderer, Mesh& mesh, VertexBufferBindCal
 		currentBufferIndex += vertexSize;
 	}
 	mesh.Initialize(renderer, bindFunction, vertexBuffer, vertexCount, sizeofVertex, indices.data(), indices.size());
+	mesh.BuildTriangles(triangleType);
 
 	delete[] vertexBuffer;
 	vertexBuffer = nullptr;
@@ -987,3 +1001,4 @@ void MeshBuilder::ComputeNormals() {
 		v.normal = Normalize(v.normal);
 	}
 }
+

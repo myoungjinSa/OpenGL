@@ -155,6 +155,9 @@ void Renderer::DrawIndexBuffer(unsigned int vertexArrayId, size_t indexCount) {
 	pGL->glBindVertexArray(vertexArrayId);
 
 	switch (drawMode) {
+	case DrawMode::TRIANGLE_STRIP:
+		glDrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, 0);
+		break;
 	case DrawMode::TRIANGLES:
 		glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
 		break;
@@ -490,6 +493,31 @@ void Renderer::OutputShaderErrorMessage(OpenGL& gl, unsigned int shaderId, char*
 }
 void Renderer::SetDepthTest(bool bEnable) {
 	bEnable ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
+}
+
+void Renderer::SetWindingOrder(Renderer::WindingOrder order) {
+	switch (order) {
+	case WindingOrder::CW:
+		glFrontFace(GL_CW);
+		break;
+	case WindingOrder::CCW:
+		glFrontFace(GL_CCW);
+		break;
+	}
+}
+
+void Renderer::SetCullingMode(Renderer::CullingMode cullMode) {
+	switch (cullMode) {
+	case Renderer::CullingMode::Front:
+		glCullFace(GL_FRONT);
+		break;
+	case Renderer::CullingMode::Back:
+		glCullFace(GL_BACK);
+		break;
+	case Renderer::CullingMode::FrontAndBack:
+		glCullFace(GL_FRONT_AND_BACK);
+		break;
+	}
 }
 void Renderer::SetDrawMode(Renderer::DrawMode _drawMode) {
 	drawMode = _drawMode;

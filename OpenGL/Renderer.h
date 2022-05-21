@@ -35,6 +35,17 @@ public:
 		WIREFRAME
 	};
 
+	enum class WindingOrder : unsigned int {
+		CW,
+		CCW
+	};
+
+	enum class CullingMode : unsigned int {
+		Back,
+		Front,
+		FrontAndBack
+	};
+
 	Renderer();
 	Renderer(const Renderer&) = delete;
 	~Renderer();
@@ -52,6 +63,8 @@ public:
 	bool CompileGeometryShader(const char* gsFilename, unsigned int& geometryShader);
 	bool BindVertexAttrib(unsigned int shaderProgram, unsigned int vertexShader, unsigned int fragmentShader, int vertexArgs, ...);
 	
+	void SetWindingOrder(WindingOrder order);
+	void SetCullingMode(CullingMode cullMode);
 	void SetDepthTest(bool bEnable);
 	void SetDrawMode(Renderer::DrawMode drawMode);
 	void SetRenderMode(RenderMode renderMode);
