@@ -7,7 +7,7 @@ class WString;
 class Picture;
 class TerrainHeightImage {
 public:
-	TerrainHeightImage(const Vec3f& scale);
+	TerrainHeightImage(const Vec3f& scale, float minHeight, float maxHeight);
 	~TerrainHeightImage();
 
 	int GetWidth() const { return width; }
@@ -20,6 +20,9 @@ public:
 	unsigned char* GetHeightMapPixels() const { return pHeightMapPixels; }
 	bool Load(const WString& filename);
 private:
+	float minHeight;
+	float maxHeight;
+
 	unsigned char* pHeightMapPixels;
 	int width;
 	int length;

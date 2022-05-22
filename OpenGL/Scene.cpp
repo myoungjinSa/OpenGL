@@ -23,8 +23,8 @@ Scene::~Scene() {
 bool Scene::BuildObject(Renderer& renderer) {	
 	skybox.Initialize(renderer);
 	phongLight = std::make_unique<Light>();
-	phongLight->SetPosition(0.0f, 0.0f, -10.0f);
-	phongLight->SetDirection(Vec3f::FORWARD);
+	phongLight->SetPosition(0.0f, 0.0f, -5.0f);
+	phongLight->SetDirection(Vec3f(1.0f, -3.0f, 1.0f));
 
 	terrain = std::make_unique<Terrain>(100, 100);
 	terrain->Initialize(renderer);
@@ -74,10 +74,8 @@ bool Scene::Render(Renderer& renderer) {
 	renderer.SetDepthFunc(GL_LESS);
 
 	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLE_STRIP);
-	renderer.SetRenderMode(Renderer::RenderMode::WIREFRAME);
 	terrain->FillShaderParameter(shaderParmaeter, GetViewMatrix(), projectionMatrix, *phongLight, camera, 0);
 	terrain->Render(renderer, shaderParmaeter);
-	renderer.SetRenderMode(Renderer::RenderMode::SOLID);
 	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
 
 	Matrix<float, 4, 4> worldMatrix;

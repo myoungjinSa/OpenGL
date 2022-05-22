@@ -879,19 +879,22 @@ void MeshBuilder::AddLathe(const Vec3f& axis, const Vec3f& arm1, const Vec3f& ar
 	//ComputeNormals();
 }
 
-void MeshBuilder::AddGrid(int xStart, int zStart, int xTileCount, int zTileCount, const Vec3f& scale, const RGBA& color, const TerrainHeightImage& terrainContext) {
-	xTileCount = xTileCount + 1;
-	zTileCount = zTileCount + 1;
-
+void MeshBuilder::AddGrid(int xStart, int zStart, int xTileCount, int zTileCount, const Vec3f& positionOffset, const Vec3f& scale, const RGBA& color, const TerrainHeightImage& terrainContext) {
+	int xVertexCount = xTileCount + 1;
+	int zVertexCount = zTileCount + 1;
+	
 	int heightMapWidth = terrainContext.GetWidth();
 	int heightMapLength = terrainContext.GetLength();
-	for (int zTile = zStart; zTile < (zStart + zTileCount); zTile++) {
-		for (int xTile = xStart; xTile < (xStart + xTileCount); xTile++) {
+	for (int zVertex = zStart; zVertex < (zStart + zVertexCount); zVertex++) {
+		for (int xVertex = xStart; xVertex < (xStart + xVertexCount); xVertex++) {
 			SetColor(color);
-
-			float height = terrainContext.GetHeight(xTile, zTile);
-			SetPosition(xTile * scale.x, -5.0f, zTile * scale.z);
-			SetUV(Vec2f(float(xTile) / float(heightMapWidth - 1), float(heightMapLength - 1 - zTile) / float(heightMapLength - 1)));
+			float height = terrainContext.GetHeight(xVertex, zVertex);
+			SetPosition(xVertex * scale.x + positionOffset.x, height + positionOffset.y, zVertex * scale.z + positionOffset.z);
+			//SetUV(Vec2f(float(xVertex) / float(heightMapWidth - 1), float(heightMapLength - 1 - zVertex) / float(heightMapLength - 1)));
+			SetUV(Vec2f(float(xVertex) / float(scale.x * 0.5f), float(zVertex) / float(scale.z * 0.5f)));
+			
+			Vec3f normal = terrainContext.GetHeightNormal(xVertex, zVertex);
+			SetNormal(normal);
 			vertices.push_back(stamp);
 		}
 	}
@@ -899,35 +902,17 @@ void MeshBuilder::AddGrid(int xStart, int zStart, int xTileCount, int zTileCount
 
 	int indexPointer = 0;
 	for (int zTile = 0; zTile < zTileCount; zTile++) {
-		for (int xTile = 0; xTile < xTileCount; xTile++) {
-			int leftTop = zTile * xTileCount + indexPointer++;
-			int leftBottom = xTileCount + leftTop;
+		for (int xVertex = 0; xVertex < xVertexCount; xVertex++) {
+			int leftTop = indexPointer++;
+			int leftBottom = xVertexCount + leftTop;
 			AddIndex(leftTop);
-			AddIndex(xTileCount + leftTop);
-		
-			if (zTile < zTileCount) {
-				if (leftTop == (zTile + 1) * xTileCount - 1) {
-					AddIndex(leftBottom);
-					AddIndex((zTile + 1) * xTileCount);
-				}
+			AddIndex(leftBottom);
+			if (leftTop == ((zTile + 1) * xVertexCount) - 1 && leftBottom < xVertexCount * zVertexCount - 1) {
+				AddIndex(leftBottom);
+				AddIndex(leftBottom - xTileCount);
 			}
 		}
-		indexPointer = 0;
 	}
-
-	//for (int zTile = 0; zTile < zTileCount - 1; zTile++) {
-	//	for (int xTile = 0; xTile < xTileCount - 1; xTile++) {
-	//		int leftTop = zTile * xTileCount + xTile;
-	//		AddIndex(leftTop);
-	//		AddIndex(xTileCount + leftTop);
-	//		AddIndex(leftTop + 1);
-
-	//		AddIndex(leftTop + 1);
-	//		AddIndex(xTileCount + leftTop);
-	//		AddIndex(xTileCount + leftTop + 1);
-	//	}
-	//}
-
 }
 void MeshBuilder::AddVertex(const Vec3f& _position) {
 	stamp.position = _position;

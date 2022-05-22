@@ -9,8 +9,8 @@
 #include "BoundingVolume.h"
 #include "Texture.h"
 
-TerrainHeightImage::TerrainHeightImage(const Vec3f& _scale)
-	: pHeightMapPixels(nullptr), width(0), length(0), scale(_scale)
+TerrainHeightImage::TerrainHeightImage(const Vec3f& _scale, float _minHeight, float _maxHeight)
+	: pHeightMapPixels(nullptr), width(0), length(0), scale(_scale), minHeight(_minHeight), maxHeight(_maxHeight)
 {
 	
 }
@@ -96,6 +96,10 @@ float TerrainHeightImage::GetHeight(float fx, float fz, bool bReverseQuad) const
 	float topHeight = MathUtils::Lerp(topLeft, topRight, tx);
 	float bottomHeight = MathUtils::Lerp(bottomLeft, bottomRight, tx);
 	float height = MathUtils::Lerp(bottomHeight, topHeight, tz);
+
+	int integer = int(height) % int(ceil(maxHeight));
+	float remainder = height - int(height);
+	height = (float)integer + remainder;
 	return height;
 }
 
@@ -106,7 +110,7 @@ Terrain::Terrain(int _gridX, int _gridZ)
 bool Terrain::Initialize(Renderer& renderer) {
 	GameObject::Initialize(renderer);
 
-	AddComponent<TextureShader>();
+	AddComponent<PhongShader>();
 	shader = GetComponent<Shader>();
 	if (!shader)
 		return false;
@@ -116,17 +120,21 @@ bool Terrain::Initialize(Renderer& renderer) {
 		return false;
 	}
 
-	Vec3f scale = Vec3f(0.8f, 1.0f, 1.25f);
-	std::unique_ptr<TerrainHeightImage> heightImage = std::make_unique<TerrainHeightImage>(scale);
-	if (!heightImage->Load(L"HeightMap.png")) {
+	Vec3f scale = Vec3f(8.0f, 1.0f, 8.0f);
+	std::unique_ptr<TerrainHeightImage> heightImage = std::make_unique<TerrainHeightImage>(scale, -2.0f, 8.0f);
+	if (!heightImage->Load(L"coast_sand_rocks.jpg")) {
 		assert(0);
 		return false;
 	}
 
+	
 	MeshBuilder meshBuilder;
 	meshes.push_back(std::make_shared<Mesh>());
 	meshBuilder.Begin();
-	meshBuilder.AddGrid(0, 0, 5, 5, scale, RGBA::FOREST_GREEN, *heightImage);
+
+	int xTileCount = 255;
+	int zTileCount = 255;
+	meshBuilder.AddGrid(0, 0, xTileCount, zTileCount, Vec3f(-(xTileCount * scale.x) / 2.0f, -8.0f, -(zTileCount * scale.z) / 2.0f), scale, RGBA::FOREST_GREEN, *heightImage);
 	meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex), Mesh::TriangleType::MeshType_Strip);
 	meshBuilder.End();
 
@@ -134,7 +142,7 @@ bool Terrain::Initialize(Renderer& renderer) {
 	Vec4f ambientColor(0.3f, 0.3f, 0.3f, 1.0f);
 	Vec3f specularColor(1.0f, 1.0f, 1.0f);
 
-	diffuseMap = TextureLoader::GetTexture(renderer, L"HeightMap.png");
+	diffuseMap = TextureLoader::GetTexture(renderer, L"coast_sand_rocks.jpg");
 
 	renderer.AllocateTextures(diffuseMap->textureID, 1);
 	renderer.BindTexture(diffuseMap->GetTextureID());

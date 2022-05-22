@@ -154,7 +154,7 @@ public:
 
 	void CopyToMesh(Renderer& renderers, Mesh& mesh, VertexBufferBindCallback* bindFunction, VertexCopyCallback* copyFunction, unsigned int sizeofVertex, Mesh::TriangleType triangleType = Mesh::TriangleType::MeshType_List);
 
-	void AddGrid(int xStart, int zStart, int width, int length, const Vec3f& scale, const RGBA& color, const TerrainHeightImage& HeightContext);
+	void AddGrid(int xStart, int zStart, int width, int length, const Vec3f& positionOffset, const Vec3f& scale, const RGBA& color, const TerrainHeightImage& HeightContext);
 	void AddCylinder(const Vec3f& axis, const Vec3f& arm1, const Vec3f& arm2, uint32_t slices, const RGBA& color);
 	void AddSphere(const Vec3f& position, float radius, int sectorCount, int stackCount);
 	void AddCube(float sideLength, const RGBA& color);

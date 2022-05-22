@@ -277,7 +277,7 @@ Cube::~Cube() {
 bool Cube::Initialize(Renderer& renderer) {
 	GameObject::Initialize(renderer);
 
-	AddComponent<TextureShader>();
+	AddComponent<PhongShader>();
 	shader = GetComponent<Shader>();
 	//shader = std::make_shared<TextureShader>(this);
 	if (!shader)
