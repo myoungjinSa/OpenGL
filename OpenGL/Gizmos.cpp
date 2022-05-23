@@ -140,7 +140,29 @@ Gizmos::GizmoHandle::eHandle Gizmos::GizmoHandles::Intersect(const Ray& ray, dou
 
 		break;
 	}
+	case eTransformMode::ROTATE:
+	{
+		double tempDistance = DBL_MAX;
+		bIntersect = at(GizmoHandle::eHandle::ROTATE_X).Intersect(ray, tempDistance);
+		if (bIntersect) {
+			handle = GizmoHandle::eHandle::ROTATE_X;
+			distance = tempDistance;
+		}
 
+		bIntersect = at(GizmoHandle::eHandle::ROTATE_Y).Intersect(ray, tempDistance);
+		if (bIntersect) {
+			handle = GizmoHandle::eHandle::ROTATE_Y;
+			distance = tempDistance;
+		}
+
+		bIntersect = at(GizmoHandle::eHandle::ROTATE_Z).Intersect(ray, tempDistance);
+		if (bIntersect) {
+			handle = GizmoHandle::eHandle::ROTATE_Z;
+			distance = tempDistance;
+		}
+
+		break;
+	}
 	}
 
 	return handle;
@@ -161,6 +183,14 @@ void Gizmos::GizmoHandles::Render(Renderer& renderer, ShaderParameter& shaderPar
 	}
 	case eTransformMode::ROTATE:
 	{
+		shaderParam.objNo = (int)GizmoHandle::eHandle::ROTATE_X;
+		at(GizmoHandle::eHandle::ROTATE_X).Render(renderer, shaderParam);
+
+		shaderParam.objNo = (int)GizmoHandle::eHandle::ROTATE_Y;
+		at(GizmoHandle::eHandle::ROTATE_Y).Render(renderer, shaderParam);
+
+		shaderParam.objNo = (int)GizmoHandle::eHandle::ROTATE_Z;
+		at(GizmoHandle::eHandle::ROTATE_Z).Render(renderer, shaderParam);
 
 		break;
 	}
@@ -175,7 +205,7 @@ void Gizmos::GizmoHandles::Render(Renderer& renderer, ShaderParameter& shaderPar
 
 Gizmos::Gizmos() 
 	:GameObject()
-	,transformMode(eTransformMode::TRANSLATE)
+	,transformMode(eTransformMode::ROTATE)
 	,oldMousePoint()
 {
 
@@ -254,6 +284,59 @@ bool Gizmos::Initialize(Renderer& renderer) {
 
 	handles.Add(translationZHandle);
 
+	Gizmos::GizmoHandle rotationXHandle{
+		GizmoHandle(*this, [&](Gizmos::GizmoHandle& handle, Renderer& renderer) -> bool {
+			std::list<std::shared_ptr<Mesh>>& meshes = handle.GetMeshes();
+
+			MeshBuilder meshBuilder;
+			meshes.push_back(std::make_shared<Mesh>());
+			meshBuilder.Begin();
+			meshBuilder.AddXAxisCircleGizmo(RGBA::RED);
+			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+			meshBuilder.End();
+
+			return true;
+		}, RGBA::RED, RGBA::YELLOW, Gizmos::GizmoHandle::eHandle::ROTATE_X)
+	};
+
+	handles.Add(rotationXHandle);
+
+	Gizmos::GizmoHandle rotationYHandle{
+		GizmoHandle(*this, [&](Gizmos::GizmoHandle& handle, Renderer& renderer)->bool {
+			std::list<std::shared_ptr<Mesh>>& meshes = handle.GetMeshes();
+
+			MeshBuilder meshBuilder;
+			meshes.push_back(std::make_shared<Mesh>());
+			meshBuilder.Begin();
+			meshBuilder.AddYAxisCircleGizmo(RGBA::GREEN);
+			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+			meshBuilder.End();
+
+			return true;
+		}, RGBA::GREEN, RGBA::YELLOW, Gizmos::GizmoHandle::eHandle::ROTATE_Y)
+	};
+
+	handles.Add(rotationYHandle);
+
+
+	Gizmos::GizmoHandle rotationZHandle{
+		GizmoHandle(*this, [&](Gizmos::GizmoHandle& handle, Renderer& renderer)->bool {
+			std::list<std::shared_ptr<Mesh>>& meshes = handle.GetMeshes();
+
+			MeshBuilder meshBuilder;
+			meshes.push_back(std::make_shared<Mesh>());
+			meshBuilder.Begin();
+			meshBuilder.AddZAxisCircleGizmo(RGBA::BLUE);
+			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+			meshBuilder.End();
+
+			return true;
+
+		}, RGBA::BLUE, RGBA::YELLOW, Gizmos::GizmoHandle::eHandle::ROTATE_Z)
+	};
+
+	handles.Add(rotationZHandle);
+
 #ifdef _DEBUG
 	if (!VerifyGizmos()) {
 		assert(0);
@@ -287,6 +370,9 @@ bool Gizmos::VerifyGizmos() const{
 	if (!handles.DoesExist(GizmoHandle::eHandle::TRANSLATE_X))	return false;
 	if (!handles.DoesExist(GizmoHandle::eHandle::TRANSLATE_Y))	return false;
 	if (!handles.DoesExist(GizmoHandle::eHandle::TRANSLATE_Z))	return false;
+	if (!handles.DoesExist(GizmoHandle::eHandle::ROTATE_X))		return false;
+	if (!handles.DoesExist(GizmoHandle::eHandle::ROTATE_Y))		return false;
+	if (!handles.DoesExist(GizmoHandle::eHandle::ROTATE_Z))		return false;
 
 	return true;
 }
@@ -302,13 +388,9 @@ bool Gizmos::Intersect(const Ray& ray, double& distance) {
 	//기즈모 스케일 처리가 들어가야함
 	GizmoHandle::eHandle handleType = GizmoHandle::eHandle::NONE;;
 	switch (transformMode) {
-	case Gizmos::eTransformMode::TRANSLATE:
-	{
-		handleType = handles.Intersect(ray, distance, transformMode);
-	}
-	break;
-	/*case Gizmos::eTransformMode::ROTATE:		return IntersectRotationGizmos(ray, distance);
-	case Gizmos::eTransformMode::SCALE:			return IntersectScaleGizmos(ray, distance);*/
+	case Gizmos::eTransformMode::TRANSLATE: handleType = handles.Intersect(ray, distance, transformMode);	break;
+	case Gizmos::eTransformMode::ROTATE:	handleType = handles.Intersect(ray, distance, transformMode);	break;
+	/*case Gizmos::eTransformMode::SCALE:			return IntersectScaleGizmos(ray, distance);*/
 	default:
 		assert(0);
 		break;

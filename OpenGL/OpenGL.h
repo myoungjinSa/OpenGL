@@ -102,9 +102,6 @@ public:
 	void EndScene();
 	void GetVideoCardInfo(char* videoCardList);
 
-
-	void MatrixRotationY(Matrix<float, 4, 4>& matrix, float angle);
-	void MatrixTranslation(Matrix<float, 4, 4>& matrix, float x, float y, float z);
 	void MatrixMultiply(Matrix<float, 4, 4>& matrix, const Matrix<float, 4, 4>& matrix1, const Matrix<float, 4, 4>& matrix2);
 
 	static void CheckError();

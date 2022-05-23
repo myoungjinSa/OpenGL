@@ -88,7 +88,6 @@ bool Scene::Render(Renderer& renderer) {
 	renderer.SetDepthTest(false);
 	gizmos.Render(renderer, &camera, *this);
 	renderer.SetDepthTest(true);
-
 	renderer.EndRender();
 	return true;
 }
