@@ -235,17 +235,16 @@ bool Mesh::BuildTriangles(TriangleType triangleType) {
 		}
 	}
 	else if (triangleType == TriangleType::MeshType_Strip) {
-		/*if (DoesHaveIndexBuffer()) {
+		if (DoesHaveIndexBuffer()) {
 			for (size_t iIndex = 0; iIndex < indexCount - 2; iIndex++) {
 				std::tuple<const Vertex*, const Vertex*, const Vertex*> vTuple = std::make_tuple(vertexList.at(indexList[iIndex]), vertexList.at(indexList[iIndex + 1]), vertexList.at(indexList[iIndex + 2]));
 				triangles.push_back(Triangle(*std::get<0>(vTuple), *std::get<1>(vTuple), *std::get<2>(vTuple)));
 			}
-		}else {
-			for (size_t iVertex = 0; iVertex < vertexCount - 2; iVertex ++) {
-				std::tuple<const Vertex*, const Vertex*, const Vertex*> vTuple = std::make_tuple(vertexList.at(iVertex), vertexList.at(iVertex + 1), vertexList.at(iVertex + 2));
-				triangles.push_back(Triangle(*std::get<0>(vTuple), *std::get<1>(vTuple), *std::get<2>(vTuple)));
-			}
-		}*/
+		}
+		else {
+			//Not yet...
+			assert(0);
+		}
 	}
 	return true;
 }
@@ -464,48 +463,68 @@ void MeshBuilder::AddCylinder(const Vec3f& axis, const Vec3f& arm1, const Vec3f&
 	}
 }
 
-void MeshBuilder::AddXAxisCircleGizmo(const RGBA& color) {
+void MeshBuilder::AddXAxisCircle(float outerRadius, float innerRadius, const RGBA& color) {
 	const int segmentCount = 32;
-
-	SetPosition(0.0f, 0.0f, 0.0f);
-	SetColor(color);
-	vertices.push_back(stamp);
-	for (int iSegment = 0; iSegment < segmentCount + 1; iSegment++) {
-		float angle = MathUtils::PI * 2 * (float)iSegment / (float)segmentCount;
-		SetPosition(Vec3f(0.0f, cosf(angle), sinf(angle)));
-		SetColor(color);
-		vertices.push_back(stamp);
-	}
-}
-
-void MeshBuilder::AddYAxisCircleGizmo(const RGBA& color) {
-	const int segmentCount = 32;
-
-	SetPosition(0.0f, 0.0f, 0.0f);
-	SetColor(color);
-	vertices.push_back(stamp);
 
 	for (int iSegment = 0; iSegment < segmentCount + 1; iSegment++) {
 		float angle = MathUtils::PI * 2 * (float)iSegment / (float)segmentCount;
-		SetPosition(Vec3f(sinf(angle), 0.0f, cosf(angle)));
+		const float xOffset = 0.03f;
+		
+		SetPosition(Vec3f(xOffset, cosf(angle) * outerRadius, sinf(angle) * outerRadius));
+		SetColor(color);
+		vertices.push_back(stamp);
+
+		SetPosition(Vec3f(-xOffset, cosf(angle) * innerRadius, sinf(angle) * innerRadius));
 		SetColor(color);
 		vertices.push_back(stamp);
 	}
+
+	for (size_t iVertex = 0; iVertex < vertices.size(); iVertex++) {
+		AddIndex(iVertex);
+	}
 }
 
-void MeshBuilder::AddZAxisCircleGizmo(const RGBA& color) {
+void MeshBuilder::AddYAxisCircle(float outerRadius, float innerRadius, const RGBA& color) {
+	const int segmentCount = 32;
+
+	for (int iSegment = 0; iSegment < segmentCount + 1; iSegment++) {
+		float angle = MathUtils::PI * 2 * (float)iSegment / (float)segmentCount;
+		const float yOffset = 0.03f;
+		SetPosition(Vec3f(sinf(angle) * outerRadius, yOffset, cosf(angle) * outerRadius));
+		SetColor(color);
+		vertices.push_back(stamp);
+
+		SetPosition(Vec3f(sinf(angle) * innerRadius, -yOffset, cosf(angle) * innerRadius));
+		SetColor(color);
+		vertices.push_back(stamp);
+	}
+
+	for (size_t iVertex = 0; iVertex < vertices.size() - 2; iVertex++) {
+		//for triangle strip
+		AddIndex(iVertex);
+	}
+}
+
+void MeshBuilder::AddZAxisCircle(float outerRadius, float innerRadius, const RGBA& color) {
 	const int segmentCount = 32;
 	
-	SetPosition(0.0f, 0.0f, 0.0f);
-	SetColor(color);
-	vertices.push_back(stamp);
-
 	for (int iSegment = 0; iSegment < segmentCount + 1; iSegment++) {
-		float angle = MathUtils::PI * (float)iSegment / (float)segmentCount;
-		SetPosition(Vec3f(cosf(angle), sinf(angle), 0.0f));
+		float angle = MathUtils::PI * 2 * (float)iSegment / (float)segmentCount;
+		float zOffset = 0.03f;
+		SetPosition(Vec3f(cosf(angle) * outerRadius, sinf(angle) * outerRadius, zOffset));
+		SetColor(color);
+		vertices.push_back(stamp);
+
+		SetPosition(Vec3f(cosf(angle) * innerRadius, sinf(angle) * innerRadius, -zOffset));
 		SetColor(color);
 		vertices.push_back(stamp);
 	}
+
+	for (size_t iVertex = 0; iVertex < vertices.size(); iVertex++) {
+		//for triangle strip
+		AddIndex(iVertex);
+	}
+
 }
 
 void MeshBuilder::AddXAxisCone(const Vec3f& centerOffset, float halfWidth, float halfHeight, float halfDepth, double angleStep, const RGBA& color) {
@@ -934,7 +953,6 @@ void MeshBuilder::AddGrid(int xStart, int zStart, int xTileCount, int zTileCount
 			SetColor(color);
 			float height = terrainContext.GetHeight(xVertex, zVertex);
 			SetPosition(xVertex * scale.x + positionOffset.x, height + positionOffset.y, zVertex * scale.z + positionOffset.z);
-			//SetUV(Vec2f(float(xVertex) / float(heightMapWidth - 1), float(heightMapLength - 1 - zVertex) / float(heightMapLength - 1)));
 			SetUV(Vec2f(float(xVertex) / float(scale.x * 0.5f), float(zVertex) / float(scale.z * 0.5f)));
 			
 			Vec3f normal = terrainContext.GetHeightNormal(xVertex, zVertex);
@@ -965,6 +983,11 @@ void MeshBuilder::AddVertex(const Vec3f& _position) {
 }
 
 void MeshBuilder::AddIndex(int index) {
+	if (vertices.size() <= index) {
+		assert(false);
+		return;
+	}
+
 	indices.emplace_back(index);
 }
 

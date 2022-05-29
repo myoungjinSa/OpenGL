@@ -1,8 +1,11 @@
 #pragma once
 
+class EventInfo {
+
+};
 class Event abstract {
 public:
-	virtual void GetInfo() = 0;
+	virtual const EventInfo& GetInfo() = 0;
 };
 
 

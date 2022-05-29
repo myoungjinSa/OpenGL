@@ -6,6 +6,17 @@
 #include "Observer.h"
 #include "Drag.h"
 
+class KeyInfo : public EventInfo {
+public:
+	KeyInfo();
+
+	bool bToggleMenu;
+	bool bToggleCtrl;
+	bool bToggleShift;
+
+	unsigned int key;
+};
+
 class KeyboardInput
 {
 public:
@@ -16,9 +27,10 @@ public:
 			KEY_STATE_UP,
 			KEY_STATE_COUNT
 		};
-		KeyboardEvent(KEY_STATE keyState, const std::vector<unsigned int>& keys);
-		void GetInfo() override;
 
+		KeyboardEvent(KEY_STATE keyState, const std::vector<unsigned int>& keys);
+		const KeyInfo& GetInfo() override;
+		
 		std::vector<unsigned int> keys;
 		KEY_STATE keyState;
 	};
@@ -42,6 +54,10 @@ private:
 	static std::vector<Observer*> observers;
 };
 
+class MouseInfo : public EventInfo {
+
+};
+
 class MouseInput
 {
 public:
@@ -56,7 +72,7 @@ public:
 			MOUSE_STATE_COUNT
 		};
 		MouseEvent(MOUSE_STATE mouseState, const Point2i& newMousePoint, const Point2i& oldMousePoint);
-		void GetInfo() override;
+		const MouseInfo& GetInfo() override;
 
 		Point2i oldMousePoint;
 		Point2i newMousePoint;

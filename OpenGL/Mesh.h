@@ -162,9 +162,9 @@ public:
 	void AddQuad(const Vec3f& bottomLeft, const Vec3f& up, float upLength, const Vec3f& right, float rightLength, const Vec3f& normal, const RGBA& color = RGBA::WHITE, const Vec2f& uvOffset = Vec2f::ZERO, float uvStepSize = 1.0f);
 	void AddQuad(const Vec3f& center, const Vec3f& extent, const Vec3f& normal, const RGBA& color = RGBA::WHITE, const Vec2f& uvOffset = Vec2f::ZERO, float uvStepSize = 1.0f, bool bReversed = false);
 	void AddLathe(const Vec3f& axis, const Vec3f& arm1, const Vec3f& arm2, int slices, const std::vector<Point2f>& points, const RGBA& color, const float epsilon = 0.0f);
-	void AddXAxisCircleGizmo(const RGBA& color);
-	void AddYAxisCircleGizmo(const RGBA& color);
-	void AddZAxisCircleGizmo(const RGBA& color);
+	void AddXAxisCircle(float outerRadius, float innerRadius, const RGBA& color);
+	void AddYAxisCircle(float outerRadius, float innerRadius, const RGBA& color);
+	void AddZAxisCircle(float outerRadius, float innerRadius, const RGBA& color);
 	void AddXAxisCone(const Vec3f& centerOffset, float halfWidth, float halfHegiht, float halfDepth, double angleStep, const RGBA& color);
 	void AddYAxisCone(const Vec3f& centerOffset, float halfWidth, float halfHegiht, float halfDepth, double angleStep, const RGBA& color);
 	void AddZAxisCone(const Vec3f& centerOffset, float halfWidth, float halfHegiht, float halfDepth, double angleStep, const RGBA& color);

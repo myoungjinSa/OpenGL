@@ -156,6 +156,7 @@ void BoundingBox::GetMinMaxRange(Volumef& volume) {
 }
 
 void BoundingBox::Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix) {
+	Renderer::DrawMode oldDrawMode = renderer.GetDrawMode();
 	renderer.SetDrawMode(Renderer::DrawMode::LINES);
 	
 	ShaderParameter shaderParam;
@@ -168,6 +169,8 @@ void BoundingBox::Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatr
 
 	DefaultShader->Render(renderer, shaderParam);
 	pMesh->Render(renderer);
+
+	renderer.SetDrawMode(oldDrawMode);
 }
 
 BoundingSphere::BoundingSphere(Object* pOwner) 

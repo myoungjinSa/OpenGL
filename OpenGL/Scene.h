@@ -79,6 +79,8 @@ public:
 	const Camera& GetCamera() const { return camera; }
 
 	Size2u GetSceneSize() const { return sceneSize; }
+
+	void SetTransformMode(Gizmos::eTransformMode transformMode);
 private:
 	Size2u sceneSize;
 	Camera camera;

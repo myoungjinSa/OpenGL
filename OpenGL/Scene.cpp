@@ -139,6 +139,10 @@ Ray Scene::GetRay(int x, int y, size_t screenWidth, size_t screenHeight) const{
 	return ray;
 }
 
+void Scene::SetTransformMode(Gizmos::eTransformMode transformMode) {
+	gizmos.SetTransformMode(transformMode);
+}
+
 bool Scene::IntersectObjects(const Ray& ray) const {
 	double distance = 0.0;
 	for (size_t iObj = 0; iObj < gameObjects.size(); iObj++) {

@@ -168,9 +168,13 @@ Gizmos::GizmoHandle::eHandle Gizmos::GizmoHandles::Intersect(const Ray& ray, dou
 	return handle;
 }
 void Gizmos::GizmoHandles::Render(Renderer& renderer, ShaderParameter& shaderParam, eTransformMode transformMode) {
+	Renderer::DrawMode oldDrawMode = renderer.GetDrawMode();
+	renderer.EnableCulling(false);
+
 	switch (transformMode) {
 	case eTransformMode::TRANSLATE:
 	{
+		renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
 		shaderParam.objNo = (int)GizmoHandle::eHandle::TRANSLATE_X;
 		at(GizmoHandle::eHandle::TRANSLATE_X).Render(renderer, shaderParam);
 
@@ -179,10 +183,13 @@ void Gizmos::GizmoHandles::Render(Renderer& renderer, ShaderParameter& shaderPar
 
 		shaderParam.objNo = (int)GizmoHandle::eHandle::TRANSLATE_Z;
 		at(GizmoHandle::eHandle::TRANSLATE_Z).Render(renderer, shaderParam);
+
 		break;
 	}
 	case eTransformMode::ROTATE:
 	{
+		renderer.SetDrawMode(Renderer::DrawMode::TRIANGLE_STRIP);
+
 		shaderParam.objNo = (int)GizmoHandle::eHandle::ROTATE_X;
 		at(GizmoHandle::eHandle::ROTATE_X).Render(renderer, shaderParam);
 
@@ -200,6 +207,8 @@ void Gizmos::GizmoHandles::Render(Renderer& renderer, ShaderParameter& shaderPar
 		break;
 	}
 	}
+	renderer.SetDrawMode(oldDrawMode);
+	renderer.EnableCulling(true);
 }
 
 
@@ -291,8 +300,8 @@ bool Gizmos::Initialize(Renderer& renderer) {
 			MeshBuilder meshBuilder;
 			meshes.push_back(std::make_shared<Mesh>());
 			meshBuilder.Begin();
-			meshBuilder.AddXAxisCircleGizmo(RGBA::RED);
-			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+			meshBuilder.AddXAxisCircle(1.0f, 0.95f, RGBA::RED);
+			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex), Mesh::TriangleType::MeshType_Strip);
 			meshBuilder.End();
 
 			return true;
@@ -308,8 +317,8 @@ bool Gizmos::Initialize(Renderer& renderer) {
 			MeshBuilder meshBuilder;
 			meshes.push_back(std::make_shared<Mesh>());
 			meshBuilder.Begin();
-			meshBuilder.AddYAxisCircleGizmo(RGBA::GREEN);
-			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+			meshBuilder.AddYAxisCircle(1.0f, 0.95f, RGBA::GREEN);
+			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex), Mesh::TriangleType::MeshType_Strip);
 			meshBuilder.End();
 
 			return true;
@@ -326,8 +335,8 @@ bool Gizmos::Initialize(Renderer& renderer) {
 			MeshBuilder meshBuilder;
 			meshes.push_back(std::make_shared<Mesh>());
 			meshBuilder.Begin();
-			meshBuilder.AddZAxisCircleGizmo(RGBA::BLUE);
-			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+			meshBuilder.AddZAxisCircle(1.0f, 0.95f, RGBA::BLUE);
+			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex), Mesh::TriangleType::MeshType_Strip);
 			meshBuilder.End();
 
 			return true;
@@ -437,8 +446,6 @@ void Gizmos::Render(Renderer& renderer, Camera* pCamera, const Scene& scene) {
 	if (targets.empty())
 		return;
 	
-	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
-	
 	//Calculate Center of Objects 
 	Matrix<float, 4, 4> worldMatrix = transform->GetWorldMatrix();
 	MakeWorldMatrix(targets[0]->GetPosition(), targets[0]->GetScale(), Vec3f::FORWARD, Vec3f::RIGHT, Vec3f::UP, worldMatrix);
@@ -447,7 +454,6 @@ void Gizmos::Render(Renderer& renderer, Camera* pCamera, const Scene& scene) {
 	pCamera->GetViewMatrix(shaderParam.viewMatrix);
 	shaderParam.projectionMatrix = scene.GetProjectionMatrix();
 
-	
 	shaderParam.focusInfo.focusObjNo = (int)context.editingHandle;
 	shaderParam.focusInfo.highlightColor = Vec4f(1.0f, 0.8f, 0.0f, 1.0f);
 	

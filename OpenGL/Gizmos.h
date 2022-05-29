@@ -108,6 +108,9 @@ public:
 	eTransformMode GetMode() const;
 
 	GizmoHandle::eHandle GetEditingHandle() const { return context.editingHandle; }
+
+	void SetTransformMode(eTransformMode _transformMode) { transformMode = _transformMode; }
+	eTransformMode GetTransformMode() const { return transformMode; }
 private:
 	GizmoContext context;
 	eTransformMode transformMode;

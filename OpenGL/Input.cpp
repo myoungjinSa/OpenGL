@@ -84,15 +84,23 @@ void KeyboardInput::Notify(KeyboardInput::KeyboardEvent& e) {
 	}
 }
 
+KeyInfo::KeyInfo() 
+	: bToggleCtrl(false), bToggleMenu(false), bToggleShift(false), key(0)
+{
+
+}
+
 KeyboardInput::KeyboardEvent::KeyboardEvent(KEY_STATE _keyState, const std::vector<unsigned int>& _keys) {
-	for (unsigned int key : keys) {
+	for (unsigned int key : _keys) {
 		keys.push_back(key);
 	}
 
 	keyState = _keyState;
 }
-void KeyboardInput::KeyboardEvent::GetInfo() {
-
+const KeyInfo& KeyboardInput::KeyboardEvent::GetInfo() {
+	KeyInfo keyInfo;
+	keyInfo.key = keys.back();
+	return KeyInfo(keyInfo);
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -203,6 +211,6 @@ MouseInput::MouseEvent::MouseEvent(MOUSE_STATE _mouseState, const Point2i& _newM
 
 	mouseState = _mouseState;
 }
-void MouseInput::MouseEvent::GetInfo() {
-	
+const MouseInfo& MouseInput::MouseEvent::GetInfo() {
+	return MouseInfo();
 }

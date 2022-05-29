@@ -25,6 +25,7 @@ public:
 	enum class DrawMode : unsigned int {
 		POINTS,
 		LINES,
+		LINE_STRIP,
 		TRIANGLES,
 		TRIANGLE_STRIP,
 		NUM_DRAW_MODES
@@ -66,9 +67,9 @@ public:
 	void SetWindingOrder(WindingOrder order);
 	void SetCullingMode(CullingMode cullMode);
 	void SetDepthTest(bool bEnable);
+	Renderer::DrawMode GetDrawMode() const { return drawMode; }
 	void SetDrawMode(Renderer::DrawMode drawMode);
 	void SetRenderMode(RenderMode renderMode);
-	Renderer::DrawMode GetDrawMode() const { return drawMode; }
 	Renderer::RenderMode GetRenderMode() const { return renderMode; }
 	
 	bool SetShaderParameter(unsigned int shaderProgram, const Vec4f& vec4, String variableName);
@@ -94,7 +95,7 @@ public:
 	void SetFiltering(bool bCubemap = false);
 
 	void SetDepthFunc(unsigned int Func);
-
+	void EnableCulling(bool bEnable = true);
 	void DisableVertexAttribArray(size_t vertexAttribCount);
 	void ReleaseVertexBuffers(unsigned int& vertexBufferId, size_t bufferCount);
 	void ReleaseIndexBuffers(unsigned int& vertexBufferId, size_t bufferCount);

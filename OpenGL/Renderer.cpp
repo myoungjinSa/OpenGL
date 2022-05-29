@@ -169,6 +169,9 @@ void Renderer::DrawIndexBuffer(unsigned int vertexArrayId, size_t indexCount) {
 void Renderer::SetDepthFunc(unsigned int depthFunc) {
 	glDepthFunc(depthFunc);
 }
+void Renderer::EnableCulling(bool bEnable) {
+	bEnable == true ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
+}
 
 
 bool Renderer::BeginRender() {

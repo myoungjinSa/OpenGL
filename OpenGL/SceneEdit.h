@@ -15,6 +15,7 @@ public:
 		DRAG_MODE_NONE,
 		DRAG_MODE_MOVING,
 		DRAG_MODE_SIZING,
+		DRAG_MODE_ROTATING,
 	};
 
 	class ObjectMemento {
@@ -37,6 +38,7 @@ public:
 	bool PickObject(const Ray& ray);
 
 	void MoveSelectedObject(GameObjects& selection);
+	void RotateSelectedObject(GameObjects& selection);
 
 	void ProcessEvent(Event& e);
 private:

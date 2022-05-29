@@ -18,10 +18,12 @@ SceneEdit::SceneEdit(class Scene& _scene)
 	picker.SetFar(scene.GetCamera().GetFar());
 
 	MouseInput::Attach(this);
+	KeyboardInput::Attach(this);
 }
 
 SceneEdit::~SceneEdit() {
 	MouseInput::Detach(this);
+	KeyboardInput::Attach(this);
 }
 
 bool SceneEdit::PickObject(const Ray& _ray) {
@@ -125,6 +127,13 @@ void SceneEdit::MoveSelectedObject(GameObjects& selection) {
 	selectedObj.Move(offset);
 }
 
+void SceneEdit::RotateSelectedObject(GameObjects& selection) {
+	if (selection.empty())
+		return;
+
+
+}
+
 void SceneEdit::ProcessEvent(Event& e) {
 	if (MouseInput::MouseEvent* pMouseEvent = dynamic_cast<MouseInput::MouseEvent*>(&e)) {
 		if (pMouseEvent->mouseState == MouseInput::MouseEvent::MOUSE_STATE::MOUSE_STATE_COUNT) {
@@ -154,6 +163,18 @@ void SceneEdit::ProcessEvent(Event& e) {
 			}
 		}
 	}
+
+	if (KeyboardInput::KeyboardEvent* pKeyboardEvent = dynamic_cast<KeyboardInput::KeyboardEvent*>(&e)) {
+		if (pKeyboardEvent->keyState == KeyboardInput::KeyboardEvent::KEY_STATE::KEY_STATE_UP) {
+			const KeyInfo& keyInfo = pKeyboardEvent->GetInfo();
+			if (keyInfo.key == KEY_R) {
+				scene.SetTransformMode(Gizmos::eTransformMode::ROTATE);
+			}
+			if (keyInfo.key == KEY_T) {
+				scene.SetTransformMode(Gizmos::eTransformMode::TRANSLATE);
+			}
+		}
+	}
 }
 
 void SceneEdit::DoFocus(const Point2i& pt) {
@@ -167,9 +188,13 @@ void SceneEdit::DoFocus(const Point2i& pt) {
 	}
 }
 void SceneEdit::DoDrag(eDragMode dragMode) {
+	if (dragMode == eDragMode::DRAG_MODE_NONE)
+		return;
+
+	GameObjects selectedObjects = picker.GetSelectedObjects();
 	if (dragMode == eDragMode::DRAG_MODE_MOVING) {
-		GameObjects selectedObjects = picker.GetSelectedObjects();
-		
 		MoveSelectedObject(selectedObjects);
+	}else if (dragMode == eDragMode::DRAG_MODE_ROTATING) {
+
 	}
 }
