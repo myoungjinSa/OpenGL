@@ -214,7 +214,7 @@ void Gizmos::GizmoHandles::Render(Renderer& renderer, ShaderParameter& shaderPar
 
 Gizmos::Gizmos() 
 	:GameObject()
-	,transformMode(eTransformMode::ROTATE)
+	,transformMode(eTransformMode::TRANSLATE)
 	,oldMousePoint()
 {
 

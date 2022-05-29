@@ -233,6 +233,8 @@
   <ItemGroup>
     <None Include="color.ps" />
     <None Include="color.vs" />
+    <None Include="defaultPhong.ps" />
+    <None Include="defaultPhong.vs" />
     <None Include="PhongLight.ps" />
     <None Include="PhongLight.vs" />
     <None Include="Skybox.ps" />

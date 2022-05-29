@@ -9,7 +9,8 @@ uniform mat4 worldMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 uniform vec3 lightPosition;
-uniform vec3 worldCameraPosition;
+
+varying vec3 posInEyeCoord;
 
 out VS_OUT {
 	vec2 TEXCOORD;
@@ -19,12 +20,13 @@ out VS_OUT {
 } vs_out;
 
 void main(){
-	gl_Position = projectionMatrix * viewMatrix * worldMatrix * vec4(inputPosition, 1.0);
-
-	vec4 worldPosition = worldMatrix * vec4(inputPosition, 1.0);
-
+	vec4 vertPosition4 = viewMatrix * worldMatrix * vec4(inputPosition, 1.0);
+	posInEyeCoord = vec3(vertPosition4) / vertPosition4.w;
+	
+	gl_Position = projectionMatrix * vertPosition4;
+	
 	vs_out.TEXCOORD = vec2(inputTexCoord.x, 1- inputTexCoord.y);
-	vs_out.N = mat3(worldMatrix) * inputNormal;
-	vs_out.L = lightPosition - worldPosition.xyz;
-	vs_out.V = worldCameraPosition - worldPosition.xyz;
+	vs_out.N = normalize(mat3(worldMatrix) * inputNormal);
+	vs_out.L = normalize(lightPosition - posInEyeCoord);
+	vs_out.V = normalize(-posInEyeCoord);
 }

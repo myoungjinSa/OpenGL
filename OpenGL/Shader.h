@@ -107,6 +107,7 @@ protected:
 	bool InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer);
 };
 
+
 class SkyboxShader : public Shader 
 {
 public:

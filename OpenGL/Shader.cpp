@@ -209,10 +209,10 @@ bool PhongShader::SetShaderParameters(Renderer& renderer, const ShaderParameter&
 		return false;
 	}
 
-	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.cameraPosition, String("worldCameraPosition"))) {
-		assert(0);
-		return false;
-	}
+	//if (!renderer.SetShaderParameter(shaderProgram, shaderParam.cameraPosition, String("worldCameraPosition"))) {
+	//	assert(0);
+	//	return false;
+	//}
 
 
 	Vec3f diffuse = Vec3f(shaderParam.diffuse.x, shaderParam.diffuse.y, shaderParam.diffuse.z);

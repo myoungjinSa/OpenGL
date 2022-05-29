@@ -92,7 +92,6 @@ Vec3f SceneEdit::CalcDragOffsetInWorld(const GameObject& baseObject, const Point
 	}
 
 	Vec3f distance = plane.GetIntersection(curRay.GetLine()) - plane.GetIntersection(prevRay.GetLine());	
-	
 	return ClampDragOffset(handleType, distance);
 }
 

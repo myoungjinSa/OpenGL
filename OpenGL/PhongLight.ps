@@ -33,12 +33,12 @@ void main(){
     vec3 lightDir = normalize(fs_in.L);
     vec3 viewDir = normalize(fs_in.V);
 
-    vec3 reflection = reflect(normal, lightDir);
+    vec3 reflection = reflect(-lightDir, normal);
 
     vec4 textureColor = texture(shaderTexture, fs_in.TEXCOORD);
 
     vec3 diffuse = max(dot(normal, lightDir), 0.0) * diffuseColor;
-    vec3 specular = pow(max(dot(reflection, -viewDir), 0.0), shininess) * specularColor;
+    vec3 specular = pow(max(dot(reflection, viewDir), 0.0), shininess) * specularColor;
 
     out_color = vec4(diffuse + specular + ambientColor, 1.0) * textureColor;
 }
