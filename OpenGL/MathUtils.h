@@ -1,4 +1,6 @@
 #pragma once
+#include "Matrix.h"
+
 #define BIT(X) (1 << (X))
 
 #define MAX(a, b) ((a < b) ? b : a)
@@ -23,6 +25,8 @@ public:
 
 	static bool IsSame(double left, double right);
 	static bool IsSame(float left, float right);
+	
+	static Matrix<float, 4, 4> Multiply(const Matrix<float, 4, 4>& mat1, const Matrix<float, 4, 4>& mat2);
 
 	static const float PI;
 	static const float TWO_PI;

@@ -23,13 +23,13 @@ Scene::~Scene() {
 bool Scene::BuildObject(Renderer& renderer) {	
 	skybox.Initialize(renderer);
 	phongLight = std::make_unique<Light>();
-	phongLight->SetPosition(0.0f, 0.0f, -5.0f);
-	phongLight->SetDirection(Vec3f(1.0f, -3.0f, 1.0f));
+	phongLight->SetPosition(0.0f, 5.0f, 0.0f);
+	phongLight->SetDirection(Vec3f::UP * -1.0f);
 
-	terrain = std::make_unique<Terrain>(100, 100);
+	terrain = std::make_unique<Terrain>(10, 10);
 	terrain->Initialize(renderer);
 
-	GameObject* pObject = new Cube(Vec3f(1.0f, 1.0f, 1.0f));//new Cylinder(Vec3f::UP, Vec3f::RIGHT, Vec3f::FORWARD, 32);
+	GameObject* pObject = new Sphere(1.0f, 32, 32);//new Cylinder(Vec3f::UP, Vec3f::RIGHT, Vec3f::FORWARD, 32);
 	gameObjects.Add(*pObject);
 
 	for (const auto& obj : gameObjects) {
@@ -78,7 +78,6 @@ bool Scene::Render(Renderer& renderer) {
 	terrain->Render(renderer, shaderParmaeter);
 	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
 
-	Matrix<float, 4, 4> worldMatrix;
 	for (size_t iObj = 0; iObj < gameObjects.size(); iObj++) {
 		ShaderParameter shaderParmaeter;
 		gameObjects[iObj]->FillShaderParameter(shaderParmaeter, GetViewMatrix(), projectionMatrix, *phongLight, camera, iObj);

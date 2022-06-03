@@ -2,6 +2,7 @@
 #include <iostream>
 #include <math.h>
 #include "Matrix.h"
+#include "MathUtils.h"
 
 #define M_PI   3.14159265358979323846
 

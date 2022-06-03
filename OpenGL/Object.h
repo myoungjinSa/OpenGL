@@ -8,6 +8,9 @@
 
 
 void MakeWorldMatrix(const Vec3f& position, const Vec3f& scale, const Vec3f& look, const Vec3f& right, const Vec3f& up, Matrix<float, 4, 4>& worldMatrix);
+void MakeWorldViewMatrix(const Matrix<float, 4, 4>& worldMatrix, const Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& modelViewMatrix);
+void MakeNormalMatrix(const Matrix<float, 4, 4>& modelViewMatrix, Matrix<float, 4, 4>& normalMatrix);
+
 class Material;
 class Mesh;
 class Meshes;

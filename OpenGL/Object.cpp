@@ -36,6 +36,15 @@ void MakeWorldMatrix(const Vec3f& position, const Vec3f& scale, const Vec3f& loo
 	worldMatrix.value[15] = 1.0f;
 }
 
+void MakeWorldViewMatrix(const Matrix<float, 4, 4>& worldMatrix, const Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& worldViewMatrix) {
+	//modelviewMatrix;
+	worldViewMatrix = MathUtils::Multiply(worldMatrix, viewMatrix);
+}
+
+void MakeNormalMatrix(const Matrix<float, 4, 4>& worldMatrix, Matrix<float, 4, 4>& normalMatrix) {
+	normalMatrix = Inverse(worldMatrix).Transpose();
+}
+
 GameObject::GameObject() 
 	: diffuseMap(nullptr), normalMap(nullptr)
 {
@@ -134,9 +143,15 @@ bool GameObject::Intersect(const Ray& ray, double& distance) {
 void GameObject::FillShaderParameter(ShaderParameter& shaderParam, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix, const Light& light, const Camera& Camera, int iObj) {
 	Matrix<float, 4, 4> worldMatrix = Matrix<float, 4, 4>::Identity();
 	MakeWorldMatrix(GetPosition(), GetScale(), GetLook(), GetRight(), GetUp(), worldMatrix);
-	shaderParam.worldMatrix = worldMatrix;
+	Matrix<float, 4, 4> worldViewMatrix = Matrix<float, 4, 4>::Identity();
+	Matrix<float, 4, 4> normalMatrix = Matrix<float, 4, 4>::Identity();
+	MakeWorldViewMatrix(worldMatrix, viewMatrix, worldViewMatrix);
+	MakeNormalMatrix(worldMatrix, normalMatrix);
+
+	shaderParam.worldViewMatrix = worldViewMatrix;
 	shaderParam.viewMatrix = viewMatrix;
 	shaderParam.projectionMatrix = projectionMatrix;
+	shaderParam.normalMatrix = normalMatrix;
 
 	shaderParam.lightPosition = light.GetPosition();
 	shaderParam.diffuse = material->GetDiffuse();
@@ -368,7 +383,7 @@ Sphere::~Sphere() {
 bool Sphere::Initialize(Renderer& renderer) {
 	GameObject::Initialize(renderer);
 
-	shader = std::make_shared<TextureShader>(this);
+	shader = std::make_shared<PhongShader>(this);
 	if (!shader)
 		return false;
 
@@ -385,7 +400,7 @@ bool Sphere::Initialize(Renderer& renderer) {
 	meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 	meshBuilder.End();
 
-	diffuseMap = TextureLoader::GetTexture(renderer, L"surfing.mov");
+	diffuseMap = TextureLoader::GetTexture(renderer, L"coast_sand_rocks.jpg");
 	
 	renderer.AllocateTextures(diffuseMap->textureID, 1);
 	renderer.BindTexture(diffuseMap->textureID);
@@ -526,6 +541,15 @@ Cylinder::~Cylinder() {
 bool Cylinder::Initialize(Renderer& renderer) {
 	GameObject::Initialize(renderer);
 
+	shader = std::make_shared<PhongShader>(this);
+	if (!shader)
+		return false;
+
+	if (!shader->Initialize(renderer)) {
+		LogError(L"Could not initialize the Default Shader\n");
+		return false;
+	}
+
 	//MeshBuilder Call
 	MeshBuilder meshBuilder;
 	meshes.push_back(std::make_shared<Mesh>());
@@ -534,7 +558,7 @@ bool Cylinder::Initialize(Renderer& renderer) {
 	meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 	meshBuilder.End();
 
-	diffuseMap = TextureLoader::GetTexture(renderer, L"Capture.bmp");
+	diffuseMap = TextureLoader::GetTexture(renderer, L"coast_sand_rocks.jpg");
 
 	renderer.AllocateTextures(diffuseMap->textureID, 1);
 	renderer.BindTexture(diffuseMap->textureID);
@@ -542,12 +566,22 @@ bool Cylinder::Initialize(Renderer& renderer) {
 	renderer.SetSampleMode();
 	renderer.SetFiltering();
 
-
 	Vec3f diffuseColor(0.8f, 0.85f, 0.85f);
 	Vec4f ambientColor(0.3f, 0.3f, 0.3f, 1.0f);
 	Vec3f specularColor(1.0f, 1.0f, 1.0f);
 	material = std::make_shared<Material>(diffuseColor, ambientColor, specularColor, std::make_pair(Material::TextureType::TEXTURE_DIFFUSE, diffuseMap->GetTextureID()));
 	
+	AddComponent<BoundingBox>();
+	auto boundingBox = GetComponent<BoundingBox>();
+
+	boundingBox->SetCenter(transform->GetPosition());
+	boundingBox->SetExtent(GetScale());
+
+	boundingVolume = boundingBox;
+	if (!boundingVolume->Init(renderer)) {
+		return false;
+	}
+
 	return true;
 }
 
@@ -560,11 +594,16 @@ void Cylinder::Shutdown(Renderer& renderer) {
 }
 
 void Cylinder::Update(float deltaTime) {
-
+	diffuseMap->Update(deltaTime);
 }
 
 void Cylinder::Render(Renderer& renderer, ShaderParameter& shaderParam) {
 	GameObject::Render(renderer, shaderParam);
+
+	shader->Render(renderer, shaderParam);
+	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
+	renderer.SetDepthTest(true);
+
 	for (auto& mesh : meshes) {
 		mesh->Render(renderer);
 	}

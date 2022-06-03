@@ -423,12 +423,12 @@ void MeshBuilder::AddCylinder(const Vec3f& axis, const Vec3f& arm1, const Vec3f&
 	}
 	for (uint32_t iSlice = 0; iSlice < sliceCount; ++iSlice) {
 		AddIndex(iSlice * 2);
-		AddIndex(iSlice * 2 + 2);
 		AddIndex(iSlice * 2 + 3);
+		AddIndex(iSlice * 2 + 2);
 
 		AddIndex(iSlice * 2);
-		AddIndex(iSlice * 2 + 3);
 		AddIndex(iSlice * 2 + 1);
+		AddIndex(iSlice * 2 + 3);
 	}
 
 	//Generate caps
@@ -454,12 +454,12 @@ void MeshBuilder::AddCylinder(const Vec3f& axis, const Vec3f& arm1, const Vec3f&
 
 	for (uint32_t iSlice = 2; iSlice < sliceCount; ++iSlice) {
 		AddIndex(base);
-		AddIndex(base + iSlice * 2 - 2);
 		AddIndex(base + iSlice * 2);
+		AddIndex(base + iSlice * 2 - 2);
 
 		AddIndex(base + 1);
-		AddIndex(base + iSlice * 2 + 1);
 		AddIndex(base + iSlice * 2 - 1);
+		AddIndex(base + iSlice * 2 + 1);
 	}
 }
 
@@ -719,7 +719,7 @@ void MeshBuilder::AddSphere(const Vec3f& center, float radius, int sectorCount, 
 			SetPosition(x + center.x, y + center.y, z + center.z);
 
 			//normalized vertex normal
-			Vec3f n = Normalize(center - Vec3f(x, y, z));
+			Vec3f n = Normalize(Vec3f(x, y, z) - center);
 			SetNormal(n);
 
 			// vertex tex coord between [0, 1]
@@ -744,11 +744,11 @@ void MeshBuilder::AddSphere(const Vec3f& center, float radius, int sectorCount, 
 		k2 = k1 + sectorCount + 1;
 		for (int iSector = 0; iSector < sectorCount; iSector++, k1++, k2++) {
 			if (iStack != 0) {
-				AddIndex(k1); AddIndex(k1 + 1); AddIndex(k2);
+				AddIndex(k1); AddIndex(k2); AddIndex(k1 + 1);
 			}
 
 			if (iStack != (stackCount - 1)) {
-				AddIndex(k2), AddIndex(k1 + 1); AddIndex(k2 + 1);
+				AddIndex(k2), AddIndex(k2 + 1); AddIndex(k1 + 1);
 			}
 		}
 	}
@@ -955,7 +955,7 @@ void MeshBuilder::AddGrid(int xStart, int zStart, int xTileCount, int zTileCount
 			SetPosition(xVertex * scale.x + positionOffset.x, height + positionOffset.y, zVertex * scale.z + positionOffset.z);
 			SetUV(Vec2f(float(xVertex) / float(scale.x * 0.5f), float(zVertex) / float(scale.z * 0.5f)));
 			
-			Vec3f normal = terrainContext.GetHeightNormal(xVertex, zVertex);
+			Vec3f normal = Vec3f::UP;//terrainContext.GetHeightNormal(xVertex, zVertex);
 			SetNormal(normal);
 			vertices.push_back(stamp);
 		}
@@ -973,8 +973,19 @@ void MeshBuilder::AddGrid(int xStart, int zStart, int xTileCount, int zTileCount
 				AddIndex(leftBottom);
 				AddIndex(leftBottom - xTileCount);
 			}
+
+			Vec3f lt = vertices[leftTop].position;
+			Vec3f lb = vertices[leftBottom].position;
+			Vec3f rt = vertices[leftTop + 1].position;
+
+			Vec3f edge1 = rt - lt;
+			Vec3f edge2 = lb - lt;
+			Vec3f normal = Normalize(Cross(edge2, edge1));
+			vertices[leftTop].normal = normal;
 		}
 	}
+
+	
 }
 void MeshBuilder::AddVertex(const Vec3f& _position) {
 	stamp.position = _position;
@@ -1012,7 +1023,6 @@ void MeshBuilder::CopyToMesh(Renderer& renderer, Mesh& mesh, VertexBufferBindCal
 	delete[] vertexBuffer;
 	vertexBuffer = nullptr;
 }
-
 
 void MeshBuilder::ComputeNormals() {
 	static const double NORMAL_EPSILON = 0.0001;

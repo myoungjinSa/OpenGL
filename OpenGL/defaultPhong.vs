@@ -8,6 +8,7 @@ layout (location = 3) in vec3 inputNormal;
 uniform mat4 worldMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
+
 uniform vec3 lightPosition;
 uniform vec3 worldCameraPosition;
 

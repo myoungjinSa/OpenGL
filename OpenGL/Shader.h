@@ -21,9 +21,10 @@ typedef struct FocusInfo {
 }FocusInfo;
 
 struct ShaderParameter {
-	Matrix<float, 4, 4> worldMatrix;
 	Matrix<float, 4, 4> viewMatrix;
+	Matrix<float, 4, 4> worldViewMatrix;
 	Matrix<float, 4, 4> projectionMatrix;
+	Matrix<float, 4, 4> normalMatrix;
 
 	int   objNo;
 	Vec3f lightPosition;

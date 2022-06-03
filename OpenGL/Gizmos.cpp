@@ -448,10 +448,14 @@ void Gizmos::Render(Renderer& renderer, Camera* pCamera, const Scene& scene) {
 	
 	//Calculate Center of Objects 
 	Matrix<float, 4, 4> worldMatrix = transform->GetWorldMatrix();
+	Matrix<float, 4, 4> worldViewMatrix = Matrix<float, 4, 4>::Identity();
 	MakeWorldMatrix(targets[0]->GetPosition(), targets[0]->GetScale(), Vec3f::FORWARD, Vec3f::RIGHT, Vec3f::UP, worldMatrix);
-	shaderParam.worldMatrix = worldMatrix;
 	transform->SetWorldMatrix(worldMatrix);
 	pCamera->GetViewMatrix(shaderParam.viewMatrix);
+	
+	MakeWorldViewMatrix(worldMatrix, shaderParam.viewMatrix, worldViewMatrix);
+	
+	shaderParam.worldViewMatrix = worldViewMatrix;
 	shaderParam.projectionMatrix = scene.GetProjectionMatrix();
 
 	shaderParam.focusInfo.focusObjNo = (int)context.editingHandle;

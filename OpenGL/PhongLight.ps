@@ -1,19 +1,21 @@
 #version 400
 
 in VS_OUT{
-    vec2 TEXCOORD;
+    vec3 V;
+    vec2 UV;
     vec3 N;
     vec3 L;
-    vec3 V;
 } fs_in;
 
 uniform sampler2D shaderTexture;
 
-uniform float shininess = 64.0;
+uniform float shininess = 16.0;
 uniform float rimPower = 1.0;
 uniform vec3 diffuseColor;
 uniform vec3 specularColor;
 uniform vec3 ambientColor;
+uniform vec3 lightPosition;
+
 out vec4 out_color;
 
 vec3 rimLight(vec3 N, vec3 V){
@@ -28,17 +30,21 @@ vec3 rimLight(vec3 N, vec3 V){
     return f * rimColor;
 }
 
+
 void main(){
-    vec3 normal = normalize(fs_in.N);
-    vec3 lightDir = normalize(fs_in.L);
-    vec3 viewDir = normalize(fs_in.V);
+    vec3 normal = fs_in.N;
+    vec3 lightDir = fs_in.L;
+    vec3 viewDir = fs_in.V;
 
-    vec3 reflection = reflect(-lightDir, normal);
+    float lambertian = max(dot(normal, lightDir), 0.0);
+    float specular = 0.0;
+    if(0.0 < lambertian){
+        vec3 reflection = reflect(-lightDir, normal);        
+        float specAngle = max(dot(reflection, viewDir), 0.0);
+        specular = pow(specAngle, shininess);
+    }
 
-    vec4 textureColor = texture(shaderTexture, fs_in.TEXCOORD);
-
-    vec3 diffuse = max(dot(normal, lightDir), 0.0) * diffuseColor;
-    vec3 specular = pow(max(dot(reflection, viewDir), 0.0), shininess) * specularColor;
-
-    out_color = vec4(diffuse + specular + ambientColor, 1.0) * textureColor;
+    vec4 textureColor = texture(shaderTexture, fs_in.UV);
+    vec3 diffuse = lambertian * diffuseColor;
+    out_color = vec4(diffuse + specularColor * specular + ambientColor, 1.0) * textureColor;
 }

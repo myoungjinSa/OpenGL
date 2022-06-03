@@ -1,14 +1,10 @@
 #include "MathUtils.h"
-#include "Matrix.h"
 #include <cmath>
 #include <float.h>
-
 
 const float MathUtils::PI = 3.14159265358f;
 const float MathUtils::TWO_PI = 6.28318530718f;
 const float MathUtils::HALF_PI = 3.14159265358f / 2.0f;
-
-
 
 float MathUtils::Lerp(float a, float b, float t) {
 	return (1.0f - t) * a + t * b ;
@@ -86,4 +82,11 @@ bool MathUtils::IsSame(double left, double right) {
 
 bool MathUtils::IsSame(float left, float right) {
 	return abs(left - right) < FLT_EPSILON;
+}
+
+Matrix<float, 4, 4>  MathUtils::Multiply(const Matrix<float, 4, 4>& mat1, const Matrix<float, 4, 4>& mat2) {
+	Matrix<float, 4, 4> ret = Matrix<float, 4, 4>::Identity();
+	ret.Multiply(mat1);
+	ret.Multiply(mat2);
+	return ret;
 }

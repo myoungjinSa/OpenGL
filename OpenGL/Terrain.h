@@ -38,7 +38,7 @@ public:
 	void Shutdown(Renderer& renderer)override;
 	void Render(Renderer& renderer)override;
 	void Render(Renderer& renderer, ShaderParameter& shaderParam) override;
-
+	
 	void Update(float deltaTime)override;
 private:
 	const int maxSize = 800;
@@ -46,4 +46,6 @@ private:
 
 	int gridX;
 	int gridZ;
+
+	
 };

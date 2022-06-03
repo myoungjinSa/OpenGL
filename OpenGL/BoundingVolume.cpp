@@ -161,12 +161,13 @@ void BoundingBox::Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatr
 	
 	ShaderParameter shaderParam;
 	Matrix<float, 4, 4> worldMatrix = Matrix<float, 4, 4>::Identity();
+	Matrix<float, 4, 4> worldViewMatrix = Matrix<float, 4, 4>::Identity();
+
 	MakeWorldMatrix(pGameObject->GetPosition(), pGameObject->GetScale(), pGameObject->GetLook(), pGameObject->GetRight(), pGameObject->GetUp(), worldMatrix);
-
-	shaderParam.worldMatrix = worldMatrix;
-	shaderParam.viewMatrix = viewMatrix;
+	MakeWorldViewMatrix(worldMatrix, viewMatrix, worldViewMatrix);
+	shaderParam.worldViewMatrix = worldViewMatrix;
 	shaderParam.projectionMatrix = projectionMatrix;
-
+	
 	DefaultShader->Render(renderer, shaderParam);
 	pMesh->Render(renderer);
 

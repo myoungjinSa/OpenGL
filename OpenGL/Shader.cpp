@@ -68,10 +68,7 @@ bool ColorShader::InitializeShader(const char* vsFilename, const char* fsFilenam
 }
 
 bool ColorShader::SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParam) {
-	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldMatrix, String("worldMatrix"))) {
-		return false;
-	}
-	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.viewMatrix, String("viewMatrix"))) {
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldViewMatrix, String("worldViewMatrix"))) {
 		return false;
 	}
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.projectionMatrix, String("projectionMatrix"))) {
@@ -116,12 +113,10 @@ bool TextureShader::InitializeShader(const char* vsFilename, const char* fsFilen
 }
 
 bool TextureShader::SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParam) {
-	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldMatrix, String("worldMatrix"))) {
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldViewMatrix, String("worldViewMatrix"))) {
 		return false;
 	}
-	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.viewMatrix, String("viewMatrix"))) {
-		return false;
-	}
+
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.projectionMatrix, String("projectionMatrix"))) {
 		return false;
 	}
@@ -189,55 +184,21 @@ bool PhongShader::InitializeShader(const char* vsFilename, const char* fsFilenam
 
 bool PhongShader::SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParam) {
 
-	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldMatrix, String("worldMatrix"))) {
-		assert(0);
-		return false;
-	}
-
-	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.viewMatrix, String("viewMatrix"))) {
-		assert(0);
-		return false;
-	}
-
-	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.projectionMatrix, String("projectionMatrix"))) {
-		assert(0);
-		return false;
-	}
-
-	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.lightPosition, String("lightPosition"))) {
-		assert(0);
-		return false;
-	}
-
-	//if (!renderer.SetShaderParameter(shaderProgram, shaderParam.cameraPosition, String("worldCameraPosition"))) {
-	//	assert(0);
-	//	return false;
-	//}
-
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldViewMatrix, String("worldViewMatrix")))				assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.projectionMatrix, String("projectionMatrix")))	assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.normalMatrix, String("normalMatrix")))			assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.lightPosition, String("lightPosition")))		assert(0);
 
 	Vec3f diffuse = Vec3f(shaderParam.diffuse.x, shaderParam.diffuse.y, shaderParam.diffuse.z);
 	Vec3f ambient = Vec3f(shaderParam.ambient.x, shaderParam.ambient.y, shaderParam.ambient.z);
 	Vec3f specular = Vec3f(shaderParam.specular.x, shaderParam.specular.y, shaderParam.specular.z);
 
-	if (!renderer.SetShaderParameter(shaderProgram, diffuse, String("diffuseColor"))) {
-		assert(0);
-		return false;
-	}
-	if (!renderer.SetShaderParameter(shaderProgram, specular, String("specularColor"))) {
-		assert(0);
-		return false;
-	}
-	if (!renderer.SetShaderParameter(shaderProgram, ambient, String("ambientColor"))) {
-		assert(0);
-		return false;
-	}
-
+	if (!renderer.SetShaderParameter(shaderProgram, diffuse, String("diffuseColor"))) 							assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, specular, String("specularColor")))							assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, ambient, String("ambientColor"))) 							assert(0);
 	int textureUnit = shaderParam.textureUnit;
-	if (!renderer.SetShaderParameter(shaderProgram, textureUnit, String("shaderTexture"))) {
-		assert(0);
-		return false;
-	}
-
+	if (!renderer.SetShaderParameter(shaderProgram, textureUnit, String("shaderTexture")))						assert(0);
+	
 	return true;
 }
 

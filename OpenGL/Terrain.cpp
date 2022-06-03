@@ -42,10 +42,10 @@ bool TerrainHeightImage::Load(const WString& filename) {
 	}
 	return true;
 }
-Vec3f TerrainHeightImage::GetHeightNormal(int nx, int nz) const {
-	if ((nx < 0.0f) || (nz < 0.0f) || (width <= nx) || (length <= nz))
-		return Vec3f(0.0f, 1.0f, 0.0f);
 
+Vec3f TerrainHeightImage::GetHeightNormal(int nx, int nz) const {
+	if ((nx < 0.0f) || (nz < 0.0f) || (width - 1 <= nx) || (length - 1 <= nz))
+		return Vec3f(0.0f, 1.0f, 0.0f);
 
 	int nHeightMapIndex = nx + (nz * width);
 	int xHeightMapAdd = ((nx < width - 1)) ? 1 : -1;
@@ -54,10 +54,11 @@ Vec3f TerrainHeightImage::GetHeightNormal(int nx, int nz) const {
 	float height_1 = (float)pHeightMapPixels[nHeightMapIndex] * scale.y;
 	float height_2 = (float)pHeightMapPixels[nHeightMapIndex + xHeightMapAdd] * scale.y;
 	float height_3 = (float)pHeightMapPixels[nHeightMapIndex + zHeightMapAdd] * scale.y;
-
+	
 	Vec3f edge1 = Vec3f(0.0f, height_3 - height_1, scale.z);
 	Vec3f edge2 = Vec3f(scale.x, height_2 - height_1, 0.0f);
 	Vec3f normal = Normalize(Cross(edge1, edge2));
+
 	return normal; 
 }
 float TerrainHeightImage::GetHeight(float fx, float fz, bool bReverseQuad) const {
@@ -132,8 +133,8 @@ bool Terrain::Initialize(Renderer& renderer) {
 	meshes.push_back(std::make_shared<Mesh>());
 	meshBuilder.Begin();
 
-	int xTileCount = 255;
-	int zTileCount = 255;
+	int xTileCount = gridX;
+	int zTileCount = gridZ;
 	meshBuilder.AddGrid(0, 0, xTileCount, zTileCount, Vec3f(-(xTileCount * scale.x) / 2.0f, -8.0f, -(zTileCount * scale.z) / 2.0f), scale, RGBA::FOREST_GREEN, *heightImage);
 	meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex), Mesh::TriangleType::MeshType_Strip);
 	meshBuilder.End();

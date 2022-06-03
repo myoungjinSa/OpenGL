@@ -2,7 +2,6 @@
 #include <initializer_list>
 #include <cassert>
 #include <cmath>
-#include "MathUtils.h"
 
 template<typename T, int m, int n> 
 class Matrix
@@ -370,7 +369,6 @@ public:
 	bool IsZero() const;
 
 	T GetLength();
-	float CalculateTheta();
 	void Normalize();
 	Vector2 Multiply(const Vector2<T>& v);	
 	
@@ -425,11 +423,6 @@ void Vector2<T>::Normalize() {
 		return;
 	x /= len;
 	y /= len;
-}
-
-template<typename T> inline
-float Vector2<T>::CalculateTheta() {
-	return MathUtils::RadiansToDegrees(atan2(y, x));
 }
 
 template<typename T> inline
