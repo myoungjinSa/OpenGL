@@ -3,7 +3,7 @@
 #pragma comment(lib, "../OpenGL_Lib/glew/lib/glew32s.lib")
 #pragma comment(lib, "opengl32.lib")
 
-#include <Windows.h>
+#include "GraphicDevice.h"
 #include <math.h>
 #include "Matrix.h"
 
@@ -87,27 +87,28 @@ typedef void (APIENTRY* PFNGLUNIFORM4FVPROC) (GLint location, GLsizei count, con
 typedef void (GLAPIENTRY* PFNGLGENFRAMEBUFFERSEXTPROC) (GLsizei n, GLuint* framebuffers);
 typedef void (GLAPIENTRY* PFNGLBINDFRAMEBUFFEREXTPROC) (GLenum target, GLuint framebuffer);
 
-class OpenGL
+class OpenGL : public GraphicDevice
 {
 public:
 	OpenGL();
 	OpenGL(const OpenGL&) = delete;
-	~OpenGL();
+	~OpenGL() override;
 
-	bool InitializeExtensions(HWND hWnd);
-	bool InitializeOpenGL(HWND hWnd, int screenWidth, int screenHeight, bool vSync);
-	void Shutdown(HWND hWnd);
+	bool InitializeExtensions(HWND hWnd) override;
+	bool Initialize(HWND hWnd, int screenWidth, int screenHeight, bool vSync)override;
+	void Shutdown(HWND hWnd)override;
 
-	void BeginScene(float red, float green, float blue, float alpha);
-	void EndScene();
-	void GetVideoCardInfo(char* videoCardList);
-
-	void MatrixMultiply(Matrix<float, 4, 4>& matrix, const Matrix<float, 4, 4>& matrix1, const Matrix<float, 4, 4>& matrix2);
+	void BeginScene(float red, float green, float blue, float alpha)override;
+	void EndScene()override;
+	void GetVideoCardInfo(char* videoCardList)override;
 
 	static void CheckError();
 
-	float GetScreenWidth() const { return screenWidth; }
-	float GetScreenHeight() const { return screenHeight; }
+	unsigned int GetScreenWidth() const override { return screenWidth; }
+	unsigned int GetScreenHeight() const override { return screenHeight; }
+
+	char* GetShaderLog(unsigned int shaderID) override;
+	char* GetLinkerLog(unsigned int programID) override;
 private:
 	bool LoadExtensionList();
 

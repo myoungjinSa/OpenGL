@@ -29,7 +29,7 @@ bool Scene::BuildObject(Renderer& renderer) {
 	terrain = std::make_unique<Terrain>(10, 10);
 	terrain->Initialize(renderer);
 
-	GameObject* pObject = new Sphere(1.0f, 32, 32);//new Cylinder(Vec3f::UP, Vec3f::RIGHT, Vec3f::FORWARD, 32);
+	GameObject* pObject = new Cube();//new Cylinder(Vec3f::UP, Vec3f::RIGHT, Vec3f::FORWARD, 32);
 	gameObjects.Add(*pObject);
 
 	for (const auto& obj : gameObjects) {
@@ -41,12 +41,12 @@ bool Scene::BuildObject(Renderer& renderer) {
 
 	camera.Initialize(renderer);
 	camera.SetPosition(0.0f, 0.0f, -5.0f);
-	camera.SetViewport(Rect2f(0.0f, 0.0f, renderer.GetRenderTargetWidth(), renderer.GetRenderTargetHeight()));
+	camera.SetViewport(Rect2f(0.0f, 0.0f, renderer.GetScreenSize().width, renderer.GetScreenSize().height));
 	camera.SetNear(1.0f);
 	camera.SetFar(1000.0f);
 	gizmos.Initialize(renderer);
 	
-	sceneSize = Size2u(renderer.GetRenderTargetWidth(), renderer.GetRenderTargetHeight());
+	sceneSize = Size2u(renderer.GetScreenSize().width, renderer.GetScreenSize().height);
 	return true;
 }
 

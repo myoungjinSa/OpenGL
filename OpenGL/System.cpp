@@ -8,7 +8,7 @@
 #include "RayCast.h"
 
 System::System() 
-	: pOpenGL(nullptr),
+	: pGraphicDevice(nullptr),
 	pScene(nullptr),
 	pSceneEdit(nullptr),
 	pInput(nullptr),
@@ -32,11 +32,11 @@ bool System::Initialize() {
 	
 	std::setlocale(LC_ALL, "ko_KR");
 
-	pOpenGL = new OpenGL();
-	if (!pOpenGL)
+	pGraphicDevice = new OpenGL();
+	if (!pGraphicDevice)
 		return false;
 
-	if (!InitializeWindows(pOpenGL, screenWidth, screenHeight)) {
+	if (!InitializeWindows(pGraphicDevice, screenWidth, screenHeight)) {
 		MessageBox(hWnd, L"Could not initialize the window", L"Error", MB_OK);
 		return false;
 	}
@@ -54,14 +54,14 @@ bool System::Initialize() {
 	timer.Start();
 
 	// Create the graphics object.  This object will handle rendering all the graphics for this application.
-	pRenderer = new Renderer();
+	pRenderer = new OpenGLRenderer();
 	if (!pRenderer)
 	{
 		return false;
 	}
 	
 	// Initialize the graphics object.
-	result = pRenderer->Initialize(pOpenGL);
+	result = pRenderer->Initialize(pGraphicDevice);
 	if (!result)
 	{
 		return false;
@@ -110,11 +110,11 @@ void System::Shutdown() {
 	}
 
 	// Release the OpenGL object.
-	if (pOpenGL)
+	if (pGraphicDevice)
 	{
-		pOpenGL->Shutdown(hWnd);
-		delete pOpenGL;
-		pOpenGL = nullptr;
+		pGraphicDevice->Shutdown(hWnd);
+		delete pGraphicDevice;
+		pGraphicDevice = nullptr;
 	}
 
 	timer.Reset();
@@ -259,7 +259,7 @@ void System::ProcessInput() {
 		MouseInput::ProcessMouseMove(ptCursorPos.x, ptCursorPos.y);
 	}
 }
-bool System::InitializeWindows(OpenGL* pOpenGL, int& screenWidth, int& screenHeight) {
+bool System::InitializeWindows(GraphicDevice* pGraphicDevice, int& screenWidth, int& screenHeight) {
 	WNDCLASSEX wc;
 	DEVMODE dmScreenSettings;
 	int posX, posY;
@@ -306,7 +306,7 @@ bool System::InitializeWindows(OpenGL* pOpenGL, int& screenWidth, int& screenHei
 	ShowWindow(hWnd, SW_HIDE);
 
 	//Initialize a temporary OpenGL window and load the OpenGL extensions.
-	result = pOpenGL->InitializeExtensions(hWnd);
+	result = pGraphicDevice->InitializeExtensions(hWnd);
 	if (!result)
 	{
 		MessageBox(hWnd, L"Could not initialize the OpenGL extensions.", L"Error", MB_OK);
@@ -352,7 +352,7 @@ bool System::InitializeWindows(OpenGL* pOpenGL, int& screenWidth, int& screenHei
 		posX, posY, screenWidth, screenHeight, NULL, NULL, hInstance, NULL);
 
 	// Initialize OpenGL now that the window has been created.
-	result = pOpenGL->InitializeOpenGL(hWnd, screenWidth, screenHeight, VSYNC_ENABLED);
+	result = pGraphicDevice->Initialize(hWnd, screenWidth, screenHeight, VSYNC_ENABLED);
 	if (!result)
 	{
 		MessageBox(hWnd, L"Could not initialize OpenGL, check if video card supports OpenGL 4.0.", L"Error", MB_OK);

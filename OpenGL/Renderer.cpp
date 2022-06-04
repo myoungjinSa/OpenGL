@@ -2,6 +2,7 @@
 #include "Camera.h"
 #include "Scene.h"
 #include "Shader.h"
+#include "OpenGL.h"
 #include "Object.h"
 #include "Texture.h"
 #include "String/String.h"
@@ -10,8 +11,7 @@
 #include <stdarg.h>
 
 Renderer::Renderer() 
-	:pGL(nullptr),
-	drawMode(DrawMode::TRIANGLES)
+	:drawMode(DrawMode::TRIANGLES)
 {
 }
 
@@ -19,384 +19,16 @@ Renderer::~Renderer() {
 
 }
 
-bool Renderer::Initialize(OpenGL* pOpenGL) {
-	//Store a pointer to ther OpenGL class object.
-	pGL = pOpenGL;
-	if (!pGL)
-		return false;
-
-	return true;
-}
-
 
 void Renderer::Shutdown(unsigned int shaderProgram, unsigned int vertexShader, unsigned int fragmentShader) {
-	pGL->glDetachShader(shaderProgram, vertexShader);
-	pGL->glDetachShader(shaderProgram, fragmentShader);
-
-	pGL->glDeleteShader(vertexShader);
-	pGL->glDeleteShader(fragmentShader);
-
-
-	
-	pGL->glDeleteProgram(shaderProgram);
-
 	TextureLoader::Release();
 }
 
-bool Renderer::AllocateVertexBuffer(unsigned int& vertexArrayId, unsigned int& vertexBufferId, void* vertexData, VertexBufferBindCallback* pBindFunction, unsigned int numVertices, unsigned int sizeofVertex) {
-	pGL->glGenVertexArrays(1, &vertexArrayId);
-	pGL->glBindVertexArray(vertexArrayId);
-	pGL->glGenBuffers(1, &vertexBufferId);
 
 
-	pBindFunction(*pGL, vertexData, vertexBufferId, numVertices, sizeofVertex);
-	return true;
-}
-
-
-bool Renderer::AllocateIndexBuffer(unsigned int& indexBufferId, size_t indexCount, unsigned int* indexData) {
-	if (indexCount == 0)
-		return false;
-	
-	pGL->glGenBuffers(1, &indexBufferId);
-
-	pGL->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferId);
-	pGL->glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * sizeof(unsigned int), indexData, GL_STATIC_DRAW);
-	return true;
-}
-
-bool Renderer::AllocateFrameBuffer(unsigned int& colorBuffer, unsigned int& depthBuffer, unsigned int& fbo) {
-	pGL->glGenFramebuffersEXT(1, &fbo);
-	pGL->glBindFramebufferEXT(GL_FRAMEBUFFER, fbo);
-
-	return true;
-}
-
-bool Renderer::AllocateTextures(unsigned int& textureId, unsigned int textureCount) {
-	//Generate an ID for the texture.
-	glGenTextures(textureCount, &textureId);
-
-	OpenGL::CheckError();
-	return true;
-}
-
-void Renderer::SetSampleMode(bool bCubemap) {
-	if (bCubemap) {
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-	}
-	else {
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-	}
-}
-
-void Renderer::SetFiltering(bool bCubemap) {
-	glTexParameteri(bCubemap ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(bCubemap ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	//pGL->glGenerateMipmap(bCubemap ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D);
-}
-void Renderer::BindTexture(unsigned int textureId) {
-	//glEnable(GL_TEXTURE_2D);
-	////Set the unique texture unit in which to store the data
-	pGL->glActiveTexture(GL_TEXTURE0 + textureId);
-
-	glBindTexture(GL_TEXTURE_2D, textureId);
-}
-
-void Renderer::BindCubemapTexture(unsigned int textureId) {
-	pGL->glActiveTexture(GL_TEXTURE0 + textureId);
-
-	glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
-}
-
-void Renderer::SetImage(unsigned int target, void* pImage, unsigned int width, unsigned int height) {
-	glTexImage2D(target, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, pImage);
-}
-
-void Renderer::DisableVertexAttribArray(size_t vertexAttribCount) {
-	for (size_t iVertexAttrib = 0; iVertexAttrib < vertexAttribCount; iVertexAttrib++) {
-		pGL->glDisableVertexAttribArray(iVertexAttrib);
-	}
-}
-
-
-void Renderer::ReleaseVertexArray(unsigned int& vertexArrayId, size_t arrayCount) {
-	pGL->glBindVertexArray(0);
-	pGL->glDeleteVertexArrays(arrayCount, &vertexArrayId);
-}
-void Renderer::ReleaseVertexBuffers(unsigned int& vertexBufferId, size_t bufferCount) {
-	pGL->glBindBuffer(GL_ARRAY_BUFFER, 0);
-	pGL->glDeleteBuffers(bufferCount, &vertexBufferId);
-}
-void Renderer::ReleaseIndexBuffers(unsigned int& indexBufferId, size_t indexCount) {
-	pGL->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	pGL->glDeleteBuffers(indexCount, &indexBufferId);
-}
-
-void Renderer::DrawVertexBuffer(unsigned int vertexArrayId, size_t startPos, size_t vertexCount) {
-	pGL->glBindVertexArray(vertexArrayId);
-
-	switch (drawMode) {
-	case DrawMode::TRIANGLE_STRIP:
-		glDrawArrays(GL_TRIANGLE_STRIP, startPos, vertexCount);
-		break;
-	case DrawMode::TRIANGLES:
-		glDrawArrays(GL_TRIANGLES, startPos, vertexCount);
-		break;
-	case DrawMode::LINES:
-		glDrawArrays(GL_LINES, startPos, vertexCount);
-		break;
-	}
-}
-
-void Renderer::DrawIndexBuffer(unsigned int vertexArrayId, size_t indexCount) {
-	pGL->glBindVertexArray(vertexArrayId);
-
-	switch (drawMode) {
-	case DrawMode::TRIANGLE_STRIP:
-		glDrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, 0);
-		break;
-	case DrawMode::TRIANGLES:
-		glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
-		break;
-	case DrawMode::LINES:
-		glDrawElements(GL_LINES, indexCount, GL_UNSIGNED_INT, 0);
-		break;
-	}
-}
-void Renderer::SetDepthFunc(unsigned int depthFunc) {
-	glDepthFunc(depthFunc);
-}
-void Renderer::EnableCulling(bool bEnable) {
-	bEnable == true ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
-}
-
-
-bool Renderer::BeginRender() {
-	pGL->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
-
-	return true;
-}
-
-void Renderer::EndRender() {
-	pGL->EndScene();
-}
-
-float Renderer::GetRenderTargetWidth() const{
-	return pGL->GetScreenWidth();
-}
-float Renderer::GetRenderTargetHeight() const{
-	return pGL->GetScreenHeight();
-}
-
-unsigned int Renderer::CreateShader() {
-	return pGL->glCreateProgram();
-}
-
-bool Renderer::CreateRenderTarget(RenderTarget& renderTarget, const Size2u& screenSize, bool downSamplingTarget) {
-	if (screenSize.Empty())
-		return false;
-
-	renderTarget.SetSize(screenSize);
-	int iPreviousFrameBuffer = 0;
-
-	if (renderTarget.IsNull()) {
-		pGL->glGenFramebuffersEXT(1, &(renderTarget.iFrameBuffer));
-		OpenGL::CheckError();
-	}
-	pGL->glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, renderTarget.iFrameBuffer);
-	OpenGL::CheckError();
-
-	return true;
-}
-
-bool Renderer::CreateTexture(Texture& texture, const Size2u& size, bool managed) {
-	if (size.Empty())
-		return false;
-
-	if (texture.IsNull()) {
-		AllocateTextures(texture.textureID, 1);
-	}
-
-	glBindTexture(GL_TEXTURE_2D, texture.textureID);
-	OpenGL::CheckError();
-
-	if (managed) {
-		//texture.Initialize()
-	}
-	return true;
-}
-
-
-void Renderer::SetShader(unsigned int shaderPrgram) {
-	pGL->glUseProgram(shaderPrgram);
-}
-bool Renderer::CompileVertexShader(const char* vsFilename, unsigned int& vertexShader) {
-	const char* vertexShaderBuffer;
-	vertexShaderBuffer = LoadShaderSourceFile(vsFilename);
-	if (!vertexShaderBuffer)
-	{
-		return false;
-	}
-	vertexShader = pGL->glCreateShader(GL_VERTEX_SHADER);
-	pGL->glShaderSource(vertexShader, 1, &vertexShaderBuffer, NULL);
-	delete vertexShaderBuffer;
-	vertexShaderBuffer = nullptr;
-
-	int status = 0;
-	pGL->glCompileShader(vertexShader);
-	pGL->glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &status);
-	if (status != 1) {
-		// If it did not compile then write the syntax error message out to a text file for review.
-		OutputShaderErrorMessage(*pGL, vertexShader, const_cast<char*>(vsFilename));
-		return false;
-	}
-	return true;
-}
-
-bool Renderer::CompileFragmentShader(const char* fsFilename, unsigned int& fragmentShader) {
-	const char* fragmentShaderBuffer;
-	fragmentShaderBuffer = LoadShaderSourceFile(fsFilename);
-	if (!fragmentShaderBuffer)
-	{
-		return false;
-	}
-	fragmentShader = pGL->glCreateShader(GL_FRAGMENT_SHADER);
-	pGL->glShaderSource(fragmentShader, 1, &fragmentShaderBuffer, NULL);
-	delete fragmentShaderBuffer;
-	fragmentShaderBuffer = nullptr;
-
-	int status = 0;
-	pGL->glCompileShader(fragmentShader);
-	pGL->glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &status);
-	if (status != 1) {
-		// If it did not compile then write the syntax error message out to a text file for review.
-		OutputShaderErrorMessage(*pGL, fragmentShader, const_cast<char*>(fsFilename));
-		return false;
-	}
-	return true;
-}
-
-bool Renderer::CompileGeometryShader(const char* gsFilename, unsigned int& geometryShader) {
-	const char* geometryShaderBuffer;
-	geometryShaderBuffer = LoadShaderSourceFile(gsFilename);
-	if (!geometryShaderBuffer)
-		return false;
-
-	geometryShader = pGL->glCreateShader(GL_GEOMETRY_SHADER);
-	pGL->glShaderSource(geometryShader, 1, &geometryShaderBuffer, NULL);
-	delete geometryShaderBuffer;
-	geometryShaderBuffer = nullptr;
-
-	int status = 0;
-	pGL->glCompileShader(geometryShader);
-	pGL->glGetShaderiv(geometryShader, GL_COMPILE_STATUS, &status);
-	if (status != 1) {
-		OutputShaderErrorMessage(*pGL, geometryShader, const_cast<char*>(gsFilename));
-		return false;
-	}
-
-	return true;
-}
-
-bool Renderer::SetShaderParameter(unsigned int shaderProgram, Matrix<float, 4, 4>& matrix, String variableName) {
-	_ASSERT(pGL);
-	unsigned int location = pGL->glGetUniformLocation(shaderProgram, variableName.c_str());
-	if (location == -1)
-		return false;
-
-	pGL->glUniformMatrix4fv(location, 1, false, (float*)&matrix.value);
-	return true;
-}
-
-bool Renderer::SetShaderParameter(unsigned int shaderProgram, const Matrix<float, 4, 4>& matrix, String variableName) {
-	_ASSERT(pGL);
-	unsigned int location = pGL->glGetUniformLocation(shaderProgram, variableName.c_str());
-	if (location == -1)
-		return false;
-
-	pGL->glUniformMatrix4fv(location, 1, false, (float*)&matrix.value);
-	return true;
-}
-
-
-bool Renderer::SetShaderParameter(unsigned int shaderProgram, const Vec3f& vec3, String variableName) {
-	_ASSERT(pGL);
-	unsigned int location = pGL->glGetUniformLocation(shaderProgram, variableName.c_str());
-	if (location == -1)
-		return false;
-
-	pGL->glUniform3fv(location, 1, (float*)const_cast<Vec3f&>(vec3).ConvertToValue());
-	return true;
-}
-
-bool Renderer::SetShaderParameter(unsigned int shaderProgram, Vec3f& vec3, String variableName) {
-	_ASSERT(pGL);
-	unsigned int location = pGL->glGetUniformLocation(shaderProgram, variableName.c_str());
-	if (location == -1)
-		return false;
-
-	pGL->glUniform3fv(location, 1, (float*)vec3.ConvertToValue());
-	return true;
-}
-
-bool Renderer::SetShaderParameter(unsigned int shaderProgram, const Vec4f& vec4, String variableName) {
-	_ASSERT(pGL);
-	unsigned int location = pGL->glGetUniformLocation(shaderProgram, variableName.c_str());
-	if (location == -1)
-		return false;
-
-	pGL->glUniform4fv(location, 1, (float*)const_cast<Vec4f&>(vec4).ConvertToValue());
-	return true;
-}
-
-bool Renderer::SetShaderParameter(unsigned int shaderProgram, Vec4f& vec4, String variableName) {
-	_ASSERT(pGL);
-	unsigned int location = pGL->glGetUniformLocation(shaderProgram, variableName.c_str());
-	if (location == -1)
-		return false;
-
-	pGL->glUniform4fv(location, 1, (float*)vec4.ConvertToValue());
-	return true;
-}
-
-bool Renderer::SetShaderParameter(unsigned int shaderProgram, int integer, String variableName) {
-	_ASSERT(pGL);
-	unsigned int location = pGL->glGetUniformLocation(shaderProgram, variableName.c_str());
-	if (location == -1)
-		return false;
-
-	pGL->glUniform1i(location, integer);
-	return true;
-}
-
-
-
-
-bool Renderer::BindVertexAttrib(unsigned int shaderProgram, unsigned int vertexShader, unsigned int fragmentShader, int vertexArgs, ...) {
-	
-	pGL->glAttachShader(shaderProgram, vertexShader);
-	pGL->glAttachShader(shaderProgram, fragmentShader);
-
-	va_list ap;
-	va_start(ap, vertexArgs);
-	String attrib;
-	for (size_t iAttrib = 0; iAttrib < vertexArgs; iAttrib++) {
-		attrib = va_arg(ap, String);
-
-		pGL->glBindAttribLocation(shaderProgram, iAttrib, attrib.c_str());
-	}
-	pGL->glLinkProgram(shaderProgram);
-
-	GLint status;
-	pGL->glGetProgramiv(shaderProgram, GL_LINK_STATUS, &status);
-	if (status != GL_TRUE) {
-		OutputLinkErrorMessage(*pGL, shaderProgram);
-		return false;
-	}
-	return true;
+bool Renderer::Initialize(GraphicDevice* pGraphics) {
+	screenSize = Size2u(pGraphics->GetScreenWidth(), pGraphics->GetScreenHeight());
+	return false;
 }
 
 char* Renderer::LoadShaderSourceFile(const char* filename) {
@@ -436,54 +68,39 @@ char* Renderer::LoadShaderSourceFile(const char* filename) {
 	return buffer;
 }
 
-void Renderer::OutputLinkErrorMessage(OpenGL& gl, unsigned int programId) {
-	int logSize = 0;
-	gl.glGetProgramiv(programId, GL_INFO_LOG_LENGTH, &logSize);
-
-	//Increment the size by one to handle also the null terminator.
-	logSize++;
-	char* infoLog = new char[logSize];
-	if (!infoLog)
+void Renderer::OutputLinkErrorMessage(GraphicDevice& device, unsigned int programId) {
+	char* pInfoLog = device.GetLinkerLog(programId);
+	if (!pInfoLog)
 		return;
 
-	gl.glGetProgramInfoLog(programId, logSize, NULL, infoLog);
 	std::ofstream fout;
 	fout.open("linker-error.txt");
+	int logSize = strlen(pInfoLog);
 	for (size_t iLog = 0; iLog < logSize; iLog++)
-		fout << infoLog[iLog];
+		fout << pInfoLog[iLog];
 
 	fout.close();
-	delete[] infoLog;
+	delete[] pInfoLog;
 
 	MessageBox(hWnd, L"Error compiling linker. Check linker-error.txt for message", L"Linker Error", MB_OK);
 }
 
-void Renderer::OutputShaderErrorMessage(OpenGL& gl, unsigned int shaderId, char* shaderFilename) {
-	std::ofstream fout;
+void Renderer::OutputShaderErrorMessage(GraphicDevice& device, unsigned int shaderId, char* shaderFilename) {
 
-	char* infoLog = nullptr;
-	int logSize = 0;
-	gl.glGetShaderiv(shaderId, GL_INFO_LOG_LENGTH, &logSize);
-
-	//Increment the size by one to handle also the null terminator.
-	logSize++;
-
-	//Create a char buffer to hold the info log.
-	infoLog = new char[logSize];
-	if (!infoLog)
+	char* pInfoLog = device.GetShaderLog(shaderId);
+	if (!pInfoLog)
 		return;
 
-	gl.glGetShaderInfoLog(shaderId, logSize, NULL, infoLog);
-
+	std::ofstream fout;
 	//Open a file to write the error message to.
 	fout.open("shader-error.txt");
-
+	int logSize = strlen(pInfoLog);
 	for (size_t iLog = 0; iLog < logSize; iLog++) {
-		fout << infoLog[iLog];
+		fout << pInfoLog[iLog];
 	}
 
 	fout.close();
-	delete[] infoLog;
+	delete[] pInfoLog;
 
 	//Convert the shader filename to a widechar string
 	size_t convertedChars = 0;
@@ -494,11 +111,178 @@ void Renderer::OutputShaderErrorMessage(OpenGL& gl, unsigned int shaderId, char*
 
 	MessageBox(hWnd, L"Error compile shader. Check shader-error.txt for message.", newString, MB_OK);
 }
-void Renderer::SetDepthTest(bool bEnable) {
-	bEnable ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
+
+void Renderer::SetDrawMode(Renderer::DrawMode _drawMode) {
+	drawMode = _drawMode;
 }
 
-void Renderer::SetWindingOrder(Renderer::WindingOrder order) {
+void Renderer::SetRenderMode(Renderer::RenderMode _renderMode) {
+	renderMode = _renderMode;
+}
+
+OpenGLRenderer::~OpenGLRenderer() {
+
+}
+
+bool OpenGLRenderer::Initialize(GraphicDevice* pGraphicDevice) {
+	Renderer::Initialize(pGraphicDevice);
+	//Store a pointer to ther OpenGL class object.
+	pDevice = dynamic_cast<OpenGL*>(pGraphicDevice);
+	if (!pDevice)
+		return false;
+
+	return true;
+}
+void OpenGLRenderer::Shutdown(unsigned int shaderProgram, unsigned int vertexShader, unsigned int fragmentShader) {
+	Renderer::Shutdown(shaderProgram, vertexShader, fragmentShader);
+	
+	pDevice->glDetachShader(shaderProgram, vertexShader);
+	pDevice->glDetachShader(shaderProgram, fragmentShader);
+
+	pDevice->glDeleteShader(vertexShader);
+	pDevice->glDeleteShader(fragmentShader);
+
+	pDevice->glDeleteProgram(shaderProgram);
+}
+
+unsigned int OpenGLRenderer::CreateShader() {
+	return pDevice->glCreateProgram();
+}
+
+bool OpenGLRenderer::CreateRenderTarget(RenderTarget& renderTarget, const Size2u& screenSize, bool downSamplingTarget) {
+	if (screenSize.Empty())
+		return false;
+
+	renderTarget.SetSize(screenSize);
+	int iPreviousFrameBuffer = 0;
+
+	if (renderTarget.IsNull()) {
+		pDevice->glGenFramebuffersEXT(1, &(renderTarget.iFrameBuffer));
+		OpenGL::CheckError();
+	}
+	pDevice->glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, renderTarget.iFrameBuffer);
+	OpenGL::CheckError();
+
+	return true;
+}
+
+bool OpenGLRenderer::CreateTexture(Texture& texture, const Size2u& size, bool managed) {
+	if (size.Empty())
+		return false;
+
+	if (texture.IsNull()) {
+		AllocateTextures(texture.textureID, 1);
+	}
+
+	glBindTexture(GL_TEXTURE_2D, texture.textureID);
+	OpenGL::CheckError();
+
+	if (managed) {
+		//texture.Initialize()
+	}
+	return true;
+}
+
+void OpenGLRenderer::DeleteTexture(Texture& texture) {
+	glDeleteTextures(1, &texture.textureID);
+}
+void OpenGLRenderer::SetShader(unsigned int shaderPrgram) {
+	pDevice->glUseProgram(shaderPrgram);
+}
+
+bool OpenGLRenderer::CompileVertexShader(const char* vsFilename, unsigned int& vertexShader) {
+	const char* vertexShaderBuffer;
+	vertexShaderBuffer = LoadShaderSourceFile(vsFilename);
+	if (!vertexShaderBuffer)
+	{
+		return false;
+	}
+	vertexShader = pDevice->glCreateShader(GL_VERTEX_SHADER);
+	pDevice->glShaderSource(vertexShader, 1, &vertexShaderBuffer, NULL);
+	delete vertexShaderBuffer;
+	vertexShaderBuffer = nullptr;
+
+	int status = 0;
+	pDevice->glCompileShader(vertexShader);
+	pDevice->glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &status);
+	if (status != 1) {
+		// If it did not compile then write the syntax error message out to a text file for review.
+		OutputShaderErrorMessage(*pDevice, vertexShader, const_cast<char*>(vsFilename));
+		return false;
+	}
+	return true;
+}
+
+bool OpenGLRenderer::CompileFragmentShader(const char* fsFilename, unsigned int& fragmentShader) {
+	const char* fragmentShaderBuffer;
+	fragmentShaderBuffer = LoadShaderSourceFile(fsFilename);
+	if (!fragmentShaderBuffer)
+	{
+		return false;
+	}
+	fragmentShader = pDevice->glCreateShader(GL_FRAGMENT_SHADER);
+	pDevice->glShaderSource(fragmentShader, 1, &fragmentShaderBuffer, NULL);
+	delete fragmentShaderBuffer;
+	fragmentShaderBuffer = nullptr;
+
+	int status = 0;
+	pDevice->glCompileShader(fragmentShader);
+	pDevice->glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &status);
+	if (status != 1) {
+		// If it did not compile then write the syntax error message out to a text file for review.
+		OutputShaderErrorMessage(*pDevice, fragmentShader, const_cast<char*>(fsFilename));
+		return false;
+	}
+	return true;
+}
+
+bool OpenGLRenderer::CompileGeometryShader(const char* gsFilename, unsigned int& geometryShader) {
+	const char* geometryShaderBuffer;
+	geometryShaderBuffer = LoadShaderSourceFile(gsFilename);
+	if (!geometryShaderBuffer)
+		return false;
+
+	geometryShader = pDevice->glCreateShader(GL_GEOMETRY_SHADER);
+	pDevice->glShaderSource(geometryShader, 1, &geometryShaderBuffer, NULL);
+	delete geometryShaderBuffer;
+	geometryShaderBuffer = nullptr;
+
+	int status = 0;
+	pDevice->glCompileShader(geometryShader);
+	pDevice->glGetShaderiv(geometryShader, GL_COMPILE_STATUS, &status);
+	if (status != 1) {
+		OutputShaderErrorMessage(*pDevice, geometryShader, const_cast<char*>(gsFilename));
+		return false;
+	}
+
+	return true;
+}
+
+
+bool OpenGLRenderer::BindVertexAttrib(unsigned int shaderProgram, unsigned int vertexShader, unsigned int fragmentShader, int vertexArgs, ...) {
+	pDevice->glAttachShader(shaderProgram, vertexShader);
+	pDevice->glAttachShader(shaderProgram, fragmentShader);
+
+	va_list ap;
+	va_start(ap, vertexArgs);
+	String attrib;
+	for (size_t iAttrib = 0; iAttrib < vertexArgs; iAttrib++) {
+		attrib = va_arg(ap, String);
+
+		pDevice->glBindAttribLocation(shaderProgram, iAttrib, attrib.c_str());
+	}
+	pDevice->glLinkProgram(shaderProgram);
+
+	GLint status;
+	pDevice->glGetProgramiv(shaderProgram, GL_LINK_STATUS, &status);
+	if (status != GL_TRUE) {
+		OutputLinkErrorMessage(*pDevice, shaderProgram);
+		return false;
+	}
+	return true;
+}
+
+void OpenGLRenderer::SetWindingOrder(Renderer::WindingOrder order) {
 	switch (order) {
 	case WindingOrder::CW:
 		glFrontFace(GL_CW);
@@ -509,7 +293,7 @@ void Renderer::SetWindingOrder(Renderer::WindingOrder order) {
 	}
 }
 
-void Renderer::SetCullingMode(Renderer::CullingMode cullMode) {
+void OpenGLRenderer::SetCullingMode(Renderer::CullingMode cullMode) {
 	switch (cullMode) {
 	case Renderer::CullingMode::Front:
 		glCullFace(GL_FRONT);
@@ -522,10 +306,218 @@ void Renderer::SetCullingMode(Renderer::CullingMode cullMode) {
 		break;
 	}
 }
-void Renderer::SetDrawMode(Renderer::DrawMode _drawMode) {
-	drawMode = _drawMode;
+
+void OpenGLRenderer::SetDepthTest(bool bEnable) {
+	bEnable ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
 }
 
-void Renderer::SetRenderMode(Renderer::RenderMode _renderMode) {
-	renderMode = _renderMode;
+bool OpenGLRenderer::SetShaderParameter(unsigned int shaderProgram, Matrix<float, 4, 4>& matrix, String variableName) {
+	_ASSERT(pDevice);
+	unsigned int location = pDevice->glGetUniformLocation(shaderProgram, variableName.c_str());
+	if (location == -1)
+		return false;
+
+	pDevice->glUniformMatrix4fv(location, 1, false, (float*)&matrix.value);
+	return true;
+}
+
+bool OpenGLRenderer::SetShaderParameter(unsigned int shaderProgram, const Matrix<float, 4, 4>& matrix, String variableName) {
+	_ASSERT(pDevice);
+	unsigned int location = pDevice->glGetUniformLocation(shaderProgram, variableName.c_str());
+	if (location == -1)
+		return false;
+
+	pDevice->glUniformMatrix4fv(location, 1, false, (float*)&matrix.value);
+	return true;
+}
+
+
+bool OpenGLRenderer::SetShaderParameter(unsigned int shaderProgram, const Vec3f& vec3, String variableName) {
+	_ASSERT(pDevice);
+	unsigned int location = pDevice->glGetUniformLocation(shaderProgram, variableName.c_str());
+	if (location == -1)
+		return false;
+
+	pDevice->glUniform3fv(location, 1, (float*)const_cast<Vec3f&>(vec3).ConvertToValue());
+	return true;
+}
+
+bool OpenGLRenderer::SetShaderParameter(unsigned int shaderProgram, Vec3f& vec3, String variableName) {
+	_ASSERT(pDevice);
+	unsigned int location = pDevice->glGetUniformLocation(shaderProgram, variableName.c_str());
+	if (location == -1)
+		return false;
+
+	pDevice->glUniform3fv(location, 1, (float*)vec3.ConvertToValue());
+	return true;
+}
+
+bool OpenGLRenderer::SetShaderParameter(unsigned int shaderProgram, const Vec4f& vec4, String variableName) {
+	_ASSERT(pDevice);
+	unsigned int location = pDevice->glGetUniformLocation(shaderProgram, variableName.c_str());
+	if (location == -1)
+		return false;
+
+	pDevice->glUniform4fv(location, 1, (float*)const_cast<Vec4f&>(vec4).ConvertToValue());
+	return true;
+}
+
+bool OpenGLRenderer::SetShaderParameter(unsigned int shaderProgram, Vec4f& vec4, String variableName) {
+	_ASSERT(pDevice);
+	unsigned int location = pDevice->glGetUniformLocation(shaderProgram, variableName.c_str());
+	if (location == -1)
+		return false;
+
+	pDevice->glUniform4fv(location, 1, (float*)vec4.ConvertToValue());
+	return true;
+}
+
+bool OpenGLRenderer::SetShaderParameter(unsigned int shaderProgram, int integer, String variableName) {
+	_ASSERT(pDevice);
+	unsigned int location = pDevice->glGetUniformLocation(shaderProgram, variableName.c_str());
+	if (location == -1)
+		return false;
+
+	pDevice->glUniform1i(location, integer);
+	return true;
+}
+
+bool OpenGLRenderer::AllocateVertexBuffer(unsigned int& vertexArrayId, unsigned int& vertexBufferId, void* vertexData, VertexBufferBindCallback* pBindFunction, unsigned int numVertices, unsigned int sizeofVertex) {
+	pDevice->glGenVertexArrays(1, &vertexArrayId);
+	pDevice->glBindVertexArray(vertexArrayId);
+	pDevice->glGenBuffers(1, &vertexBufferId);
+
+
+	pBindFunction(*pDevice, vertexData, vertexBufferId, numVertices, sizeofVertex);
+	return true;
+}
+
+
+bool OpenGLRenderer::AllocateIndexBuffer(unsigned int& indexBufferId, size_t indexCount, unsigned int* indexData) {
+	if (indexCount == 0)
+		return false;
+
+	pDevice->glGenBuffers(1, &indexBufferId);
+
+	pDevice->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBufferId);
+	pDevice->glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount * sizeof(unsigned int), indexData, GL_STATIC_DRAW);
+	return true;
+}
+
+bool OpenGLRenderer::AllocateFrameBuffer(unsigned int& colorBuffer, unsigned int& depthBuffer, unsigned int& fbo) {
+	pDevice->glGenFramebuffersEXT(1, &fbo);
+	pDevice->glBindFramebufferEXT(GL_FRAMEBUFFER, fbo);
+
+	return true;
+}
+
+bool OpenGLRenderer::AllocateTextures(unsigned int& textureId, unsigned int textureCount) {
+	//Generate an ID for the texture.
+	glGenTextures(textureCount, &textureId);
+
+	OpenGL::CheckError();
+	return true;
+}
+
+
+void OpenGLRenderer::SetSampleMode(bool bCubemap) {
+	if (bCubemap) {
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+	}
+	else {
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	}
+}
+
+void OpenGLRenderer::SetFiltering(bool bCubemap) {
+	glTexParameteri(bCubemap ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(bCubemap ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	//pGL->glGenerateMipmap(bCubemap ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D);
+}
+void OpenGLRenderer::BindTexture(unsigned int textureId) {
+	//glEnable(GL_TEXTURE_2D);
+	////Set the unique texture unit in which to store the data
+	pDevice->glActiveTexture(GL_TEXTURE0 + textureId);
+
+	glBindTexture(GL_TEXTURE_2D, textureId);
+}
+
+void OpenGLRenderer::BindCubemapTexture(unsigned int textureId) {
+	pDevice->glActiveTexture(GL_TEXTURE0 + textureId);
+
+	glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
+}
+
+void OpenGLRenderer::SetImage(unsigned int target, void* pImage, unsigned int width, unsigned int height) {
+	glTexImage2D(target, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, pImage);
+}
+
+void OpenGLRenderer::DisableVertexAttribArray(size_t vertexAttribCount) {
+	for (size_t iVertexAttrib = 0; iVertexAttrib < vertexAttribCount; iVertexAttrib++) {
+		pDevice->glDisableVertexAttribArray(iVertexAttrib);
+	}
+}
+
+
+void OpenGLRenderer::ReleaseVertexArray(unsigned int& vertexArrayId, size_t arrayCount) {
+	pDevice->glBindVertexArray(0);
+	pDevice->glDeleteVertexArrays(arrayCount, &vertexArrayId);
+}
+void OpenGLRenderer::ReleaseVertexBuffers(unsigned int& vertexBufferId, size_t bufferCount) {
+	pDevice->glBindBuffer(GL_ARRAY_BUFFER, 0);
+	pDevice->glDeleteBuffers(bufferCount, &vertexBufferId);
+}
+void OpenGLRenderer::ReleaseIndexBuffers(unsigned int& indexBufferId, size_t indexCount) {
+	pDevice->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	pDevice->glDeleteBuffers(indexCount, &indexBufferId);
+}
+
+void OpenGLRenderer::DrawVertexBuffer(unsigned int vertexArrayId, size_t startPos, size_t vertexCount) {
+	pDevice->glBindVertexArray(vertexArrayId);
+
+	switch (drawMode) {
+	case DrawMode::TRIANGLE_STRIP:
+		glDrawArrays(GL_TRIANGLE_STRIP, startPos, vertexCount);
+		break;
+	case DrawMode::TRIANGLES:
+		glDrawArrays(GL_TRIANGLES, startPos, vertexCount);
+		break;
+	case DrawMode::LINES:
+		glDrawArrays(GL_LINES, startPos, vertexCount);
+		break;
+	}
+}
+
+void OpenGLRenderer::DrawIndexBuffer(unsigned int vertexArrayId, size_t indexCount) {
+	pDevice->glBindVertexArray(vertexArrayId);
+
+	switch (drawMode) {
+	case DrawMode::TRIANGLE_STRIP:
+		glDrawElements(GL_TRIANGLE_STRIP, indexCount, GL_UNSIGNED_INT, 0);
+		break;
+	case DrawMode::TRIANGLES:
+		glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, 0);
+		break;
+	case DrawMode::LINES:
+		glDrawElements(GL_LINES, indexCount, GL_UNSIGNED_INT, 0);
+		break;
+	}
+}
+void OpenGLRenderer::SetDepthFunc(unsigned int depthFunc) {
+	glDepthFunc(depthFunc);
+}
+void OpenGLRenderer::EnableCulling(bool bEnable) {
+	bEnable == true ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
+}
+
+bool OpenGLRenderer::BeginRender() {
+	pDevice->BeginScene(0.0f, 0.0f, 0.0f, 1.0f);
+	return true;
+}
+
+void OpenGLRenderer::EndRender() {
+	pDevice->EndScene();
 }

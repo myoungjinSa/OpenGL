@@ -7,6 +7,7 @@
 #include "Picture.h"
 #include "PictureFile.h"
 
+#include "OpenGL.h"
 Texture::Texture() 
 	: textureID(0)
 	, type(eType::TYPE_COUNT)
@@ -58,7 +59,7 @@ bool Texture::Update(float deltaTime) {
 	return true;
 }
 void Texture::Shutdown() {
-	glDeleteTextures(1, &textureID);
+	renderContext->renderer.DeleteTexture(*this);
 	return;
 }
 

@@ -14,8 +14,7 @@ inline bool IsKeyDown(int key) {
 	return (GetAsyncKeyState(key) & 0x8000) != 0;
 }
 
-
-class OpenGL;
+class GraphicDevice;
 class Input;
 class Renderer;
 class Scene;
@@ -36,7 +35,7 @@ public:
 private:
 	void ProcessInput();
 	bool Frame(float elapsedTime);
-	bool InitializeWindows(OpenGL* gl, int&, int&);
+	bool InitializeWindows(GraphicDevice* pGraphicDevice, int&, int&);
 	void ShutdownWindows();
 
 private:
@@ -47,7 +46,7 @@ private:
 	int screenWidth;
 	int screenHeight;
 
-	OpenGL* pOpenGL;
+	GraphicDevice* pGraphicDevice;
 	Input* pInput;
 	Renderer* pRenderer;
 	Scene* pScene;

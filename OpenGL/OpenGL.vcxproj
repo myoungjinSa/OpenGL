@@ -74,7 +74,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <LibraryPath>$(SolutionDir)..\OpenGL_Lib\freeglut\x64;D:\OpenGL\OpenGL\OpenGL_Lib\FFMPEG\portAudio\Debug;$(SolutionDir)..\OpenGL_Lib\FFMPEG;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)..\OpenGL_Lib\freeglut\x64;D:\OpenGL\OpenGL\OpenGL_Lib\portAudio\portAudio\Debug;$(SolutionDir)..\OpenGL_Lib\FFMPEG;$(LibraryPath)</LibraryPath>
     <IncludePath>$(SolutionDir)..\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -197,6 +197,7 @@
     <ClInclude Include="FFMPEGDecoder.h" />
     <ClInclude Include="FileIO.h" />
     <ClInclude Include="Gizmos.h" />
+    <ClInclude Include="GraphicDevice.h" />
     <ClInclude Include="KeyCode.h" />
     <ClInclude Include="Light.h" />
     <ClInclude Include="Logger.h" />
@@ -208,6 +209,7 @@
     <ClInclude Include="Observer.h" />
     <ClInclude Include="Picture.h" />
     <ClInclude Include="PictureFile.h" />
+    <ClInclude Include="Platform.h" />
     <ClInclude Include="Player.h" />
     <ClInclude Include="Quaternion.h" />
     <ClInclude Include="RayCast.h" />

@@ -1,8 +1,9 @@
 #pragma once
 #include "Common.h"
-#include "OpenGL.h"
 #include "Mesh.h"
 #include "Types.h"
+#include "Platform.h"
+#include "String/String.h"
 
 /////////////
 // GLOBALS //
@@ -10,6 +11,7 @@
 const bool FULL_SCREEN = false;
 const bool VSYNC_ENABLED = true;
 
+class GraphicDevice;
 class OpenGL;
 class Object;
 class PhongShader;
@@ -49,74 +51,131 @@ public:
 
 	Renderer();
 	Renderer(const Renderer&) = delete;
-	~Renderer();
+	virtual ~Renderer();
 
-	bool Initialize(OpenGL* pOpenGL); 
-	void Shutdown(unsigned int shaderProgram, unsigned int vertexShader, unsigned int fragmentShader);
+	virtual bool Initialize(GraphicDevice* pDevice);
+	virtual void Shutdown(unsigned int shaderProgram, unsigned int vertexShader, unsigned int fragmentShader);
 
-	unsigned int CreateShader();
-	bool CreateRenderTarget(RenderTarget& renderTarget, const Size2u& screenSize, bool downSamplingTarget);
-	bool CreateTexture(Texture& texture, const Size2u& size, bool managed);
+	virtual unsigned int CreateShader() = 0;
+	virtual bool CreateRenderTarget(RenderTarget& renderTarget, const Size2u& screenSize, bool downSamplingTarget) { return false; }
+	virtual bool CreateTexture(Texture& texture, const Size2u& size, bool managed) { return false; }
+	virtual void DeleteTexture(Texture& texture) {}
 
-	void SetShader(unsigned int shaderProgram);
-	bool CompileVertexShader(const char* vsFilename, unsigned int& vertexShader);
-	bool CompileFragmentShader(const char* fsFilename, unsigned int& fragmentShader);
-	bool CompileGeometryShader(const char* gsFilename, unsigned int& geometryShader);
-	bool BindVertexAttrib(unsigned int shaderProgram, unsigned int vertexShader, unsigned int fragmentShader, int vertexArgs, ...);
+	virtual void SetShader(unsigned int shaderProgram) {}
+	virtual bool CompileVertexShader(const char* vsFilename, unsigned int& vertexShader) { return false; }
+	virtual bool CompileFragmentShader(const char* fsFilename, unsigned int& fragmentShader) {return false;}
+	virtual bool CompileGeometryShader(const char* gsFilename, unsigned int& geometryShader) {return false;}
+	virtual bool BindVertexAttrib(unsigned int shaderProgram, unsigned int vertexShader, unsigned int fragmentShader, int vertexArgs, ...) { return false; }
 	
-	void SetWindingOrder(WindingOrder order);
-	void SetCullingMode(CullingMode cullMode);
-	void SetDepthTest(bool bEnable);
+	virtual void SetWindingOrder(WindingOrder order) {}
+	virtual void SetCullingMode(CullingMode cullMode) {}
+	virtual void SetDepthTest(bool bEnable) {}
 	Renderer::DrawMode GetDrawMode() const { return drawMode; }
 	void SetDrawMode(Renderer::DrawMode drawMode);
 	void SetRenderMode(RenderMode renderMode);
 	Renderer::RenderMode GetRenderMode() const { return renderMode; }
 	
-	bool SetShaderParameter(unsigned int shaderProgram, const Vec4f& vec4, String variableName);
-	bool SetShaderParameter(unsigned int shaderProgram, const Vec3f& vec3, String variableName);
-
-	bool SetShaderParameter(unsigned int shaderProgram, Vec4f& vec4, String variableName);
-	bool SetShaderParameter(unsigned int shaderProgram, Vec3f& vec3, String variableName);
-	bool SetShaderParameter(unsigned int shaderProgram, int integer, String variableName);
-
-	bool SetShaderParameter(unsigned int shaderProgram, Matrix<float, 4, 4>& matrix, String variableName);
-	bool SetShaderParameter(unsigned int shaderProgram, const Matrix<float, 4, 4>& matrix, String variableName);
-
-
-	bool AllocateVertexBuffer(unsigned int& vertexArrayId, unsigned int& vertexBufferId, void* vertexData, VertexBufferBindCallback* pBindFunction, unsigned int numVertices, unsigned int sizeofVertex);
-	bool AllocateIndexBuffer(unsigned int& indexBufferId, size_t indexCount, unsigned int* indexData);
-	bool AllocateFrameBuffer(unsigned int& colorBuffer, unsigned int& depthBuffer, unsigned int& fbo);
-	bool AllocateTextures(unsigned int& textureID, unsigned int textureCount);
+	virtual bool SetShaderParameter(unsigned int shaderProgram, const Vec4f& vec4, String variableName) { return false; }
+	virtual bool SetShaderParameter(unsigned int shaderProgram, const Vec3f& vec3, String variableName) { return false; }
 	
-	void BindTexture(unsigned int textureId);
-	void BindCubemapTexture(unsigned int textureId);
-	void SetImage(unsigned int target, void* pImage, unsigned int width, unsigned int height);
-	void SetSampleMode(bool bCubemap = false);
-	void SetFiltering(bool bCubemap = false);
+	virtual bool SetShaderParameter(unsigned int shaderProgram, Vec4f& vec4, String variableName) { return false; }
+	virtual bool SetShaderParameter(unsigned int shaderProgram, Vec3f& vec3, String variableName) { return false; }
+	virtual bool SetShaderParameter(unsigned int shaderProgram, int integer, String variableName) { return false; }
+	
+	virtual bool SetShaderParameter(unsigned int shaderProgram, Matrix<float, 4, 4>& matrix, String variableName) { return false; }
+	virtual bool SetShaderParameter(unsigned int shaderProgram, const Matrix<float, 4, 4>& matrix, String variableName) { return false; }
 
-	void SetDepthFunc(unsigned int Func);
-	void EnableCulling(bool bEnable = true);
-	void DisableVertexAttribArray(size_t vertexAttribCount);
-	void ReleaseVertexBuffers(unsigned int& vertexBufferId, size_t bufferCount);
-	void ReleaseIndexBuffers(unsigned int& vertexBufferId, size_t bufferCount);
-	void ReleaseVertexArray(unsigned int& vertedxArrayId, size_t arrayCount);
-	void DrawVertexBuffer(unsigned int vertexArrayId, size_t startPos, size_t vertexCounts);
-	void DrawIndexBuffer(unsigned int vertexArrayId, size_t indexCount);
+	virtual bool AllocateVertexBuffer(unsigned int& vertexArrayId, unsigned int& vertexBufferId, void* vertexData, VertexBufferBindCallback* pBindFunction, unsigned int numVertices, unsigned int sizeofVertex) { return false; }
+	virtual bool AllocateIndexBuffer(unsigned int& indexBufferId, size_t indexCount, unsigned int* indexData) { return false; }
+	virtual bool AllocateFrameBuffer(unsigned int& colorBuffer, unsigned int& depthBuffer, unsigned int& fbo) { return false; }
+	virtual bool AllocateTextures(unsigned int& textureID, unsigned int textureCount) { return false; }
+	
+	virtual void BindTexture(unsigned int textureId) {}
+	virtual void BindCubemapTexture(unsigned int textureId){}
+	virtual void SetImage(unsigned int target, void* pImage, unsigned int width, unsigned int height) {}
+	virtual void SetSampleMode(bool bCubemap = false){}
+	virtual void SetFiltering(bool bCubemap = false){}
 
-	bool BeginRender();
-	void EndRender();
+	virtual void SetDepthFunc(unsigned int Func) {}
+	virtual void EnableCulling(bool bEnable = true) {}
+	virtual void DisableVertexAttribArray(size_t vertexAttribCount){}
+	virtual void ReleaseVertexBuffers(unsigned int& vertexBufferId, size_t bufferCount){}
+	virtual void ReleaseIndexBuffers(unsigned int& vertexBufferId, size_t bufferCount){}
+	virtual void ReleaseVertexArray(unsigned int& vertedxArrayId, size_t arrayCount){}
+	virtual void DrawVertexBuffer(unsigned int vertexArrayId, size_t startPos, size_t vertexCounts){}
+	virtual void DrawIndexBuffer(unsigned int vertexArrayId, size_t indexCount){}
 
-	float GetRenderTargetWidth() const;
-	float GetRenderTargetHeight() const;
-private:
-	void OutputLinkErrorMessage(OpenGL& gl, unsigned int programId);
-	void OutputShaderErrorMessage(OpenGL& gl, unsigned int shaderId, char* shaderFilename);
-	char* LoadShaderSourceFile(const char* filename);
-private:
-	OpenGL* pGL;
-	//PhongShader* pShader;
+	virtual bool BeginRender() { return false; }
+	virtual void EndRender() {}
+	
+	const Size2u& GetScreenSize() const { return screenSize; }
+protected:
 	HWND hWnd;
 	DrawMode drawMode;
 	RenderMode renderMode;
+
+	Size2u  screenSize;
+
+	void OutputLinkErrorMessage(GraphicDevice& device, unsigned int programId);
+	void OutputShaderErrorMessage(GraphicDevice& device, unsigned int shaderId, char* shaderFilename);
+	char* LoadShaderSourceFile(const char* filename);
 };
 
+
+
+class OpenGLRenderer : public Renderer {
+public:
+	~OpenGLRenderer() override;
+	bool Initialize(GraphicDevice* pDevice) override;
+	void Shutdown(unsigned int shaderProgram, unsigned int vertexShader, unsigned int fragmentShader) override;
+
+	unsigned int CreateShader() override;
+	bool CreateRenderTarget(RenderTarget& renderTarget, const Size2u& screenSize, bool downSampleingTarget);
+	bool CreateTexture(Texture& texture, const Size2u& size, bool managed)override;
+	void DeleteTexture(Texture& texture)override;
+
+	void SetShader(unsigned int shaderProgram) override;
+	bool CompileVertexShader(const char* vsFilename, unsigned int& vertexShader) override;
+	bool CompileFragmentShader(const char* fsFilename, unsigned int& fragmentShader)override;
+	bool CompileGeometryShader(const char* gsFilename, unsigned int& geometryShader)override;
+	bool BindVertexAttrib(unsigned int shaderProgram, unsigned int vertexShader, unsigned int fragmentShader, int vertexArgs, ...) override;
+
+	void SetWindingOrder(Renderer::WindingOrder order) override;
+	void SetCullingMode(Renderer::CullingMode cullMode)override;
+	void SetDepthTest(bool bEnable) override;
+
+	bool SetShaderParameter(unsigned int shaderProgram, const Vec4f& vec4, String variableName) override;
+	bool SetShaderParameter(unsigned int shaderProgram, const Vec3f& vec3, String variableName) override;
+
+	bool SetShaderParameter(unsigned int shaderProgram, Vec4f& vec4, String variableName)override; 
+	bool SetShaderParameter(unsigned int shaderProgram, Vec3f& vec3, String variableName)override;
+	bool SetShaderParameter(unsigned int shaderProgram, int integer, String variableName)override;
+
+	bool SetShaderParameter(unsigned int shaderProgram, Matrix<float, 4, 4>& matrix, String variableName)override;
+	bool SetShaderParameter(unsigned int shaderProgram, const Matrix<float, 4, 4>& matrix, String variableName) override;
+
+	bool AllocateVertexBuffer(unsigned int& vertexArrayId, unsigned int& vertexBufferId, void* vertexData, VertexBufferBindCallback* pBindFunction, unsigned int numVertices, unsigned int sizeofVertex) override;
+	bool AllocateIndexBuffer(unsigned int& indexBufferId, size_t indexCount, unsigned int* indexData) override;
+	bool AllocateFrameBuffer(unsigned int& colorBuffer, unsigned int& depthBuffer, unsigned int& fbo) override;
+	bool AllocateTextures(unsigned int& textureID, unsigned int textureCount) override;
+
+	void BindTexture(unsigned int textureId)override;
+	void BindCubemapTexture(unsigned int textureId)override;
+	void SetImage(unsigned int target, void* pImage, unsigned int width, unsigned int height) override;
+	void SetSampleMode(bool bCubemap = false)override;
+	void SetFiltering(bool bCubemap = false)override;
+
+	void SetDepthFunc(unsigned int Func) override;
+	void EnableCulling(bool bEnable = true)override;
+	void DisableVertexAttribArray(size_t vertexAttribCount)override;
+	void ReleaseVertexBuffers(unsigned int& vertexBufferId, size_t bufferCount)override;
+	void ReleaseIndexBuffers(unsigned int& vertexBufferId, size_t bufferCount)override;
+	void ReleaseVertexArray(unsigned int& vertedxArrayId, size_t arrayCount)override;
+	void DrawVertexBuffer(unsigned int vertexArrayId, size_t startPos, size_t vertexCounts)override;
+	void DrawIndexBuffer(unsigned int vertexArrayId, size_t indexCount)override;
+
+	bool BeginRender() override;
+	void EndRender() override;
+protected:
+	OpenGL* pDevice;
+};

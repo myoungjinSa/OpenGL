@@ -53,7 +53,7 @@ bool OpenGL::InitializeExtensions(HWND hWnd) {
 	return true;
 }
 
-bool OpenGL::InitializeOpenGL(HWND hWnd, int _screenWidth, int _screenHeight, bool vSync) {
+bool OpenGL::Initialize(HWND hWnd, int _screenWidth, int _screenHeight, bool vSync) {
 	int attributeListInt[19] = { 0, };
 	int pixelFormat[1] = { 0, };
 	unsigned int formatCount = 0;
@@ -432,35 +432,10 @@ bool OpenGL::LoadExtensionList() {
 	return true;
 }
 
-
 void OpenGL::GetVideoCardInfo(char* cardName)
 {
 	strcpy_s(cardName, 128, videoCardDescription);
 }
-
-void OpenGL::MatrixMultiply(Matrix<float, 4, 4>& result, const Matrix<float, 4, 4>& matrix1, const Matrix<float, 4, 4>& matrix2)
-{
-	result[0] = (matrix1[0] * matrix2[0]) + (matrix1[1] * matrix2[4]) + (matrix1[2] * matrix2[8]) + (matrix1[3] * matrix2[12]);
-	result[1] = (matrix1[0] * matrix2[1]) + (matrix1[1] * matrix2[5]) + (matrix1[2] * matrix2[9]) + (matrix1[3] * matrix2[13]);
-	result[2] = (matrix1[0] * matrix2[2]) + (matrix1[1] * matrix2[6]) + (matrix1[2] * matrix2[10]) + (matrix1[3] * matrix2[14]);
-	result[3] = (matrix1[0] * matrix2[3]) + (matrix1[1] * matrix2[7]) + (matrix1[2] * matrix2[11]) + (matrix1[3] * matrix2[15]);
-
-	result[4] = (matrix1[4] * matrix2[0]) + (matrix1[5] * matrix2[4]) + (matrix1[6] * matrix2[8]) + (matrix1[7] * matrix2[12]);
-	result[5] = (matrix1[4] * matrix2[1]) + (matrix1[5] * matrix2[5]) + (matrix1[6] * matrix2[9]) + (matrix1[7] * matrix2[13]);
-	result[6] = (matrix1[4] * matrix2[2]) + (matrix1[5] * matrix2[6]) + (matrix1[6] * matrix2[10]) + (matrix1[7] * matrix2[14]);
-	result[7] = (matrix1[4] * matrix2[3]) + (matrix1[5] * matrix2[7]) + (matrix1[6] * matrix2[11]) + (matrix1[7] * matrix2[15]);
-
-	result[8] = (matrix1[8] * matrix2[0]) + (matrix1[9] * matrix2[4]) + (matrix1[10] * matrix2[8]) + (matrix1[11] * matrix2[12]);
-	result[9] = (matrix1[8] * matrix2[1]) + (matrix1[9] * matrix2[5]) + (matrix1[10] * matrix2[9]) + (matrix1[11] * matrix2[13]);
-	result[10] = (matrix1[8] * matrix2[2]) + (matrix1[9] * matrix2[6]) + (matrix1[10] * matrix2[10]) + (matrix1[11] * matrix2[14]);
-	result[11] = (matrix1[8] * matrix2[3]) + (matrix1[9] * matrix2[7]) + (matrix1[10] * matrix2[11]) + (matrix1[11] * matrix2[15]);
-
-	result[12] = (matrix1[12] * matrix2[0]) + (matrix1[13] * matrix2[4]) + (matrix1[14] * matrix2[8]) + (matrix1[15] * matrix2[12]);
-	result[13] = (matrix1[12] * matrix2[1]) + (matrix1[13] * matrix2[5]) + (matrix1[14] * matrix2[9]) + (matrix1[15] * matrix2[13]);
-	result[14] = (matrix1[12] * matrix2[2]) + (matrix1[13] * matrix2[6]) + (matrix1[14] * matrix2[10]) + (matrix1[15] * matrix2[14]);
-	result[15] = (matrix1[12] * matrix2[3]) + (matrix1[13] * matrix2[7]) + (matrix1[14] * matrix2[11]) + (matrix1[15] * matrix2[15]);
-}
-
 
 void OpenGL::CheckError() {
 	GLenum error(glGetError());
@@ -476,4 +451,34 @@ void OpenGL::CheckError() {
 		}
 		error = glGetError();
 	}
+}
+
+char* OpenGL::GetShaderLog(unsigned int shaderID) {
+	int logSize = 0;
+	glGetShaderiv(shaderID, GL_INFO_LOG_LENGTH, &logSize);
+
+	//Increment the size by one to handle also the null terminator.
+	logSize++;
+	char* pInfoLog = new char[logSize];
+	if (!pInfoLog)
+		return nullptr;
+
+	glGetShaderInfoLog(shaderID, logSize, NULL, pInfoLog);
+
+	return pInfoLog;
+}
+
+char* OpenGL::GetLinkerLog(unsigned int programID) {
+	int logSize = 0;
+	glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &logSize);
+
+	//Increment the size by one to handle also the null terminator.
+	logSize++;
+	char* pInfoLog = new char[logSize];
+	if (!pInfoLog)
+		return nullptr;
+
+	glGetProgramInfoLog(programID, logSize, NULL, pInfoLog);
+
+	return pInfoLog;
 }
