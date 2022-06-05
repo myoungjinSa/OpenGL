@@ -5,9 +5,9 @@ layout (location = 1) in vec4 inputColor;
 layout (location = 2) in vec2 inputTexCoord;
 layout (location = 3) in vec3 inputNormal;
 
+uniform mat4 worldMatrix;
 uniform mat4 worldViewMatrix;
 uniform mat4 projectionMatrix;
-uniform mat3 normalMatrix;
 
 uniform vec3 lightPosition;
 
@@ -23,11 +23,12 @@ out VS_OUT{
 } vs_out;
 
 void main(){
-	vec4 vertPosition4 = worldViewMatrix * vec4(inputPosition, 1.0);
-	vec3 normal = normalMatrix * inputNormal;
+	vec4 positionInWorld = worldMatrix * vec4(inputPosition, 1.0);
+	vec4 positionInEye = worldViewMatrix * vec4(inputPosition, 1.0);
+	vec3 normal = mat3(worldMatrix) * inputNormal;
 
-	vec3 lightDir = lightPosition - vertPosition4.xyz;
-	vec3 viewDir = -vertPosition4.xyz;
+	vec3 lightDir = lightPosition - positionInWorld.xyz;
+	vec3 viewDir = -positionInEye.xyz;
 
 	normal = normalize(normal);
 	lightDir = normalize(lightDir);
@@ -41,5 +42,5 @@ void main(){
 	vs_out.uv = vec2(inputTexCoord.x, 1 - inputTexCoord.y);
 	vs_out.color = ambientColor + diffuse + specular;
 
-	gl_Position = projectionMatrix * vertPosition4;
+	gl_Position = projectionMatrix * positionInEye;
 }

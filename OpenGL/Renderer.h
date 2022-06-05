@@ -66,7 +66,9 @@ public:
 	virtual bool CompileFragmentShader(const char* fsFilename, unsigned int& fragmentShader) {return false;}
 	virtual bool CompileGeometryShader(const char* gsFilename, unsigned int& geometryShader) {return false;}
 	virtual bool BindVertexAttrib(unsigned int shaderProgram, unsigned int vertexShader, unsigned int fragmentShader, int vertexArgs, ...) { return false; }
-	
+	virtual bool BindVertexAttrib(unsigned int shaderProgram, unsigned int vertexShader, unsigned int geometryShader, unsigned int fragmentShader, int vertexArgs, ...) { return false; }
+
+
 	virtual void SetWindingOrder(WindingOrder order) {}
 	virtual void SetCullingMode(CullingMode cullMode) {}
 	virtual void SetDepthTest(bool bEnable) {}
@@ -142,6 +144,8 @@ public:
 	bool CompileFragmentShader(const char* fsFilename, unsigned int& fragmentShader)override;
 	bool CompileGeometryShader(const char* gsFilename, unsigned int& geometryShader)override;
 	bool BindVertexAttrib(unsigned int shaderProgram, unsigned int vertexShader, unsigned int fragmentShader, int vertexArgs, ...) override;
+	bool BindVertexAttrib(unsigned int shaderProgram, unsigned int vertexShader, unsigned int geometryShader, unsigned int fragmentShader, int vertexArgs, ...) override;
+
 
 	void SetWindingOrder(Renderer::WindingOrder order) override;
 	void SetCullingMode(Renderer::CullingMode cullMode)override;

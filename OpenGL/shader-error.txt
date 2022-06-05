@@ -1,2 +1,1 @@
-ERROR: 0:32: ';' : syntax error syntax error
-
+0(22) : error C1503: undefined variable "normlize"

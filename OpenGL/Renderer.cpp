@@ -282,6 +282,30 @@ bool OpenGLRenderer::BindVertexAttrib(unsigned int shaderProgram, unsigned int v
 	return true;
 }
 
+bool OpenGLRenderer::BindVertexAttrib(unsigned int shaderProgram, unsigned int vertexShader, unsigned int geometryShader, unsigned int fragmentShader, int vertexArgs, ...) {
+	pDevice->glAttachShader(shaderProgram, vertexShader);
+	pDevice->glAttachShader(shaderProgram, geometryShader);
+	pDevice->glAttachShader(shaderProgram, fragmentShader);
+	
+	va_list ap;
+	va_start(ap, vertexArgs);
+	String attrib;
+	for (size_t iAttrib = 0; iAttrib < vertexArgs; iAttrib++) {
+		attrib = va_arg(ap, String);
+
+		pDevice->glBindAttribLocation(shaderProgram, iAttrib, attrib.c_str());
+	}
+	pDevice->glLinkProgram(shaderProgram);
+
+	GLint status;
+	pDevice->glGetProgramiv(shaderProgram, GL_LINK_STATUS, &status);
+	if (status != GL_TRUE) {
+		OutputLinkErrorMessage(*pDevice, shaderProgram);
+		return false;
+	}
+	return true;
+}
+
 void OpenGLRenderer::SetWindingOrder(Renderer::WindingOrder order) {
 	switch (order) {
 	case WindingOrder::CW:

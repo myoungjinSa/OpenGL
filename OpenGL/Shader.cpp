@@ -183,10 +183,9 @@ bool PhongShader::InitializeShader(const char* vsFilename, const char* fsFilenam
 }
 
 bool PhongShader::SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParam) {
-
+	if(!renderer.SetShaderParameter(shaderProgram, shaderParam.worldMatrix, String("worldMatrix")))				assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldViewMatrix, String("worldViewMatrix")))				assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.projectionMatrix, String("projectionMatrix")))	assert(0);
-	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.normalMatrix, String("normalMatrix")))			assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.lightPosition, String("lightPosition")))		assert(0);
 
 	Vec3f diffuse = Vec3f(shaderParam.diffuse.x, shaderParam.diffuse.y, shaderParam.diffuse.z);
@@ -242,9 +241,9 @@ bool GoraudShader::InitializeShader(const char* vsFilename, const char* fsFilena
 
 
 bool GoraudShader::SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParam) {
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldMatrix, String("worldMatrix")))				assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldViewMatrix, String("worldViewMatrix")))	assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.projectionMatrix, String("projectionMatrix")))	assert(0);
-	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.normalMatrix, String("normalMatrix")))		assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.lightPosition, String("lightPosition")))		assert(0);
 
 	Vec3f diffuse = Vec3f(shaderParam.diffuse.x, shaderParam.diffuse.y, shaderParam.diffuse.z);
@@ -273,7 +272,7 @@ BumpShader::~BumpShader() {
 }
 
 bool BumpShader::Initialize(Renderer& renderer) {
-	return InitializeShader("BumpShading.vs", "BumpShading.ps", renderer);
+	return InitializeShader("BumpShading.vs", "BumpShading.gs", "BumpShading.ps", renderer);
 }
 
 void BumpShader::Render(Renderer& renderer, const ShaderParameter& shaderParam) {
@@ -286,10 +285,13 @@ void BumpShader::Shutdown(Renderer& renderer) {
 	Shader::Shutdown(renderer);
 }
 
-bool BumpShader::InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer) {
+bool BumpShader::InitializeShader(const char* vsFilename, const char* gsFilename, const char* fsFilename, Renderer& renderer) {
 	shaderProgram = renderer.CreateShader();
 
 	if (!renderer.CompileVertexShader(vsFilename, vertexShader))
+		return false;
+
+	if (!renderer.CompileGeometryShader(gsFilename, geometryShader))
 		return false;
 
 	if (!renderer.CompileFragmentShader(fsFilename, fragmentShader))
@@ -299,27 +301,28 @@ bool BumpShader::InitializeShader(const char* vsFilename, const char* fsFilename
 	String inputColor("inputColor");
 	String inputTexcoord("inputTexcoord");
 	String inputNormal("inputNormal");
-	return renderer.BindVertexAttrib(shaderProgram, vertexShader, fragmentShader, 4, inputPosition, inputColor, inputTexcoord, inputNormal);
+	return renderer.BindVertexAttrib(shaderProgram, vertexShader, geometryShader, fragmentShader, 4, inputPosition, inputColor, inputTexcoord, inputNormal);
 }
 
 bool BumpShader::SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParam) {
+	if(!renderer.SetShaderParameter(shaderProgram, shaderParam.worldMatrix, String("worldMatrix")))				assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldViewMatrix, String("worldViewMatrix")))	assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.projectionMatrix, String("projectionMatrix")))	assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.lightPosition, String("lightPosition")))		assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.cameraPosition, String("cameraPosition")))      assert(0);
+	Vec3f diffuse = Vec3f(shaderParam.diffuse.x, shaderParam.diffuse.y, shaderParam.diffuse.z);
+	//Vec3f ambient = Vec3f(shaderParam.ambient.x, shaderParam.ambient.y, shaderParam.ambient.z);
+	Vec3f specular = Vec3f(shaderParam.specular.x, shaderParam.specular.y, shaderParam.specular.z);
 
-	/*Vec3f diffuse = Vec3f(shaderParam.diffuse.x, shaderParam.diffuse.y, shaderParam.diffuse.z);
-	Vec3f ambient = Vec3f(shaderParam.ambient.x, shaderParam.ambient.y, shaderParam.ambient.z);
-	Vec3f specular = Vec3f(shaderParam.specular.x, shaderParam.specular.y, shaderParam.specular.z);*/
-
-	/*if (!renderer.SetShaderParameter(shaderProgram, diffuse, String("diffuseColor"))) 							assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, diffuse, String("diffuseColor"))) 							assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, specular, String("specularColor")))							assert(0);
-	if (!renderer.SetShaderParameter(shaderProgram, ambient, String("ambientColor"))) 							assert(0);
-	*/
+	//if (!renderer.SetShaderParameter(shaderProgram, ambient, String("ambientColor"))) 						assert(0);
+	
 	int diffuseTexture = shaderParam.diffuseTexture;
 	if (!renderer.SetShaderParameter(shaderProgram, diffuseTexture, String("tex_color")))						assert(0);
 
 	int normalTexture = shaderParam.normalTexture;
-	if (!renderer.SetShaderParameter(shaderProgram, normalTexture, String("tex_normal"))) assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, normalTexture, String("tex_normal")))						assert(0);
 
 	return true;
 }

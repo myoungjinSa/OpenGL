@@ -22,6 +22,7 @@ typedef struct FocusInfo {
 
 struct ShaderParameter {
 	Matrix<float, 4, 4> worldViewMatrix;
+	Matrix<float, 4, 4> worldMatrix;
 	Matrix<float, 4, 4> viewMatrix;
 	Matrix<float, 4, 4> projectionMatrix;
 	Matrix<float, 3, 3> normalMatrix;
@@ -54,10 +55,12 @@ public:
 	
 	virtual bool SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParam) = 0;
 protected:
-	virtual bool InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer) = 0;
+	virtual bool InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer) { return false; }
+	virtual bool InitializeShader(const char* vsFilename, const char* gsFilename, const char* fsFilename, Renderer& renderer) { return false; }
 	
 	unsigned int vertexShader;
 	unsigned int fragmentShader;
+	unsigned int geometryShader;
 	unsigned int shaderProgram;
 };
 
@@ -137,7 +140,7 @@ public:
 	bool SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParameter) override;
 
 protected:
-	bool InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer);
+	bool InitializeShader(const char* vsFilename, const char* gsFilename, const char* fsFilename, Renderer& renderer);
 }; 
 
 class SkyboxShader : public Shader 

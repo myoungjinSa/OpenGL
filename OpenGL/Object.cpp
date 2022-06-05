@@ -149,6 +149,7 @@ void GameObject::FillShaderParameter(ShaderParameter& shaderParam, const Matrix<
 	MakeWorldViewMatrix(worldMatrix, viewMatrix, worldViewMatrix);
 	MakeNormalMatrix(worldViewMatrix, normalMatrix);
 
+	shaderParam.worldMatrix = worldMatrix;
 	shaderParam.worldViewMatrix = worldViewMatrix;
 	shaderParam.viewMatrix = viewMatrix;
 	shaderParam.projectionMatrix = projectionMatrix;
@@ -388,7 +389,7 @@ Sphere::~Sphere() {
 bool Sphere::Initialize(Renderer& renderer) {
 	GameObject::Initialize(renderer);
 
-	shader = std::make_shared<GoraudShader>(this);
+	shader = std::make_shared<BumpShader>(this);
 	if (!shader)
 		return false;
 
