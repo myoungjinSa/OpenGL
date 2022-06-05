@@ -84,6 +84,9 @@ public:
 	
 	virtual bool SetShaderParameter(unsigned int shaderProgram, Matrix<float, 4, 4>& matrix, String variableName) { return false; }
 	virtual bool SetShaderParameter(unsigned int shaderProgram, const Matrix<float, 4, 4>& matrix, String variableName) { return false; }
+	virtual bool SetShaderParameter(unsigned int shaderProgram, Matrix<float, 3, 3>& matrix, String variableName) { return false; }
+	virtual bool SetShaderParameter(unsigned int shaderProgram, const Matrix<float, 3, 3>& matrix, String variableName) { return false; }
+
 
 	virtual bool AllocateVertexBuffer(unsigned int& vertexArrayId, unsigned int& vertexBufferId, void* vertexData, VertexBufferBindCallback* pBindFunction, unsigned int numVertices, unsigned int sizeofVertex) { return false; }
 	virtual bool AllocateIndexBuffer(unsigned int& indexBufferId, size_t indexCount, unsigned int* indexData) { return false; }
@@ -153,6 +156,8 @@ public:
 
 	bool SetShaderParameter(unsigned int shaderProgram, Matrix<float, 4, 4>& matrix, String variableName)override;
 	bool SetShaderParameter(unsigned int shaderProgram, const Matrix<float, 4, 4>& matrix, String variableName) override;
+	bool SetShaderParameter(unsigned int shaderProgram, Matrix<float, 3, 3>& matrix, String variableName)override;
+	bool SetShaderParameter(unsigned int shaderProgram, const Matrix<float, 3, 3>& matrix, String variableName) override;
 
 	bool AllocateVertexBuffer(unsigned int& vertexArrayId, unsigned int& vertexBufferId, void* vertexData, VertexBufferBindCallback* pBindFunction, unsigned int numVertices, unsigned int sizeofVertex) override;
 	bool AllocateIndexBuffer(unsigned int& indexBufferId, size_t indexCount, unsigned int* indexData) override;

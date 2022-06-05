@@ -41,8 +41,9 @@ void MakeWorldViewMatrix(const Matrix<float, 4, 4>& worldMatrix, const Matrix<fl
 	worldViewMatrix = MathUtils::Multiply(worldMatrix, viewMatrix);
 }
 
-void MakeNormalMatrix(const Matrix<float, 4, 4>& worldMatrix, Matrix<float, 4, 4>& normalMatrix) {
-	normalMatrix = Inverse(worldMatrix).Transpose();
+void MakeNormalMatrix(const Matrix<float, 4, 4>& worldViewMatrix, Matrix<float, 3, 3>& normalMatrix) {
+	Matrix<float, 3, 3> worldViewMatrix3x3 = Truncate(worldViewMatrix);
+	normalMatrix = Inverse(worldViewMatrix3x3).Transpose();
 }
 
 GameObject::GameObject() 
@@ -144,9 +145,9 @@ void GameObject::FillShaderParameter(ShaderParameter& shaderParam, const Matrix<
 	Matrix<float, 4, 4> worldMatrix = Matrix<float, 4, 4>::Identity();
 	MakeWorldMatrix(GetPosition(), GetScale(), GetLook(), GetRight(), GetUp(), worldMatrix);
 	Matrix<float, 4, 4> worldViewMatrix = Matrix<float, 4, 4>::Identity();
-	Matrix<float, 4, 4> normalMatrix = Matrix<float, 4, 4>::Identity();
+	Matrix<float, 3, 3> normalMatrix = Matrix<float, 3, 3>::Identity();
 	MakeWorldViewMatrix(worldMatrix, viewMatrix, worldViewMatrix);
-	MakeNormalMatrix(worldMatrix, normalMatrix);
+	MakeNormalMatrix(worldViewMatrix, normalMatrix);
 
 	shaderParam.worldViewMatrix = worldViewMatrix;
 	shaderParam.viewMatrix = viewMatrix;
@@ -312,7 +313,7 @@ bool Cube::Initialize(Renderer& renderer) {
 	meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 	meshBuilder.End();
 
-	diffuseMap = TextureLoader::GetTexture(renderer, L"·¹µåº§ºª-WildSide.mp4");
+	diffuseMap = TextureLoader::GetTexture(renderer, L"·¹µåº§ºª-Feel My Rythm.mp4");
 	
 	renderer.AllocateTextures(diffuseMap->textureID, 1);
 	renderer.BindTexture(diffuseMap->GetTextureID());
@@ -383,7 +384,7 @@ Sphere::~Sphere() {
 bool Sphere::Initialize(Renderer& renderer) {
 	GameObject::Initialize(renderer);
 
-	shader = std::make_shared<PhongShader>(this);
+	shader = std::make_shared<GoraudShader>(this);
 	if (!shader)
 		return false;
 

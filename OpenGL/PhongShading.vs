@@ -7,11 +7,9 @@ layout (location = 3) in vec3 inputNormal;
 
 uniform mat4 worldViewMatrix;
 uniform mat4 projectionMatrix;
-uniform mat4 normalMatrix;
+uniform mat3 normalMatrix;
 
 uniform vec3 lightPosition;
-
-varying vec3 posInEyeCoord;
 
 out VS_OUT {
 	vec3 V;
@@ -22,12 +20,11 @@ out VS_OUT {
 
 void main(){
 	vec4 vertPosition4 = worldViewMatrix * vec4(inputPosition, 1.0);
-	posInEyeCoord = vec3(vertPosition4) / vertPosition4.w;
 	
 	gl_Position = projectionMatrix * vertPosition4;
 	
-	vs_out.V = normalize(-posInEyeCoord);
+	vs_out.V = -vertPosition4.xyz;
 	vs_out.UV = vec2(inputTexCoord.x, 1- inputTexCoord.y);
-	vs_out.N = normalize(vec3(normalMatrix * vec4(inputNormal, 0.0)));
-	vs_out.L = normalize(lightPosition - posInEyeCoord);
+	vs_out.N = normalMatrix * inputNormal;
+	vs_out.L = lightPosition - vertPosition4.xyz;
 }

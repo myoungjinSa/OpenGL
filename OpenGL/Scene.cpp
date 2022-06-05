@@ -23,13 +23,13 @@ Scene::~Scene() {
 bool Scene::BuildObject(Renderer& renderer) {	
 	skybox.Initialize(renderer);
 	phongLight = std::make_unique<Light>();
-	phongLight->SetPosition(0.0f, 5.0f, 0.0f);
-	phongLight->SetDirection(Vec3f::UP * -1.0f);
+	phongLight->SetPosition(0.0f, 0.0f, -5.0f);
+	phongLight->SetDirection(Vec3f::FORWARD);
 
 	terrain = std::make_unique<Terrain>(10, 10);
 	terrain->Initialize(renderer);
 
-	GameObject* pObject = new Cube();//new Cylinder(Vec3f::UP, Vec3f::RIGHT, Vec3f::FORWARD, 32);
+	GameObject* pObject = new Sphere(1.0f, 32, 32);//new Cylinder(Vec3f::UP, Vec3f::RIGHT, Vec3f::FORWARD, 32);
 	gameObjects.Add(*pObject);
 
 	for (const auto& obj : gameObjects) {
@@ -56,7 +56,7 @@ void Scene::Update(double elapsedTime) {
 	terrain->Update(elapsedTime);
 	for (const auto& obj : gameObjects) {
 		obj->Update(elapsedTime);
-		//obj->Rotate(MathUtils::DegreesToRadians(0.0f), MathUtils::DegreesToRadians(1.0f), MathUtils::DegreesToRadians(0.0f));
+		obj->Rotate(MathUtils::DegreesToRadians(0.0f), MathUtils::DegreesToRadians(1.0f), MathUtils::DegreesToRadians(0.0f));
 		//obj->Move(obj->GetLook(), 1.0f, elapsedTime);
 	}
 }

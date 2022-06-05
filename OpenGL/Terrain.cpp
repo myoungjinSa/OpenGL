@@ -127,7 +127,6 @@ bool Terrain::Initialize(Renderer& renderer) {
 		assert(0);
 		return false;
 	}
-
 	
 	MeshBuilder meshBuilder;
 	meshes.push_back(std::make_shared<Mesh>());

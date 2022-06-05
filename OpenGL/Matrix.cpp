@@ -100,6 +100,32 @@ Matrix<float, 4, 4> Inverse(const Matrix<float, 4, 4>& mat) {
 	return inversedMatrix;
 }
 
+Matrix<float, 2, 2> Truncate(const Matrix<float, 3, 3>& mat) {
+	Matrix<float, 2, 2> ret = Matrix<float, 2, 2>::Identity();
+	int k = 0;
+	for (int iCol = 1; iCol < ret.cols + 1; iCol++) {
+		for (int iRow = 1; iRow < ret.rows + 1; iRow++) {
+			if (iRow != mat.rows - 1 && iCol != mat.cols - 1) {
+				ret.value[k++] = mat.value[iRow + (iCol * mat.cols)];
+			}
+		}
+	}
+	return ret;
+}
+
+Matrix<float, 3, 3> Truncate(const Matrix<float, 4, 4>& mat) {
+	Matrix<float, 3, 3> ret = Matrix<float, 3, 3>::Identity();
+	int k = 0;
+	for (int iCol = 0; iCol < mat.cols; iCol++) {
+		for (int iRow = 0; iRow < mat.rows; iRow++) {
+			if (iRow != mat.rows - 1 && iCol != mat.cols - 1) {
+				ret.value[k++] = mat.value[iRow + (iCol * mat.cols)];		
+			}
+		}
+	}
+	return ret;
+}
+
 
 Matrix<float, 2, 2> GetCofactor(const Matrix<float, 3, 3>& mat, int iRow, int iCol) {
 	Matrix<float, 2, 2> cofactor;

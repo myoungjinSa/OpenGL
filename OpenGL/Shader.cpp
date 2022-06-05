@@ -153,7 +153,7 @@ PhongShader::~PhongShader() {
 }
 
 bool PhongShader::Initialize(Renderer& renderer) {
-	return InitializeShader("PhongLight.vs", "PhongLight.ps", renderer);
+	return InitializeShader("PhongShading.vs", "PhongShading.ps", renderer);
 }
 
 
@@ -201,7 +201,64 @@ bool PhongShader::SetShaderParameters(Renderer& renderer, const ShaderParameter&
 	
 	return true;
 }
+/////////////////////////////////////////////////////////////////////////////////////////////
+GoraudShader::GoraudShader(Object* pOwner)
+	: Shader(pOwner)
+{
 
+}
+GoraudShader::~GoraudShader() {
+
+}
+
+bool GoraudShader::Initialize(Renderer& renderer) {
+	return InitializeShader("GoraudShading.vs", "GoraudShading.ps", renderer);
+}
+
+void GoraudShader::Shutdown(Renderer& renderer) {
+	Shader::Shutdown(renderer);
+}
+
+void GoraudShader::Render(Renderer& renderer, const ShaderParameter& shaderParam){
+	SetShader(renderer);
+
+	SetShaderParameters(renderer, shaderParam);
+}
+
+bool GoraudShader::InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer) {
+	shaderProgram = renderer.CreateShader();
+
+	if (!renderer.CompileVertexShader(vsFilename, vertexShader))
+		return false;
+
+	if (!renderer.CompileFragmentShader(fsFilename, fragmentShader))
+		return false;
+
+	String inputPosition("inputPosition");
+	String inputTexCoord("inputTexCoord");
+	String inputNormal("inputNormal");
+	return renderer.BindVertexAttrib(shaderProgram, vertexShader, fragmentShader, 3, inputPosition, inputTexCoord, inputNormal);
+}
+
+
+bool GoraudShader::SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParam) {
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldViewMatrix, String("worldViewMatrix")))	assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.projectionMatrix, String("projectionMatrix")))	assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.normalMatrix, String("normalMatrix")))		assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.lightPosition, String("lightPosition")))		assert(0);
+
+	Vec3f diffuse = Vec3f(shaderParam.diffuse.x, shaderParam.diffuse.y, shaderParam.diffuse.z);
+	Vec3f ambient = Vec3f(shaderParam.ambient.x, shaderParam.ambient.y, shaderParam.ambient.z);
+	Vec3f specular = Vec3f(shaderParam.specular.x, shaderParam.specular.y, shaderParam.specular.z);
+
+	if (!renderer.SetShaderParameter(shaderProgram, diffuse, String("diffuseColor"))) 							assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, specular, String("specularColor")))							assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, ambient, String("ambientColor"))) 							assert(0);
+	int textureUnit = shaderParam.textureUnit;
+	if (!renderer.SetShaderParameter(shaderProgram, textureUnit, String("shaderTexture")))						assert(0);
+
+	return true;
+}
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 //Skybox Shader

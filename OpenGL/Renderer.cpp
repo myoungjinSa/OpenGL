@@ -331,6 +331,25 @@ bool OpenGLRenderer::SetShaderParameter(unsigned int shaderProgram, const Matrix
 	return true;
 }
 
+bool OpenGLRenderer::SetShaderParameter(unsigned int shaderProgram, const Matrix<float, 3, 3>& matrix, String variableName) {
+	_ASSERT(pDevice);
+	unsigned int location = pDevice->glGetUniformLocation(shaderProgram, variableName.c_str());
+	if (location == -1)
+		return false;
+
+	pDevice->glUniformMatrix3fv(location, 1, false, (float*)&matrix.value);
+	return true;
+}
+
+bool OpenGLRenderer::SetShaderParameter(unsigned int shaderProgram, Matrix<float, 3, 3>& matrix, String variableName) {
+	_ASSERT(pDevice);
+	unsigned int location = pDevice->glGetUniformLocation(shaderProgram, variableName.c_str());
+	if (location == -1)
+		return false;
+
+	pDevice->glUniformMatrix3fv(location, 1, false, (float*)&matrix.value);
+	return true;
+}
 
 bool OpenGLRenderer::SetShaderParameter(unsigned int shaderProgram, const Vec3f& vec3, String variableName) {
 	_ASSERT(pDevice);

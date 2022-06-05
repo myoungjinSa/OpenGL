@@ -74,7 +74,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <LibraryPath>$(SolutionDir)..\OpenGL_Lib\freeglut\x64;D:\OpenGL\OpenGL\OpenGL_Lib\portAudio\portAudio\Debug;$(SolutionDir)..\OpenGL_Lib\FFMPEG;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(SolutionDir)..\OpenGL_Lib\freeglut\x64;D:\OpenGL\OpenGL\OpenGL_Lib\FFMPEG\portAudio\Debug;$(SolutionDir)..\OpenGL_Lib\FFMPEG;$(LibraryPath)</LibraryPath>
     <IncludePath>$(SolutionDir)..\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -235,10 +235,10 @@
   <ItemGroup>
     <None Include="color.ps" />
     <None Include="color.vs" />
-    <None Include="defaultPhong.ps" />
-    <None Include="defaultPhong.vs" />
-    <None Include="PhongLight.ps" />
-    <None Include="PhongLight.vs" />
+    <None Include="GoraudShading.ps" />
+    <None Include="GoraudShading.vs" />
+    <None Include="PhongShading.ps" />
+    <None Include="PhongShading.vs" />
     <None Include="Skybox.ps" />
     <None Include="Skybox.vs" />
     <None Include="Texture.ps" />

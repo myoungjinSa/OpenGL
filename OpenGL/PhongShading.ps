@@ -32,19 +32,18 @@ vec3 rimLight(vec3 N, vec3 V){
 
 
 void main(){
-    vec3 normal = fs_in.N;
-    vec3 lightDir = fs_in.L;
-    vec3 viewDir = fs_in.V;
+    vec3 normal = normalize(fs_in.N);
+    vec3 lightDir = normalize(fs_in.L);
+    vec3 viewDir = normalize(fs_in.V);
 
     float lambertian = max(dot(normal, lightDir), 0.0);
-    float specular = 0.0;
+    vec3 specular = vec3(0.0, 0.0, 0.0);
     if(0.0 < lambertian){
         vec3 reflection = reflect(-lightDir, normal);        
-        float specAngle = max(dot(reflection, viewDir), 0.0);
-        specular = pow(specAngle, shininess);
+        specular = pow(max(dot(reflection, viewDir), 0.0), shininess) * specularColor;
     }
 
     vec4 textureColor = texture(shaderTexture, fs_in.UV);
     vec3 diffuse = lambertian * diffuseColor;
-    out_color = vec4(diffuse + specularColor * specular + ambientColor, 1.0) * textureColor;
+    out_color = vec4(diffuse + specular + ambientColor, 1.0) * textureColor;
 }

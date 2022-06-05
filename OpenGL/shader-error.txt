@@ -1,3 +1,2 @@
-0(14) : warning C7555: 'varying' is deprecated, use 'in/out' instead
-0(14) : warning C7022: unrecognized profile specifier "aa"
-0(14) : error C0502: syntax error at token "aa"
+ERROR: 0:29: ';' : syntax error syntax error
+

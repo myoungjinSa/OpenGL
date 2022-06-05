@@ -393,6 +393,12 @@ bool OpenGL::LoadExtensionList() {
 		return false;
 	}
 
+	glUniformMatrix3fv = (PFNGLUNIFORMMATRIX4FVPROC)wglGetProcAddress("glUniformMatrix3fv");
+	if (!glUniformMatrix3fv)
+	{
+		return false;
+	}
+
 	glActiveTexture = (PFNGLACTIVETEXTUREPROC)wglGetProcAddress("glActiveTexture");
 	if (!glActiveTexture)
 	{

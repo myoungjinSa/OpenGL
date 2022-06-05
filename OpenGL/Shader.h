@@ -24,7 +24,7 @@ struct ShaderParameter {
 	Matrix<float, 4, 4> viewMatrix;
 	Matrix<float, 4, 4> worldViewMatrix;
 	Matrix<float, 4, 4> projectionMatrix;
-	Matrix<float, 4, 4> normalMatrix;
+	Matrix<float, 3, 3> normalMatrix;
 
 	int   objNo;
 	Vec3f lightPosition;
@@ -108,6 +108,20 @@ protected:
 	bool InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer);
 };
 
+class GoraudShader : public Shader {
+public:
+	GoraudShader(Object* pOwner);
+	GoraudShader(const GoraudShader& other) = delete;
+	~GoraudShader() override;
+
+	bool Initialize(Renderer& renderer) override;
+	void Shutdown(Renderer& renderer) override;
+	void Render(Renderer& renderer, const ShaderParameter& shaderParam) override;
+
+	bool SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParam) override;
+protected:
+	bool InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer);
+};
 
 class SkyboxShader : public Shader 
 {
