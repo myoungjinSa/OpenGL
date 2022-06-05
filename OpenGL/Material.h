@@ -23,7 +23,7 @@ public:
 	void SetAmbient(const Vec4f& ambient);
 	void SetSpecular(const Vec3f& specular);
 
-	bool DoesHaveTexture() const { return !maps.empty(); }
+	bool DoesHaveTexture(TextureType textureType) const;
 	void SetTextureMap(const std::pair<TextureType, unsigned int>& maps);
 	unsigned int GetTextureUnit(TextureType textureType) const;
 private:

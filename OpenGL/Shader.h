@@ -21,8 +21,8 @@ typedef struct FocusInfo {
 }FocusInfo;
 
 struct ShaderParameter {
-	Matrix<float, 4, 4> viewMatrix;
 	Matrix<float, 4, 4> worldViewMatrix;
+	Matrix<float, 4, 4> viewMatrix;
 	Matrix<float, 4, 4> projectionMatrix;
 	Matrix<float, 3, 3> normalMatrix;
 
@@ -36,7 +36,8 @@ struct ShaderParameter {
 	
 	FocusInfo focusInfo;
 
-	int textureUnit;
+	int diffuseTexture;
+	int normalTexture;
 };
 
 class Shader : public Component{
@@ -122,6 +123,22 @@ public:
 protected:
 	bool InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer);
 };
+
+class BumpShader : public Shader {
+public:
+	BumpShader(Object* pOwner);
+	BumpShader(const BumpShader& other) = delete;
+	~BumpShader() override;
+
+	bool Initialize(Renderer& renderer) override;
+	void Shutdown(Renderer& renderer) override;
+	void Render(Renderer& renderer, const ShaderParameter& shaderParam)override;
+
+	bool SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParameter) override;
+
+protected:
+	bool InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer);
+}; 
 
 class SkyboxShader : public Shader 
 {

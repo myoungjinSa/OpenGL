@@ -233,6 +233,8 @@
     <ClInclude Include="VideoFile.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="BumpShading.ps" />
+    <None Include="BumpShading.vs" />
     <None Include="color.ps" />
     <None Include="color.vs" />
     <None Include="GoraudShading.ps" />

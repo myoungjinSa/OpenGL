@@ -16,8 +16,8 @@ struct VertexMaster {
 	RGBA color;
 	Vec2f uv0;
 	Vec3f normal;
-	//Vec2f uv1;
 	//Vec3f tangent;
+	//Vec2f uv1;
 	//Vec3f bitangent;
 };
 typedef unsigned char byte;
@@ -143,6 +143,8 @@ public:
 	inline void SetUV(float u, float v) { stamp.uv0 = Vec2f(u, v); SetMaskBit(UV0_BIT); };
 	inline void SetNormal(const Vec3f& normal) { stamp.normal = normal, SetMaskBit(NORMAL_BIT); };
 	inline void SetNormal(float nx, float ny, float nz) { stamp.normal = Vec3f(nx, ny, nz), SetMaskBit(NORMAL_BIT); }
+	//inline void SetTangent(const Vec3f& tangent) { stamp.tangent = tangent, SetMaskBit(TANGENT_BIT); }
+	//inline void SetTangent(float tx, float ty, float tz) { stamp.tangent = Vec3f(tx, ty, tz), SetMaskBit(TANGENT_BIT); }
 	inline void SetMaskBit(const MeshDataFlag flag) {
 		dataMask |= (1 << flag);
 	};

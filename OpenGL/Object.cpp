@@ -162,8 +162,12 @@ void GameObject::FillShaderParameter(ShaderParameter& shaderParam, const Matrix<
 	shaderParam.cameraPosition = Camera.GetPosition();
 	shaderParam.objNo = iObj;
 
-	if(material->DoesHaveTexture())
-		shaderParam.textureUnit = material->GetTextureUnit(Material::TextureType::TEXTURE_DIFFUSE);
+	if (material->DoesHaveTexture(Material::TextureType::TEXTURE_DIFFUSE)) {
+		shaderParam.diffuseTexture = material->GetTextureUnit(Material::TextureType::TEXTURE_DIFFUSE);
+	}
+	if (material->DoesHaveTexture(Material::TextureType::TEXTURE_NORMAL)) {
+		shaderParam.normalTexture = material->GetTextureUnit(Material::TextureType::TEXTURE_NORMAL);
+	}
 }
 
 void GameObject::GetWorldBoundingBox(Volumef& volume) const{
@@ -409,12 +413,22 @@ bool Sphere::Initialize(Renderer& renderer) {
 	renderer.SetSampleMode();
 	renderer.SetFiltering();
 
+	normalMap = TextureLoader::GetTexture(renderer, L"concrete_normal.png");
+	
+	renderer.AllocateTextures(normalMap->textureID, 1);
+	renderer.BindTexture(normalMap->textureID);
+	renderer.SetImage(GL_TEXTURE_2D, diffuseMap->GetPicture().GetMemory(), normalMap->GetPicture().GetWidth(), normalMap->GetPicture().GetHeight());
+	renderer.SetSampleMode();
+	renderer.SetFiltering();
+
+
 	SetScale(radius, radius, radius);
 	
 	Vec3f diffuseColor(0.8f, 0.85f, 0.85f);
 	Vec4f ambientColor(0.3f, 0.3f, 0.3f, 1.0f);
 	Vec3f specularColor(1.0f, 1.0f, 1.0f);
 	material = std::make_shared<Material>(diffuseColor, ambientColor, specularColor, std::make_pair(Material::TextureType::TEXTURE_DIFFUSE, diffuseMap->GetTextureID()));
+	material->SetTextureMap(std::make_pair(Material::TextureType::TEXTURE_NORMAL, normalMap->GetTextureID()));
 
 	AddComponent<BoundingBox>();
 	auto boundingBox = GetComponent<BoundingBox>();

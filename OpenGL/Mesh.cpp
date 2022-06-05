@@ -51,6 +51,7 @@ void Vertex::BindVertexBuffer(OpenGL& gl, void* pBuffer, unsigned int vertexBuff
 	gl.glEnableVertexAttribArray(1); // Color
 	gl.glEnableVertexAttribArray(2); // Texture coordinates;
 	gl.glEnableVertexAttribArray(3); // Normal
+	gl.glEnableVertexAttribArray(4); // Tangent
 
 	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
 	gl.glVertexAttribPointer(0, 3, GL_FLOAT, false, sizeofVertex, 0);
@@ -63,6 +64,9 @@ void Vertex::BindVertexBuffer(OpenGL& gl, void* pBuffer, unsigned int vertexBuff
 
 	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
 	gl.glVertexAttribPointer(3, 3, GL_FLOAT, false, sizeofVertex, (unsigned char*)NULL + (5 * sizeof(float)) + (4 * sizeof(unsigned char)));
+
+	gl.glBindBuffer(GL_ARRAY_BUFFER, vertexBufferId);
+	gl.glVertexAttribPointer(4, 3, GL_FLOAT, false, sizeofVertex, (unsigned char*)NULL + (8 * sizeof(float)) + (4 * sizeof(unsigned char)));
 }
 
 
@@ -727,6 +731,7 @@ void MeshBuilder::AddSphere(const Vec3f& center, float radius, int sectorCount, 
 			float t = (float)iStack / stackCount;
 			SetUV(s, t);
 			
+
 			vertices.emplace_back(stamp);
 		}
 	}

@@ -41,11 +41,26 @@ void Material::SetSpecular(const Vec3f& _specular) {
 	specular = _specular;
 }
 
+bool Material::DoesHaveTexture(TextureType textureType) const{
+	auto mapIter = std::find_if(maps.begin(), maps.end(), [textureType](const std::pair<TextureType, unsigned int>& element) {
+		if (element.first == textureType)
+			return true;
+		
+		return false;
+	});
+
+	if (mapIter == maps.end())
+		return false;
+
+	return true;
+}
 void Material::SetTextureMap(const std::pair<TextureType, unsigned int>& textureMap) {
 	auto mapIter = maps.begin();
 	while (mapIter != maps.end()) {
 		if ((*mapIter).first == textureMap.first)
 			maps.erase(mapIter);
+
+		mapIter++;
 	}
 
 	maps.push_back(textureMap);
@@ -56,6 +71,8 @@ unsigned int Material::GetTextureUnit(TextureType textureType) const{
 	while (mapIter != maps.end()) {
 		if ((*mapIter).first == textureType)
 			return (*mapIter).second;
+
+		mapIter++;
 	}
 	assert(0);
 

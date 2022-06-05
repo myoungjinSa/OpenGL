@@ -121,8 +121,8 @@ bool TextureShader::SetShaderParameters(Renderer& renderer, const ShaderParamete
 		return false;
 	}
 
-	int textureUnit = shaderParam.textureUnit;
-	if (!renderer.SetShaderParameter(shaderProgram, textureUnit, String("shaderTexture"))) {
+	int diffuseTexture = shaderParam.diffuseTexture;
+	if (!renderer.SetShaderParameter(shaderProgram, diffuseTexture, String("shaderTexture"))) {
 		assert(0);
 		return false;
 	}
@@ -196,8 +196,8 @@ bool PhongShader::SetShaderParameters(Renderer& renderer, const ShaderParameter&
 	if (!renderer.SetShaderParameter(shaderProgram, diffuse, String("diffuseColor"))) 							assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, specular, String("specularColor")))							assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, ambient, String("ambientColor"))) 							assert(0);
-	int textureUnit = shaderParam.textureUnit;
-	if (!renderer.SetShaderParameter(shaderProgram, textureUnit, String("shaderTexture")))						assert(0);
+	int diffuseTexture = shaderParam.diffuseTexture;
+	if (!renderer.SetShaderParameter(shaderProgram, diffuseTexture, String("shaderTexture")))						assert(0);
 	
 	return true;
 }
@@ -254,11 +254,77 @@ bool GoraudShader::SetShaderParameters(Renderer& renderer, const ShaderParameter
 	if (!renderer.SetShaderParameter(shaderProgram, diffuse, String("diffuseColor"))) 							assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, specular, String("specularColor")))							assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, ambient, String("ambientColor"))) 							assert(0);
-	int textureUnit = shaderParam.textureUnit;
-	if (!renderer.SetShaderParameter(shaderProgram, textureUnit, String("shaderTexture")))						assert(0);
+	int diffuseTexture = shaderParam.diffuseTexture;
+	if (!renderer.SetShaderParameter(shaderProgram, diffuseTexture, String("shaderTexture")))						assert(0);
 
 	return true;
 }
+
+////////////////////////////////////////////////////////////////////////////////////////////
+//Bump Shader
+BumpShader::BumpShader(Object* pOwner) 
+	: Shader(pOwner)
+{
+
+}
+
+BumpShader::~BumpShader() {
+
+}
+
+bool BumpShader::Initialize(Renderer& renderer) {
+	return InitializeShader("BumpShading.vs", "BumpShading.ps", renderer);
+}
+
+void BumpShader::Render(Renderer& renderer, const ShaderParameter& shaderParam) {
+	SetShader(renderer);
+
+	SetShaderParameters(renderer, shaderParam);
+}
+
+void BumpShader::Shutdown(Renderer& renderer) {
+	Shader::Shutdown(renderer);
+}
+
+bool BumpShader::InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer) {
+	shaderProgram = renderer.CreateShader();
+
+	if (!renderer.CompileVertexShader(vsFilename, vertexShader))
+		return false;
+
+	if (!renderer.CompileFragmentShader(fsFilename, fragmentShader))
+		return false;
+
+	String inputPosition("inputPosition");
+	String inputColor("inputColor");
+	String inputTexcoord("inputTexcoord");
+	String inputNormal("inputNormal");
+	return renderer.BindVertexAttrib(shaderProgram, vertexShader, fragmentShader, 4, inputPosition, inputColor, inputTexcoord, inputNormal);
+}
+
+bool BumpShader::SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParam) {
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldViewMatrix, String("worldViewMatrix")))	assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.projectionMatrix, String("projectionMatrix")))	assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.lightPosition, String("lightPosition")))		assert(0);
+
+	/*Vec3f diffuse = Vec3f(shaderParam.diffuse.x, shaderParam.diffuse.y, shaderParam.diffuse.z);
+	Vec3f ambient = Vec3f(shaderParam.ambient.x, shaderParam.ambient.y, shaderParam.ambient.z);
+	Vec3f specular = Vec3f(shaderParam.specular.x, shaderParam.specular.y, shaderParam.specular.z);*/
+
+	/*if (!renderer.SetShaderParameter(shaderProgram, diffuse, String("diffuseColor"))) 							assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, specular, String("specularColor")))							assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, ambient, String("ambientColor"))) 							assert(0);
+	*/
+	int diffuseTexture = shaderParam.diffuseTexture;
+	if (!renderer.SetShaderParameter(shaderProgram, diffuseTexture, String("tex_color")))						assert(0);
+
+	int normalTexture = shaderParam.normalTexture;
+	if (!renderer.SetShaderParameter(shaderProgram, normalTexture, String("tex_normal"))) assert(0);
+
+	return true;
+}
+
+
 
 /////////////////////////////////////////////////////////////////////////////////////////////
 //Skybox Shader
@@ -314,8 +380,8 @@ bool SkyboxShader::SetShaderParameters(Renderer& renderer, const ShaderParameter
 		return false;
 	}
 
-	int textureUnit = shaderParam.textureUnit;
-	if (!renderer.SetShaderParameter(shaderProgram, textureUnit, String("shaderTexture"))) {
+	int diffuseTexture = shaderParam.diffuseTexture;
+	if (!renderer.SetShaderParameter(shaderProgram, diffuseTexture, String("shaderTexture"))) {
 		assert(0);
 		return false;
 	}

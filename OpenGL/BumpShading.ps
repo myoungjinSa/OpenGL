@@ -1,0 +1,35 @@
+#version 400 core
+
+out vec4 color;
+
+layout (binding = 0) uniform sampler2D tex_color;
+layout (binding = 1) uniform sampler2D tex_normal;
+
+in VS_OUT
+{
+	vec2 texcoord;
+	vec3 eyeDir;
+	vec3 lightDir;
+} fs_in;
+
+
+uniform float shininess = 16.0;
+
+void main(void){
+	vec3 viewDir = normalize(fs_in.eyeDir);
+	vec3 lightDir = normalize(fs_in.lightDir);
+
+	vec3 normal = normalize(texture(tex_normal, fs_in.texcoord).rgb * 2.0 - vec3(1.0));
+
+	vec3 reflection = reflect(-lightDir, normal);
+
+	vec3 diffuseAlbedo = texture(tex_color, fs_in.texcoord).rgb;
+	
+	vec3 diffuse = max(dot(normal, lightDir), 0.0) * diffuseAlbedo;
+
+	vec3 specularAlbedo = vec3(1.0);
+
+	vec3 specular = max(pow(dot(reflection, viewDir), shininess), 0.0) * specularAlbedo;
+	
+	color = vec4(diffuse + specular, 1.0);
+}
