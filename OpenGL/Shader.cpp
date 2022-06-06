@@ -184,17 +184,19 @@ bool PhongShader::InitializeShader(const char* vsFilename, const char* fsFilenam
 
 bool PhongShader::SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParam) {
 	if(!renderer.SetShaderParameter(shaderProgram, shaderParam.worldMatrix, String("worldMatrix")))				assert(0);
-	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldViewMatrix, String("worldViewMatrix")))				assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldViewMatrix, String("worldViewMatrix")))	assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.projectionMatrix, String("projectionMatrix")))	assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.lightPosition, String("lightPosition")))		assert(0);
+	renderer.SetShaderParameter(shaderProgram, shaderParam.cameraPosition, String("cameraPosition"));
 
 	Vec3f diffuse = Vec3f(shaderParam.diffuse.x, shaderParam.diffuse.y, shaderParam.diffuse.z);
 	Vec3f ambient = Vec3f(shaderParam.ambient.x, shaderParam.ambient.y, shaderParam.ambient.z);
 	Vec3f specular = Vec3f(shaderParam.specular.x, shaderParam.specular.y, shaderParam.specular.z);
 
-	if (!renderer.SetShaderParameter(shaderProgram, diffuse, String("diffuseColor"))) 							assert(0);
-	if (!renderer.SetShaderParameter(shaderProgram, specular, String("specularColor")))							assert(0);
-	if (!renderer.SetShaderParameter(shaderProgram, ambient, String("ambientColor"))) 							assert(0);
+	renderer.SetShaderParameter(shaderProgram, diffuse, String("diffuseColor"));
+	renderer.SetShaderParameter(shaderProgram, specular, String("specularColor"));
+	renderer.SetShaderParameter(shaderProgram, ambient, String("ambientColor"));
+	
 	int diffuseTexture = shaderParam.diffuseTexture;
 	if (!renderer.SetShaderParameter(shaderProgram, diffuseTexture, String("shaderTexture")))						assert(0);
 	
@@ -306,23 +308,23 @@ bool BumpShader::InitializeShader(const char* vsFilename, const char* gsFilename
 
 bool BumpShader::SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParam) {
 	if(!renderer.SetShaderParameter(shaderProgram, shaderParam.worldMatrix, String("worldMatrix")))				assert(0);
-	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldViewMatrix, String("worldViewMatrix")))	assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.viewMatrix, String("viewMatrix")))				assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.projectionMatrix, String("projectionMatrix")))	assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.lightPosition, String("lightPosition")))		assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.cameraPosition, String("cameraPosition")))      assert(0);
 	Vec3f diffuse = Vec3f(shaderParam.diffuse.x, shaderParam.diffuse.y, shaderParam.diffuse.z);
-	//Vec3f ambient = Vec3f(shaderParam.ambient.x, shaderParam.ambient.y, shaderParam.ambient.z);
+	Vec3f ambient = Vec3f(shaderParam.ambient.x, shaderParam.ambient.y, shaderParam.ambient.z);
 	Vec3f specular = Vec3f(shaderParam.specular.x, shaderParam.specular.y, shaderParam.specular.z);
 
-	if (!renderer.SetShaderParameter(shaderProgram, diffuse, String("diffuseColor"))) 							assert(0);
-	if (!renderer.SetShaderParameter(shaderProgram, specular, String("specularColor")))							assert(0);
-	//if (!renderer.SetShaderParameter(shaderProgram, ambient, String("ambientColor"))) 						assert(0);
+	renderer.SetShaderParameter(shaderProgram, diffuse, String("diffuseColor"));
+	renderer.SetShaderParameter(shaderProgram, specular, String("specularColor"));
+	renderer.SetShaderParameter(shaderProgram, ambient, String("ambientColor"));
 	
 	int diffuseTexture = shaderParam.diffuseTexture;
-	if (!renderer.SetShaderParameter(shaderProgram, diffuseTexture, String("tex_color")))						assert(0);
+	renderer.SetShaderParameter(shaderProgram, diffuseTexture, String("tex_color"));
 
 	int normalTexture = shaderParam.normalTexture;
-	if (!renderer.SetShaderParameter(shaderProgram, normalTexture, String("tex_normal")))						assert(0);
+	renderer.SetShaderParameter(shaderProgram, normalTexture, String("tex_normal"));
 
 	return true;
 }

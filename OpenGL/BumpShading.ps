@@ -5,33 +5,30 @@ out vec4 color;
 uniform sampler2D tex_color;
 uniform sampler2D tex_normal;
 
-in vec3 currentPos;
-in vec3 normal;
-in vec3 texcoord;
-in vec3 lightPos;
-in vec3 cameraPos;
+in vec2 texcoord;
+in vec3 lightDir;
+in vec3 eyeDir;
 
 uniform float shininess = 16.0;
 uniform vec3 diffuseColor;
 uniform vec3 specularColor;
+uniform vec3 ambientColor;
 
-
-vec4 DirectLight(){
-	float ambient = 0.2f;
-
-    vec3 viewDir = normalize(cameraPos);
-	vec3 normalVec = normalize(normal);
-	vec3 lightDir = normalize(vec3(0.0f, 0.0f ,1.0f));
-	vec3 diffuse = max(dot(normal, lightDir), 0.0f) * diffuseColor;
-
-    float lambertian = max(dot(normalVec, lightDir), 0.0);
-    vec3 specular = vec3(0.0, 0.0, 0.0);
-    if(0.0 < lambertian){
-        vec3 reflection = reflect(-lightDir, normal);        
-        specular = pow(max(dot(reflection, viewDir), 0.0), shininess) * specularColor;
-    }
-    return vec4(diffuse, 1.0);
-}
 void main(void){
-	color = DirectLight();
+    vec3 V = normalize(eyeDir);
+    vec3 L = normalize(lightDir);
+
+    vec3 N = normalize(texture(tex_normal, texcoord).rgb * 2.0 - vec3(1.0));
+
+    vec3 R = reflect(-L, N);
+
+    vec3 diffuse_albedo = texture(tex_color, texcoord).rgb;
+
+    vec3 diffuse = max(dot(N, L), 0.0) * diffuse_albedo;
+
+    vec3 specular_albedo = vec3(1.0);
+
+    vec3 specular = max(pow(dot(R, V), shininess), 0.0) * specular_albedo;
+
+    color = vec4(diffuse + specular, 1.0);
 }

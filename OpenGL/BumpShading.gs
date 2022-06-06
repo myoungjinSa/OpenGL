@@ -3,24 +3,20 @@
 layout (triangles) in;
 layout (triangle_strip, max_vertices = 3) out;
 
-out vec3 normal;
-out vec4 color;
+uniform mat4 worldMatrix;
+uniform mat4 viewMatrix;
+uniform mat4 projectionMatrix;
+uniform vec3 cameraPosition;
+uniform vec3 lightPosition;
+
 out vec2 texcoord;
-out vec3 currentPos;
-out vec3 lightPosition;
-out vec3 cameraPosition;
+out vec3 lightDir;
+out vec3 eyeDir;
 
 in VS_OUT
 {
 	vec3 normal;
 	vec2 texcoord;
-
-	mat4 worldMatrix;
-	mat4 worldViewMatrix;
-	mat4 projectionMatrix;
-
-	vec3 lightPos;
-	vec3 cameraPos;
 } data_in[];
 
 void main(){
@@ -38,48 +34,46 @@ void main(){
 	vec3 tangent = vec3(invDet * (deltaUV1.y * edge0 - deltaUV0.y * edge1));
 	vec3 bitangent = vec3(invDet * (-deltaUV1.x * edge0 + deltaUV0.x * edge1));
 
-	vec3 T = normalize(vec3(data_in[0].worldMatrix * vec4(tangent, 0.0f)));
-	vec3 B = normalize(vec3(data_in[0].worldMatrix * vec4(bitangent, 0.0f)));
-	vec3 N = normalize(vec3(data_in[0].worldMatrix * vec4(cross(edge1, edge0), 0.0f)));
+	vec3 T = normalize(vec3(worldMatrix * vec4(tangent, 0.0f)));
+	vec3 B = normalize(vec3(worldMatrix * vec4(bitangent, 0.0f)));
+	vec3 N = normalize(vec3(worldMatrix * vec4(cross(edge0, edge1), 0.0f)));
 
 	mat3 TBN = mat3(T, B, N);
 
 	//TBN is an orthogonal matrix and so its inverse is equal to its transpose
 	TBN = transpose(TBN);
 
-	gl_Position = data_in[0].projectionMatrix * gl_in[0].gl_Position;
+	gl_Position = projectionMatrix * viewMatrix * gl_in[0].gl_Position;
 
-	normal = data_in[0].normal;
 	texcoord = data_in[0].texcoord;
 
 	//Change all lighting variables to TBN space
-	currentPos = TBN * gl_in[0].gl_Position.xyz;
-	lightPosition = TBN * data_in[0].lightPos;
-	cameraPosition = TBN * data_in[0].cameraPos;
+	lightDir =  normalize(TBN * lightPosition - gl_in[0].gl_Position.xyz);
+
+	vec3 viewDir = cameraPosition - gl_in[0].gl_Position.xyz;
+	eyeDir = normalize(TBN * viewDir);	
 	EmitVertex();
 
-	
-	gl_Position = data_in[1].projectionMatrix * gl_in[1].gl_Position;
+	gl_Position = projectionMatrix * viewMatrix * gl_in[1].gl_Position;
 
-	normal = data_in[1].normal;
 	texcoord = data_in[1].texcoord;
 
 	//Change all lighting variables to TBN space
-	currentPos = TBN * gl_in[1].gl_Position.xyz;
-	lightPosition = TBN * data_in[1].lightPos;
-	cameraPosition = TBN * data_in[1].cameraPos;
+	lightDir = normalize(TBN * lightPosition - gl_in[1].gl_Position.xyz);
+	viewDir = cameraPosition - gl_in[1].gl_Position.xyz;
+	eyeDir = normalize(TBN * viewDir);
+
 	EmitVertex();
 
-		
-	gl_Position = data_in[2].projectionMatrix * gl_in[2].gl_Position;
+	gl_Position = projectionMatrix * viewMatrix * gl_in[2].gl_Position;
 
-	normal = data_in[2].normal;
 	texcoord = data_in[2].texcoord;
 
 	//Change all lighting variables to TBN space
-	currentPos = TBN * gl_in[2].gl_Position.xyz;
-	lightPosition = TBN * data_in[2].lightPos;
-	cameraPosition = TBN * data_in[2].cameraPos;
+	lightDir =  normalize(TBN * lightPosition - gl_in[2].gl_Position.xyz);
+	viewDir = cameraPosition - gl_in[2].gl_Position.xyz;
+	eyeDir = normalize(TBN * viewDir);
+
 	EmitVertex();
 
 	EndPrimitive();

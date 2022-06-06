@@ -1,1 +1,3 @@
-0(22) : error C1503: undefined variable "normlize"
+ERROR: 0:70: 'viewDir' : redefinition 
+ERROR: 0:85: 'viewDir' : redefinition 
+

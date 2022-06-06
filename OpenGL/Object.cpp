@@ -406,7 +406,7 @@ bool Sphere::Initialize(Renderer& renderer) {
 	meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 	meshBuilder.End();
 
-	diffuseMap = TextureLoader::GetTexture(renderer, L"coast_sand_rocks.jpg");
+	diffuseMap = TextureLoader::GetTexture(renderer, L"brick_d.jpg");
 	
 	renderer.AllocateTextures(diffuseMap->textureID, 1);
 	renderer.BindTexture(diffuseMap->textureID);
@@ -414,11 +414,11 @@ bool Sphere::Initialize(Renderer& renderer) {
 	renderer.SetSampleMode();
 	renderer.SetFiltering();
 
-	normalMap = TextureLoader::GetTexture(renderer, L"concrete_normal.png");
+	normalMap = TextureLoader::GetTexture(renderer, L"brick_n.jpg");
 	
 	renderer.AllocateTextures(normalMap->textureID, 1);
 	renderer.BindTexture(normalMap->textureID);
-	renderer.SetImage(GL_TEXTURE_2D, diffuseMap->GetPicture().GetMemory(), normalMap->GetPicture().GetWidth(), normalMap->GetPicture().GetHeight());
+	renderer.SetImage(GL_TEXTURE_2D, normalMap->GetPicture().GetMemory(), normalMap->GetPicture().GetWidth(), normalMap->GetPicture().GetHeight());
 	renderer.SetSampleMode();
 	renderer.SetFiltering();
 
@@ -426,7 +426,7 @@ bool Sphere::Initialize(Renderer& renderer) {
 	SetScale(radius, radius, radius);
 	
 	Vec3f diffuseColor(0.8f, 0.85f, 0.85f);
-	Vec4f ambientColor(0.3f, 0.3f, 0.3f, 1.0f);
+	Vec4f ambientColor(0.8f, 0.8f, 0.8f, 1.0f);
 	Vec3f specularColor(1.0f, 1.0f, 1.0f);
 	material = std::make_shared<Material>(diffuseColor, ambientColor, specularColor, std::make_pair(Material::TextureType::TEXTURE_DIFFUSE, diffuseMap->GetTextureID()));
 	material->SetTextureMap(std::make_pair(Material::TextureType::TEXTURE_NORMAL, normalMap->GetTextureID()));

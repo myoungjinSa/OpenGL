@@ -1,4 +1,2 @@
-Geometry info
--------------
-(0) : error C6022: No input primitive type
-(0) : error C6029: No output primitive type
+The  shader uses varying cameraPos, but previous shader does not write to it.
+Out of resource error.

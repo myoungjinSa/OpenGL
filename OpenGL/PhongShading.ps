@@ -15,6 +15,7 @@ uniform vec3 diffuseColor;
 uniform vec3 specularColor;
 uniform vec3 ambientColor;
 uniform vec3 lightPosition;
+uniform vec3 cameraPosition;
 
 out vec4 out_color;
 
@@ -30,20 +31,44 @@ vec3 rimLight(vec3 N, vec3 V){
     return f * rimColor;
 }
 
-
-void main(){
-    vec3 normal = normalize(fs_in.N);
-    vec3 lightDir = normalize(fs_in.L);
-    vec3 viewDir = normalize(fs_in.V);
+vec4 DirectLight(vec3 _normal, vec3 _lightDir, vec3 _viewDir){
+    vec3 normal = normalize(_normal);
+    vec3 lightDir = normalize(_lightDir);
+    vec3 viewDir = normalize(_viewDir);
 
     float lambertian = max(dot(normal, lightDir), 0.0);
     vec3 specular = vec3(0.0, 0.0, 0.0);
     if(0.0 < lambertian){
-        vec3 reflection = reflect(-lightDir, normal);        
+        vec3 reflection = reflect(-lightDir, normal);
         specular = pow(max(dot(reflection, viewDir), 0.0), shininess) * specularColor;
     }
-
-    vec4 textureColor = texture(shaderTexture, fs_in.UV);
     vec3 diffuse = lambertian * diffuseColor;
-    out_color = vec4(diffuse + specular + ambientColor, 1.0) * textureColor;
+    return vec4(diffuse + specular + ambientColor, 1.0);
+}
+
+//vec4 SpotLight(vec3 _normal, vec3 _lightDir, vec3 _viewDir){    
+//    float outerCone = 0.9f;
+//    float innerCone = 0.95f;
+//
+//    vec3 normal = normalize(_normal);
+//    vec3 lightDir = normalize(_lightDir);
+// 
+//    vec3 specular = vec3(0.0f, 0.0f, 0.0f);
+//    float lambertian = max(dot(normal, lightDir), 0.0);
+//    if(0.0 < lambertian){
+//        vec3 viewDir = normalize(cameraPosition - _viewDir);
+//        vec3 halfwayDir = normalize(viewDir + lightDir);
+//        float specAmount = pow(max(dot(normal, halfwayDir), 0.0f), shininess);
+//        specular = specAmount * specularColor;
+//    }
+//
+//    float angle = dot(vec3(0.0f, -1.0f, 0.0f), -lightDir);
+//    float intensity = clamp((angle - outerCone) / (innerCone - outerCone), 0.0f, 1.0f);
+//    vec4 lightColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);
+//    return vec4(lambertian * intensity * ambientColor, 1.0f) + vec4(specular * intensity, 1.0f) * lightColor;
+//}
+
+void main(){
+    vec4 textureColor = texture(shaderTexture, fs_in.UV);
+    out_color = DirectLight(fs_in.N, fs_in.L, fs_in.V) * textureColor ;
 }
