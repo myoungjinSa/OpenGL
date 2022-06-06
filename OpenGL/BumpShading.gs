@@ -6,8 +6,8 @@ layout (triangle_strip, max_vertices = 3) out;
 uniform mat4 worldMatrix;
 uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
-uniform vec3 cameraPosition;
 uniform vec3 lightPosition;
+uniform vec3 cameraPosition;
 
 out vec2 texcoord;
 out vec3 lightDir;
@@ -43,36 +43,40 @@ void main(){
 	//TBN is an orthogonal matrix and so its inverse is equal to its transpose
 	TBN = transpose(TBN);
 
-	gl_Position = projectionMatrix * viewMatrix * gl_in[0].gl_Position;
-
 	texcoord = data_in[0].texcoord;
 
 	//Change all lighting variables to TBN space
-	lightDir =  normalize(TBN * lightPosition - gl_in[0].gl_Position.xyz);
+	vec3 lightDirection = lightPosition - gl_in[0].gl_Position.xyz;
 
+	lightDir = normalize(TBN * lightDirection);
 	vec3 viewDir = cameraPosition - gl_in[0].gl_Position.xyz;
-	eyeDir = normalize(TBN * viewDir);	
+	eyeDir =  normalize(TBN * viewDir);
+	gl_Position = projectionMatrix * viewMatrix * gl_in[0].gl_Position;
+
 	EmitVertex();
 
-	gl_Position = projectionMatrix * viewMatrix * gl_in[1].gl_Position;
-
+	
 	texcoord = data_in[1].texcoord;
 
 	//Change all lighting variables to TBN space
-	lightDir = normalize(TBN * lightPosition - gl_in[1].gl_Position.xyz);
+	lightDirection = lightPosition - gl_in[1].gl_Position.xyz;
+	lightDir = normalize(TBN * lightDirection);
 	viewDir = cameraPosition - gl_in[1].gl_Position.xyz;
-	eyeDir = normalize(TBN * viewDir);
+	eyeDir =  normalize(TBN * viewDir);
+
+	gl_Position = projectionMatrix * viewMatrix * gl_in[1].gl_Position;
 
 	EmitVertex();
-
-	gl_Position = projectionMatrix * viewMatrix * gl_in[2].gl_Position;
 
 	texcoord = data_in[2].texcoord;
 
 	//Change all lighting variables to TBN space
-	lightDir =  normalize(TBN * lightPosition - gl_in[2].gl_Position.xyz);
+	lightDirection = lightPosition - gl_in[2].gl_Position.xyz;
+	lightDir =  normalize(TBN * lightDirection);
 	viewDir = cameraPosition - gl_in[2].gl_Position.xyz;
 	eyeDir = normalize(TBN * viewDir);
+	
+	gl_Position = projectionMatrix * viewMatrix * gl_in[2].gl_Position;
 
 	EmitVertex();
 

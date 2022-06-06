@@ -1,3 +1,2 @@
-ERROR: 0:70: 'viewDir' : redefinition 
-ERROR: 0:85: 'viewDir' : redefinition 
+ERROR: 0:29: '<' : wrong operand types no operation '<' exists that takes a left-hand operand of type 'const float' and a right operand of type '3-component vector of highp float' (or there is no acceptable conversion)
 

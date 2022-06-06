@@ -6,7 +6,6 @@ layout (location = 2) in vec2 inputTexcoord;
 layout (location = 3) in vec3 inputNormal;
 
 uniform mat4 worldMatrix;
-uniform mat4 viewMatrix;
 
 out VS_OUT
 {

@@ -311,7 +311,8 @@ bool BumpShader::SetShaderParameters(Renderer& renderer, const ShaderParameter& 
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.viewMatrix, String("viewMatrix")))				assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.projectionMatrix, String("projectionMatrix")))	assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.lightPosition, String("lightPosition")))		assert(0);
-	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.cameraPosition, String("cameraPosition")))      assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.cameraPosition, String("cameraPosition")))		assert(0);
+
 	Vec3f diffuse = Vec3f(shaderParam.diffuse.x, shaderParam.diffuse.y, shaderParam.diffuse.z);
 	Vec3f ambient = Vec3f(shaderParam.ambient.x, shaderParam.ambient.y, shaderParam.ambient.z);
 	Vec3f specular = Vec3f(shaderParam.specular.x, shaderParam.specular.y, shaderParam.specular.z);
