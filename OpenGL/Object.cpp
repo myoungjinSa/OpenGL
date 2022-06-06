@@ -318,7 +318,7 @@ bool Cube::Initialize(Renderer& renderer) {
 	meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 	meshBuilder.End();
 
-	diffuseMap = TextureLoader::GetTexture(renderer, L"·¹µåº§ºª-Feel My Rythm.mp4");
+	diffuseMap = TextureLoader::GetTexture(renderer, L"·¹µåº§ºª-WildSide.mp4");
 	
 	renderer.AllocateTextures(diffuseMap->textureID, 1);
 	renderer.BindTexture(diffuseMap->GetTextureID());
@@ -426,7 +426,7 @@ bool Sphere::Initialize(Renderer& renderer) {
 	SetScale(radius, radius, radius);
 	
 	Vec3f diffuseColor(0.8f, 0.85f, 0.85f);
-	Vec4f ambientColor(0.8f, 0.8f, 0.8f, 1.0f);
+	Vec4f ambientColor(0.3f, 0.3f, 0.3f, 1.0f);
 	Vec3f specularColor(1.0f, 1.0f, 1.0f);
 	material = std::make_shared<Material>(diffuseColor, ambientColor, specularColor, std::make_pair(Material::TextureType::TEXTURE_DIFFUSE, diffuseMap->GetTextureID()));
 	material->SetTextureMap(std::make_pair(Material::TextureType::TEXTURE_NORMAL, normalMap->GetTextureID()));
