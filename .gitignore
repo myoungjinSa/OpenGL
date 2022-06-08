@@ -8,6 +8,10 @@ v16/
 *.tlog
 *.user
 *.filters
+*.pdb
+*.ilk
+*.recipe
+*.idb
 
 
 *.mov
