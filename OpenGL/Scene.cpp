@@ -56,7 +56,7 @@ void Scene::Update(double elapsedTime) {
 	terrain->Update(elapsedTime);
 	for (const auto& obj : gameObjects) {
 		obj->Update(elapsedTime);
-		obj->Rotate(MathUtils::DegreesToRadians(0.0f), MathUtils::DegreesToRadians(1.0f), MathUtils::DegreesToRadians(0.0f));
+		//obj->Rotate(MathUtils::DegreesToRadians(0.0f), MathUtils::DegreesToRadians(1.0f), MathUtils::DegreesToRadians(0.0f));
 		//obj->Move(obj->GetLook(), 1.0f, elapsedTime);
 	}
 }

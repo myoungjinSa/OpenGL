@@ -13,7 +13,6 @@
 #include "Camera.h"
 
 void MakeWorldMatrix(const Vec3f& position, const Vec3f& scale, const Vec3f& look, const Vec3f& right, const Vec3f& up, Matrix<float, 4, 4>& worldMatrix) {
-	
 	//Right
 	worldMatrix.value[0] = right.x * scale.x;
 	worldMatrix.value[1] = right.y;
@@ -45,6 +44,8 @@ void MakeNormalMatrix(const Matrix<float, 4, 4>& worldViewMatrix, Matrix<float, 
 	Matrix<float, 3, 3> worldViewMatrix3x3 = Truncate(worldViewMatrix);
 	normalMatrix = Inverse(worldViewMatrix3x3).Transpose();
 }
+
+
 
 GameObject::GameObject() 
 	: diffuseMap(nullptr), normalMap(nullptr)

@@ -44,7 +44,7 @@ public :
 	template<int m1, int n1> Matrix<T, m1, n1> Reshape() const;
 
 	//Extract part of the matrix
-	template<int m1, int n1> Matrix<T, m1, n1> GetMinor(int i, int j) const;
+	template<int m1, int n1> Matrix<T, m1, n1> Truncate(int i, int j) const;
 
 	Matrix<T, 1, n> Row(int iRow) const;
 
@@ -220,7 +220,7 @@ Matrix<T, m1, n1> Matrix<T, m, n>::Reshape() const {
 
 template<typename T, int m, int n>
 template<int m1, int n1> inline
-Matrix<T, m1, n1> Matrix<T, m, n>::GetMinor(int i, int j) const {
+Matrix<T, m1, n1> Matrix<T, m, n>::Truncate(int i, int j) const {
 	assert((0 <= i && i + m1 <= m && 0 <= j && j + n1 <= n));
 	Matrix<T, m1, n1> s;
 	for (int di = 0; di < m1; di++) {

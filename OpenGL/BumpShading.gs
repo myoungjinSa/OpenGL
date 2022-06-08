@@ -15,7 +15,6 @@ out vec3 eyeDir;
 
 in VS_OUT
 {
-	vec3 normal;
 	vec2 texcoord;
 } data_in[];
 
@@ -33,9 +32,9 @@ void main(){
 	vec3 tangent = vec3(invDet * (deltaUV1.y * edge0 - deltaUV0.y * edge1));
 	vec3 bitangent = vec3(invDet * (-deltaUV1.x * edge0 + deltaUV0.x * edge1));
 
-	vec3 T = normalize(vec3(worldMatrix * vec4(tangent, 0.0f)));
-	vec3 B = normalize(vec3(worldMatrix * vec4(bitangent, 0.0f)));
-	vec3 N = normalize(vec3(worldMatrix * vec4(cross(edge0, edge1), 0.0f)));
+	vec3 T = normalize(tangent);
+	vec3 B = normalize(bitangent);
+	vec3 N = normalize(cross(edge0, edge1));
 
 	mat3 TBN = mat3(T, B, N);
 
@@ -45,11 +44,11 @@ void main(){
 	texcoord = data_in[0].texcoord;
 
 	//Change all lighting variables to TBN space
-	vec3 lightDirection = lightPosition - gl_in[0].gl_Position.xyz;
+	vec3 lightDirection = normalize(lightPosition - gl_in[0].gl_Position.xyz);
 
-	lightDir = TBN * lightDirection;
-	vec3 viewDir = cameraPosition - gl_in[0].gl_Position.xyz;
-	eyeDir =  TBN * viewDir;
+	lightDir = normalize(TBN * lightDirection);
+	vec3 viewDir = normalize(cameraPosition - gl_in[0].gl_Position.xyz);
+	eyeDir =  normalize(TBN * viewDir);
 	gl_Position = projectionMatrix * viewMatrix * gl_in[0].gl_Position;
 
 	EmitVertex();
@@ -57,10 +56,10 @@ void main(){
 	texcoord = data_in[1].texcoord;
 
 	//Change all lighting variables to TBN space
-	lightDirection = lightPosition - gl_in[1].gl_Position.xyz;
-	lightDir = TBN * lightDirection;
-	viewDir = cameraPosition - gl_in[1].gl_Position.xyz;
-	eyeDir =  TBN * viewDir;
+	lightDirection = normalize(lightPosition - gl_in[1].gl_Position.xyz);
+	lightDir = normalize(TBN * lightDirection);
+	viewDir = normalize(cameraPosition - gl_in[1].gl_Position.xyz);
+	eyeDir =  normalize(TBN * viewDir);
 
 	gl_Position = projectionMatrix * viewMatrix * gl_in[1].gl_Position;
 
@@ -69,10 +68,10 @@ void main(){
 	texcoord = data_in[2].texcoord;
 
 	//Change all lighting variables to TBN space
-	lightDirection = lightPosition - gl_in[2].gl_Position.xyz;
-	lightDir = TBN * lightDirection;
-	viewDir = cameraPosition - gl_in[2].gl_Position.xyz;
-	eyeDir = TBN * viewDir;
+	lightDirection = normalize(lightPosition - gl_in[2].gl_Position.xyz);
+	lightDir = normalize(TBN * lightDirection);
+	viewDir = normalize(cameraPosition - gl_in[2].gl_Position.xyz);
+	eyeDir = normalize(TBN * viewDir);
 	
 	gl_Position = projectionMatrix * viewMatrix * gl_in[2].gl_Position;
 

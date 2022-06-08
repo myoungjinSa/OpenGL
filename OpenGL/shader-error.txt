@@ -1,2 +1,1 @@
-0(21) : error C1503: undefined variable "inputTexCoord"
-0(21) : error C1503: undefined variable "inputTexCoord"
+0(18) : error C1009: "normal" is not member of struct "VS_OUT"
