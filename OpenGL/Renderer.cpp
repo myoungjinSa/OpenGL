@@ -317,18 +317,9 @@ void OpenGLRenderer::SetWindingOrder(Renderer::WindingOrder order) {
 	}
 }
 
-void OpenGLRenderer::SetCullingMode(Renderer::CullingMode cullMode) {
-	switch (cullMode) {
-	case Renderer::CullingMode::Front:
-		glCullFace(GL_FRONT);
-		break;
-	case Renderer::CullingMode::Back:
-		glCullFace(GL_BACK);
-		break;
-	case Renderer::CullingMode::FrontAndBack:
-		glCullFace(GL_FRONT_AND_BACK);
-		break;
-	}
+void OpenGLRenderer::SetCullFace(eFace _face) {
+	int face = GetFace(_face);
+	glCullFace(face);
 }
 
 void OpenGLRenderer::SetDepthTest(bool bEnable) {
@@ -549,9 +540,78 @@ void OpenGLRenderer::DrawIndexBuffer(unsigned int vertexArrayId, size_t indexCou
 		break;
 	}
 }
-void OpenGLRenderer::SetDepthFunc(unsigned int depthFunc) {
+
+int OpenGLRenderer::ClearStencilBuffer(int clearVal) {
+	int ret = 0;
+	pDevice->glClearBufferiv(GL_STENCIL, 0, &ret);
+	return ret;
+}
+
+int OpenGLRenderer::GetFace(eFace _face)const {
+	int face = GL_BACK;
+	
+	switch (_face) {
+	case eFace::Back:    face = GL_BACK; break;
+	case eFace::Front:   face = GL_FRONT; break;
+	case eFace::FrontAndBack: face = GL_FRONT_AND_BACK; break;
+	}
+
+	return face;
+}
+int OpenGLRenderer::GetDepthCompare(eCompare _depthCmp) const {
+	int depthCmp = -1;
+	switch (_depthCmp) {
+	case eCompare::ALWAYS:	depthCmp = GL_ALWAYS;		break;
+	case eCompare::NEVER:	depthCmp = GL_NEVER;			break;
+	case eCompare::LESS:	depthCmp = GL_LESS;			break;
+	case eCompare::LEQUAL:	depthCmp = GL_LEQUAL;		break;
+	case eCompare::EQUAL:	depthCmp = GL_EQUAL;			break;
+	case eCompare::NOTEQUAL: depthCmp = GL_NOTEQUAL;		break;
+	case eCompare::GREATER:	depthCmp = GL_GREATER;		break;
+	case eCompare::GEQUAL:	depthCmp = GL_GEQUAL;		break;
+	default:
+		break;
+	}
+	return depthCmp;
+}
+
+int OpenGLRenderer::GetStencilOp(StencilOp _stencilOp) const {
+	int stencilOp = -1;
+	switch (_stencilOp) {
+	case StencilOp::KEEP:			stencilOp = GL_KEEP;		break;
+	case StencilOp::ZERO:			stencilOp = GL_ZERO;		break;
+	case StencilOp::REPLACE:		stencilOp = GL_REPLACE;		break;
+	case StencilOp::INCREMENT:		stencilOp = GL_INCR;		break;
+	case StencilOp::DECREMENT:		stencilOp = GL_DECR;		break;
+	case StencilOp::INVERT:			stencilOp = GL_INVERT;		break;
+	case StencilOp::INCREMENT_WRAP: stencilOp = GL_INCR_WRAP;	break;
+	case StencilOp::DECREMENT_WRAP: stencilOp = GL_DECR_WRAP;	break;
+	default:
+		break;
+	}
+	return stencilOp;
+}
+
+
+void OpenGLRenderer::OperateAfterStencilTest(int face, StencilOp stencilFailed, StencilOp depthFailed, StencilOp depthPassed) {
+	int sFailed = GetStencilOp(stencilFailed);
+	int dFailed = GetStencilOp(depthFailed);
+	int dPassed = GetStencilOp(depthPassed);
+
+	pDevice->glStencilOpSeparate(face, sFailed, dFailed, dPassed);
+}
+
+void OpenGLRenderer::SetStencilTest(int face, eCompare _stencilFunc, int ref, unsigned int mask) {
+	int stencilFunc = GetDepthCompare(_stencilFunc);
+	pDevice->glStencilFuncSeparate(face, stencilFunc, ref, mask);
+}
+
+void OpenGLRenderer::SetDepthFunc(eCompare _depthCmp) {
+	int depthFunc = GetDepthCompare(_depthCmp);
 	glDepthFunc(depthFunc);
 }
+
+
 void OpenGLRenderer::EnableCulling(bool bEnable) {
 	bEnable == true ? glEnable(GL_CULL_FACE) : glDisable(GL_CULL_FACE);
 }

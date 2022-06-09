@@ -20,6 +20,26 @@ class ColorShader;
 class Camera;
 class String;
 class Texture;
+
+
+enum class eCompare : unsigned int {
+	ALWAYS,			
+	NEVER,			
+	LESS,		
+	LEQUAL,
+	EQUAL,
+	NOTEQUAL,
+	GREATER,		
+	GEQUAL
+};
+
+enum class eFace : unsigned int {
+	Back,
+	Front,
+	FrontAndBack
+};
+
+
 template<typename> class Size;
 class Renderer
 {
@@ -43,11 +63,18 @@ public:
 		CCW
 	};
 
-	enum class CullingMode : unsigned int {
-		Back,
-		Front,
-		FrontAndBack
+
+	enum class StencilOp : unsigned int {
+		KEEP,
+		ZERO,
+		REPLACE,
+		INCREMENT,
+		DECREMENT,
+		INVERT,
+		INCREMENT_WRAP,
+		DECREMENT_WRAP
 	};
+
 
 	Renderer();
 	Renderer(const Renderer&) = delete;
@@ -70,7 +97,7 @@ public:
 
 
 	virtual void SetWindingOrder(WindingOrder order) {}
-	virtual void SetCullingMode(CullingMode cullMode) {}
+	virtual void SetCullFace(eFace face) {}
 	virtual void SetDepthTest(bool bEnable) {}
 	Renderer::DrawMode GetDrawMode() const { return drawMode; }
 	void SetDrawMode(Renderer::DrawMode drawMode);
@@ -101,7 +128,10 @@ public:
 	virtual void SetSampleMode(bool bCubemap = false){}
 	virtual void SetFiltering(bool bCubemap = false){}
 
-	virtual void SetDepthFunc(unsigned int Func) {}
+	virtual int  ClearStencilBuffer(int stencil) { return 0; }
+	virtual void SetStencilTest(int face, eCompare _stencilFunc, int ref, unsigned int mask){}
+	virtual void OperateAfterStencilTest(int face, StencilOp stencilFailed, StencilOp depthFailed, StencilOp depthPassed) {}
+	virtual void SetDepthFunc(eCompare depthFunc) {}
 	virtual void EnableCulling(bool bEnable = true) {}
 	virtual void DisableVertexAttribArray(size_t vertexAttribCount){}
 	virtual void ReleaseVertexBuffers(unsigned int& vertexBufferId, size_t bufferCount){}
@@ -118,12 +148,15 @@ protected:
 	HWND hWnd;
 	DrawMode drawMode;
 	RenderMode renderMode;
-
 	Size2u  screenSize;
 
 	void OutputLinkErrorMessage(GraphicDevice& device, unsigned int programId);
 	void OutputShaderErrorMessage(GraphicDevice& device, unsigned int shaderId, char* shaderFilename);
 	char* LoadShaderSourceFile(const char* filename);
+
+	virtual int GetFace(eFace face) const { return 0; }
+	virtual int GetDepthCompare(eCompare depthCmp) const { return 0; }
+	virtual int GetStencilOp(StencilOp stencilOp) const{ return 0; }
 };
 
 
@@ -146,9 +179,8 @@ public:
 	bool BindVertexAttrib(unsigned int shaderProgram, unsigned int vertexShader, unsigned int fragmentShader, int vertexArgs, ...) override;
 	bool BindVertexAttrib(unsigned int shaderProgram, unsigned int vertexShader, unsigned int geometryShader, unsigned int fragmentShader, int vertexArgs, ...) override;
 
-
 	void SetWindingOrder(Renderer::WindingOrder order) override;
-	void SetCullingMode(Renderer::CullingMode cullMode)override;
+	void SetCullFace(eFace cullMode)override;
 	void SetDepthTest(bool bEnable) override;
 
 	bool SetShaderParameter(unsigned int shaderProgram, const Vec4f& vec4, String variableName) override;
@@ -174,7 +206,10 @@ public:
 	void SetSampleMode(bool bCubemap = false)override;
 	void SetFiltering(bool bCubemap = false)override;
 
-	void SetDepthFunc(unsigned int Func) override;
+	int  ClearStencilBuffer(int clearVal)override;
+	void SetStencilTest(int face, eCompare _stencilFunc, int ref, unsigned int mask)override;
+	void OperateAfterStencilTest(int face, StencilOp stencilFailed, StencilOp depthFailed, StencilOp depthPassed)override;
+	void SetDepthFunc(eCompare depthFunc) override;
 	void EnableCulling(bool bEnable = true)override;
 	void DisableVertexAttribArray(size_t vertexAttribCount)override;
 	void ReleaseVertexBuffers(unsigned int& vertexBufferId, size_t bufferCount)override;
@@ -187,4 +222,8 @@ public:
 	void EndRender() override;
 protected:
 	OpenGL* pDevice;
+
+	int GetFace(eFace face) const override;
+	int GetDepthCompare(eCompare depthCmp) const override;
+	int GetStencilOp(StencilOp stencilOp)const override;
 };

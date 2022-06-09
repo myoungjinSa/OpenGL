@@ -88,6 +88,12 @@ typedef void (APIENTRY* PFNGLUNIFORM4FVPROC) (GLint location, GLsizei count, con
 typedef void (GLAPIENTRY* PFNGLGENFRAMEBUFFERSEXTPROC) (GLsizei n, GLuint* framebuffers);
 typedef void (GLAPIENTRY* PFNGLBINDFRAMEBUFFEREXTPROC) (GLenum target, GLuint framebuffer);
 
+typedef void (GLAPIENTRY* PFNGLSTENCILFUNCSEPARATEPROC) (GLenum frontfunc, GLenum backfunc, GLint ref, GLuint mask);
+typedef void (GLAPIENTRY* PFNGLSTENCILMASKSEPARATEPROC) (GLenum face, GLuint mask);
+typedef void (GLAPIENTRY* PFNGLSTENCILOPSEPARATEPROC) (GLenum face, GLenum sfail, GLenum dpfail, GLenum dppass);
+
+typedef void (GLAPIENTRY* PFNGLCLEARBUFFERIVPROC) (GLenum buffer, GLint drawBuffer, const GLint* value);
+typedef void (GLAPIENTRY* PFNGLENABLEIPROC) (GLenum cap, GLuint index);
 class OpenGL : public GraphicDevice
 {
 public:
@@ -150,7 +156,11 @@ public:
 	PFNGLDISABLEVERTEXATTRIBARRAYPROC glDisableVertexAttribArray;
 	PFNGLUNIFORM3FVPROC glUniform3fv;
 	PFNGLUNIFORM4FVPROC glUniform4fv;
-
+	PFNGLSTENCILFUNCSEPARATEPROC glStencilFuncSeparate;
+	PFNGLSTENCILOPSEPARATEPROC   glStencilOpSeparate;
+	PFNGLSTENCILMASKSEPARATEPROC glStencilMaskSeparate;
+	PFNGLCLEARBUFFERIVPROC glClearBufferiv;
+	PFNGLENABLEIPROC glEnablei;
 private:
 	HDC deviceContext;
 	HGLRC renderingContext;

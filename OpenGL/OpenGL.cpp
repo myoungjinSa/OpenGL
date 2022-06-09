@@ -435,6 +435,27 @@ bool OpenGL::LoadExtensionList() {
 		return false;
 	}
 
+	glStencilFuncSeparate = (PFNGLSTENCILFUNCSEPARATEPROC)wglGetProcAddress("glStencilFuncSeparate");
+	if (!glStencilFuncSeparate)
+		return false;
+
+	glStencilOpSeparate = (PFNGLSTENCILOPSEPARATEPROC)wglGetProcAddress("glStencilOpSeparate");
+	if (!glStencilOpSeparate)
+		return false;
+
+	glStencilMaskSeparate = (PFNGLSTENCILMASKSEPARATEPROC)wglGetProcAddress("glStencilMaskSeparate");
+	if (!glStencilMaskSeparate)
+		return false;
+
+	glEnablei = (PFNGLENABLEIPROC)wglGetProcAddress("glEnablei");
+	if (!glEnablei)
+		return false;
+	
+	glClearBufferiv = (PFNGLCLEARBUFFERIVPROC)wglGetProcAddress("glClearBufferiv");
+	if (!glClearBufferiv)
+		return false;
+
+
 	return true;
 }
 

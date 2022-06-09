@@ -65,13 +65,13 @@ bool Scene::Render(Renderer& renderer) {
 	renderer.BeginRender();
 	camera.BuildPerspectiveFovLHMatrix(projectionMatrix);
 	
-	renderer.SetCullingMode(Renderer::CullingMode::Back);
-	renderer.SetDepthFunc(GL_LEQUAL);
+	renderer.SetCullFace(eFace::Back);
+	renderer.SetDepthFunc(eCompare::LEQUAL);
 	ShaderParameter shaderParmaeter;
 	renderer.SetWindingOrder(Renderer::WindingOrder::CW);
 	skybox.FillShaderParameter(shaderParmaeter, GetViewMatrix(), projectionMatrix, *phongLight, camera, 0);
 	skybox.Render(renderer, shaderParmaeter);
-	renderer.SetDepthFunc(GL_LESS);
+	renderer.SetDepthFunc(eCompare::LESS);
 
 	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLE_STRIP);
 	terrain->FillShaderParameter(shaderParmaeter, GetViewMatrix(), projectionMatrix, *phongLight, camera, 0);
