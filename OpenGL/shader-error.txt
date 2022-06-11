@@ -1,1 +1,4 @@
-0(18) : error C1009: "normal" is not member of struct "VS_OUT"
+ERROR: 0:37: 'refract' : no matching overloaded function found (using implicit conversion) 
+ERROR: 0:37: 'refract' : function is not known 
+ERROR: 0:36: 'assign' :  cannot convert from 'const highp float' to 'varying 3-component vector of highp float'
+

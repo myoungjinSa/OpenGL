@@ -7,6 +7,8 @@ public:
 	enum class TextureType : int{
 		TEXTURE_DIFFUSE,
 		TEXTURE_NORMAL,
+		TEXTURE_ENVIORNMENT,
+
 		TEXTURE_COUNT
 	};
 

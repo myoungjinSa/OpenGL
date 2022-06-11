@@ -387,10 +387,80 @@ bool SkyboxShader::SetShaderParameters(Renderer& renderer, const ShaderParameter
 	}
 
 	int diffuseTexture = shaderParam.diffuseTexture;
-	if (!renderer.SetShaderParameter(shaderProgram, diffuseTexture, String("shaderTexture"))) {
+	if (!renderer.SetShaderParameter(shaderProgram, diffuseTexture, String("modelTexture"))) {
 		assert(0);
 		return false;
 	}
 
 	return true;
+}
+
+CubemapEnvShader::CubemapEnvShader(Object* pOwner) 
+	: Shader(pOwner) 
+{
+
+}
+
+CubemapEnvShader::~CubemapEnvShader() {
+
+}
+
+bool CubemapEnvShader::Initialize(Renderer& renderer) {
+	return InitializeShader("CubemapEnvShading.vs", "CubemapEnvShading.ps", renderer);
+}
+
+void CubemapEnvShader::Shutdown(Renderer& renderer) {
+	Shader::Shutdown(renderer);
+}
+
+void CubemapEnvShader::Render(Renderer& renderer, const ShaderParameter& shaderParam) {
+	SetShader(renderer);
+
+	SetShaderParameters(renderer, shaderParam);
+}
+
+bool CubemapEnvShader::SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParam)  {
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldMatrix, String("worldMatrix")))				assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.viewMatrix, String("viewMatrix")))				assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.projectionMatrix, String("projectionMatrix")))	assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.cameraPosition, String("cameraPosition")))		assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.lightPosition, String("lightPosition")))		assert(0);
+
+	Vec3f diffuse = Vec3f(shaderParam.diffuse.x, shaderParam.diffuse.y, shaderParam.diffuse.z);
+	Vec3f ambient = Vec3f(shaderParam.ambient.x, shaderParam.ambient.y, shaderParam.ambient.z);
+	Vec3f specular = Vec3f(shaderParam.specular.x, shaderParam.specular.y, shaderParam.specular.z);
+
+	renderer.SetShaderParameter(shaderProgram, diffuse, String("diffuseColor"));
+	renderer.SetShaderParameter(shaderProgram, specular, String("specularColor"));
+	renderer.SetShaderParameter(shaderProgram, ambient, String("ambientColor"));
+
+
+	int diffuseTexture = shaderParam.diffuseTexture;
+	if (!renderer.SetShaderParameter(shaderProgram, diffuseTexture, String("modelTexture"))) {
+		assert(0);
+		return false;
+	}
+
+	int enviornmentTexture = shaderParam.environmentTexture;
+	if (!renderer.SetShaderParameter(shaderProgram, enviornmentTexture, String("environTexture"))) {
+		assert(0);
+		return false;
+	}
+	return true;
+}
+
+
+bool CubemapEnvShader::InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer){
+	shaderProgram = renderer.CreateShader();
+
+	if (!renderer.CompileVertexShader(vsFilename, vertexShader))
+		return false;
+
+	if (!renderer.CompileFragmentShader(fsFilename, fragmentShader))
+		return false;
+
+	String inputPosition("inputPosition");
+	String inputTexcoords("inputTexcoord");
+	String inputNormal("inputNormal");
+	return renderer.BindVertexAttrib(shaderProgram, vertexShader, fragmentShader, 3, inputPosition, inputTexcoords, inputNormal);
 }

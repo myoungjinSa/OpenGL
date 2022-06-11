@@ -2,6 +2,7 @@
 #include <array>
 #include "Types.h"
 #include "Component.h"
+#include "Quaternion.h"
 
 class Object;
 class RigidTransform : public Component 
@@ -52,12 +53,12 @@ public:
 
 	const Matrix<float, 4, 4>& GetWorldMatrix() const;
 	void SetWorldMatrix(const Matrix<float, 4, 4>& worldMatrix);
-	void CalculateRotationMatrix(Matrix<float, 4, 4>& rotationMatrix, float pitch, float yaw, float roll, bool bUseQuaternion = true) const;
+	void CalculateRotationMatrix(Matrix<float, 4, 4>& rotationMatrix, float pitch, float yaw, float roll, bool bUseQuaternion = true);
 private:
 	void SetTransform();
 private:
 	Vec3f position;
-	Vec4d orientation;
+	Quaternion orientation;
 	Vec3f scale;
 
 	Matrix<float, 4, 4> worldMatrix;

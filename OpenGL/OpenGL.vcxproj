@@ -238,6 +238,8 @@
     <None Include="BumpShading.vs" />
     <None Include="color.ps" />
     <None Include="color.vs" />
+    <None Include="CubemapEnvShading.ps" />
+    <None Include="CubemapEnvShading.vs" />
     <None Include="GoraudShading.ps" />
     <None Include="GoraudShading.vs" />
     <None Include="PhongShading.ps" />

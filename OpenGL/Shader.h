@@ -39,6 +39,8 @@ struct ShaderParameter {
 
 	int diffuseTexture;
 	int normalTexture;
+
+	int environmentTexture;
 };
 
 class Shader : public Component{
@@ -158,3 +160,20 @@ public:
 protected:
 	bool InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer);
 };
+
+class CubemapEnvShader : public Shader {
+public:
+	CubemapEnvShader(Object* pOwner);
+	CubemapEnvShader(const CubemapEnvShader& other) = delete;
+	~CubemapEnvShader() override;
+
+	bool Initialize(Renderer& renderer) override;
+	void Shutdown(Renderer& renderer) override;
+	void Render(Renderer& renderer, const ShaderParameter& shaderParam) override;
+
+	bool SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParameter) override;
+
+protected:
+	bool InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer);
+};
+

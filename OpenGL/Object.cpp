@@ -48,7 +48,7 @@ void MakeNormalMatrix(const Matrix<float, 4, 4>& worldViewMatrix, Matrix<float, 
 
 
 GameObject::GameObject() 
-	: diffuseMap(nullptr), normalMap(nullptr)
+	: diffuseMap(nullptr), normalMap(nullptr), environMap(nullptr)
 {
 	transform = AddComponent<RigidTransform>();
 }
@@ -169,6 +169,9 @@ void GameObject::FillShaderParameter(ShaderParameter& shaderParam, const Matrix<
 	}
 	if (material->DoesHaveTexture(Material::TextureType::TEXTURE_NORMAL)) {
 		shaderParam.normalTexture = material->GetTextureUnit(Material::TextureType::TEXTURE_NORMAL);
+	}
+	if (material->DoesHaveTexture(Material::TextureType::TEXTURE_ENVIORNMENT)) {
+		shaderParam.environmentTexture = material->GetTextureUnit(Material::TextureType::TEXTURE_ENVIORNMENT);
 	}
 }
 
@@ -319,7 +322,7 @@ bool Cube::Initialize(Renderer& renderer) {
 	meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 	meshBuilder.End();
 
-	diffuseMap = TextureLoader::GetTexture(renderer, L"·¹µåº§ºª-WildSide.mp4");
+	diffuseMap = TextureLoader::GetTexture(renderer, L"·¹µåº§ºª-Feel My Rythm.mp4");
 	
 	renderer.AllocateTextures(diffuseMap->textureID, 1);
 	renderer.BindTexture(diffuseMap->GetTextureID());
@@ -390,7 +393,7 @@ Sphere::~Sphere() {
 bool Sphere::Initialize(Renderer& renderer) {
 	GameObject::Initialize(renderer);
 
-	shader = std::make_shared<BumpShader>(this);
+	shader = std::make_shared<CubemapEnvShader>(this);
 	if (!shader)
 		return false;
 
@@ -398,7 +401,8 @@ bool Sphere::Initialize(Renderer& renderer) {
 		LogError(L"Could not initialize the Default Shader\n");
 		return false;
 	}
-
+	SetScale(radius, radius, radius);
+	
 	//MeshBuilder Call
 	MeshBuilder meshBuilder;
 	meshes.push_back(std::make_shared<Mesh>());
@@ -423,15 +427,26 @@ bool Sphere::Initialize(Renderer& renderer) {
 	renderer.SetSampleMode();
 	renderer.SetFiltering();
 
+	std::shared_ptr<CubemapTexture> cubemapTexture = std::make_shared<CubemapTexture>();
+	cubemapTexture->LoadTexture(renderer, CubemapTexture::eCubemapSide::CUBEMAP_RIGHT, L"SkyBox_Right.png");
+	cubemapTexture->LoadTexture(renderer, CubemapTexture::eCubemapSide::CUBEMAP_LEFT, L"SkyBox_Left.png");
+	cubemapTexture->LoadTexture(renderer, CubemapTexture::eCubemapSide::CUBEMAP_TOP, L"SkyBox_Top.png");
+	cubemapTexture->LoadTexture(renderer, CubemapTexture::eCubemapSide::CUBEMAP_BOTTOM, L"SkyBox_Bottom.png");
+	cubemapTexture->LoadTexture(renderer, CubemapTexture::eCubemapSide::CUBEMAP_FRONT, L"SkyBox_Front.png");
+	cubemapTexture->LoadTexture(renderer, CubemapTexture::eCubemapSide::CUBEMAP_BACK, L"SkyBox_Back.png");
 
-	SetScale(radius, radius, radius);
+	if (!cubemapTexture->Init(renderer))
+		return false;
 	
+	environMap = cubemapTexture;
+
 	Vec3f diffuseColor(0.8f, 0.85f, 0.85f);
 	Vec4f ambientColor(0.3f, 0.3f, 0.3f, 1.0f);
 	Vec3f specularColor(1.0f, 1.0f, 1.0f);
 	material = std::make_shared<Material>(diffuseColor, ambientColor, specularColor, std::make_pair(Material::TextureType::TEXTURE_DIFFUSE, diffuseMap->GetTextureID()));
-	material->SetTextureMap(std::make_pair(Material::TextureType::TEXTURE_NORMAL, normalMap->GetTextureID()));
-
+	material->SetTextureMap(std::make_pair(Material::TextureType::TEXTURE_NORMAL,		normalMap->GetTextureID()));
+	material->SetTextureMap(std::make_pair(Material::TextureType::TEXTURE_ENVIORNMENT,	environMap->GetTextureID()));
+	
 	AddComponent<BoundingBox>();
 	auto boundingBox = GetComponent<BoundingBox>();
 
@@ -500,26 +515,17 @@ bool Cubemap::Initialize(Renderer& renderer) {
 	meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 	meshBuilder.End();
 
-	std::array<std::shared_ptr<Texture>, 6> cubeTextures;
-	cubeTextures[0] = TextureLoader::GetTexture(renderer, L"SkyBox_Right.png");
-	cubeTextures[1] = TextureLoader::GetTexture(renderer, L"SkyBox_Left.png");
-	cubeTextures[2] = TextureLoader::GetTexture(renderer, L"SkyBox_Top.png");
-	cubeTextures[3] = TextureLoader::GetTexture(renderer, L"SkyBox_Bottom.png");
-	cubeTextures[4] = TextureLoader::GetTexture(renderer, L"SkyBox_Front.png");
-	cubeTextures[5] = TextureLoader::GetTexture(renderer, L"SkyBox_Back.png");
-	
-	unsigned int cubemapTexture;
-	renderer.AllocateTextures(cubemapTexture, 1);
-	renderer.BindCubemapTexture(cubemapTexture);
-	renderer.SetSampleMode(true);
-	renderer.SetFiltering(true);
+	CubemapTexture cubemapTexture;
+	cubemapTexture.LoadTexture(renderer, CubemapTexture::eCubemapSide::CUBEMAP_RIGHT, L"SkyBox_Right.png");
+	cubemapTexture.LoadTexture(renderer, CubemapTexture::eCubemapSide::CUBEMAP_LEFT, L"SkyBox_Left.png");
+	cubemapTexture.LoadTexture(renderer, CubemapTexture::eCubemapSide::CUBEMAP_TOP, L"SkyBox_Top.png");
+	cubemapTexture.LoadTexture(renderer, CubemapTexture::eCubemapSide::CUBEMAP_BOTTOM, L"SkyBox_Bottom.png");
+	cubemapTexture.LoadTexture(renderer, CubemapTexture::eCubemapSide::CUBEMAP_FRONT, L"SkyBox_Front.png");
+	cubemapTexture.LoadTexture(renderer, CubemapTexture::eCubemapSide::CUBEMAP_BACK, L"SkyBox_Back.png");
+	if (!cubemapTexture.Init(renderer))
+		return false;
 
-	for (size_t iTexture = 0; iTexture < cubeTextures.size(); iTexture++) {
-		Size2u imageSize(cubeTextures[iTexture]->GetPicture().GetWidth(), cubeTextures[iTexture]->GetPicture().GetHeight());
-		renderer.SetImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + iTexture, cubeTextures[iTexture]->GetPicture().GetMemory(), imageSize.width, imageSize.height);
-	}
-	
-	material = std::make_shared<Material>(Vec3f(1.0f, 1.0f, 1.0f), Vec4f(1.0f, 1.0f, 1.0f), Vec3f(1.0f, 1.0f, 1.0f), std::make_pair(Material::TextureType::TEXTURE_DIFFUSE, cubemapTexture));
+	material = std::make_shared<Material>(Vec3f(1.0f, 1.0f, 1.0f), Vec4f(1.0f, 1.0f, 1.0f), Vec3f(1.0f, 1.0f, 1.0f), std::make_pair(Material::TextureType::TEXTURE_DIFFUSE, cubemapTexture.GetTextureID()));
 	
 	return true;
 }

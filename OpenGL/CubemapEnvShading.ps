@@ -1,0 +1,48 @@
+
+#version 400 core
+
+out vec4 out_color;
+
+in VS_OUT{
+	vec3 passNormal;
+	vec2 passTexcoords;
+	vec3 reflectedVector;
+    vec3 refractedVector;
+    vec3 viewDir;
+}fs_in;
+
+uniform sampler2D modelTexture;
+uniform samplerCube environTexture;
+
+uniform vec3 diffuseColor;
+uniform vec3 specularColor;
+uniform vec3 ambientColor;
+
+uniform float shininess = 16.0f;
+varying vec3 lightDirection;
+
+vec4 DirectLight(vec3 _normal, vec3 _lightDir, vec3 _viewDir){
+    vec3 normal = normalize(_normal);
+    vec3 lightDir = normalize(_lightDir);
+    vec3 viewDir = normalize(_viewDir);
+
+    float lambertian = max(dot(normal, lightDir), 0.0);
+    vec3 specular = vec3(0.0, 0.0, 0.0);
+    if(0.0 < lambertian){
+        vec3 reflection = reflect(-lightDir, normal);
+        specular = pow(max(dot(reflection, viewDir), 0.0), shininess) * specularColor;
+    }
+    vec3 diffuse = lambertian * diffuseColor;
+    return vec4(diffuse + specular + ambientColor, 1.0);
+}
+
+void main(void){
+    vec4 brigtness = DirectLight(fs_in.passNormal, lightDirection, fs_in.viewDir);
+	out_color = texture(modelTexture, fs_in.passTexcoords) * brigtness;
+
+	vec4 reflectedColor = texture(environTexture, fs_in.reflectedVector);
+    vec4 refractedColor = texture(environTexture, fs_in.refractedVector);
+    vec4 environColor = mix(reflectedColor, refractedColor, 0.5);
+
+	out_color = mix(out_color, environColor, 0.7);
+}

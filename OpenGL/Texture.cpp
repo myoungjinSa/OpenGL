@@ -97,6 +97,44 @@ bool Texture::Load(const WString& filename, int& genTextureID) {
 	return true;
 }
 
+/////////////////////////////////////////////////////////////////////////
+//CubemapTexture
+CubemapTexture::CubemapTexture() 
+	: textureID(0)
+{
+	
+}
+
+bool CubemapTexture::LoadTexture(Renderer& renderer, eCubemapSide side, const WString& filename) {
+	if (at((size_t)side)) {
+		assert(0);
+		return false;
+	}
+
+	std::shared_ptr<Texture> texture = TextureLoader::GetTexture(renderer, filename);
+
+	at((size_t)side) = texture;
+
+	return true;
+}
+
+bool CubemapTexture::Init(Renderer& renderer) {
+	renderer.AllocateTextures(textureID, 1);
+	renderer.BindCubemapTexture(textureID);
+	renderer.SetSampleMode(true);
+	renderer.SetFiltering(true);
+
+	for (size_t iTexture = 0; iTexture < size(); iTexture++) {
+		Size2u imageSize(at(iTexture)->GetPicture().GetWidth(), at(iTexture)->GetPicture().GetHeight());
+		renderer.SetImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + iTexture, at(iTexture)->GetPicture().GetMemory(), imageSize.width, imageSize.height);
+		at(iTexture)->textureID = textureID;
+	}
+
+	return textureID == 0 ? false : true;
+}
+
+
+
 /////////////////////////////////////////////////////////////////////////////
 std::vector<std::pair<WString, std::shared_ptr<Texture>>> TextureLoader::textures;
 TextureLoader::TextureLoader() {
@@ -108,8 +146,10 @@ TextureLoader::~TextureLoader() {
 }
 
 void TextureLoader::Release() {
-	for (auto& tex : textures)
+	for (auto& tex : textures) {
 		tex.second->Shutdown();
+		tex.second.reset();
+	}
 
 	textures.clear();
 }
@@ -129,6 +169,14 @@ const std::shared_ptr<Texture>& TextureLoader::GetTexture(Renderer& renderer, co
 	}
 	size_t index = textures.size();
 	return textures[index - 1].second;
+}
+
+void TextureLoader::ResetTexture(Renderer& renderer, const WString& filename) {
+	for (size_t iTexture = 0; iTexture < textures.size(); iTexture++) {
+		if (textures[iTexture].first.Compare(filename)) {
+			textures[iTexture].second.reset();
+		}
+	}
 }
 
 bool TextureLoader::Load(Renderer& renderer, const WString& filename) {

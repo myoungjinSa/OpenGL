@@ -15,6 +15,7 @@ class Material;
 class Mesh;
 class Meshes;
 class Texture;
+class CubemapTexture;
 class Renderer;
 class Ray;
 class BoundingVolume;
@@ -108,6 +109,7 @@ public:
 	void GetWorldBoundingBox(Volumef& volume)const;
 	void GetLocalBoundingBox(Volumef& volume)const;
 
+	
 	std::list<std::shared_ptr<Mesh>>& GetMeshes() { return meshes; }
 protected:
 	std::vector<std::shared_ptr<Component>> components;
@@ -115,6 +117,7 @@ protected:
 	std::list<std::shared_ptr<Mesh>> meshes;
 	std::shared_ptr<Texture> diffuseMap;
 	std::shared_ptr<Texture> normalMap;
+	std::shared_ptr<CubemapTexture> environMap;
 };
 
 bool IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, double& distance);

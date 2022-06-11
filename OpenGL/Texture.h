@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include "Common.h"
 #include "Types.h"
 #include "VideoFile.h"
@@ -59,12 +60,34 @@ private:
 	Picture      picture;
 };
 
+class CubemapTexture : public std::array<std::shared_ptr<Texture>, 6>{
+public:
+	enum class eCubemapSide {
+		CUBEMAP_RIGHT,
+		CUBEMAP_LEFT,
+		CUBEMAP_TOP,
+		CUBEMAP_BOTTOM,
+		CUBEMAP_FRONT,
+		CUBEMAP_BACK
+	};
+		
+	CubemapTexture();
+
+	bool LoadTexture(Renderer& renderer, eCubemapSide side, const WString& textureName);
+	bool Init(Renderer& renderer);
+
+	unsigned int GetTextureID() const { return textureID; }
+private:
+	unsigned int textureID;
+};
+
 class TextureLoader {
 public:
 	TextureLoader();
 	~TextureLoader();
 	
 	static const std::shared_ptr<Texture>& GetTexture(Renderer& renderer, const WString& filename);
+	static void ResetTexture(Renderer& renderer, const WString& filename);
 	static void Release();
 private:
 	static bool Load(Renderer& renderer, const WString& filename);

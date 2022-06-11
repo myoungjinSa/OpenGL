@@ -2,6 +2,8 @@
 #include "Object.h"
 #include "Quaternion.h"
 
+
+
 RigidTransform::RigidTransform(Object* _owner)
 	: Component(_owner), position(0.0f, 0.0f, 0.0f), orientation(0.0, 0.0, 0.0, 1.0), scale(1.0f, 1.0f, 1.0f), movingSpeed(2.0f)
 {
@@ -9,7 +11,7 @@ RigidTransform::RigidTransform(Object* _owner)
 }
 
 Vec3f RigidTransform::TransformVector(const Vec3f& vec)const{
-	return Quaternion::Rotate(orientation, vec * scale);
+	return Quaternion::Rotate(orientation.GetVector(), vec * scale);
 }
 
 Vec3f RigidTransform::TransformPoint(const Vec3f& point) const{
@@ -24,7 +26,7 @@ Vec3f RigidTransform::DetransformPoint(const Vec3f& point) const{
 Vec3f RigidTransform::DetransformVector(const Vec3f& vec) const{
 	Quaternion q(vec, 1.0f);
 
-	return Quaternion::Rotate(q.Inverse(orientation).GetVector(), vec) / Vec3d(scale.x, scale.y, scale.z);
+	return Quaternion::Rotate(q.Inverse(orientation.GetVector()).GetVector(), vec) / Vec3d(scale.x, scale.y, scale.z);
 }
 
 
@@ -93,14 +95,12 @@ Vec4f RigidTransform::Rotate(const Vec3f& pos, const Vec3f& pivot, float pitch, 
 	return rotatedVector;
 }
 
-void RigidTransform::CalculateRotationMatrix(Matrix<float, 4, 4>& rotationMatrix, float pitch, float yaw, float roll, bool bUseQuaternion) const {
+void RigidTransform::CalculateRotationMatrix(Matrix<float, 4, 4>& rotationMatrix, float pitch, float yaw, float roll, bool bUseQuaternion) {
+	orientation.GetEuler(Vec3d(pitch, yaw, roll));
+	orientation.Normalize();
+
 	if (bUseQuaternion) {
-		Quaternion q;
-		q.GetEuler(Vec3d(pitch, yaw, roll));
-		q.Normalize();
-		
-		Matrix<double, 3, 3> m = q.GetRotationMatrix();
-		
+		Matrix<double, 3, 3> m = orientation.GetRotationMatrix();
 		rotationMatrix[0] = m[0];
 		rotationMatrix[1] = m[1];
 		rotationMatrix[2] = m[2];
