@@ -100,7 +100,7 @@ public:
 
 	void Move(const Vec3f& offset);
 	void Move(const Vec3f& dir, float movingSpeed, float elapsedTime);
-	virtual void Rotate(float pitch, float yaw, float roll);
+	void Rotate(float pitch, float yaw, float roll);
 
 	void FillShaderParameter(ShaderParameter& shaderParam, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix, const Light& light, const Camera& Camera, int iObjNo);
 

@@ -56,6 +56,41 @@ bool SceneEdit::PickObject(const Ray& _ray) {
 
 	return true;
 }
+Quaternion SceneEdit::CalcDragRotation(const GameObject& baseObject, const Point2i& prev, const Point2i& cur) {
+	Gizmos::GizmoHandle::eHandle handleType = scene.gizmos.GetEditingHandle();
+	
+	Ray curRay = scene.GetRay(cur, scene.GetSceneSize());
+	Ray prevRay = scene.GetRay(prev, scene.GetSceneSize());
+	
+	Volumef volume;
+	baseObject.GetLocalBoundingBox(volume);
+
+	Matrix<float, 4, 4> worldMatrix = baseObject.GetWorldMatrix();
+	Vec4f vertices[8];
+	vertices[0] = Transform(worldMatrix, Vec4f(volume.min.x, volume.max.y, volume.max.z, 1.0f));
+	vertices[1] = Transform(worldMatrix, Vec4f(volume.max.x, volume.max.y, volume.max.z, 1.0f));
+	vertices[2] = Transform(worldMatrix, Vec4f(volume.max.x, volume.max.y, volume.min.z, 1.0f));
+	vertices[3] = Transform(worldMatrix, Vec4f(volume.min.x, volume.max.y, volume.min.z, 1.0f));
+	vertices[4] = Transform(worldMatrix, Vec4f(volume.min.x, volume.min.y, volume.max.z, 1.0f));
+	vertices[5] = Transform(worldMatrix, Vec4f(volume.max.x, volume.min.y, volume.max.z, 1.0f));
+	vertices[6] = Transform(worldMatrix, Vec4f(volume.max.x, volume.min.y, volume.min.z, 1.0f));
+	vertices[7] = Transform(worldMatrix, Vec4f(volume.min.x, volume.min.y, volume.min.z, 1.0f));
+
+	Planef plane;
+	switch (handleType) {
+	case Gizmos::GizmoHandle::eHandle::TRANSLATE_X:
+	case Gizmos::GizmoHandle::eHandle::TRANSLATE_Y:
+		plane.Build(vertices[0], vertices[4], vertices[5]);
+		break;
+	case Gizmos::GizmoHandle::eHandle::TRANSLATE_Z:
+		plane.Build(vertices[1], vertices[2], vertices[6]);
+		break;
+	}
+
+	Vec3f centerPoint = volume.GetCenter();
+
+	return Quaternion();
+}
 
 Vec3f SceneEdit::CalcDragOffsetInWorld(const GameObject& baseObject, const Point2i& prev, const Point2i& cur) {
 	Gizmos::GizmoHandle::eHandle handleType = scene.gizmos.GetEditingHandle();
@@ -87,11 +122,16 @@ Vec3f SceneEdit::CalcDragOffsetInWorld(const GameObject& baseObject, const Point
 		plane.Build(vertices[0], vertices[4], vertices[5]);
 		break;
 	case Gizmos::GizmoHandle::eHandle::TRANSLATE_Z:
-		plane.Build(vertices[6], vertices[2], vertices[1]);
+		plane.Build(vertices[1], vertices[2], vertices[6]);
 		break;
 	}
 
-	Vec3f distance = plane.GetIntersection(curRay.GetLine()) - plane.GetIntersection(prevRay.GetLine());	
+	
+	if (0 < plane.normal.DotProduct(curRay.GetDirection())) {
+		plane.normal.Set(-plane.normal);
+	}
+	
+	Vec3f distance = plane.GetIntersection(curRay.GetLine()) - plane.GetIntersection(prevRay.GetLine());
 	//LogDebug(L"offset : %.8lf, %.8lf, %.8lf\n", distance.x, distance.y, distance.z);
 	LogDebug(L"Plane - normal: %.8lf, %.8lf, %.8lf - distance: %.8lf\n", plane.normal.x, plane.normal.y, plane.normal.z, plane.distance);
 	return ClampDragOffset(handleType, distance);
@@ -132,7 +172,11 @@ void SceneEdit::RotateSelectedObject(GameObjects& selection) {
 	if (selection.empty())
 		return;
 
+	Quaternion q = CalcDragRotation(*selection.at(0), drag.GetBeginPoint(), drag.GetEndPoint());
 
+	GameObject& selectedObj = *selection.at(0);
+	objMemento.Restore(selectedObj);
+	//selectedObj.Rotate();
 }
 
 void SceneEdit::ProcessEvent(Event& e) {
@@ -158,7 +202,7 @@ void SceneEdit::ProcessEvent(Event& e) {
 			drag.Track(newMousePoint);
 
 			if (drag.IsTracked()) {
-				DoDrag(eDragMode::DRAG_MODE_MOVING);
+				DoDrag(dragMode);
 			}else {
 				DoFocus(newMousePoint);
 			}
@@ -169,9 +213,11 @@ void SceneEdit::ProcessEvent(Event& e) {
 		if (pKeyboardEvent->keyState == KeyboardInput::KeyboardEvent::KEY_STATE::KEY_STATE_UP) {
 			const KeyInfo& keyInfo = pKeyboardEvent->GetInfo();
 			if (keyInfo.key == KEY_R) {
+				dragMode = eDragMode::DRAG_MODE_ROTATING;
 				scene.SetTransformMode(Gizmos::eTransformMode::ROTATE);
 			}
 			if (keyInfo.key == KEY_T) {
+				dragMode = eDragMode::DRAG_MODE_MOVING;
 				scene.SetTransformMode(Gizmos::eTransformMode::TRANSLATE);
 			}
 		}

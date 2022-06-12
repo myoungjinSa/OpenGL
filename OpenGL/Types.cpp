@@ -569,8 +569,8 @@ bool Volume<T>::IsEmpty() const {
 
 template<typename T> inline
 void Volume<T>::SetZero() {
-	max.SetXYZ(T(0), T(0), T(0));
-	min.SetXYZ(T(0), T(0), T(0));
+	max.Set(T(0), T(0), T(0));
+	min.Set(T(0), T(0), T(0));
 }
 
 template<typename T> inline

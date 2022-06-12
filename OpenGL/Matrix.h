@@ -630,7 +630,9 @@ public:
 	Vector3(const Matrix<T, 4, 1>& mat);
 
 	Vector3(const Vector3<T>& v) = default;
-	void SetXYZ(T x, T y, T z);
+
+	void Set(const Vector3<T>& vec);
+	void Set(T x, T y, T z);
 	bool IsZero() const;
 
 	Vector3 Cross(const Vector3& v) const;
@@ -760,7 +762,11 @@ T Vector3<T>::GetLength() const {
 }
 
 template<typename T> inline
-void Vector3<T>::SetXYZ(T _x, T _y, T _z) {
+void Vector3<T>::Set(const Vector3<T>& vec) {
+	Set(vec.x, vec.y, vec.z);
+}
+template<typename T> inline
+void Vector3<T>::Set(T _x, T _y, T _z) {
 	x = _x; y = _y; z = _z;
 }
 
@@ -950,7 +956,7 @@ public:
 	Vector4(const Vector4<T>& other) = default;
 	Vector4(const Matrix<T, 1, 4>& mat);
 	Vector4(const Matrix<T, 4, 1>& mat);
-	void SetXYZW(T x, T y, T z, T w);
+	void Set(T x, T y, T z, T w);
 	bool IsZero() const;
 
 	T* ConvertToValue();
@@ -1037,7 +1043,7 @@ T* Vector4<T>::ConvertToValue() {
 }
 
 template<typename T> inline
-void Vector4<T>::SetXYZW(T _x, T _y, T _z, T _w) {
+void Vector4<T>::Set(T _x, T _y, T _z, T _w) {
 	x = _x; y = _y; z = _z; w = _w;
 }
 

@@ -205,9 +205,9 @@ public:
 	bool operator==(const Plane& other) const { return normal == other.normal && distance == other.distance; }
 
 	void Build(const Vec3f& v1, const Vec3f& v2, const Vec3f& v3) {
-		Vec3f edge1 = v2 - v1;
+		Vec3f edge1 = v1 - v2;
 		Vec3f edge2 = v3 - v2;
-		normal = edge1.Cross(edge2);
+		normal = edge2.Cross(edge1);
 
 		normal.Normalize();
 		distance = -normal.DotProduct(v1);
@@ -218,10 +218,10 @@ public:
 		Vec3f v2 = Vec3f(_v2.x, _v2.y, _v2.z);
 		Vec3f v3 = Vec3f(_v3.x, _v3.y, _v3.z);
 
-		Vec3f edge1 = v2 - v1;
+		Vec3f edge1 = v1 - v2;
 		Vec3f edge2 = v3 - v2;
-		normal = edge1.Cross(edge2);
-
+		normal = edge2.Cross(edge1);
+	
 		normal.Normalize();
 		distance = -normal.DotProduct(v1);
 	}
@@ -232,7 +232,7 @@ public:
 	}
 
 	void Set(const Vec4f& plane) {
-		normal.SetXYZ(plane.x, plane.y, plane.z);
+		normal.Set(plane.x, plane.y, plane.z);
 		distance = plane.w;
 	}
 

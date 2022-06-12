@@ -25,7 +25,7 @@ public:
 
 	static bool IsSame(double left, double right);
 	static bool IsSame(float left, float right);
-	
+
 	static Matrix<float, 4, 4> Multiply(const Matrix<float, 4, 4>& mat1, const Matrix<float, 4, 4>& mat2);
 
 	static const float PI;
