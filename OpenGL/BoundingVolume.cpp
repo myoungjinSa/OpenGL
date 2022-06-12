@@ -160,10 +160,9 @@ void BoundingBox::Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatr
 	renderer.SetDrawMode(Renderer::DrawMode::LINES);
 	
 	ShaderParameter shaderParam;
-	Matrix<float, 4, 4> worldMatrix = Matrix<float, 4, 4>::Identity();
 	Matrix<float, 4, 4> worldViewMatrix = Matrix<float, 4, 4>::Identity();
 
-	MakeWorldMatrix(pGameObject->GetPosition(), pGameObject->GetScale(), pGameObject->GetLook(), pGameObject->GetRight(), pGameObject->GetUp(), worldMatrix);
+	Matrix<float, 4, 4> worldMatrix = pGameObject->GetWorldMatrix();
 	MakeWorldViewMatrix(worldMatrix, viewMatrix, worldViewMatrix);
 	shaderParam.worldViewMatrix = worldViewMatrix;
 	shaderParam.projectionMatrix = projectionMatrix;

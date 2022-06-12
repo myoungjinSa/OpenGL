@@ -28,6 +28,49 @@ public :
 	explicit Matrix(const T* values);
 
 	Matrix(std::initializer_list<T> values);
+	
+	Matrix(const Matrix& other) {
+		int k = 0;
+		for (size_t iCol = 0; iCol < other.cols; iCol++) {
+			for (size_t iRow = 0; iRow < other.rows; iRow++) {
+				value[k] = static_cast<T>(other.value[k]);
+				k++;
+			}
+		}
+	}
+	template<typename U, int m, int n>
+	Matrix(const Matrix<U, m, n>& other) {
+		int k = 0;
+		for (size_t iCol = 0; iCol < other.cols; iCol++) {
+			for (size_t iRow = 0; iRow < other.rows; iRow++) {
+				value[k] = static_cast<T>(other.value[k]);
+				k++;
+			}
+		}
+	}
+	const Matrix<T, m, n>& operator=(const Matrix& other) {
+		Matrix<T, m, n> mat;
+		int k = 0;
+		for (size_t iCol = 0; iCol < other.cols; iCol++) {
+			for (size_t iRow = 0; iRow < other.rows; iRow++) {
+				value[k] = static_cast<T>(other.value[k]);
+				k++;
+			}
+		}
+		return mat;
+	}
+	template<typename U, int m, int n>
+	const Matrix<T, m, n>& operator=(const Matrix<U, m, n>& other) {
+		Matrix<T, m, n> mat;
+		int k = 0;		
+		for (size_t iCol = 0; iCol < other.cols; iCol++) {
+			for (size_t iRow = 0; iRow < other.rows; iRow++) {
+				value[k] = static_cast<T>(other.value[k]);
+				k++;
+			}
+		}
+		return mat;
+	}
 
 	static Matrix Identity();
 	static Matrix All(T alpha);
@@ -70,7 +113,6 @@ public :
 	void operator*(T val) const;
 	Matrix<T, m, n>& operator/(T val);
 
-	
 	T value[m * n];
 };
 
@@ -86,9 +128,6 @@ double GetDeterminant(const Matrix<float, 4, 4>& other);
 Matrix<float, 2, 2> Inverse(const Matrix<float, 2, 2>& mat);
 Matrix<float, 3, 3> Inverse(const Matrix<float, 3, 3>& mat);
 Matrix<float, 4, 4> Inverse(const Matrix<float, 4, 4>& mat);
-
-Matrix<float, 2, 2> Truncate(const Matrix<float, 3, 3>& mat);
-Matrix<float, 3, 3> Truncate(const Matrix<float, 4, 4>& mat);
 
 template<typename T, int m, int n> inline
 Matrix<T, m, n>::Matrix()
@@ -357,6 +396,7 @@ Matrix<T, m, n>& Matrix<T, m, n>::operator/(T val) {
 	return *this;
 }
 
+
 ////////////////////////////////////////////////////////////////////
 //Vector
 template<typename T>
@@ -603,6 +643,8 @@ public:
 	T* ConvertToValue();
 
 	template<typename T2> operator Vector3<T2>() const;
+
+
 	Vector3& operator+=(const Vector3& rhs);
 	Vector3& operator-=(const Vector3& rhs);
 	Vector3& operator/=(const Vector3& rhs);

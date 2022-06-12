@@ -15,12 +15,12 @@ public:
 	Vec3f DetransformVector(const Vec3f& vec)const;
 	Vec3f DetransformPoint(const Vec3f& point)const;
 
-	void AddPosition(const Vec3f& position);
-	void AddPosition(float x, float y, float z);
-	void SetPosition(const Vec3f& position);
-	void SetPosition(float x, float y, float z);
-	Vec3f GetPosition() const;
-	void GetPosition(std::array<float, 4>& position);
+	void AddPosition(const Vec3f& _position) { position += _position; }
+	void AddPosition(float x, float y, float z) { AddPosition(Vec3f(x, y, z)); }
+	void SetPosition(const Vec3f& _position) { position = _position; }
+	void SetPosition(float x, float y, float z) { position = Vec3f(x, y, z); }
+	Vec3f GetPosition() const { return position; }
+
 	Matrix<float, 3, 3> GetRotationMatrix() const;
 
 
@@ -28,40 +28,34 @@ public:
 	Vec4f Rotate(const Vec3f& pos, const Vec3f& pivot, float pitch, float yaw, float roll);
 	void Rotate(float pitch, float yaw, float roll);
 	
-	void SetScale(float sx, float sy, float sz);
-	void SetScale(const Vec3f& size);
-	Vec3f GetScale() const;
+	void SetScale(float sx, float sy, float sz) { scale = Vec3f(sx, sy, sz); }
+	void SetScale(const Vec3f& size) { scale = size; }
+	Vec3f GetScale() const { return scale; }
 
 	void Move(const Vec3f& offset);
 	void Move(const Vec3f& direction, float elapsedTime);
 
-	void SetLook(const Vec3f& look);
-	void SetLook(Vec3f&& look) noexcept;
+	void SetLook(const Vec3f& _look) { look = _look; }
+	void SetUp(const Vec3f& _up) { up = _up; }
+	void SetRight(const Vec3f& _right) { right = _right; }
 
-	void SetUp(const Vec3f& up);
-	void SetUp(Vec3f&& up) noexcept;
+	Vec3f GetLook() const { return look; }
+	Vec3f GetRight() const { return right; }
+	Vec3f GetUp() const { return up; }
 
-	void SetRight(const Vec3f& right);
-	void SetRight(Vec3f&& right) noexcept;
+	void  SetMovingSpeed(float speed) { movingSpeed = speed; }
+	float GetMovingSpeed() const { return movingSpeed; }
 
-	Vec3f GetLook() const;
-	Vec3f GetRight() const;
-	Vec3f GetUp() const;
-
-	void  SetMovingSpeed(float speed);
-	float GetMovingSpeed() const;
-
-	const Matrix<float, 4, 4>& GetWorldMatrix() const;
-	void SetWorldMatrix(const Matrix<float, 4, 4>& worldMatrix);
+	Matrix<float, 4, 4> GetWorldMatrix() const;
 	void CalculateRotationMatrix(Matrix<float, 4, 4>& rotationMatrix, float pitch, float yaw, float roll, bool bUseQuaternion = true);
-private:
-	void SetTransform();
 private:
 	Vec3f position;
 	Quaternion orientation;
 	Vec3f scale;
 
-	Matrix<float, 4, 4> worldMatrix;
+	Vec3f look;
+	Vec3f up;
+	Vec3f right;
 
 	float movingSpeed;
 };

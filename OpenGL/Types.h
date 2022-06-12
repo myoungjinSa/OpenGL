@@ -213,6 +213,19 @@ public:
 		distance = -normal.DotProduct(v1);
 	}
 
+	void Build(const Vec4f& _v1, const Vec4f& _v2, const Vec4f& _v3) {
+		Vec3f v1 = Vec3f(_v1.x, _v1.y, _v1.z);
+		Vec3f v2 = Vec3f(_v2.x, _v2.y, _v2.z);
+		Vec3f v3 = Vec3f(_v3.x, _v3.y, _v3.z);
+
+		Vec3f edge1 = v2 - v1;
+		Vec3f edge2 = v3 - v2;
+		normal = edge1.Cross(edge2);
+
+		normal.Normalize();
+		distance = -normal.DotProduct(v1);
+	}
+
 	void Set(const Vec3f &_normal, T _distance) {
 		normal = _normal;
 		distance = _distance;

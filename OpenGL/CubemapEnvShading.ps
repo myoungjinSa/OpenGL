@@ -42,7 +42,7 @@ void main(void){
 
 	vec4 reflectedColor = texture(environTexture, fs_in.reflectedVector);
     vec4 refractedColor = texture(environTexture, fs_in.refractedVector);
-    vec4 environColor = mix(reflectedColor, refractedColor, 0.5);
+    vec4 environColor = mix(reflectedColor, refractedColor, 0.3);
 
-	out_color = mix(out_color, environColor, 0.7);
+	out_color = mix(out_color, environColor, 0.5);
 }

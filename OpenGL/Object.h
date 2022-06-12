@@ -6,10 +6,8 @@
 #include "Component.h"
 #include "Transform.h"
 
-void MakeWorldMatrix(const Vec3f& position, const Vec3f& scale, const Vec3f& look, const Vec3f& right, const Vec3f& up, Matrix<float, 4, 4>& worldMatrix);
 void MakeWorldViewMatrix(const Matrix<float, 4, 4>& worldMatrix, const Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& modelViewMatrix);
 void MakeNormalMatrix(const Matrix<float, 4, 4>& worldMatrix, Matrix<float, 3, 3>& normalMatrix);
-
 
 class Material;
 class Mesh;
@@ -108,8 +106,8 @@ public:
 
 	void GetWorldBoundingBox(Volumef& volume)const;
 	void GetLocalBoundingBox(Volumef& volume)const;
+	Matrix<float, 4, 4> GetWorldMatrix() const;
 
-	
 	std::list<std::shared_ptr<Mesh>>& GetMeshes() { return meshes; }
 protected:
 	std::vector<std::shared_ptr<Component>> components;

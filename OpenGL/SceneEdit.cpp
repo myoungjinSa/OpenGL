@@ -66,19 +66,19 @@ Vec3f SceneEdit::CalcDragOffsetInWorld(const GameObject& baseObject, const Point
 	Ray prevRay = scene.GetRay(prev, scene.GetSceneSize());
 
 	Volumef volume;
-	baseObject.GetWorldBoundingBox(volume);
+	baseObject.GetLocalBoundingBox(volume);
 
-	Matrix<float, 3, 3> worldMatrix = Matrix<float, 3, 3>::Identity();
+	Matrix<float, 4, 4> worldMatrix = baseObject.GetWorldMatrix();
 	
-	Vec3f vertices[8];
-	vertices[0] = Transform(worldMatrix, Vec3f(volume.min.x, volume.max.y, volume.max.z));
-	vertices[1] = Transform(worldMatrix, Vec3f(volume.max.x, volume.max.y, volume.max.z));
-	vertices[2] = Transform(worldMatrix, Vec3f(volume.max.x, volume.max.y, volume.min.z));
-	vertices[3] = Transform(worldMatrix, Vec3f(volume.min.x, volume.max.y, volume.min.z));
-	vertices[4] = Transform(worldMatrix, Vec3f(volume.min.x, volume.min.y, volume.max.z));
-	vertices[5] = Transform(worldMatrix, Vec3f(volume.max.x, volume.min.y, volume.max.z));
-	vertices[6] = Transform(worldMatrix, Vec3f(volume.max.x, volume.min.y, volume.min.z));
-	vertices[7] = Transform(worldMatrix, Vec3f(volume.min.x, volume.min.y, volume.min.z));
+	Vec4f vertices[8];
+	vertices[0] = Transform(worldMatrix, Vec4f(volume.min.x, volume.max.y, volume.max.z, 1.0f));
+	vertices[1] = Transform(worldMatrix, Vec4f(volume.max.x, volume.max.y, volume.max.z, 1.0f));
+	vertices[2] = Transform(worldMatrix, Vec4f(volume.max.x, volume.max.y, volume.min.z, 1.0f));
+	vertices[3] = Transform(worldMatrix, Vec4f(volume.min.x, volume.max.y, volume.min.z, 1.0f));
+	vertices[4] = Transform(worldMatrix, Vec4f(volume.min.x, volume.min.y, volume.max.z, 1.0f));
+	vertices[5] = Transform(worldMatrix, Vec4f(volume.max.x, volume.min.y, volume.max.z, 1.0f));
+	vertices[6] = Transform(worldMatrix, Vec4f(volume.max.x, volume.min.y, volume.min.z, 1.0f));
+	vertices[7] = Transform(worldMatrix, Vec4f(volume.min.x, volume.min.y, volume.min.z, 1.0f));
 
 	Planef plane;
 	switch (handleType) {
@@ -87,11 +87,13 @@ Vec3f SceneEdit::CalcDragOffsetInWorld(const GameObject& baseObject, const Point
 		plane.Build(vertices[0], vertices[4], vertices[5]);
 		break;
 	case Gizmos::GizmoHandle::eHandle::TRANSLATE_Z:
-		plane.Build(vertices[0], vertices[1], vertices[2]);
+		plane.Build(vertices[6], vertices[2], vertices[1]);
 		break;
 	}
 
 	Vec3f distance = plane.GetIntersection(curRay.GetLine()) - plane.GetIntersection(prevRay.GetLine());	
+	//LogDebug(L"offset : %.8lf, %.8lf, %.8lf\n", distance.x, distance.y, distance.z);
+	LogDebug(L"Plane - normal: %.8lf, %.8lf, %.8lf - distance: %.8lf\n", plane.normal.x, plane.normal.y, plane.normal.z, plane.distance);
 	return ClampDragOffset(handleType, distance);
 }
 

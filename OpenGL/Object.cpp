@@ -12,28 +12,6 @@
 #include "Light.h"
 #include "Camera.h"
 
-void MakeWorldMatrix(const Vec3f& position, const Vec3f& scale, const Vec3f& look, const Vec3f& right, const Vec3f& up, Matrix<float, 4, 4>& worldMatrix) {
-	//Right
-	worldMatrix.value[0] = right.x * scale.x;
-	worldMatrix.value[1] = right.y;
-	worldMatrix.value[2] = right.z;
-
-	//Up
-	worldMatrix.value[4] = up.x;
-	worldMatrix.value[5] = up.y * scale.y;
-	worldMatrix.value[6] = up.z;
-
-	//Look
-	worldMatrix.value[8] = look.x;
-	worldMatrix.value[9] = look.y;
-	worldMatrix.value[10] = look.z * scale.z;
-
-	//Position
-	worldMatrix.value[12] = position.x;
-	worldMatrix.value[13] = position.y;
-	worldMatrix.value[14] = position.z;
-	worldMatrix.value[15] = 1.0f;
-}
 
 void MakeWorldViewMatrix(const Matrix<float, 4, 4>& worldMatrix, const Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& worldViewMatrix) {
 	//modelviewMatrix;
@@ -41,11 +19,9 @@ void MakeWorldViewMatrix(const Matrix<float, 4, 4>& worldMatrix, const Matrix<fl
 }
 
 void MakeNormalMatrix(const Matrix<float, 4, 4>& worldViewMatrix, Matrix<float, 3, 3>& normalMatrix) {
-	Matrix<float, 3, 3> worldViewMatrix3x3 = Truncate(worldViewMatrix);
+	Matrix<float, 3, 3> worldViewMatrix3x3 = worldViewMatrix.Truncate<3, 3>(0, 0);
 	normalMatrix = Inverse(worldViewMatrix3x3).Transpose();
 }
-
-
 
 GameObject::GameObject() 
 	: diffuseMap(nullptr), normalMap(nullptr), environMap(nullptr)
@@ -143,11 +119,11 @@ bool GameObject::Intersect(const Ray& ray, double& distance) {
 }
 
 void GameObject::FillShaderParameter(ShaderParameter& shaderParam, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix, const Light& light, const Camera& Camera, int iObj) {
-	Matrix<float, 4, 4> worldMatrix = Matrix<float, 4, 4>::Identity();
-	MakeWorldMatrix(GetPosition(), GetScale(), GetLook(), GetRight(), GetUp(), worldMatrix);
+	Matrix<float, 4, 4> worldMatrix = transform->GetWorldMatrix();
 	Matrix<float, 4, 4> worldViewMatrix = Matrix<float, 4, 4>::Identity();
-	Matrix<float, 3, 3> normalMatrix = Matrix<float, 3, 3>::Identity();
 	MakeWorldViewMatrix(worldMatrix, viewMatrix, worldViewMatrix);
+	
+	Matrix<float, 3, 3> normalMatrix = Matrix<float, 3, 3>::Identity();
 	MakeNormalMatrix(worldViewMatrix, normalMatrix);
 
 	shaderParam.worldMatrix = worldMatrix;
@@ -187,6 +163,13 @@ void GameObject::GetLocalBoundingBox(Volumef& volume) const{
 		return;
 
 	volume = boundingVolume->GetVolume();
+}
+
+Matrix<float, 4, 4> GameObject::GetWorldMatrix() const {
+	if (!transform)
+		return Matrix<float, 4, 4>::Identity();
+
+	return transform->GetWorldMatrix();
 }
 
 bool IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const Vec3f& v2, bool bFrontOnly, double& distance) {
