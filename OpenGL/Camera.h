@@ -35,10 +35,10 @@ public:
 	void Render(Renderer& renderer, ShaderParameter& shaderParam)override {}
 
 	void GetViewMatrix(Matrix<float, 4, 4>& Matrix) const;
-	void BuildPerspectiveFovLHMatrix(Matrix<float, 4, 4>& matrix);
-	
+	void SetFrustum(float width, float height, float _near, float _far);
 	void SetViewport(const Rect2f& _viewPort);
-
+	Matrix<float, 4, 4> GetFrustum() const { return frustum; }
+	
 	const Viewport& GetViewport() const { return viewport; }
 	float GetFov() const { return MathUtils::PI / 4.0f; }
 	void SetNear(float _Near) { Near = _Near; }
@@ -58,7 +58,8 @@ private:
 
 	Viewport viewport;
 	Matrix<float, 4, 4> viewMatrix;
-
+	Matrix<float, 4, 4> frustum;
+	
 	float Near;
 	float Far;
 

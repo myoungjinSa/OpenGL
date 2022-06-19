@@ -151,27 +151,36 @@ Vec3f Camera::GetLook() const {
 	return Vec3f(viewMatrix.Col(2));
 }
 
-void Camera::BuildPerspectiveFovLHMatrix(Matrix<float, 4, 4>& matrix) {
+//left handed
+void Camera::SetFrustum(float width, float height, float _near, float _far) {
+	if (MathUtils::IsSame(width, 0.0f) || MathUtils::IsSame(height, 0.0f) || MathUtils::IsSame(_near, _far)) {
+		frustum = Matrix<float, 4, 4>::Identity();
+		return;
+	}
+
 	float fov = GetFov();
-	matrix[0] = (1.0f / (GetAspectRatio() * tan(fov * 0.5f)));
-	matrix[1] = 0.0f;
-	matrix[2] = 0.0f;
-	matrix[3] = 0.0f;
+	float aspectRatio = width / MAX(1.0f, height);
 
-	matrix[4] = 0.0f;
-	matrix[5] = 1.0f / tan(fov * 0.5f);
-	matrix[6] = 0.0f;
-	matrix[7] = 0.0f;
+	frustum.value[0] = (1.0f / (aspectRatio * tan(fov * 0.5f)));
+	frustum.value[1] = 0;
+	frustum.value[2] = 0;
+	frustum.value[3] = 0;
 
-	matrix[8] = 0.0f;
-	matrix[9] = 0.0f;
-	matrix[10] = Far / (Far - Near);
-	matrix[11] = 1.0f;
+	frustum.value[4] = 0;
+	frustum.value[5] = 1.0f / tan(fov * 0.5f);
+	frustum.value[6] = 0;
+	frustum.value[7] = 0;
 
-	matrix[12] = 0.0f;
-	matrix[13] = 0.0f;
-	matrix[14] = (-Near * Far) / (Far - Near);
-	matrix[15] = 0.0f;
+	frustum.value[8] = 0;
+	frustum.value[9] = 0;
+	frustum.value[10] = (_far) / (_far - _near);
+	frustum.value[11] = 1;
+
+	frustum.value[12] = 0;
+	frustum.value[13] = 0;
+	frustum.value[14] = -_near * _far / (_far - _near);
+	frustum.value[15] = 0;
+
 }
 
 void Camera::ProcessEvent(Event& e) {

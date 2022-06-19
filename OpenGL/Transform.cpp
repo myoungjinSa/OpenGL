@@ -129,17 +129,17 @@ void RigidTransform::Move(const Vec3f& direction, float elapsedTime) {
 
 Matrix<float, 4, 4> RigidTransform::GetWorldMatrix() const {
 	Matrix<float, 4, 4> worldMatrix = Matrix<float, 4, 4>::Identity(); 
-	worldMatrix.value[0] = right.x;
+	worldMatrix.value[0] = scale.x * right.x;
 	worldMatrix.value[1] = right.y;
 	worldMatrix.value[2] = right.z;
 	
 	worldMatrix.value[4] = up.x;
-	worldMatrix.value[5] = up.y;
+	worldMatrix.value[5] = scale.y * up.y;
 	worldMatrix.value[6] = up.z;
 
 	worldMatrix.value[8] = look.x;
 	worldMatrix.value[9] = look.y;
-	worldMatrix.value[10] = look.z;
+	worldMatrix.value[10] = scale.z * look.z;
 
 	worldMatrix.value[12] = position.x;
 	worldMatrix.value[13] = position.y;

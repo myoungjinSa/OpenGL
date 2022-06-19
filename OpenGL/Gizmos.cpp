@@ -232,13 +232,13 @@ bool Gizmos::Initialize(Renderer& renderer) {
 			MeshBuilder meshBuilder;
 			meshes.push_back(std::make_shared<Mesh>());
 			meshBuilder.Begin();
-			meshBuilder.AddCylinder(Vec3f(0.25f, 0.0f, 0.0f), Vec3f(0.0f, 0.01f, 0.0f), Vec3f(0.0f, 0.0f, 0.01f), 32, RGBA::RED);
+			meshBuilder.AddCylinder(Vec3f(orgSize, 0.0f, 0.0f), Vec3f(0.0f, 0.01f, 0.0f), Vec3f(0.0f, 0.0f, 0.01f), 32, RGBA::RED);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 			meshBuilder.End();
 
 			meshes.push_back(std::make_shared<Mesh>());
 			meshBuilder.Begin();
-			meshBuilder.AddXAxisCone(Vec3f(0.25f, 0.0f, 0.0f), 0.1f, 0.05f, 0.05f, 0.1f, RGBA::RED);
+			meshBuilder.AddXAxisCone(Vec3f(orgSize, 0.0f, 0.0f), 0.1f, 0.05f, 0.05f, 0.1f, RGBA::RED);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 			meshBuilder.End();
 
@@ -254,13 +254,13 @@ bool Gizmos::Initialize(Renderer& renderer) {
 			MeshBuilder meshBuilder;
 			meshes.push_back(std::make_shared<Mesh>());
 			meshBuilder.Begin();
-			meshBuilder.AddCylinder(Vec3f(0.0f, 0.25f, 0.0f), Vec3f(0.0f, 0.0f, 0.01f), Vec3f(0.01f, 0.0f, 0.0f), 32, RGBA::GREEN);
+			meshBuilder.AddCylinder(Vec3f(0.0f, orgSize, 0.0f), Vec3f(0.0f, 0.0f, 0.01f), Vec3f(0.01f, 0.0f, 0.0f), 32, RGBA::GREEN);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 			meshBuilder.End();
 
 			meshes.push_back(std::make_shared<Mesh>());
 			meshBuilder.Begin();
-			meshBuilder.AddYAxisCone(Vec3f(0.0f, 0.25f, 0.0f), 0.05f, 0.1f, 0.05f, 0.1f, RGBA::GREEN);
+			meshBuilder.AddYAxisCone(Vec3f(0.0f, orgSize, 0.0f), 0.05f, 0.1f, 0.05f, 0.1f, RGBA::GREEN);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 			meshBuilder.End();
 			return true;
@@ -277,13 +277,13 @@ bool Gizmos::Initialize(Renderer& renderer) {
 			MeshBuilder meshBuilder;
 			meshes.push_back(std::make_shared<Mesh>());
 			meshBuilder.Begin();
-			meshBuilder.AddCylinder(Vec3f(0.0f, 0.0f, 0.25f), Vec3f(0.01f, 0.0f, 0.0f), Vec3f(0.0f, 0.01f, 0.0f), 32, RGBA::BLUE);
+			meshBuilder.AddCylinder(Vec3f(0.0f, 0.0f, orgSize), Vec3f(0.01f, 0.0f, 0.0f), Vec3f(0.0f, 0.01f, 0.0f), 32, RGBA::BLUE);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 			meshBuilder.End();
 
 			meshes.push_back(std::make_shared<Mesh>());
 			meshBuilder.Begin();
-			meshBuilder.AddZAxisCone(Vec3f(0.0f, 0.0f, 0.25f), 0.05f, 0.05f, 0.1f, 0.1f, RGBA::BLUE);
+			meshBuilder.AddZAxisCone(Vec3f(0.0f, 0.0f, orgSize), 0.05f, 0.05f, 0.1f, 0.1f, RGBA::BLUE);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 			meshBuilder.End();
 			
@@ -300,7 +300,7 @@ bool Gizmos::Initialize(Renderer& renderer) {
 			MeshBuilder meshBuilder;
 			meshes.push_back(std::make_shared<Mesh>());
 			meshBuilder.Begin();
-			meshBuilder.AddXAxisCircle(0.25f, 0.2f, RGBA::RED);
+			meshBuilder.AddXAxisCircle(orgSize, orgSize - 0.05f, RGBA::RED);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex), Mesh::TriangleType::MeshType_Strip);
 			meshBuilder.End();
 
@@ -317,7 +317,7 @@ bool Gizmos::Initialize(Renderer& renderer) {
 			MeshBuilder meshBuilder;
 			meshes.push_back(std::make_shared<Mesh>());
 			meshBuilder.Begin();
-			meshBuilder.AddYAxisCircle(0.25f, 0.2f, RGBA::GREEN);
+			meshBuilder.AddYAxisCircle(orgSize, orgSize - 0.05f, RGBA::GREEN);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex), Mesh::TriangleType::MeshType_Strip);
 			meshBuilder.End();
 
@@ -335,7 +335,7 @@ bool Gizmos::Initialize(Renderer& renderer) {
 			MeshBuilder meshBuilder;
 			meshes.push_back(std::make_shared<Mesh>());
 			meshBuilder.Begin();
-			meshBuilder.AddZAxisCircle(0.25f, 0.2f, RGBA::BLUE);
+			meshBuilder.AddZAxisCircle(orgSize, orgSize - 0.05f, RGBA::BLUE);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex), Mesh::TriangleType::MeshType_Strip);
 			meshBuilder.End();
 
@@ -369,11 +369,14 @@ const GameObject& Gizmos::GetAttachedObjects(uint32_t index) const {
 	return *(targets.at(index));
 }
 
-float Gizmos::ScaleByDistanceToTarget(const Vec3f& targetPos, float yfov, float pixelScale) const {
-	float dist = ::Length(targetPos - transform.get()->GetPosition());
-	return std::tan(yfov) * dist;
-}
+Vec3f Gizmos::CalcGizmoSize(const Camera& camera) const {
+	Vec3f cameraPosition = camera.GetPosition();
+	Vec3f position = GetPosition();
 
+	Vec3f direction = cameraPosition - position;
+	float distance = sqrt((double)direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
+	return orgSize * distance;
+}
 #ifdef _DEBUG
 bool Gizmos::VerifyGizmos() const{
 	if (!handles.DoesExist(GizmoHandle::eHandle::TRANSLATE_X))	return false;
@@ -447,10 +450,9 @@ void Gizmos::Render(Renderer& renderer, Camera* pCamera, const Scene& scene) {
 		return;
 
 	transform->SetPosition(targets[0]->GetPosition());
-	
-
+	transform->SetScale(CalcGizmoSize(*pCamera));
 	pCamera->GetViewMatrix(shaderParam.viewMatrix);
-	
+
 	Matrix<float, 4, 4> worldMatrix = transform->GetWorldMatrix();
 	Matrix<float, 4, 4> worldViewMatrix = Matrix<float, 4, 4>::Identity();
 	MakeWorldViewMatrix(worldMatrix, shaderParam.viewMatrix, worldViewMatrix);

@@ -87,7 +87,8 @@ public:
 	
 		GizmoHandle::eHandle Intersect(const Ray& ray, double& distance, eTransformMode transformMode);
 	};
-	
+	const float orgSize = 0.25f;
+
 	Gizmos();
 
 	bool Initialize(Renderer& renderer);
@@ -104,7 +105,7 @@ public:
 	bool IsAlreadyAttached() const;
 	const GameObject& GetAttachedObjects(uint32_t index) const;
 
-	float ScaleByDistanceToTarget(const Vec3f& targetPos, float yfov, float pixelScale) const;
+	Vec3f CalcGizmoSize(const Camera& Camera)const;
 	eTransformMode GetMode() const;
 
 	GizmoHandle::eHandle GetEditingHandle() const { return context.editingHandle; }
