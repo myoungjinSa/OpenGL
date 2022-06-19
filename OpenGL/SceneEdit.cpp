@@ -12,8 +12,7 @@ void SceneEdit::ObjectMemento::Restore(GameObject& gameObject) {
 
 
 SceneEdit::SceneEdit(class Scene& _scene)
-	: scene(_scene),
-	  dragMode(eDragMode::DRAG_MODE_MOVING)
+	: scene(_scene)
 {
 	picker.SetNear(scene.GetCamera().GetNear());
 	picker.SetFar(scene.GetCamera().GetFar());
@@ -178,7 +177,7 @@ void SceneEdit::ProcessEvent(Event& e) {
 			drag.Track(newMousePoint);
 
 			if (drag.IsTracked()) {
-				DoDrag(dragMode);
+				DoDrag();
 			}else {
 				DoFocus(newMousePoint);
 			}
@@ -189,11 +188,9 @@ void SceneEdit::ProcessEvent(Event& e) {
 		if (pKeyboardEvent->keyState == KeyboardInput::KeyboardEvent::KEY_STATE::KEY_STATE_UP) {
 			const KeyInfo& keyInfo = pKeyboardEvent->GetInfo();
 			if (keyInfo.key == KEY_R) {
-				dragMode = eDragMode::DRAG_MODE_ROTATING;
 				scene.SetTransformMode(Gizmos::eTransformMode::ROTATE);
 			}
 			if (keyInfo.key == KEY_T) {
-				dragMode = eDragMode::DRAG_MODE_MOVING;
 				scene.SetTransformMode(Gizmos::eTransformMode::TRANSLATE);
 			}
 		}
@@ -210,14 +207,12 @@ void SceneEdit::DoFocus(const Point2i& pt) {
 		}
 	}
 }
-void SceneEdit::DoDrag(eDragMode dragMode) {
-	if (dragMode == eDragMode::DRAG_MODE_NONE)
-		return;
-
+void SceneEdit::DoDrag() {
+	
 	GameObjects selectedObjects = picker.GetSelectedObjects();
-	if (dragMode == eDragMode::DRAG_MODE_MOVING) {
+	if (scene.gizmos.GetTransformMode() == Gizmos::eTransformMode::TRANSLATE) {
 		MoveSelectedObject(selectedObjects);
-	}else if (dragMode == eDragMode::DRAG_MODE_ROTATING) {
+	}else if (scene.gizmos.GetTransformMode() == Gizmos::eTransformMode::ROTATE) {
 		RotateSelectedObject(selectedObjects);
 	}
 }

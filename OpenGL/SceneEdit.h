@@ -11,13 +11,12 @@ class Ray;
 
 class SceneEdit : public Observer{
 public:
-	enum class eDragMode {
+	enum eDragMode {
 		DRAG_MODE_NONE,
-		DRAG_MODE_MOVING,
-		DRAG_MODE_SIZING,
-		DRAG_MODE_ROTATING,
+		DRAG_MODE_TRANSLATE,
+		DRAG_MODE_ROTATE,
+		DRAG_MODE_SCALE,
 	};
-
 	class ObjectMemento {
 	public:
 		ObjectMemento() = default;
@@ -33,7 +32,7 @@ public:
 	~SceneEdit();
 
 	void DoFocus(const Point2i& pt);
-	void DoDrag(eDragMode dragMode);
+	void DoDrag();
 
 	bool PickObject(const Ray& ray);
 
@@ -45,7 +44,6 @@ private:
 	GameObjectPicker picker;
 	Scene& scene;
 	Drag drag;
-	eDragMode dragMode;
 	DragContext dragContext;
 	ObjectMemento objMemento;
 
