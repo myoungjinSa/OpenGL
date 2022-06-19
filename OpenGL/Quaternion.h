@@ -199,6 +199,7 @@ public:
 		return matrix;
 	}
 
+
 	/**
 	* @brief Computes the product of this quaternion with the
 	* quaternion 'rhs'.
@@ -252,25 +253,41 @@ public:
 
 		@Param euler vector in order : roll - pitch - yaw
 	*/
+	//void GetEuler(const Vector3<double>& euler) {
+	//	double c1 = cos(euler.z * 0.5);
+	//	double c2 = cos(euler.y * 0.5);
+	//	double c3 = cos(euler.x * 0.5);
+
+	//	double s1 = sin(euler.z * 0.5);
+	//	double s2 = sin(euler.y * 0.5);
+	//	double s3 = sin(euler.x * 0.5);
+
+	//	value[0] = c1 * c2 * s3 - s1 * s2 * c3;
+	//	value[1] = c1 * s2 * c3 + s1 * c2 * s3;
+	//	value[2] = s1 * c2 * c3 - c1 * s2 * s3;
+	//	value[3] = c1 * c2 * c3 + s1 * s2 * s3;
+	//}
+
+	///////////////////////////////////////////////
+	//pitch-yaw-roll in order
 	void GetEuler(const Vector3<double>& euler) {
-		double c1 = cos(euler.z * 0.5);
+		double c1 = cos(euler.x * 0.5);
 		double c2 = cos(euler.y * 0.5);
-		double c3 = cos(euler.x * 0.5);
+		double c3 = cos(euler.z * 0.5);
 
-		double s1 = sin(euler.z * 0.5);
+		double s1 = sin(euler.x * 0.5);
 		double s2 = sin(euler.y * 0.5);
-		double s3 = sin(euler.x * 0.5);
+		double s3 = sin(euler.z * 0.5);
 
-		value[0] = c1 * c2 * s3 - s1 * s2 * c3;
-		value[1] = c1 * s2 * c3 + s1 * c2 * s3;
-		value[2] = s1 * c2 * c3 - c1 * s2 * s3;
-		value[3] = c1 * c2 * c3 + s1 * s2 * s3;
+		value[0] = c3 * c2 * s1 + s3 * s2 * c1;
+		value[1] = c3 * s2 * c1 - s3 * c2 * s1;
+		value[2] = s3 * c2 * c1 + c3 * s2 * s1;
+		value[3] = c3 * c2 * c1 - s3 * s2 * s1;
 	}
 
 	/*
 		Returns an equivalent euler angle representation of this quaternion.
-
-		@return Euler angles in roll - pitch - yaw order.
+		@return Euler angles in pitch - yaw - roll order. (same roll - pitch - yaw)
 	*/
 	Vector3<double> GetEuler() const {
 		Vector3<double> euler;

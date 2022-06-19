@@ -300,7 +300,7 @@ bool Gizmos::Initialize(Renderer& renderer) {
 			MeshBuilder meshBuilder;
 			meshes.push_back(std::make_shared<Mesh>());
 			meshBuilder.Begin();
-			meshBuilder.AddXAxisCircle(1.0f, 0.95f, RGBA::RED);
+			meshBuilder.AddXAxisCircle(0.25f, 0.2f, RGBA::RED);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex), Mesh::TriangleType::MeshType_Strip);
 			meshBuilder.End();
 
@@ -317,7 +317,7 @@ bool Gizmos::Initialize(Renderer& renderer) {
 			MeshBuilder meshBuilder;
 			meshes.push_back(std::make_shared<Mesh>());
 			meshBuilder.Begin();
-			meshBuilder.AddYAxisCircle(1.0f, 0.95f, RGBA::GREEN);
+			meshBuilder.AddYAxisCircle(0.25f, 0.2f, RGBA::GREEN);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex), Mesh::TriangleType::MeshType_Strip);
 			meshBuilder.End();
 
@@ -335,7 +335,7 @@ bool Gizmos::Initialize(Renderer& renderer) {
 			MeshBuilder meshBuilder;
 			meshes.push_back(std::make_shared<Mesh>());
 			meshBuilder.Begin();
-			meshBuilder.AddZAxisCircle(1.0f, 0.95f, RGBA::BLUE);
+			meshBuilder.AddZAxisCircle(0.25f, 0.2f, RGBA::BLUE);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex), Mesh::TriangleType::MeshType_Strip);
 			meshBuilder.End();
 
@@ -395,7 +395,7 @@ bool Gizmos::Intersect(const Ray& ray, double& distance) {
 
 	Gizmos::eTransformMode transformMode = GetMode();	
 	//기즈모 스케일 처리가 들어가야함
-	GizmoHandle::eHandle handleType = GizmoHandle::eHandle::NONE;;
+	GizmoHandle::eHandle handleType = GizmoHandle::eHandle::NONE;
 	switch (transformMode) {
 	case Gizmos::eTransformMode::TRANSLATE: handleType = handles.Intersect(ray, distance, transformMode);	break;
 	case Gizmos::eTransformMode::ROTATE:	handleType = handles.Intersect(ray, distance, transformMode);	break;
@@ -447,6 +447,8 @@ void Gizmos::Render(Renderer& renderer, Camera* pCamera, const Scene& scene) {
 		return;
 
 	transform->SetPosition(targets[0]->GetPosition());
+	
+
 	pCamera->GetViewMatrix(shaderParam.viewMatrix);
 	
 	Matrix<float, 4, 4> worldMatrix = transform->GetWorldMatrix();

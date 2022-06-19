@@ -23,11 +23,10 @@ public:
 
 	Matrix<float, 3, 3> GetRotationMatrix() const;
 
-
 	//Vec4f Rotate(const Vec4f& pos, const Vec3f& pivot, float pitch, float yaw, float roll);
-	Vec4f Rotate(const Vec3f& pos, const Vec3f& pivot, float pitch, float yaw, float roll);
 	void Rotate(float pitch, float yaw, float roll);
-	
+	void Rotate(const Quaternion& q);
+
 	void SetScale(float sx, float sy, float sz) { scale = Vec3f(sx, sy, sz); }
 	void SetScale(const Vec3f& size) { scale = size; }
 	Vec3f GetScale() const { return scale; }

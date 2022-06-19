@@ -42,21 +42,21 @@ Matrix<float, 3, 3> RigidTransform::GetRotationMatrix() const {
 }
 
 void RigidTransform::Rotate(float pitch, float yaw, float roll) {
-	Matrix<float, 4, 4> rotationMatrix = Matrix<float, 4, 4>::Identity();
-	CalculateRotationMatrix(rotationMatrix, pitch, yaw, roll);
+	/*Matrix<float, 4, 4> rotationMatrix = Matrix<float, 4, 4>::Identity();
+	CalculateRotationMatrix(rotationMatrix, pitch, yaw, roll);*/
+
+	orientation.GetEuler(Vec3d(pitch, yaw, roll));
 
 	look = orientation.GetRotatedVector(look);
 	up = orientation.GetRotatedVector(up);
 	right = orientation.GetRotatedVector(right);
 }
 
-Vec4f RigidTransform::Rotate(const Vec3f& pos, const Vec3f& pivot, float pitch, float yaw, float roll) {
-	Matrix<float, 4, 4> rotationMatrix = Matrix<float, 4 ,4>::Identity();
-	CalculateRotationMatrix(rotationMatrix, pitch, yaw, roll);
+void RigidTransform::Rotate(const Quaternion& q) {
+	orientation = q;
 
-	Vec3f rotatatedVector(pos);
-    orientation.GetRotatedVector(rotatatedVector);
-	return Vec4f(rotatatedVector, 1.0f);
+	Vec3f euler = q.GetEuler();
+	Rotate(euler.x, euler.y, euler.z);
 }
 
 void RigidTransform::CalculateRotationMatrix(Matrix<float, 4, 4>& rotationMatrix, float pitch, float yaw, float roll, bool bUseQuaternion) {
@@ -79,21 +79,6 @@ void RigidTransform::CalculateRotationMatrix(Matrix<float, 4, 4>& rotationMatrix
 		rotationMatrix[9] = m[7];
 		rotationMatrix[10] = m[8];
 		rotationMatrix[11] = 0.0f;
-
-		//rotationMatrix[0] = m[0];
-		//rotationMatrix[1] = m[3];
-		//rotationMatrix[2] = m[6];
-		//rotationMatrix[3] = 0.0f;
-		//
-		//rotationMatrix[4] = m[1];
-		//rotationMatrix[5] = m[4];
-		//rotationMatrix[6] = m[7];
-		//rotationMatrix[7] = 0.0f;
-		//
-		//rotationMatrix[8] = m[2];
-		//rotationMatrix[9] = m[5];
-		//rotationMatrix[10] = m[8];
-		//rotationMatrix[11] = 0.0f;
 		
 		rotationMatrix[12] = 0.0f;
 		rotationMatrix[13] = 0.0f;

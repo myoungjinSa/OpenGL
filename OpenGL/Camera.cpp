@@ -53,6 +53,7 @@ Camera::~Camera() {
 bool Camera::Initialize(Renderer& renderer) {
 	MouseInput::Attach(this);
 	KeyboardInput::Attach(this);
+
 	return true;
 }
 
@@ -67,12 +68,11 @@ void Camera::Update(float deltaTime) {
 	const float rotationSpeed = 0.0174532925f;
 	
 	float pitch = 0.0f, yaw = 0.0f, roll = 0.0f;
-	pitch = xAngle * rotationSpeed;
-	yaw = yAngle * rotationSpeed;
+	yaw = xAngle * rotationSpeed;
+	pitch = yAngle * rotationSpeed;
 
-	Matrix<float, 3, 3> rotationMatrix = Matrix<float, 3, 3>::Identity();
-	MatrixRotationYawPitchRoll(rotationMatrix, yaw, pitch, roll);
-	BuildViewMatrix(rotationMatrix);
+	Rotate(pitch, yaw, roll);
+	BuildViewMatrix();
 	
 	float movingSpeed = transform.get()->GetMovingSpeed();
 	if (KeyboardInput::IsKeyDown(KEY_D)) {
@@ -89,37 +89,15 @@ void Camera::Update(float deltaTime) {
 	}
 }
 
-void Camera::MatrixRotationYawPitchRoll(Matrix<float, 3, 3>& matrix, float yaw, float pitch, float roll) {
-	Quaternion q;
-	q.GetEuler(Vec3d(pitch, yaw, roll));
-	q.Normalize();
-
-	Matrix<double, 3, 3> m = q.GetRotationMatrix();
-
-	matrix[0] = m[0];
-	matrix[1] = m[3];
-	matrix[2] = m[6];
-	
-	matrix[3] = m[1];
-	matrix[4] = m[4];
-	matrix[5] = m[7];
-	
-	matrix[6] = m[2];
-	matrix[7] = m[5];
-	matrix[8] = m[8];
-}
-
-
 void Camera::SetViewport(const Rect2f& _viewport) {
 	viewport.SetViewport(_viewport);
 }
 
-void Camera::BuildViewMatrix(const Matrix<float, 3, 3>& rotationMatrix) {
-	Vec3f up(0.0f, 1.0f, 0.0f), lookAt(0.0f, 0.0f, 1.0f), right(1.0f, 0.0f, 0.0f);
-
-	lookAt = Transform(rotationMatrix, lookAt);
-	up = Transform(rotationMatrix, up);
-	right = Normalize(Cross(up, lookAt));
+void Camera::BuildViewMatrix() {
+	Matrix<float, 3, 3> rotationMatrix = transform.get()->GetRotationMatrix();
+	Vec3f lookAt = Transform(rotationMatrix, Vec3f::FORWARD);
+	Vec3f up = Transform(rotationMatrix, Vec3f::UP);
+	Vec3f right = Transform(rotationMatrix, Vec3f::RIGHT);
 
 	Vec3f xAxis, yAxis, zAxis;
 	Vec3f position = transform.get()->GetPosition();
@@ -206,8 +184,8 @@ void Camera::ProcessEvent(Event& e) {
 		Point2i oldMousePoint = pMouseEvent->oldMousePoint;
 		if (pMouseEvent->mouseState == MouseInput::MouseEvent::MOUSE_STATE::MOUSE_MOVE) {
 			if (MouseInput::rightButtonDown) {
-				xAngle += (newMousePoint.y - oldMousePoint.y) / 3.0f;
-				yAngle += (newMousePoint.x - oldMousePoint.x) / 3.0f;
+				xAngle -= (newMousePoint.x - oldMousePoint.x) / 3.0f;
+				yAngle -= (newMousePoint.y - oldMousePoint.y) / 3.0f;
 			}
 		}
 	}

@@ -83,6 +83,9 @@ void GameObject::Rotate(float pitch, float yaw, float roll) {
 	transform.get()->Rotate(pitch, yaw, roll);
 }
 
+void GameObject::Rotate(const Quaternion& q) {
+	transform.get()->Rotate(q);
+}
 bool GameObject::Initialize(Renderer& renderer) {
 	
 	return true;

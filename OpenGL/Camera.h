@@ -54,8 +54,7 @@ public:
 	void ProcessEvent(Event& e) override;
 
 private:
-	void MatrixRotationYawPitchRoll(Matrix<float, 3, 3>& Matrix, float, float, float);
-	void BuildViewMatrix(const Matrix<float, 3, 3>& rotationMatrix);
+	void BuildViewMatrix();
 
 	Viewport viewport;
 	Matrix<float, 4, 4> viewMatrix;

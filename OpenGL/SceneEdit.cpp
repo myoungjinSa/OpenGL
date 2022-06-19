@@ -12,7 +12,8 @@ void SceneEdit::ObjectMemento::Restore(GameObject& gameObject) {
 
 
 SceneEdit::SceneEdit(class Scene& _scene)
-	: scene(_scene)
+	: scene(_scene),
+	  dragMode(eDragMode::DRAG_MODE_MOVING)
 {
 	picker.SetNear(scene.GetCamera().GetNear());
 	picker.SetFar(scene.GetCamera().GetFar());
@@ -62,33 +63,8 @@ Quaternion SceneEdit::CalcDragRotation(const GameObject& baseObject, const Point
 	Ray curRay = scene.GetRay(cur, scene.GetSceneSize());
 	Ray prevRay = scene.GetRay(prev, scene.GetSceneSize());
 	
-	Volumef volume;
-	baseObject.GetLocalBoundingBox(volume);
 
-	Matrix<float, 4, 4> worldMatrix = baseObject.GetWorldMatrix();
-	Vec4f vertices[8];
-	vertices[0] = Transform(worldMatrix, Vec4f(volume.min.x, volume.max.y, volume.max.z, 1.0f));
-	vertices[1] = Transform(worldMatrix, Vec4f(volume.max.x, volume.max.y, volume.max.z, 1.0f));
-	vertices[2] = Transform(worldMatrix, Vec4f(volume.max.x, volume.max.y, volume.min.z, 1.0f));
-	vertices[3] = Transform(worldMatrix, Vec4f(volume.min.x, volume.max.y, volume.min.z, 1.0f));
-	vertices[4] = Transform(worldMatrix, Vec4f(volume.min.x, volume.min.y, volume.max.z, 1.0f));
-	vertices[5] = Transform(worldMatrix, Vec4f(volume.max.x, volume.min.y, volume.max.z, 1.0f));
-	vertices[6] = Transform(worldMatrix, Vec4f(volume.max.x, volume.min.y, volume.min.z, 1.0f));
-	vertices[7] = Transform(worldMatrix, Vec4f(volume.min.x, volume.min.y, volume.min.z, 1.0f));
-
-	Planef plane;
-	switch (handleType) {
-	case Gizmos::GizmoHandle::eHandle::TRANSLATE_X:
-	case Gizmos::GizmoHandle::eHandle::TRANSLATE_Y:
-		plane.Build(vertices[0], vertices[4], vertices[5]);
-		break;
-	case Gizmos::GizmoHandle::eHandle::TRANSLATE_Z:
-		plane.Build(vertices[1], vertices[2], vertices[6]);
-		break;
-	}
-
-	Vec3f centerPoint = volume.GetCenter();
-
+	
 	return Quaternion();
 }
 
@@ -176,7 +152,7 @@ void SceneEdit::RotateSelectedObject(GameObjects& selection) {
 
 	GameObject& selectedObj = *selection.at(0);
 	objMemento.Restore(selectedObj);
-	//selectedObj.Rotate();
+	selectedObj.Rotate(q);
 }
 
 void SceneEdit::ProcessEvent(Event& e) {
@@ -242,6 +218,6 @@ void SceneEdit::DoDrag(eDragMode dragMode) {
 	if (dragMode == eDragMode::DRAG_MODE_MOVING) {
 		MoveSelectedObject(selectedObjects);
 	}else if (dragMode == eDragMode::DRAG_MODE_ROTATING) {
-
+		RotateSelectedObject(selectedObjects);
 	}
 }
