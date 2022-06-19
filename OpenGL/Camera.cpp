@@ -152,13 +152,12 @@ Vec3f Camera::GetLook() const {
 }
 
 //left handed
-void Camera::SetFrustum(float width, float height, float _near, float _far) {
+void Camera::SetFrustum(float width, float height, float _near, float _far, float fov) {
 	if (MathUtils::IsSame(width, 0.0f) || MathUtils::IsSame(height, 0.0f) || MathUtils::IsSame(_near, _far)) {
 		frustum = Matrix<float, 4, 4>::Identity();
 		return;
 	}
 
-	float fov = GetFov();
 	float aspectRatio = width / MAX(1.0f, height);
 
 	frustum.value[0] = (1.0f / (aspectRatio * tan(fov * 0.5f)));
@@ -180,7 +179,6 @@ void Camera::SetFrustum(float width, float height, float _near, float _far) {
 	frustum.value[13] = 0;
 	frustum.value[14] = -_near * _far / (_far - _near);
 	frustum.value[15] = 0;
-
 }
 
 void Camera::ProcessEvent(Event& e) {

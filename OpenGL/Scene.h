@@ -86,12 +86,8 @@ private:
 	Camera camera;
 	Gizmos gizmos;
 
-	//std::shared_ptr<Shader> DefaultShader;
-	//std::vector<GameObject*> objects;
 	GameObjects gameObjects;
 	std::unique_ptr<Light> phongLight;
 	Cubemap skybox;
 	std::unique_ptr<Terrain> terrain;
-
-	Matrix<float, 4, 4> projectionMatrix;
 };

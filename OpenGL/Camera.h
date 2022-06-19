@@ -35,7 +35,7 @@ public:
 	void Render(Renderer& renderer, ShaderParameter& shaderParam)override {}
 
 	void GetViewMatrix(Matrix<float, 4, 4>& Matrix) const;
-	void SetFrustum(float width, float height, float _near, float _far);
+	void SetFrustum(float width, float height, float _near, float _far, float fov);
 	void SetViewport(const Rect2f& _viewPort);
 	Matrix<float, 4, 4> GetFrustum() const { return frustum; }
 	

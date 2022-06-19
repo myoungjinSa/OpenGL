@@ -458,7 +458,7 @@ void Gizmos::Render(Renderer& renderer, Camera* pCamera, const Scene& scene) {
 	MakeWorldViewMatrix(worldMatrix, shaderParam.viewMatrix, worldViewMatrix);
 	
 	shaderParam.worldViewMatrix = worldViewMatrix;
-	shaderParam.projectionMatrix = scene.GetProjectionMatrix();
+	shaderParam.projectionMatrix = pCamera->GetFrustum();
 
 	shaderParam.focusInfo.focusObjNo = (int)context.editingHandle;
 	shaderParam.focusInfo.highlightColor = Vec4f(1.0f, 0.8f, 0.0f, 1.0f);

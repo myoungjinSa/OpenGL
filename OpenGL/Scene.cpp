@@ -9,8 +9,7 @@
 #include "Light.h"
 
 Scene::Scene() 
-	:projectionMatrix(),
-	 gizmos()
+	: gizmos()
 {
 
 }
@@ -56,7 +55,7 @@ void Scene::Update(double elapsedTime) {
 	terrain->Update(elapsedTime);
 	for (const auto& obj : gameObjects) {
 		obj->Update(elapsedTime);
-		obj->Rotate(MathUtils::DegreesToRadians(0.0f), MathUtils::DegreesToRadians(1.0f), MathUtils::DegreesToRadians(0.0f));
+		//obj->Rotate(MathUtils::DegreesToRadians(0.0f), MathUtils::DegreesToRadians(1.0f), MathUtils::DegreesToRadians(0.0f));
 		//obj->Move(obj->GetLook(), 1.0f, elapsedTime);
 	}
 }
@@ -68,9 +67,8 @@ bool Scene::Render(Renderer& renderer) {
 	float width = screenSize.width;
 	float height = screenSize.height;
 
-	camera.SetFrustum(width, height, camera.GetNear(), camera.GetFar());
-	projectionMatrix = camera.GetFrustum();
-	//camera.BuildPerspectiveFovLHMatrix(projectionMatrix);
+	camera.SetFrustum(width, height, camera.GetNear(), camera.GetFar(), MathUtils::DegreesToRadians(60));
+	Matrix<float, 4, 4> projectionMatrix = camera.GetFrustum();
 	
 	renderer.SetCullFace(eFace::Back);
 	renderer.SetDepthFunc(eCompare::LEQUAL);
@@ -115,7 +113,7 @@ Matrix<float, 4, 4> Scene::GetViewMatrix() const {
 	return viewMatrix;
 }
 Matrix<float, 4, 4> Scene::GetProjectionMatrix() const {
-	return projectionMatrix;
+	return camera.GetFrustum();
 }
 
 GameObject* Scene::GetGameObject(uint32_t idx) const{
