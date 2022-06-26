@@ -21,6 +21,9 @@ public:
 	void SetPosition(float x, float y, float z) { position = Vec3f(x, y, z); }
 	Vec3f GetPosition() const { return position; }
 
+	void SetOrientation(const Vec4d& _orientation) { orientation = _orientation; }
+	Vec4d GetOrientation() const { return orientation.GetVector(); }
+
 	Matrix<float, 3, 3> GetRotationMatrix() const;
 
 	//Vec4f Rotate(const Vec4f& pos, const Vec3f& pivot, float pitch, float yaw, float roll);

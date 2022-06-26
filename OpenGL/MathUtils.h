@@ -28,6 +28,8 @@ public:
 
 	static Matrix<float, 4, 4> Multiply(const Matrix<float, 4, 4>& mat1, const Matrix<float, 4, 4>& mat2);
 
+	static Vec4d GetRotatedQuaternion(const Vec3f& axis, float angle);
+
 	static const float PI;
 	static const float TWO_PI;
 	static const float HALF_PI;

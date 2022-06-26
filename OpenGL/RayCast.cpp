@@ -59,6 +59,7 @@ Ray RayCast::GetRay(float x, float y, size_t screenWidth, size_t screenHeight, c
 	rayWorldPos.y = inversedViewMatrix.value[13];
 	rayWorldPos.z = inversedViewMatrix.value[14];
 	
+
 	Ray ray(rayWorldPos, rayDirection, 10000.0f);
 	return ray;
 }

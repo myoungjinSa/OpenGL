@@ -15,6 +15,8 @@ RigidTransform::RigidTransform(Object* _owner)
 {
 }
 
+
+
 Vec3f RigidTransform::TransformVector(const Vec3f& vec)const{
 	return Quaternion::Rotate(orientation.GetVector(), vec * scale);
 }

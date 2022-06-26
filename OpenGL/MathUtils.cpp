@@ -90,3 +90,10 @@ Matrix<float, 4, 4>  MathUtils::Multiply(const Matrix<float, 4, 4>& mat1, const 
 	ret.Multiply(mat2);
 	return ret;
 }
+
+Vec4d MathUtils::GetRotatedQuaternion(const Vec3f& axis, float angle) {
+	Vec3d _axis = axis * std::sin(angle / 2.0f);
+	return Vec4d(_axis, std::cos(angle / 2.0f));
+}
+
+

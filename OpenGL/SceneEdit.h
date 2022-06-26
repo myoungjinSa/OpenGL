@@ -47,6 +47,7 @@ private:
 	DragContext dragContext;
 	ObjectMemento objMemento;
 
+	Vec4d CalcDragRotation(const GameObject& baseObject, const Point2i& prev, const Point2i& cur, const Vec3f& axis, const Vec3f& startPosition, const Vec4d& startOrientation);
 	Quaternion CalcDragRotation(const GameObject& baseObject, const Point2i& prev, const Point2i& cur);
 	Vec3f CalcDragOffsetInWorld(const GameObject& baseObject, const Point2i& prev, const Point2i& cur);
 	Vec3f ClampDragOffset(Gizmos::GizmoHandle::eHandle handleType, const Vec3f& offset);

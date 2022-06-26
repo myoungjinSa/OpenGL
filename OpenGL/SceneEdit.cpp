@@ -63,8 +63,71 @@ Quaternion SceneEdit::CalcDragRotation(const GameObject& baseObject, const Point
 	Ray prevRay = scene.GetRay(prev, scene.GetSceneSize());
 	
 
+
 	
 	return Quaternion();
+}
+
+Vec4d SceneEdit::CalcDragRotation(const GameObject& baseObject, const Point2i& prev, const Point2i& cur, const Vec3f& axis, const Vec3f& startPosition, const Vec4d& startOrientation) {
+	Gizmos::GizmoHandle::eHandle handleType = scene.gizmos.GetEditingHandle();
+
+	Ray curRay = scene.GetRay(cur, scene.GetSceneSize());
+
+	Vec3f scale = Vec3f(1.0f, 1.0f, 1.0f);
+	Vec3f theAxis = startPosition + (Vec3f)Quaternion::Rotate(startOrientation, axis * scale);
+
+	Volumef volume;
+	baseObject.GetLocalBoundingBox(volume);
+
+	Matrix<float, 4, 4> worldMatrix = baseObject.GetWorldMatrix();
+
+	Vec4f vertices[8];
+	vertices[0] = Transform(worldMatrix, Vec4f(volume.min.x, volume.max.y, volume.max.z, 1.0f));
+	vertices[1] = Transform(worldMatrix, Vec4f(volume.max.x, volume.max.y, volume.max.z, 1.0f));
+	vertices[2] = Transform(worldMatrix, Vec4f(volume.max.x, volume.max.y, volume.min.z, 1.0f));
+	vertices[3] = Transform(worldMatrix, Vec4f(volume.min.x, volume.max.y, volume.min.z, 1.0f));
+	vertices[4] = Transform(worldMatrix, Vec4f(volume.min.x, volume.min.y, volume.max.z, 1.0f));
+	vertices[5] = Transform(worldMatrix, Vec4f(volume.max.x, volume.min.y, volume.max.z, 1.0f));
+	vertices[6] = Transform(worldMatrix, Vec4f(volume.max.x, volume.min.y, volume.min.z, 1.0f));
+	vertices[7] = Transform(worldMatrix, Vec4f(volume.min.x, volume.min.y, volume.min.z, 1.0f));
+
+	Planef plane;
+	switch (handleType) {
+	case Gizmos::GizmoHandle::eHandle::ROTATE_X:
+	case Gizmos::GizmoHandle::eHandle::ROTATE_Y:
+		plane.Build(vertices[0], vertices[4], vertices[5]);
+		break;
+	case Gizmos::GizmoHandle::eHandle::ROTATE_Z:
+		plane.Build(vertices[1], vertices[2], vertices[6]);
+		break;
+	}
+	Vec3f intersectionPoint = plane.GetIntersection(curRay.GetLine());
+	Vec3f clickOffset = baseObject.transform->TransformPoint(intersectionPoint);
+
+	Vec3f originalPosition = startPosition;
+	Vec4d orientation = baseObject.transform->GetOrientation();
+
+	Vec3f centerOfRotation = originalPosition + theAxis * DotProduct(theAxis, clickOffset - originalPosition);
+	Vec3f arm1 = Normalize(clickOffset - centerOfRotation);
+	Vec3f arm2 = Normalize(intersectionPoint - centerOfRotation);
+
+	float d = DotProduct(arm1, arm2);
+	if (0.999f < d) {
+		orientation = startOrientation;
+		return orientation;
+	}
+
+	float angle = std::acos(d);
+	if (angle < 0.001f) {
+		orientation = startOrientation;
+		return orientation;
+	}
+
+	auto newAxis = Normalize(Cross(arm1, arm2));
+	Quaternion rotated = MathUtils::GetRotatedQuaternion(newAxis, angle);
+	Quaternion newOrientation = newOrientation.Multiply(rotated.GetVector(), startOrientation);
+	return newOrientation.GetVector();
+
 }
 
 Vec3f SceneEdit::CalcDragOffsetInWorld(const GameObject& baseObject, const Point2i& prev, const Point2i& cur) {
@@ -147,11 +210,15 @@ void SceneEdit::RotateSelectedObject(GameObjects& selection) {
 	if (selection.empty())
 		return;
 
-	Quaternion q = CalcDragRotation(*selection.at(0), drag.GetBeginPoint(), drag.GetEndPoint());
 
 	GameObject& selectedObj = *selection.at(0);
 	objMemento.Restore(selectedObj);
-	selectedObj.Rotate(q);
+
+
+	Vec4d q = CalcDragRotation(*selection.at(0), drag.GetBeginPoint(), drag.GetEndPoint(), Vec3f(0.0f, 0.0f, 1.0f), selectedObj.transform->GetPosition(), selectedObj.transform->GetOrientation());
+	//Quaternion q = CalcDragRotation(*selection.at(0), drag.GetBeginPoint(), drag.GetEndPoint());
+
+	selectedObj.Rotate(Quaternion(q.x, q.y, q.z, q.w));
 }
 
 void SceneEdit::ProcessEvent(Event& e) {
