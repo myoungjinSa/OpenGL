@@ -30,6 +30,8 @@ public:
 
 	static Vec4d GetRotatedQuaternion(const Vec3f& axis, float angle);
 
+
+
 	static const float PI;
 	static const float TWO_PI;
 	static const float HALF_PI;

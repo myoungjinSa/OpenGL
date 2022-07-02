@@ -56,22 +56,59 @@ bool SceneEdit::PickObject(const Ray& _ray) {
 
 	return true;
 }
-Quaternion SceneEdit::CalcDragRotation(const GameObject& baseObject, const Point2i& prev, const Point2i& cur) {
+
+Quaternion SceneEdit::CalcRotationDegree(const GameObject& baseObject, const Vec3f& prevPickedPoint, const Point2i& cur) {
 	Gizmos::GizmoHandle::eHandle handleType = scene.gizmos.GetEditingHandle();
-	
+	if (handleType == Gizmos::GizmoHandle::eHandle::NONE)
+		return Quaternion();
+
 	Ray curRay = scene.GetRay(cur, scene.GetSceneSize());
-	Ray prevRay = scene.GetRay(prev, scene.GetSceneSize());
 	
+	Matrix<float, 3, 3> orgRotationMatrix = Matrix<float, 3, 3>::Identity();
+	orgRotationMatrix = baseObject.transform->GetRotationMatrix();
 
+	Vec3f targetPosition = baseObject.GetPosition();
 
+	Planef viewPlane;
+	viewPlane.normal = scene.GetCamera().GetPosition() - targetPosition;
+	viewPlane.normal.Normalize();
+	viewPlane.distance = -viewPlane.normal.DotProduct(prevPickedPoint);
+
+	Vec3f curPickedPoint = viewPlane.GetIntersection(curRay.GetLine());
+
+	Vec3f pickedDir = prevPickedPoint - targetPosition;
+	Vec3f curDir = curPickedPoint - targetPosition;
+	Vec3f axis = curDir.Cross(pickedDir);
+
+	switch (handleType) {
+	case Gizmos::GizmoHandle::eHandle::ROTATE_X:
+		axis = Vec3f(axis.x, 0.0f, 0.0f);
+		break;
+	case Gizmos::GizmoHandle::eHandle::ROTATE_Y:
+		axis = Vec3f(0.0f, axis.y, 0.0f);
+		break;
+	case Gizmos::GizmoHandle::eHandle::ROTATE_Z:
+		axis = Vec3f(0.0f, 0.0f, axis.z);
+		break;
+	}
+
+	Vec3f direction = curDir - pickedDir;
+	direction.Normalize();
 	
-	return Quaternion();
+	Vec3f curLength = curPickedPoint - prevPickedPoint;
+	float distance = direction.DotProduct(curLength);
+	Vec3f radius = scene.gizmos.CalcGizmoSize(scene.GetCamera());	
+	float radian = distance / (radius.x * MathUtils::PI) * 2.0f;
+	float degree = MathUtils::RadiansToDegrees(radian);
+
+	Quaternion q = MathUtils::GetRotatedQuaternion(axis, degree);
+	return q;
 }
-
 Vec4d SceneEdit::CalcDragRotation(const GameObject& baseObject, const Point2i& prev, const Point2i& cur, const Vec3f& axis, const Vec3f& startPosition, const Vec4d& startOrientation) {
 	Gizmos::GizmoHandle::eHandle handleType = scene.gizmos.GetEditingHandle();
 
 	Ray curRay = scene.GetRay(cur, scene.GetSceneSize());
+	Ray prevRay = scene.GetRay(prev, scene.GetSceneSize());
 
 	Vec3f scale = Vec3f(1.0f, 1.0f, 1.0f);
 	Vec3f theAxis = startPosition + (Vec3f)Quaternion::Rotate(startOrientation, axis * scale);
@@ -210,15 +247,12 @@ void SceneEdit::RotateSelectedObject(GameObjects& selection) {
 	if (selection.empty())
 		return;
 
-
 	GameObject& selectedObj = *selection.at(0);
 	objMemento.Restore(selectedObj);
 
-
-	Vec4d q = CalcDragRotation(*selection.at(0), drag.GetBeginPoint(), drag.GetEndPoint(), Vec3f(0.0f, 0.0f, 1.0f), selectedObj.transform->GetPosition(), selectedObj.transform->GetOrientation());
-	//Quaternion q = CalcDragRotation(*selection.at(0), drag.GetBeginPoint(), drag.GetEndPoint());
-
-	selectedObj.Rotate(Quaternion(q.x, q.y, q.z, q.w));
+	Vec3f PrevPoint = Normalize(picker.GetRay().GetDirection()) + picker.GetRay().GetPosition();
+	Quaternion q = CalcRotationDegree(*selection.at(0), PrevPoint, drag.GetEndPoint());
+	selectedObj.Rotate(q);
 }
 
 void SceneEdit::ProcessEvent(Event& e) {
@@ -271,11 +305,11 @@ void SceneEdit::DoFocus(const Point2i& pt) {
 	picker.SetRay(curRay);
 	if (scene.gizmos.IsAlreadyAttached()) {
 		if (picker.HitTest(scene.gizmos, distance)) {
+			
 		}
 	}
 }
 void SceneEdit::DoDrag() {
-	
 	GameObjects selectedObjects = picker.GetSelectedObjects();
 	if (scene.gizmos.GetTransformMode() == Gizmos::eTransformMode::TRANSLATE) {
 		MoveSelectedObject(selectedObjects);

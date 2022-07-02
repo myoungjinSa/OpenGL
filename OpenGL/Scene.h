@@ -33,6 +33,7 @@ public:
 	bool HitTest(const Scene& scene);
 	void Clear();
 
+	Ray GetRay() const { return ray; }
 	void SetRay(const Ray& _ray) { if(ray.IsValid()) ray = _ray; }
 	void SetNear(float _near) { Near = _near; }
 	void SetFar(float _far) { Far = _far; }
