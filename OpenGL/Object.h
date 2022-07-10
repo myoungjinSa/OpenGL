@@ -90,10 +90,14 @@ public:
 	void SetPosition(const Vec3f& _position);
 	Vec3f GetPosition() const;
 
+	void SetOrientation(const Quaternion& q);
+	Quaternion GetOrientation() const;
+
 	void SetScale(float sx, float sy, float sz);
 	void SetScale(const Vec3f& _scale);
 	Vec3f GetScale() const;
 
+	void SetLookRightUp(const Vec3f& look, const Vec3f& right, const Vec3f& up);
 	Vec3f GetLook() const;
 	Vec3f GetRight() const;
 	Vec3f GetUp() const;
@@ -103,6 +107,7 @@ public:
 	
 	void Rotate(float pitch, float yaw, float roll);
 	void Rotate(const Quaternion& q);
+	void Rotate(const Matrix<float, 3, 3>& rotationMatrix);
 
 	void FillShaderParameter(ShaderParameter& shaderParam, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix, const Light& light, const Camera& Camera, int iObjNo);
 

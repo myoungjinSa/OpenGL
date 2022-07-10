@@ -46,6 +46,14 @@ Vec3f GameObject::GetPosition() const {
 	return transform.get()->GetPosition();
 }
 
+void GameObject::SetOrientation(const Quaternion& q) {
+	transform.get()->SetOrientation(q.GetVector());
+}
+
+Quaternion GameObject::GetOrientation() const{
+	return Quaternion(transform.get()->GetOrientation());
+}
+
 void GameObject::SetScale(const Vec3f& _scale) {
 	transform.get()->SetScale(_scale);
 }
@@ -58,6 +66,9 @@ Vec3f GameObject::GetScale() const {
 	return transform.get()->GetScale();
 }
 
+void GameObject::SetLookRightUp(const Vec3f& look, const Vec3f& right, const Vec3f& up) {
+	transform.get()->SetLookRightUp(look, right, up);
+}
 Vec3f GameObject::GetLook() const {
 	return transform.get()->GetLook();
 }
@@ -80,12 +91,17 @@ void GameObject::Move(const Vec3f& dir, float movingSpeed, float elapsedTime) {
 }
 
 void GameObject::Rotate(float pitch, float yaw, float roll) {
-	transform.get()->Rotate(pitch, yaw, roll);
+	transform->Rotate(pitch, yaw, roll);
 }
 
 void GameObject::Rotate(const Quaternion& q) {
-	transform.get()->Rotate(q);
+	transform->Rotate(q);
 }
+
+void GameObject::Rotate(const Matrix<float, 3, 3>& rotationMatrix) {
+	transform->Rotate(rotationMatrix);
+}
+
 bool GameObject::Initialize(Renderer& renderer) {
 	
 	return true;
@@ -179,7 +195,7 @@ bool IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const V
 	Vec3f edge1 = v1 - v0;
 	Vec3f edge2 = v2 - v0;
 
-	Vec3f pVec = ray.GetDirection().Cross(edge2);
+	Vec3f pVec = edge2.Cross(ray.GetDirection());
 
 	float det = edge1.DotProduct(pVec);
 
@@ -204,7 +220,7 @@ bool IntersectTriangle(const Ray& ray, const Vec3f& v0, const Vec3f& v1, const V
 	if (u < 0 || u > det)
 		return false;
 
-	Vec3f qVec = tVec.Cross(edge1);
+	Vec3f qVec = edge1.Cross(tVec);
 
 	float v = ray.GetDirection().DotProduct(qVec);
 	if (v < 0 || u + v > det)

@@ -13,6 +13,7 @@ RigidTransform::RigidTransform(Object* _owner)
 	right(Vec3f::RIGHT),
 	movingSpeed(2.0f)
 {
+	worldMatrix = Matrix<float, 4, 4>::Identity();
 }
 
 
@@ -36,29 +37,73 @@ Vec3f RigidTransform::DetransformVector(const Vec3f& vec) const{
 	return Quaternion::Rotate(q.Inverse(orientation.GetVector()).GetVector(), vec) / Vec3d(scale.x, scale.y, scale.z);
 }
 
+void RigidTransform::AddPosition(const Vec3f& _position) {
+	position += _position;
 
+	SetTransform();
+}
+
+void RigidTransform::SetPosition(const Vec3f& _position) {
+	position = _position;
+
+	SetTransform();
+}
+
+void RigidTransform::SetScale(const Vec3f& size) {
+	scale = size;
+
+	SetTransform();
+}
 Matrix<float, 3, 3> RigidTransform::GetRotationMatrix() const {
-	Matrix<float, 3, 3> rotationMatrix;
-	rotationMatrix = orientation.GetRotationMatrix();
-	return rotationMatrix;
+	return orientation.GetRotationMatrix();
 }
 
 void RigidTransform::Rotate(float pitch, float yaw, float roll) {
-	/*Matrix<float, 4, 4> rotationMatrix = Matrix<float, 4, 4>::Identity();
-	CalculateRotationMatrix(rotationMatrix, pitch, yaw, roll);*/
-
 	orientation.GetEuler(Vec3d(pitch, yaw, roll));
 
 	look = orientation.GetRotatedVector(look);
 	up = orientation.GetRotatedVector(up);
 	right = orientation.GetRotatedVector(right);
+
+	SetTransform();
 }
 
 void RigidTransform::Rotate(const Quaternion& q) {
 	orientation = q;
-
+	
 	Vec3f euler = q.GetEuler();
 	Rotate(euler.x, euler.y, euler.z);
+}
+
+void RigidTransform::Rotate(const Matrix<float, 3, 3>& _rotationMatrix) {
+	Matrix<float, 4, 4> rotationMatrix = Matrix<float, 4, 4>::Identity();
+	rotationMatrix.value[0] = _rotationMatrix.value[0];
+	rotationMatrix.value[1] = _rotationMatrix.value[1];
+	rotationMatrix.value[2] = _rotationMatrix.value[2];
+							  
+	rotationMatrix.value[4] = _rotationMatrix.value[3];
+	rotationMatrix.value[5] = _rotationMatrix.value[4];
+	rotationMatrix.value[6] = _rotationMatrix.value[5];
+							  
+	rotationMatrix.value[8] = _rotationMatrix.value[6];
+	rotationMatrix.value[9] = _rotationMatrix.value[7];
+	rotationMatrix.value[10] = _rotationMatrix.value[8];
+
+	worldMatrix.MultiplyAfter(rotationMatrix);
+
+	right.x = worldMatrix.value[0];
+	right.y = worldMatrix.value[1];
+	right.z = worldMatrix.value[2];
+
+	up.x = worldMatrix.value[4];
+	up.y = worldMatrix.value[5];
+	up.z = worldMatrix.value[6];
+
+	look.x = worldMatrix.value[8];
+	look.y = worldMatrix.value[9];
+	look.z = worldMatrix.value[10];
+
+	orientation = Quaternion::ConvertRotationMatrixToQuaternion(rotationMatrix);
 }
 
 void RigidTransform::CalculateRotationMatrix(Matrix<float, 4, 4>& rotationMatrix, float pitch, float yaw, float roll, bool bUseQuaternion) {
@@ -123,18 +168,31 @@ void RigidTransform::CalculateRotationMatrix(Matrix<float, 4, 4>& rotationMatrix
 
 void RigidTransform::Move(const Vec3f& offset) {
 	position = GetPosition() + offset;
+	SetTransform();
 }
 
 void RigidTransform::Move(const Vec3f& direction, float elapsedTime) {
 	position = GetPosition() + Normalize(direction) * elapsedTime * movingSpeed;
+	SetTransform();
+}
+
+void RigidTransform::SetLookRightUp(const Vec3f& _look, const Vec3f& _right, const Vec3f& _up) {
+	look = _look;
+	right = _right;
+	up = _up;
+
+	SetTransform();
 }
 
 Matrix<float, 4, 4> RigidTransform::GetWorldMatrix() const {
-	Matrix<float, 4, 4> worldMatrix = Matrix<float, 4, 4>::Identity(); 
+	return worldMatrix;
+}
+
+void RigidTransform::SetTransform() {
 	worldMatrix.value[0] = scale.x * right.x;
 	worldMatrix.value[1] = right.y;
 	worldMatrix.value[2] = right.z;
-	
+
 	worldMatrix.value[4] = up.x;
 	worldMatrix.value[5] = scale.y * up.y;
 	worldMatrix.value[6] = up.z;
@@ -146,5 +204,4 @@ Matrix<float, 4, 4> RigidTransform::GetWorldMatrix() const {
 	worldMatrix.value[12] = position.x;
 	worldMatrix.value[13] = position.y;
 	worldMatrix.value[14] = position.z;
-	return worldMatrix;
 }

@@ -97,7 +97,8 @@ public :
 
 	Matrix<T, n, m> Transpose() const;
 
-	void Multiply(const Matrix<T, m, n>& a);
+	void MultiplyBefore(const Matrix<T, m, n>& a);
+	void MultiplyAfter(const Matrix<T, m, n>& a);
 
 	Matrix<T, m, n> Divide(const Matrix<T, m, n>& a)const;
 
@@ -128,6 +129,7 @@ double GetDeterminant(const Matrix<float, 4, 4>& other);
 Matrix<float, 2, 2> Inverse(const Matrix<float, 2, 2>& mat);
 Matrix<float, 3, 3> Inverse(const Matrix<float, 3, 3>& mat);
 Matrix<float, 4, 4> Inverse(const Matrix<float, 4, 4>& mat);
+
 
 template<typename T, int m, int n> inline
 Matrix<T, m, n>::Matrix()
@@ -305,8 +307,33 @@ Matrix<T, n, m> Matrix<T, m, n>::Transpose() const
 	return transposeMatrix;
 }
 
+
 template<typename T, int m, int n> inline
-void Matrix<T, m, n>::Multiply(const Matrix<T, m, n>& a)
+void Matrix<T, m, n>::MultiplyBefore(const Matrix<T, m, n>& a)
+{
+	assert((unsigned)n == (unsigned)m);
+	Matrix<float, 4, 4> tempMatrix = Matrix<float, 4, 4>::Identity();
+	for (int i = 0; i < rows * cols; i++) {
+		tempMatrix.value[i] = value[i];
+	}
+
+	T sum = T(0);
+	for (int iRow = 0; iRow < m * rows; iRow += m) {
+		for (int iCol = 0; iCol < cols; iCol++) {
+			for (int k = 0; k < cols; k++) {
+				sum += a.value[iRow + k] * tempMatrix.value[cols * k + iCol];
+			}
+			value[iRow + iCol] = sum;
+			sum = 0;
+		}
+	}
+
+}
+
+
+
+template<typename T, int m, int n> inline
+void Matrix<T, m, n>::MultiplyAfter(const Matrix<T, m, n>& a)
 {
 	assert((unsigned)n == (unsigned)m);
 	Matrix<float, 4, 4> tempMatrix = Matrix<float, 4, 4>::Identity();
@@ -729,7 +756,7 @@ Vector3<T>::operator Vector3<T2>() const
 }
 template<typename T> inline
 Vector3<T> Vector3<T>::Cross(const Vector3<T>& v) const {
-	return Vector3<T>(v.y * z - v.z * y, v.z * x - v.x * z, v.x * y - v.y * x);
+	return Vector3<T>(y * v.z - z * v.y, z * v.x - x * v.z, x * v.y - y * v.x);
 }
 
 template<typename T> inline

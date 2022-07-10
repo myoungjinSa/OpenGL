@@ -199,7 +199,6 @@ public:
 		return matrix;
 	}
 
-
 	/**
 	* @brief Computes the product of this quaternion with the
 	* quaternion 'rhs'.
@@ -342,6 +341,7 @@ public:
 	static Vector3<double> GetXDirection(const Vector4<double>& qVec);
 	static Vector3<double> GetYDirection(const Vector4<double>& qVec);
 	static Vector3<double> GetZDirection(const Vector4<double>& qVec);
+	static Quaternion ConvertRotationMatrixToQuaternion(const Matrix<double, 3, 3>& rotationMatrix);
 
 	static Vector3<double> Rotate(const Vector4<double>& q, const Vector3<double>& v);
 private:

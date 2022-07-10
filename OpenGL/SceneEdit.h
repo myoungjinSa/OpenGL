@@ -25,6 +25,10 @@ public:
 		void Restore(GameObject& object);
 
 		Vec3f position;
+		Quaternion orientation;
+		Vec3f look;
+		Vec3f up;
+		Vec3f right;
 	};
 
 
@@ -46,10 +50,10 @@ private:
 	Drag drag;
 	DragContext dragContext;
 	ObjectMemento objMemento;
+	bool bWorldCoordMode;
 
-	Quaternion CalcRotationDegree(const GameObject& baseObject, const Vec3f& prevPickedPoint, const Point2i& cur);
-	Vec4d CalcDragRotation(const GameObject& baseObject, const Point2i& prev, const Point2i& cur, const Vec3f& axis, const Vec3f& startPosition, const Vec4d& startOrientation);
-	//Quaternion CalcDragRotation(const GameObject& baseObject, const Point2i& prev, const Point2i& cur);
+	Matrix<float, 3, 3> CalcRotationMatrix(const GameObject& baseObject, const Vec3f& prevPickedPoint, const Point2i& cur);
+	Quaternion CalcRotationQuaternion(const GameObject& baseObject, const Vec3f& prevPickedPoint, const Point2i& cur);
 	Vec3f CalcDragOffsetInWorld(const GameObject& baseObject, const Point2i& prev, const Point2i& cur);
 	Vec3f ClampDragOffset(Gizmos::GizmoHandle::eHandle handleType, const Vec3f& offset);
 };

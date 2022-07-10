@@ -207,7 +207,7 @@ public:
 	void Build(const Vec3f& v1, const Vec3f& v2, const Vec3f& v3) {
 		Vec3f edge1 = v1 - v2;
 		Vec3f edge2 = v3 - v2;
-		normal = edge2.Cross(edge1);
+		normal = edge1.Cross(edge2);
 
 		normal.Normalize();
 		distance = -normal.DotProduct(v1);
@@ -220,7 +220,7 @@ public:
 
 		Vec3f edge1 = v1 - v2;
 		Vec3f edge2 = v3 - v2;
-		normal = edge2.Cross(edge1);
+		normal = edge1.Cross(edge2);
 	
 		normal.Normalize();
 		distance = -normal.DotProduct(v1);
