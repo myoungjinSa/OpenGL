@@ -25,6 +25,7 @@ public:
 		void Restore(GameObject& object);
 
 		Vec3f position;
+		Vec3f scale;
 		Quaternion orientation;
 		Vec3f look;
 		Vec3f up;
@@ -40,9 +41,10 @@ public:
 
 	bool PickObject(const Ray& ray);
 
-	void MoveSelectedObject(GameObjects& selection);
-	void RotateSelectedObject(GameObjects& selection);
-
+	void MoveSelectedObjects(GameObjects& selectedObjects);
+	void RotateSelectedObjects(GameObjects& selectedObjects);
+	void ScaleSelectedObjects(GameObjects& selectedObjects);
+	
 	void ProcessEvent(Event& e);
 private:
 	GameObjectPicker picker;
@@ -51,9 +53,12 @@ private:
 	DragContext dragContext;
 	ObjectMemento objMemento;
 	bool bWorldCoordMode;
-
+	
 	Matrix<float, 3, 3> CalcRotationMatrix(const GameObject& baseObject, const Vec3f& prevPickedPoint, const Point2i& cur);
 	Quaternion CalcRotationQuaternion(const GameObject& baseObject, const Vec3f& prevPickedPoint, const Point2i& cur);
-	Vec3f CalcDragOffsetInWorld(const GameObject& baseObject, const Point2i& prev, const Point2i& cur);
+	
+	Vec3f CalcMoveOffset(const GameObject& baseObject, const Point2i& prev, const Point2i& cur);
+	Vec3f CalcScaleFactor(const GameObject& baseObject, const Point2i& prev, const Point2i& cur);
+
 	Vec3f ClampDragOffset(Gizmos::GizmoHandle::eHandle handleType, const Vec3f& offset);
 };

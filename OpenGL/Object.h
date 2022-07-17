@@ -81,7 +81,6 @@ public:
 	virtual void Shutdown(Renderer& renderer) {}
 	virtual void Render(Renderer& renderer) {}
 	virtual void Render(Renderer& renderer, ShaderParameter& shaderParam);
-	
 	virtual void Update(float deltaTime){}
 
 	virtual bool Intersect(const Ray& ray, double& distance);
@@ -217,10 +216,10 @@ public:
 	~GameObjects();
 
 	void Add(GameObject& gameObj);
-	
-
 	bool Clear();
 };
+
+
 //class ObjectFactory {
 //public:
 //	enum class eObjectType {

@@ -366,6 +366,12 @@ void MeshBuilder::AddQuad(const Vec3f& bottomLeft, const Vec3f& up, float upLeng
 	AddIndex(1 + currentVert);	
 }
 
+void MeshBuilder::AddQuad(const Vec3f& axis, const Rect2f& rect, const RGBA& color, const Vec2f& uvOffset, float uvStepSize) {
+	unsigned int currentVert = vertices.size();
+	SetColor(color);
+	
+}
+
 //Pivot¿Ã ¡ﬂæ”
 void MeshBuilder::AddQuad(const Vec3f& center, const Vec3f& extent, const Vec3f& _normal, const RGBA& color, const Vec2f& uvOffset, float uvStepSize, bool bReversed) {
 	unsigned int currentVert = vertices.size();
@@ -528,8 +534,9 @@ void MeshBuilder::AddZAxisCircle(float outerRadius, float innerRadius, const RGB
 		//for triangle strip
 		AddIndex(iVertex);
 	}
-
 }
+
+
 
 void MeshBuilder::AddXAxisCone(const Vec3f& centerOffset, float halfWidth, float halfHeight, float halfDepth, double angleStep, const RGBA& color) {
 

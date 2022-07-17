@@ -48,7 +48,8 @@ public:
 			TRANSLATE_XYZ,
 			ROTATE_X, ROTATE_Y, ROTATE_Z, ROTATE_XY,
 			SCALE_X, SCALE_Y, SCALE_Z,
-			SCALE_XYZ
+			SCALE_XYZ,
+			COUNT
 		};
 		const Gizmos& owner;
 		RGBA baseColor;
@@ -84,7 +85,8 @@ public:
 
 		bool DoesExist(GizmoHandle::eHandle handleType) const;
 		void Render(Renderer& renderer, ShaderParameter& shaderParam, eTransformMode transformMode) ;
-	
+		
+		bool Intersect(GizmoHandle::eHandle handleType, const Ray& ray, double& distance);
 		GizmoHandle::eHandle Intersect(const Ray& ray, double& distance, eTransformMode transformMode);
 	};
 	const float orgSize = 0.25f;

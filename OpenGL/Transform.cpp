@@ -1,5 +1,6 @@
 #include "Transform.h"
 #include "Object.h"
+#include "Logger.h"
 #include "Quaternion.h"
 
 
@@ -49,8 +50,11 @@ void RigidTransform::SetPosition(const Vec3f& _position) {
 	SetTransform();
 }
 
-void RigidTransform::SetScale(const Vec3f& size) {
-	scale = size;
+void RigidTransform::SetScale(const Vec3f& _scale) {
+	if (_scale.IsZero())
+		return;
+
+	scale = _scale;
 
 	SetTransform();
 }
@@ -89,7 +93,7 @@ void RigidTransform::Rotate(const Matrix<float, 3, 3>& _rotationMatrix) {
 	rotationMatrix.value[9] = _rotationMatrix.value[7];
 	rotationMatrix.value[10] = _rotationMatrix.value[8];
 
-	worldMatrix.MultiplyAfter(rotationMatrix);
+	worldMatrix.MultiplyBefore(rotationMatrix);
 
 	right.x = worldMatrix.value[0];
 	right.y = worldMatrix.value[1];

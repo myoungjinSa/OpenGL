@@ -351,7 +351,6 @@ void Matrix<T, m, n>::MultiplyAfter(const Matrix<T, m, n>& a)
 			sum = 0;
 		}
 	}
-
 }
 
 

@@ -55,6 +55,9 @@ Quaternion GameObject::GetOrientation() const{
 }
 
 void GameObject::SetScale(const Vec3f& _scale) {
+	if (_scale.IsZero())
+		return;
+
 	transform.get()->SetScale(_scale);
 }
 
@@ -101,6 +104,7 @@ void GameObject::Rotate(const Quaternion& q) {
 void GameObject::Rotate(const Matrix<float, 3, 3>& rotationMatrix) {
 	transform->Rotate(rotationMatrix);
 }
+
 
 bool GameObject::Initialize(Renderer& renderer) {
 	
@@ -372,7 +376,6 @@ void Cube::Render(Renderer& renderer, ShaderParameter& shaderParam) {
 	
 	shader->Render(renderer, shaderParam);
 	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
-	renderer.SetDepthTest(true);
 
 	for (auto& mesh : meshes) {
 		mesh->Render(renderer);
@@ -480,7 +483,6 @@ void Sphere::Render(Renderer& renderer, ShaderParameter& shaderParam) {
 	GameObject::Render(renderer, shaderParam);
 	shader->Render(renderer, shaderParam);
 	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
-	renderer.SetDepthTest(true);
 	for (auto& mesh : meshes) {
 		mesh->Render(renderer);
 	}
@@ -546,7 +548,6 @@ void Cubemap::Render(Renderer& renderer, ShaderParameter& shaderParam) {
 	GameObject::Render(renderer, shaderParam);
 	shader->Render(renderer, shaderParam);
 	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
-	renderer.SetDepthTest(true);
 	for (auto& mesh : meshes) {
 		mesh->Render(renderer);
 	}
@@ -627,7 +628,6 @@ void Cylinder::Render(Renderer& renderer, ShaderParameter& shaderParam) {
 
 	shader->Render(renderer, shaderParam);
 	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
-	renderer.SetDepthTest(true);
 
 	for (auto& mesh : meshes) {
 		mesh->Render(renderer);

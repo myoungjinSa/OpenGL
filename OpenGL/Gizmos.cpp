@@ -112,55 +112,65 @@ bool Gizmos::GizmoHandles::DoesExist(GizmoHandle::eHandle handleType)const {
 	return count(handleType) != 0 ? true : false;
 }
 
+bool Gizmos::GizmoHandles::Intersect(Gizmos::GizmoHandle::eHandle gizmoHandle, const Ray& ray, double& distance) {
+	if (Gizmos::GizmoHandle::eHandle::COUNT <= gizmoHandle) {
+		return false;
+	}
+
+	bool bIntersect = at(gizmoHandle).Intersect(ray, distance);
+	return bIntersect;
+}
 Gizmos::GizmoHandle::eHandle Gizmos::GizmoHandles::Intersect(const Ray& ray, double& distance, eTransformMode transformMode) {
 	GizmoHandle::eHandle handle = GizmoHandle::eHandle::NONE;
 	bool bIntersect = false;
 	switch (transformMode) {
 	case eTransformMode::TRANSLATE:
 	{
-		double tempDistance = DBL_MAX;
-		bIntersect = at(GizmoHandle::eHandle::TRANSLATE_X).Intersect(ray, tempDistance);
-		if (bIntersect) {
+		if (Intersect(GizmoHandle::eHandle::TRANSLATE_X, ray, distance)) {
 			handle = GizmoHandle::eHandle::TRANSLATE_X;
-			distance = tempDistance;
+		}
+		
+		if (Intersect(GizmoHandle::eHandle::TRANSLATE_Y, ray, distance)) {
+			handle = GizmoHandle::eHandle::TRANSLATE_Y;
 		}
 
-		bIntersect = at(GizmoHandle::eHandle::TRANSLATE_Y).Intersect(ray, tempDistance);
-		
-		if (bIntersect) {
-			handle = GizmoHandle::eHandle::TRANSLATE_Y;
-			distance = tempDistance;
-		}
-		
-		bIntersect = at(GizmoHandle::eHandle::TRANSLATE_Z).Intersect(ray, tempDistance);
-		if (bIntersect) {
+		if (Intersect(GizmoHandle::eHandle::TRANSLATE_Z, ray, distance)) {
 			handle = GizmoHandle::eHandle::TRANSLATE_Z;
-			distance = tempDistance;
+		}
+		if (Intersect(GizmoHandle::eHandle::TRANSLATE_XY, ray, distance)) {
+			handle = GizmoHandle::eHandle::TRANSLATE_XY;
+		}
+		if (Intersect(GizmoHandle::eHandle::TRANSLATE_XZ, ray, distance)) {
+			handle = GizmoHandle::eHandle::TRANSLATE_XZ;
 		}
 
 		break;
 	}
 	case eTransformMode::ROTATE:
 	{
-		double tempDistance = DBL_MAX;
-		bIntersect = at(GizmoHandle::eHandle::ROTATE_X).Intersect(ray, tempDistance);
-		if (bIntersect) {
+		if (Intersect(GizmoHandle::eHandle::ROTATE_X, ray, distance)) {
 			handle = GizmoHandle::eHandle::ROTATE_X;
-			distance = tempDistance;
 		}
-
-		bIntersect = at(GizmoHandle::eHandle::ROTATE_Y).Intersect(ray, tempDistance);
-		if (bIntersect) {
+		if (Intersect(GizmoHandle::eHandle::ROTATE_Y, ray, distance)) {
 			handle = GizmoHandle::eHandle::ROTATE_Y;
-			distance = tempDistance;
 		}
-
-		bIntersect = at(GizmoHandle::eHandle::ROTATE_Z).Intersect(ray, tempDistance);
-		if (bIntersect) {
+		if (Intersect(GizmoHandle::eHandle::ROTATE_Z, ray, distance)) {
 			handle = GizmoHandle::eHandle::ROTATE_Z;
-			distance = tempDistance;
 		}
-
+		
+		break;
+	}
+	case eTransformMode::SCALE:
+	{
+		if (Intersect(GizmoHandle::eHandle::SCALE_X, ray, distance)) {
+			handle = GizmoHandle::eHandle::SCALE_X;
+		}
+		if (Intersect(GizmoHandle::eHandle::SCALE_Y, ray, distance)) {
+			handle = GizmoHandle::eHandle::SCALE_Y;
+		}
+		if (Intersect(GizmoHandle::eHandle::SCALE_Z, ray, distance)) {
+			handle = GizmoHandle::eHandle::SCALE_Z;
+		}
 		break;
 	}
 	}
@@ -169,8 +179,6 @@ Gizmos::GizmoHandle::eHandle Gizmos::GizmoHandles::Intersect(const Ray& ray, dou
 }
 void Gizmos::GizmoHandles::Render(Renderer& renderer, ShaderParameter& shaderParam, eTransformMode transformMode) {
 	Renderer::DrawMode oldDrawMode = renderer.GetDrawMode();
-	renderer.EnableCulling(false);
-
 	switch (transformMode) {
 	case eTransformMode::TRANSLATE:
 	{
@@ -183,6 +191,12 @@ void Gizmos::GizmoHandles::Render(Renderer& renderer, ShaderParameter& shaderPar
 
 		shaderParam.objNo = (int)GizmoHandle::eHandle::TRANSLATE_Z;
 		at(GizmoHandle::eHandle::TRANSLATE_Z).Render(renderer, shaderParam);
+
+		shaderParam.objNo = (int)GizmoHandle::eHandle::TRANSLATE_XY;
+		at(GizmoHandle::eHandle::TRANSLATE_XY).Render(renderer, shaderParam);
+
+		shaderParam.objNo = (int)GizmoHandle::eHandle::TRANSLATE_XZ;
+		at(GizmoHandle::eHandle::TRANSLATE_XZ).Render(renderer, shaderParam);
 
 		break;
 	}
@@ -203,12 +217,21 @@ void Gizmos::GizmoHandles::Render(Renderer& renderer, ShaderParameter& shaderPar
 	}
 	case eTransformMode::SCALE:
 	{
+		renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
+
+		shaderParam.objNo = (int)GizmoHandle::eHandle::SCALE_X;
+		at(GizmoHandle::eHandle::SCALE_X).Render(renderer, shaderParam);
+
+		shaderParam.objNo = (int)GizmoHandle::eHandle::SCALE_Y;
+		at(GizmoHandle::eHandle::SCALE_Y).Render(renderer, shaderParam);
+
+		shaderParam.objNo = (int)GizmoHandle::eHandle::SCALE_Z;
+		at(GizmoHandle::eHandle::SCALE_Z).Render(renderer, shaderParam);
 
 		break;
 	}
 	}
 	renderer.SetDrawMode(oldDrawMode);
-	renderer.EnableCulling(true);
 }
 
 
@@ -246,7 +269,8 @@ bool Gizmos::Initialize(Renderer& renderer) {
 			}, RGBA::RED, RGBA::YELLOW, Gizmos::GizmoHandle::eHandle::TRANSLATE_X)
 	};
 
-	handles.Add(translationXHandle);
+	if (!handles.Add(translationXHandle))
+		assert(0);
 
 	Gizmos::GizmoHandle translationYHandle{
 		GizmoHandle(*this, [&](Gizmos::GizmoHandle& handle, Renderer& renderer) -> bool {
@@ -268,7 +292,8 @@ bool Gizmos::Initialize(Renderer& renderer) {
 			}, RGBA::GREEN, RGBA::YELLOW, Gizmos::GizmoHandle::eHandle::TRANSLATE_Y)
 	};
 
-	handles.Add(translationYHandle);
+	if (!handles.Add(translationYHandle))
+		assert(0);
 
 
 	Gizmos::GizmoHandle translationZHandle {
@@ -291,7 +316,44 @@ bool Gizmos::Initialize(Renderer& renderer) {
 			}, RGBA::BLUE, RGBA::YELLOW, Gizmos::GizmoHandle::eHandle::TRANSLATE_Z)
 	};
 
-	handles.Add(translationZHandle);
+	if (!handles.Add(translationZHandle))
+		assert(0);
+
+	Gizmos::GizmoHandle translationXYHandle{
+		GizmoHandle(*this,[&](Gizmos::GizmoHandle& handle, Renderer& renderer)->bool {
+			std::list<std::shared_ptr<Mesh>>& meshes = handle.GetMeshes();
+
+			MeshBuilder meshBuilder;
+			meshes.push_back(std::make_shared<Mesh>());
+			meshBuilder.Begin();
+			meshBuilder.AddQuad(Vec3f(orgSize / 4, orgSize / 4, 0.0f), Vec3f(orgSize / 8, orgSize / 8, 0.0f), Vec3f(-1.0f, 0.0f, 0.0f));
+			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+			meshBuilder.End();
+
+			return true;
+		}, RGBA::WHITE, RGBA::YELLOW, Gizmos::GizmoHandle::eHandle::TRANSLATE_XY)
+	};
+
+	if (!handles.Add(translationXYHandle))
+		assert(0);
+
+	Gizmos::GizmoHandle translationXZHandle{
+		GizmoHandle(*this, [&](Gizmos::GizmoHandle& handle, Renderer& renderer)->bool {
+			std::list<std::shared_ptr<Mesh>>& meshes = handle.GetMeshes();
+
+			MeshBuilder meshBuilder;
+			meshes.push_back(std::make_shared<Mesh>());
+			meshBuilder.Begin();
+			meshBuilder.AddQuad(Vec3f(orgSize / 4, 0.0f, orgSize / 4), Vec3f(orgSize / 8, 0.0f, orgSize / 8), Vec3f(0.0f, 1.0f, 0.0f));
+			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+			meshBuilder.End();
+
+			return true;
+		}, RGBA::WHITE, RGBA::YELLOW, Gizmos::GizmoHandle::eHandle::TRANSLATE_XZ)
+	};
+
+	if (!handles.Add(translationXZHandle))
+		assert(0);
 
 	Gizmos::GizmoHandle rotationXHandle{
 		GizmoHandle(*this, [&](Gizmos::GizmoHandle& handle, Renderer& renderer) -> bool {
@@ -308,7 +370,8 @@ bool Gizmos::Initialize(Renderer& renderer) {
 		}, RGBA::RED, RGBA::YELLOW, Gizmos::GizmoHandle::eHandle::ROTATE_X)
 	};
 
-	handles.Add(rotationXHandle);
+	if (!handles.Add(rotationXHandle))
+		assert(0);
 
 	Gizmos::GizmoHandle rotationYHandle{
 		GizmoHandle(*this, [&](Gizmos::GizmoHandle& handle, Renderer& renderer)->bool {
@@ -325,7 +388,8 @@ bool Gizmos::Initialize(Renderer& renderer) {
 		}, RGBA::GREEN, RGBA::YELLOW, Gizmos::GizmoHandle::eHandle::ROTATE_Y)
 	};
 
-	handles.Add(rotationYHandle);
+	if (!handles.Add(rotationYHandle))
+		assert(0);
 
 
 	Gizmos::GizmoHandle rotationZHandle{
@@ -344,7 +408,83 @@ bool Gizmos::Initialize(Renderer& renderer) {
 		}, RGBA::BLUE, RGBA::YELLOW, Gizmos::GizmoHandle::eHandle::ROTATE_Z)
 	};
 
-	handles.Add(rotationZHandle);
+	if (!handles.Add(rotationZHandle))
+		assert(0);
+
+	Gizmos::GizmoHandle scaleXHandle{
+		GizmoHandle(*this, [&](Gizmos::GizmoHandle& handle, Renderer& renderer)->bool {
+			std::list<std::shared_ptr<Mesh>>& meshes = handle.GetMeshes();
+
+			MeshBuilder meshBuilder;
+			meshes.push_back(std::make_shared<Mesh>());
+			meshBuilder.Begin();
+			meshBuilder.AddCylinder(Vec3f(orgSize, 0.0f, 0.0f), Vec3f(0.0f, 0.01f, 0.0f), Vec3f(0.0f, 0.0f, 0.01f), 32, RGBA::RED);
+			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+			meshBuilder.End();
+
+			meshes.push_back(std::make_shared<Mesh>());
+			meshBuilder.Begin();
+			meshBuilder.AddCube(Vec3f(orgSize, 0.0f, 0.0f), Vec3f(0.05f, 0.05f, 0.05f), RGBA::RED);
+			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+			meshBuilder.End();
+
+			return true;
+		}, RGBA::RED, RGBA::YELLOW, Gizmos::GizmoHandle::eHandle::SCALE_X)
+	};
+	
+	if (!handles.Add(scaleXHandle)) {
+		assert(0);
+	}
+
+	Gizmos::GizmoHandle scaleYHandle{
+		GizmoHandle(*this, [&](Gizmos::GizmoHandle& handle, Renderer& renderer)->bool {
+			std::list<std::shared_ptr<Mesh>>& meshes = handle.GetMeshes();
+
+			MeshBuilder meshBuilder;
+			meshes.push_back(std::make_shared<Mesh>());
+			meshBuilder.Begin();
+			meshBuilder.AddCylinder(Vec3f(0.0f, orgSize, 0.0f), Vec3f(0.0f, 0.0f, 0.01f), Vec3f(0.01f, 0.0f, 0.0f), 32, RGBA::GREEN);
+			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+			meshBuilder.End();
+
+			meshes.push_back(std::make_shared<Mesh>());
+			meshBuilder.Begin();
+			meshBuilder.AddCube(Vec3f(0.0f, orgSize, 0.0f), Vec3f(0.05f, 0.05f, 0.05f), RGBA::GREEN);
+			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+			meshBuilder.End();
+
+			return true;
+		}, RGBA::GREEN, RGBA::YELLOW, Gizmos::GizmoHandle::eHandle::SCALE_Y)
+	};
+
+	if (!handles.Add(scaleYHandle)) {
+		assert(0);
+	}
+
+	Gizmos::GizmoHandle scaleZHandle{
+		GizmoHandle(*this, [&](Gizmos::GizmoHandle& handle, Renderer& renderer)->bool {
+			std::list<std::shared_ptr<Mesh>>& meshes = handle.GetMeshes();
+
+			MeshBuilder meshBuilder;
+			meshes.push_back(std::make_shared<Mesh>());
+			meshBuilder.Begin();
+			meshBuilder.AddCylinder(Vec3f(0.0f, 0.0f, orgSize), Vec3f(0.01f, 0.0f, 0.0f), Vec3f(0.0f, 0.01f, 0.0f), 32, RGBA::BLUE);
+			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+			meshBuilder.End();
+
+			meshes.push_back(std::make_shared<Mesh>());
+			meshBuilder.Begin();
+			meshBuilder.AddCube(Vec3f(0.0f, 0.0f, orgSize), Vec3f(0.05f, 0.05f, 0.05f), RGBA::BLUE);
+			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+			meshBuilder.End();
+
+			return true;
+		}, RGBA::BLUE, RGBA::YELLOW, Gizmos::GizmoHandle::eHandle::SCALE_Z)
+	};
+
+	if (!handles.Add(scaleZHandle)) {
+		assert(0);
+	}
 
 #ifdef _DEBUG
 	if (!VerifyGizmos()) {
@@ -377,14 +517,20 @@ Vec3f Gizmos::CalcGizmoSize(const Camera& camera) const {
 	float distance = sqrt((double)direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
 	return orgSize * distance;
 }
+
 #ifdef _DEBUG
 bool Gizmos::VerifyGizmos() const{
 	if (!handles.DoesExist(GizmoHandle::eHandle::TRANSLATE_X))	return false;
 	if (!handles.DoesExist(GizmoHandle::eHandle::TRANSLATE_Y))	return false;
 	if (!handles.DoesExist(GizmoHandle::eHandle::TRANSLATE_Z))	return false;
+	if (!handles.DoesExist(GizmoHandle::eHandle::TRANSLATE_XY))	return false; 
+	if (!handles.DoesExist(GizmoHandle::eHandle::TRANSLATE_XZ)) return false;
 	if (!handles.DoesExist(GizmoHandle::eHandle::ROTATE_X))		return false;
 	if (!handles.DoesExist(GizmoHandle::eHandle::ROTATE_Y))		return false;
 	if (!handles.DoesExist(GizmoHandle::eHandle::ROTATE_Z))		return false;
+	if (!handles.DoesExist(GizmoHandle::eHandle::SCALE_X))		return false;
+	if (!handles.DoesExist(GizmoHandle::eHandle::SCALE_Y))		return false;
+	if (!handles.DoesExist(GizmoHandle::eHandle::SCALE_Z))		return false;
 
 	return true;
 }
@@ -402,7 +548,7 @@ bool Gizmos::Intersect(const Ray& ray, double& distance) {
 	switch (transformMode) {
 	case Gizmos::eTransformMode::TRANSLATE: handleType = handles.Intersect(ray, distance, transformMode);	break;
 	case Gizmos::eTransformMode::ROTATE:	handleType = handles.Intersect(ray, distance, transformMode);	break;
-	/*case Gizmos::eTransformMode::SCALE:			return IntersectScaleGizmos(ray, distance);*/
+	case Gizmos::eTransformMode::SCALE:		handleType = handles.Intersect(ray, distance, transformMode);   break;
 	default:
 		assert(0);
 		break;
