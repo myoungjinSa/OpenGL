@@ -10,8 +10,6 @@
 #include "../OpenGL_Lib/glew/include/glew.h"
 #include "../OpenGL_Lib/gl/GL.h"
 
-
-
 /////////////
 // DEFINES //
 /////////////

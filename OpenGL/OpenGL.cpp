@@ -190,7 +190,7 @@ void OpenGL::BeginScene(float red, float green, float blue, float alpha) {
 	glClearColor(red, green, blue, alpha);
 
 	//Clear the screen and depth buffer.
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 	return;
 }
 

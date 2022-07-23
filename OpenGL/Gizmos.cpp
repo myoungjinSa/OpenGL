@@ -9,6 +9,7 @@
 #include "Transform.h"
 #include "String/String.h"
 #include "Input.h"
+#include "Stack.h"
 
 Gizmos::GizmoHandle::GizmoHandle(const Gizmos& _owner, std::function<bool(Gizmos::GizmoHandle&, Renderer&)> _meshBuildFunction, const RGBA& _baseColor, const RGBA& _highlightColor, GizmoHandle::eHandle handleType)
 	: GameObject(), owner(_owner), baseColor(_baseColor), type(handleType)
@@ -67,6 +68,15 @@ bool Gizmos::GizmoHandle::Initialize(Renderer& renderer) {
 
 	return true;
 }
+
+double Gizmos::GizmoHandle::CalcDistanceFromCamera(const Camera& camera) const{
+	Vec3f cameraPosition = camera.GetPosition();
+	Vec3f position = GetPosition();
+	Vec3d direction = cameraPosition - position;
+	double distance = sqrt(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
+	return distance;
+}
+
 bool Gizmos::GizmoHandle::Intersect(const Ray& ray, double& distance) {
 	for (const auto& mesh : meshes) {
 		for (size_t iTriangle = 0; iTriangle < mesh->GetTriangleMeshCount(); iTriangle++) {
@@ -120,57 +130,57 @@ bool Gizmos::GizmoHandles::Intersect(Gizmos::GizmoHandle::eHandle gizmoHandle, c
 	bool bIntersect = at(gizmoHandle).Intersect(ray, distance);
 	return bIntersect;
 }
+
+
+Gizmos::GizmoHandle::eHandle Gizmos::GizmoHandles::GetNearestHandle(std::vector<Gizmos::GizmoHandle::eHandle> handleTypes, const Ray& ray, double distance) {
+	GizmoHandle::eHandle handle = GizmoHandle::eHandle::NONE;
+	double oldDistance = distance;
+	double newDistance = 0.0;
+
+	for (auto handleType : handleTypes) {
+		if (Intersect(handleType, ray, newDistance)) {
+			if (newDistance < oldDistance) {
+				handle = handleType;
+				oldDistance = newDistance;
+			}
+		}
+	}
+	return handle;
+}
+
 Gizmos::GizmoHandle::eHandle Gizmos::GizmoHandles::Intersect(const Ray& ray, double& distance, eTransformMode transformMode) {
 	GizmoHandle::eHandle handle = GizmoHandle::eHandle::NONE;
 	bool bIntersect = false;
+	std::vector<Gizmos::GizmoHandle::eHandle> handleTypes;
 	switch (transformMode) {
 	case eTransformMode::TRANSLATE:
-	{
-		if (Intersect(GizmoHandle::eHandle::TRANSLATE_X, ray, distance)) {
-			handle = GizmoHandle::eHandle::TRANSLATE_X;
-		}
-		
-		if (Intersect(GizmoHandle::eHandle::TRANSLATE_Y, ray, distance)) {
-			handle = GizmoHandle::eHandle::TRANSLATE_Y;
-		}
-
-		if (Intersect(GizmoHandle::eHandle::TRANSLATE_Z, ray, distance)) {
-			handle = GizmoHandle::eHandle::TRANSLATE_Z;
-		}
-		if (Intersect(GizmoHandle::eHandle::TRANSLATE_XY, ray, distance)) {
-			handle = GizmoHandle::eHandle::TRANSLATE_XY;
-		}
-		if (Intersect(GizmoHandle::eHandle::TRANSLATE_XZ, ray, distance)) {
-			handle = GizmoHandle::eHandle::TRANSLATE_XZ;
-		}
+	{		
+		handleTypes.push_back(GizmoHandle::eHandle::TRANSLATE_X);
+		handleTypes.push_back(GizmoHandle::eHandle::TRANSLATE_Y);
+		handleTypes.push_back(GizmoHandle::eHandle::TRANSLATE_Z);
+		handleTypes.push_back(GizmoHandle::eHandle::TRANSLATE_XY);
+		handleTypes.push_back(GizmoHandle::eHandle::TRANSLATE_XZ);
+		handleTypes.push_back(GizmoHandle::eHandle::TRANSLATE_YZ);
+		handle = GetNearestHandle(handleTypes, ray, distance);
 
 		break;
 	}
 	case eTransformMode::ROTATE:
 	{
-		if (Intersect(GizmoHandle::eHandle::ROTATE_X, ray, distance)) {
-			handle = GizmoHandle::eHandle::ROTATE_X;
-		}
-		if (Intersect(GizmoHandle::eHandle::ROTATE_Y, ray, distance)) {
-			handle = GizmoHandle::eHandle::ROTATE_Y;
-		}
-		if (Intersect(GizmoHandle::eHandle::ROTATE_Z, ray, distance)) {
-			handle = GizmoHandle::eHandle::ROTATE_Z;
-		}
+		handleTypes.push_back(GizmoHandle::eHandle::ROTATE_X);
+		handleTypes.push_back(GizmoHandle::eHandle::ROTATE_Y);
+		handleTypes.push_back(GizmoHandle::eHandle::ROTATE_Z);
 		
+		handle = GetNearestHandle(handleTypes, ray, distance);
 		break;
 	}
 	case eTransformMode::SCALE:
 	{
-		if (Intersect(GizmoHandle::eHandle::SCALE_X, ray, distance)) {
-			handle = GizmoHandle::eHandle::SCALE_X;
-		}
-		if (Intersect(GizmoHandle::eHandle::SCALE_Y, ray, distance)) {
-			handle = GizmoHandle::eHandle::SCALE_Y;
-		}
-		if (Intersect(GizmoHandle::eHandle::SCALE_Z, ray, distance)) {
-			handle = GizmoHandle::eHandle::SCALE_Z;
-		}
+		handleTypes.push_back(GizmoHandle::eHandle::SCALE_X);
+		handleTypes.push_back(GizmoHandle::eHandle::SCALE_Y);
+		handleTypes.push_back(GizmoHandle::eHandle::SCALE_Z);
+
+		handle = GetNearestHandle(handleTypes, ray, distance);
 		break;
 	}
 	}
@@ -198,6 +208,8 @@ void Gizmos::GizmoHandles::Render(Renderer& renderer, ShaderParameter& shaderPar
 		shaderParam.objNo = (int)GizmoHandle::eHandle::TRANSLATE_XZ;
 		at(GizmoHandle::eHandle::TRANSLATE_XZ).Render(renderer, shaderParam);
 
+		shaderParam.objNo = (int)GizmoHandle::eHandle::TRANSLATE_YZ;
+		at(GizmoHandle::eHandle::TRANSLATE_YZ).Render(renderer, shaderParam);
 		break;
 	}
 	case eTransformMode::ROTATE:
@@ -326,7 +338,7 @@ bool Gizmos::Initialize(Renderer& renderer) {
 			MeshBuilder meshBuilder;
 			meshes.push_back(std::make_shared<Mesh>());
 			meshBuilder.Begin();
-			meshBuilder.AddQuad(Vec3f(orgSize / 4, orgSize / 4, 0.0f), Vec3f(orgSize / 8, orgSize / 8, 0.0f), Vec3f(-1.0f, 0.0f, 0.0f));
+			meshBuilder.AddCube(Vec3f(orgSize / 2.0f, orgSize / 2.0f, 0.0f), Vec3f(orgSize / 4.0f, orgSize / 4.0f, 0.01f), RGBA::WHITE);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 			meshBuilder.End();
 
@@ -344,7 +356,7 @@ bool Gizmos::Initialize(Renderer& renderer) {
 			MeshBuilder meshBuilder;
 			meshes.push_back(std::make_shared<Mesh>());
 			meshBuilder.Begin();
-			meshBuilder.AddQuad(Vec3f(orgSize / 4, 0.0f, orgSize / 4), Vec3f(orgSize / 8, 0.0f, orgSize / 8), Vec3f(0.0f, 1.0f, 0.0f));
+			meshBuilder.AddCube(Vec3f(orgSize / 2.0f, 0.0f, orgSize / 2.0f), Vec3f(orgSize / 4.0f, 0.01f, orgSize / 4.0f), RGBA::WHITE);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 			meshBuilder.End();
 
@@ -353,6 +365,25 @@ bool Gizmos::Initialize(Renderer& renderer) {
 	};
 
 	if (!handles.Add(translationXZHandle))
+		assert(0);
+
+	Gizmos::GizmoHandle translateYZHandle{
+		GizmoHandle(*this, [&](Gizmos::GizmoHandle& handle, Renderer& renderer)->bool {
+			std::list<std::shared_ptr<Mesh>>& meshes = handle.GetMeshes();
+
+			MeshBuilder meshBuilder;
+			meshes.push_back(std::make_shared<Mesh>());
+			meshBuilder.Begin();
+			meshBuilder.AddCube(Vec3f(0.0f, orgSize / 2.0f, orgSize / 2.0f), Vec3f(0.01f, orgSize / 4.0f, orgSize / 4.0f), RGBA::WHITE);
+			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+			meshBuilder.End();
+
+			return true;
+		}, RGBA::WHITE, RGBA::YELLOW, Gizmos::GizmoHandle::eHandle::TRANSLATE_YZ)
+	};
+
+
+	if (!handles.Add(translateYZHandle))
 		assert(0);
 
 	Gizmos::GizmoHandle rotationXHandle{
@@ -509,12 +540,24 @@ const GameObject& Gizmos::GetAttachedObjects(uint32_t index) const {
 	return *(targets.at(index));
 }
 
-Vec3f Gizmos::CalcGizmoSize(const Camera& camera) const {
+double Gizmos::CalcDistanceFromCamera(const Camera& camera)const {
 	Vec3f cameraPosition = camera.GetPosition();
 	Vec3f position = GetPosition();
+	Vec3d direction = cameraPosition - position;
+	double distance = sqrt(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
+	return distance;
+}
 
-	Vec3f direction = cameraPosition - position;
-	float distance = sqrt((double)direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
+double Gizmos::CalcDistanceFromCamera(const GizmoHandle& gizmoHandle, const Camera& camera)const {
+	Vec3f gizmoPos = gizmoHandle.GetPosition();
+	Vec3f cameraPos = camera.GetPosition();
+	Vec3d direction = gizmoPos - cameraPos;
+	double distance = sqrt(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
+	return distance;
+}
+
+Vec3f Gizmos::CalcGizmoSize(const Camera& camera) const {
+	float distance = CalcDistanceFromCamera(camera);
 	return orgSize * distance;
 }
 
@@ -525,6 +568,7 @@ bool Gizmos::VerifyGizmos() const{
 	if (!handles.DoesExist(GizmoHandle::eHandle::TRANSLATE_Z))	return false;
 	if (!handles.DoesExist(GizmoHandle::eHandle::TRANSLATE_XY))	return false; 
 	if (!handles.DoesExist(GizmoHandle::eHandle::TRANSLATE_XZ)) return false;
+	if (!handles.DoesExist(GizmoHandle::eHandle::TRANSLATE_YZ)) return false;
 	if (!handles.DoesExist(GizmoHandle::eHandle::ROTATE_X))		return false;
 	if (!handles.DoesExist(GizmoHandle::eHandle::ROTATE_Y))		return false;
 	if (!handles.DoesExist(GizmoHandle::eHandle::ROTATE_Z))		return false;

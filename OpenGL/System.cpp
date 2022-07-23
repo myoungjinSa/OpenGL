@@ -219,16 +219,6 @@ LRESULT CALLBACK System::MessageHandler(HWND hwnd, UINT umsg, WPARAM wParam, LPA
 	{
 		SetCapture(hWnd);
 		MouseInput::ProcessLButtonDown(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam));
-		
-		if (pScene) {
-			Ray ray = pScene->GetRay(GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam), screenWidth, screenHeight);
-
-			if (pSceneEdit && pSceneEdit->PickObject(ray)) {
-				LogDebug(L"Picked\n");
-			}else {
-				LogDebug(L"Not Picked\n");
-			}
-		}
 		return 0;
 	}
 	case WM_MOUSEMOVE:

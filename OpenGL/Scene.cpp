@@ -55,6 +55,12 @@ void Scene::Update(double elapsedTime) {
 	terrain->Update(elapsedTime);
 	for (const auto& obj : gameObjects) {
 		obj->Update(elapsedTime);
+		//LogDebug(L"Position = %.8lf, %.8lf, %.8lf\n", obj->GetPosition().x, obj->GetPosition().y, obj->GetPosition().z);
+		//LogDebug(L"Look = %.8lf, %.8lf, %.8lf\n", obj->GetLook().x, obj->GetLook().y, obj->GetLook().z);
+		//LogDebug(L"Up = %.8lf, %.8lf, %.8lf\n", obj->GetUp().x, obj->GetUp().y, obj->GetUp().z);
+		//LogDebug(L"Right = %.8lf, %.8lf, %.8lf\n", obj->GetRight().x, obj->GetRight().y, obj->GetRight().z);
+		//LogDebug(L"Scale = %.8lf, %.8lf, %.8lf\n", obj->GetScale().x, obj->GetScale().y, obj->GetScale().z);
+		
 		//obj->Rotate(MathUtils::DegreesToRadians(0.0f), MathUtils::DegreesToRadians(1.0f), MathUtils::DegreesToRadians(0.0f));
 		//obj->Move(obj->GetLook(), 1.0f, elapsedTime);
 	}
@@ -70,6 +76,7 @@ bool Scene::Render(Renderer& renderer) {
 	camera.SetFrustum(width, height, camera.GetNear(), camera.GetFar(), MathUtils::DegreesToRadians(60));
 	Matrix<float, 4, 4> projectionMatrix = camera.GetFrustum();
 	
+	renderer.EnableDepthTest(true);
 	renderer.SetCullFace(eFace::Back);
 	renderer.SetDepthFunc(eCompare::LEQUAL);
 	ShaderParameter shaderParmaeter;
@@ -89,9 +96,14 @@ bool Scene::Render(Renderer& renderer) {
 		gameObjects[iObj]->Render(renderer, shaderParmaeter);
 	}
 
-	renderer.SetDepthTest(false);
+	renderer.EnableStencilTest(true);
+	renderer.ClearStencilBuffer(0xff);
+	renderer.SetStencilTest((int)eFace::Back, eCompare::EQUAL, 0, 0xFF);
+	renderer.OperateAfterStencilTest((int)eFace::Back, Renderer::StencilOp::KEEP, Renderer::StencilOp::KEEP, Renderer::StencilOp::KEEP);
 	gizmos.Render(renderer, &camera, *this);
-	renderer.SetDepthTest(true);
+	renderer.SetStencilTest((int)eFace::Back, eCompare::EQUAL, 0, 0);
+	renderer.EnableStencilTest(false);
+
 	renderer.EndRender();
 	return true;
 }
@@ -179,6 +191,7 @@ void GameObjectPicker::Clear() {
 }
 
 bool GameObjectPicker::HitTest(Gizmos& gizmos, double& distance) {
+
 	if (gizmos.Intersect(ray, distance)) {
 		return true;
 	}

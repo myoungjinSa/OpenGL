@@ -174,8 +174,6 @@ void Terrain::Render(Renderer& renderer, ShaderParameter& shaderParam) {
 
 	shader->Render(renderer, shaderParam);
 
-	renderer.SetDepthTest(true);
-
 	for (auto& mesh : meshes) {
 		mesh->Render(renderer);
 	}

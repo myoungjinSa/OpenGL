@@ -340,7 +340,7 @@ void MeshBuilder::End() {
 }
 
 //Pivot¿Ã øﬁ¬  æ∆∑°
-void MeshBuilder::AddQuad(const Vec3f& bottomLeft, const Vec3f& up, float upLength, const Vec3f& right, float rightLength, const Vec3f& normal, const RGBA& color, const Vec2f& uvOffset, float uvStepSize) {
+void MeshBuilder::AddQuad(const Vec3f& bottomLeft, const Vec3f& upLeft, float upLength, const Vec3f& bottomRight, float rightLength, const Vec3f& normal, const RGBA& color, const Vec2f& uvOffset, float uvStepSize) {
 	unsigned int currentVert = vertices.size();
 
 	SetColor(color);
@@ -350,13 +350,13 @@ void MeshBuilder::AddQuad(const Vec3f& bottomLeft, const Vec3f& up, float upLeng
 	AddVertex(bottomLeft);		//020
 
 	SetUV(uvOffset);
-	AddVertex(bottomLeft + (up * upLength));//022
+	AddVertex(bottomLeft + (upLeft * upLength));//022
 
 	SetUV(uvOffset + (Vec2f::ONE * uvStepSize));
-	AddVertex(bottomLeft + (right * rightLength));//220
+	AddVertex(bottomLeft + (bottomRight * rightLength));//220
 
 	SetUV(uvOffset + (Vec2f::UNIT_X * uvStepSize));
-	AddVertex(bottomLeft + (up * upLength) + (right * rightLength));
+	AddVertex(bottomLeft + (upLeft * upLength) + (bottomRight * rightLength));
 
 	AddIndex(1 + currentVert);  
 	AddIndex(2 + currentVert);	
@@ -364,12 +364,6 @@ void MeshBuilder::AddQuad(const Vec3f& bottomLeft, const Vec3f& up, float upLeng
 	AddIndex(3 + currentVert);	
 	AddIndex(2 + currentVert);	
 	AddIndex(1 + currentVert);	
-}
-
-void MeshBuilder::AddQuad(const Vec3f& axis, const Rect2f& rect, const RGBA& color, const Vec2f& uvOffset, float uvStepSize) {
-	unsigned int currentVert = vertices.size();
-	SetColor(color);
-	
 }
 
 //Pivot¿Ã ¡ﬂæ”

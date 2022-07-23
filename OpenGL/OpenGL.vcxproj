@@ -221,6 +221,7 @@
     <ClInclude Include="Scene.h" />
     <ClInclude Include="SceneEdit.h" />
     <ClInclude Include="Shader.h" />
+    <ClInclude Include="Stack.h" />
     <ClInclude Include="String\String.h" />
     <ClInclude Include="System.h" />
     <ClInclude Include="Terrain.h" />

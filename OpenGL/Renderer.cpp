@@ -322,7 +322,7 @@ void OpenGLRenderer::SetCullFace(eFace _face) {
 	glCullFace(face);
 }
 
-void OpenGLRenderer::SetDepthTest(bool bEnable) {
+void OpenGLRenderer::EnableDepthTest(bool bEnable) {
 	bEnable ? glEnable(GL_DEPTH_TEST) : glDisable(GL_DEPTH_TEST);
 }
 
@@ -601,6 +601,9 @@ void OpenGLRenderer::OperateAfterStencilTest(int face, StencilOp stencilFailed, 
 	pDevice->glStencilOpSeparate(face, sFailed, dFailed, dPassed);
 }
 
+void OpenGLRenderer::EnableStencilTest(bool bEnable) {
+	bEnable ? glEnable(GL_STENCIL_TEST) : glDisable(GL_STENCIL_TEST);
+}
 void OpenGLRenderer::SetStencilTest(int face, eCompare _stencilFunc, int ref, unsigned int mask) {
 	int stencilFunc = GetDepthCompare(_stencilFunc);
 	pDevice->glStencilFuncSeparate(face, stencilFunc, ref, mask);

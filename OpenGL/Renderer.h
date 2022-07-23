@@ -98,7 +98,7 @@ public:
 
 	virtual void SetWindingOrder(WindingOrder order) {}
 	virtual void SetCullFace(eFace face) {}
-	virtual void SetDepthTest(bool bEnable) {}
+	virtual void EnableDepthTest(bool bEnable) {}
 	Renderer::DrawMode GetDrawMode() const { return drawMode; }
 	void SetDrawMode(Renderer::DrawMode drawMode);
 	void SetRenderMode(RenderMode renderMode);
@@ -128,6 +128,7 @@ public:
 	virtual void SetSampleMode(bool bCubemap = false){}
 	virtual void SetFiltering(bool bCubemap = false){}
 
+	virtual void EnableStencilTest(bool bEnable) {}
 	virtual int  ClearStencilBuffer(int stencil) { return 0; }
 	virtual void SetStencilTest(int face, eCompare _stencilFunc, int ref, unsigned int mask){}
 	virtual void OperateAfterStencilTest(int face, StencilOp stencilFailed, StencilOp depthFailed, StencilOp depthPassed) {}
@@ -181,7 +182,7 @@ public:
 
 	void SetWindingOrder(Renderer::WindingOrder order) override;
 	void SetCullFace(eFace cullMode)override;
-	void SetDepthTest(bool bEnable) override;
+	void EnableDepthTest(bool bEnable) override;
 
 	bool SetShaderParameter(unsigned int shaderProgram, const Vec4f& vec4, String variableName) override;
 	bool SetShaderParameter(unsigned int shaderProgram, const Vec3f& vec3, String variableName) override;
@@ -207,6 +208,7 @@ public:
 	void SetFiltering(bool bCubemap = false)override;
 
 	int  ClearStencilBuffer(int clearVal)override;
+	void EnableStencilTest(bool bEnable)override;
 	void SetStencilTest(int face, eCompare _stencilFunc, int ref, unsigned int mask)override;
 	void OperateAfterStencilTest(int face, StencilOp stencilFailed, StencilOp depthFailed, StencilOp depthPassed)override;
 	void SetDepthFunc(eCompare depthFunc) override;

@@ -99,7 +99,11 @@ Vec3f SceneEdit::CalcMoveOffset(const GameObject& baseObject, const Point2i& pre
 		plane.Build(vertices[0], vertices[4], vertices[5]);
 		break;
 	case Gizmos::GizmoHandle::eHandle::TRANSLATE_Z:
+	case Gizmos::GizmoHandle::eHandle::TRANSLATE_YZ:
 		plane.Build(vertices[1], vertices[2], vertices[6]);
+		break;
+	case Gizmos::GizmoHandle::eHandle::TRANSLATE_XZ:
+		plane.Build(vertices[4], vertices[7], vertices[6]);
 		break;
 	}
 
@@ -294,6 +298,12 @@ Vec3f SceneEdit::ClampDragOffset(Gizmos::GizmoHandle::eHandle handleType, const 
 	case Gizmos::GizmoHandle::eHandle::TRANSLATE_XY:
 		newOffset = Vec3f(offset.x, offset.y, 0.0f);
 		break;
+	case Gizmos::GizmoHandle::eHandle::TRANSLATE_XZ:
+		newOffset = Vec3f(offset.x, 0.0f, offset.z);
+		break;
+	case Gizmos::GizmoHandle::eHandle::TRANSLATE_YZ:
+		newOffset = Vec3f(0.0f, offset.y, offset.z);
+		break;
 	default:
 		break;
 	}
@@ -350,9 +360,15 @@ void SceneEdit::ProcessEvent(Event& e) {
 		if (pMouseEvent->mouseState == MouseInput::MouseEvent::MOUSE_STATE::LBUTTON_DOWN) {
 			drag.Begin(newMousePoint);
 
-			const GameObjects& selectedObjects = picker.GetSelectedObjects();
-			if(!selectedObjects.empty())
-				objMemento.Set(*selectedObjects.at(0));
+			Ray ray = scene.GetRay(newMousePoint.x, newMousePoint.y, scene.GetSceneSize().width, scene.GetSceneSize().height);
+			if (PickObject(ray)) {
+				LogDebug(L"Picked\n");
+				const GameObjects& selectedObjects = picker.GetSelectedObjects();
+				if (!selectedObjects.empty())
+					objMemento.Set(*selectedObjects.at(0));
+			}else {
+				LogDebug(L"Not Picked\n");
+			}
 		}
 		if (pMouseEvent->mouseState == MouseInput::MouseEvent::MOUSE_STATE::LBUTTON_UP) {
 			drag.End();
