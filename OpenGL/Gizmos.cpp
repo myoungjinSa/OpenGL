@@ -193,6 +193,7 @@ void Gizmos::GizmoHandles::Render(Renderer& renderer, ShaderParameter& shaderPar
 	case eTransformMode::TRANSLATE:
 	{
 		renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
+
 		shaderParam.objNo = (int)GizmoHandle::eHandle::TRANSLATE_X;
 		at(GizmoHandle::eHandle::TRANSLATE_X).Render(renderer, shaderParam);
 
@@ -557,7 +558,7 @@ double Gizmos::CalcDistanceFromCamera(const GizmoHandle& gizmoHandle, const Came
 }
 
 Vec3f Gizmos::CalcGizmoSize(const Camera& camera) const {
-	float distance = CalcDistanceFromCamera(camera);
+	float distance = (float)CalcDistanceFromCamera(camera);
 	return orgSize * distance;
 }
 

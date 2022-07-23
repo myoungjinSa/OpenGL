@@ -76,6 +76,7 @@ bool Scene::Render(Renderer& renderer) {
 	camera.SetFrustum(width, height, camera.GetNear(), camera.GetFar(), MathUtils::DegreesToRadians(60));
 	Matrix<float, 4, 4> projectionMatrix = camera.GetFrustum();
 	
+
 	renderer.EnableDepthTest(true);
 	renderer.SetCullFace(eFace::Back);
 	renderer.SetDepthFunc(eCompare::LEQUAL);
@@ -96,14 +97,9 @@ bool Scene::Render(Renderer& renderer) {
 		gameObjects[iObj]->Render(renderer, shaderParmaeter);
 	}
 
-	renderer.EnableStencilTest(true);
-	renderer.ClearStencilBuffer(0xff);
-	renderer.SetStencilTest((int)eFace::Back, eCompare::EQUAL, 0, 0xFF);
-	renderer.OperateAfterStencilTest((int)eFace::Back, Renderer::StencilOp::KEEP, Renderer::StencilOp::KEEP, Renderer::StencilOp::KEEP);
+	renderer.EnableDepthTest(false);
 	gizmos.Render(renderer, &camera, *this);
-	renderer.SetStencilTest((int)eFace::Back, eCompare::EQUAL, 0, 0);
-	renderer.EnableStencilTest(false);
-
+	
 	renderer.EndRender();
 	return true;
 }

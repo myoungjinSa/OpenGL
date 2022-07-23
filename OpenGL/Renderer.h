@@ -130,7 +130,7 @@ public:
 
 	virtual void EnableStencilTest(bool bEnable) {}
 	virtual int  ClearStencilBuffer(int stencil) { return 0; }
-	virtual void SetStencilTest(int face, eCompare _stencilFunc, int ref, unsigned int mask){}
+	virtual void SetStencilFunc(int face, eCompare _stencilFunc, int ref, unsigned int mask){}
 	virtual void OperateAfterStencilTest(int face, StencilOp stencilFailed, StencilOp depthFailed, StencilOp depthPassed) {}
 	virtual void SetDepthFunc(eCompare depthFunc) {}
 	virtual void EnableCulling(bool bEnable = true) {}
@@ -209,7 +209,7 @@ public:
 
 	int  ClearStencilBuffer(int clearVal)override;
 	void EnableStencilTest(bool bEnable)override;
-	void SetStencilTest(int face, eCompare _stencilFunc, int ref, unsigned int mask)override;
+	void SetStencilFunc(int face, eCompare _stencilFunc, int ref, unsigned int mask)override;
 	void OperateAfterStencilTest(int face, StencilOp stencilFailed, StencilOp depthFailed, StencilOp depthPassed)override;
 	void SetDepthFunc(eCompare depthFunc) override;
 	void EnableCulling(bool bEnable = true)override;

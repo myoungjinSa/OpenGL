@@ -144,6 +144,7 @@ bool OpenGL::Initialize(HWND hWnd, int _screenWidth, int _screenHeight, bool vSy
 
 	//Enable depth testing.
 	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_STENCIL_TEST);
 
 	//Set the polygon winding to front facing for the left handed system.
 	glFrontFace(GL_CW);

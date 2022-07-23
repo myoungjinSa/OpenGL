@@ -604,7 +604,7 @@ void OpenGLRenderer::OperateAfterStencilTest(int face, StencilOp stencilFailed, 
 void OpenGLRenderer::EnableStencilTest(bool bEnable) {
 	bEnable ? glEnable(GL_STENCIL_TEST) : glDisable(GL_STENCIL_TEST);
 }
-void OpenGLRenderer::SetStencilTest(int face, eCompare _stencilFunc, int ref, unsigned int mask) {
+void OpenGLRenderer::SetStencilFunc(int face, eCompare _stencilFunc, int ref, unsigned int mask) {
 	int stencilFunc = GetDepthCompare(_stencilFunc);
 	pDevice->glStencilFuncSeparate(face, stencilFunc, ref, mask);
 }
