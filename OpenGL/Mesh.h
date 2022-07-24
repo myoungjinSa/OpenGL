@@ -1,10 +1,10 @@
 #pragma once
 #include <vector>
 #include <array>
-#include <list>
 #include "Types.h"
 #include "Compositor.h"
 #include "RGBA.h"
+#include <memory>
 
 class Renderer; 
 class Shader;
@@ -95,6 +95,8 @@ public:
 
 	size_t	GetTriangleMeshCount() const;
 	const Triangle& GetTriangleMesh(size_t index) const;
+
+	Volumef GetVolume()const;
 protected:
 	std::vector<Vertex*> vertexList;
 	std::vector<unsigned int> indexList;
@@ -102,6 +104,11 @@ protected:
 	std::vector<Triangle> triangles;
 	int vertexCount, indexCount;
 	unsigned int vertexArrayId, vertexBufferId, indexBufferId;
+};
+
+class Meshes : public std::vector<std::shared_ptr<Mesh>> {
+public:
+	void Add(std::shared_ptr<Mesh>&& mesh);
 };
 
 class TerrainHeightImage;
@@ -177,6 +184,8 @@ public:
 	void SetMeshType(Mesh::TriangleType triangleType);
 
 	void ComputeNormals();
+
+	//BoundingBox GetBoundingBox(const std::list<std::shared_ptr<Mesh>& meshes)const;
 
 	std::vector<VertexMaster> vertices;
 	std::vector<unsigned int> indices;

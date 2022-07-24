@@ -1,5 +1,5 @@
 #pragma once
-#include "Matrix.h"
+#include "MathUtils.h"
 #include <numeric>
 
 //템플릿 전방선언
@@ -7,6 +7,7 @@ template<typename> class Size;
 template<typename> class Rect;
 template<typename> class Point2;
 template<typename> class Point3;
+template<typename> class Volume;
 
 template<typename T> class Point2
 {
@@ -168,13 +169,36 @@ public:
 
 	operator Rect<T>() const { return Rect<T>(min.x, min.y, max.x, max.y); }
 
-	Volume operator*(T factor) const { return Volume(min * factor, max * factor); }
-	Volume operator*(Vector3<T> vol) const { return Volume(min * vol, max * vol); }
-	Volume operator+(Vector3<T> vol) const { return Volume(min + vol, max + vol); }
-	Volume operator-(Vector3<T> vol) const { return Volume(min - vol, max - vol); }
+	Volume<T> operator*(T factor) const { return Volume<T>(min * factor, max * factor); }
+	Volume<T> operator*(Vector3<T> vol) const { return Volume<T>(min * vol, max * vol); }
+	Volume<T> operator+(Vector3<T> vol) const { return Volume<T>(min + vol, max + vol); }
+	Volume<T> operator-(Vector3<T> vol) const { return Volume<T>(min - vol, max - vol); }
+		  
+	void operator|=(const Vector3<T>& vector){
+		min.x = MIN(min.x, vector.x);
+		min.y = MIN(min.y, vector.y);
+		min.z = MIN(min.z, vector.z);
 
-	void operator|=(const Vector3<T>& vector);
-	void operator|=(const Volume& other);
+		max.x = MAX(max.x, vector.x);
+		max.y = MAX(max.y, vector.y);
+		max.z = MAX(max.z, vector.z);
+	}
+
+	void operator|=(const Volume<T>& other){
+		if (IsZero()) {
+			*this = other;
+		}
+		else {
+			min.x = MIN(min.x, other.min.x);
+			min.y = MIN(min.y, other.min.y);
+			min.z = MIN(min.z, other.min.z);
+
+			max.x = MAX(max.x, other.max.x);
+			max.y = MAX(max.y, other.max.y);
+			max.z = MAX(max.z, other.max.z);
+		}
+	}
+
 };
 typedef Volume<int>    Volumei;
 typedef Volume<float>  Volumef;

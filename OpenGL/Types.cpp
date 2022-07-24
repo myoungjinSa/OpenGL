@@ -579,30 +579,3 @@ void Volume<T>::Normalize() {
 	if (max.y < min.y) std::swap(min.y, max.y);
 	if (max.z < min.z) std::swap(min.z, max.z);
 }
-
-template<typename T> inline
-void Volume<T>::operator|=(const Vector3<T>& vector) {
-	min.x = min(min.x, vector.x);
-	min.y = min(min.y, vector.y);
-	min.z = min(min.z, vector.z);
-
-	max.x = max(max.x, vector.x);
-	max.y = max(max.y, vector.y);
-	max.z = max(max.z, vector.z);
-}
-
-template<typename T> inline
-void Volume<T>::operator|=(const Volume& other) {
-	if (IsZero()) {
-		*this = other;
-	}
-	else {
-		min.x = min(min.x, other.min.x);
-		min.y = min(min.y, other.min.y);
-		min.z = min(min.z, other.min.z);
-
-		max.x = max(max.x, other.max.x);
-		max.y = max(max.y, other.max.y);
-		max.z = max(max.z, other.max.z);
-	}
-}

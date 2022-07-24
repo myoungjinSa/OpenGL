@@ -5,13 +5,12 @@
 #include "Types.h"
 #include "Component.h"
 #include "Transform.h"
+#include "Mesh.h"
 
 void MakeWorldViewMatrix(const Matrix<float, 4, 4>& worldMatrix, const Matrix<float, 4, 4>& viewMatrix, Matrix<float, 4, 4>& modelViewMatrix);
 void MakeNormalMatrix(const Matrix<float, 4, 4>& worldMatrix, Matrix<float, 3, 3>& normalMatrix);
 
 class Material;
-class Mesh;
-class Meshes;
 class Texture;
 class CubemapTexture;
 class Renderer;
@@ -114,11 +113,11 @@ public:
 	void GetLocalBoundingBox(Volumef& volume)const;
 	Matrix<float, 4, 4> GetWorldMatrix() const;
 
-	std::list<std::shared_ptr<Mesh>>& GetMeshes() { return meshes; }
+	Meshes& GetMeshes() { return meshes; }
 protected:
 	std::vector<std::shared_ptr<Component>> components;
 	
-	std::list<std::shared_ptr<Mesh>> meshes;
+	Meshes meshes;
 	std::shared_ptr<Texture> diffuseMap;
 	std::shared_ptr<Texture> normalMap;
 	std::shared_ptr<CubemapTexture> environMap;

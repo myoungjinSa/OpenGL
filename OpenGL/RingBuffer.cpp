@@ -1,8 +1,8 @@
 #include "RingBuffer.h"
+#include "MathUtils.h"
 #include <time.h>
 #include <thread>
 
-#define MIN(a, b) (((a) < (b)) ? (a) : (b))
 
 constexpr std::chrono::nanoseconds timespecToDuration(timespec ts) {
 	auto duration = std::chrono::seconds(ts.tv_sec) + std::chrono::nanoseconds(ts.tv_nsec);

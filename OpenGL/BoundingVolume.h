@@ -18,9 +18,12 @@ public:
 	
 	virtual Volumef GetVolume() = 0;
 	virtual bool Init(Renderer& renderer);
+	virtual bool InitVolume(const Meshes& meshes) { return false; }
 	virtual bool IsIn(const Ray& ray) = 0;
 	virtual bool IsIn(const Vec3f& pos) = 0;
 	virtual void Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix);
+	
+	Volumef CalculateVolume(const Meshes& meshes);
 protected:
 	std::shared_ptr<ColorShader> DefaultShader;
 	GameObject* pGameObject;
@@ -33,10 +36,11 @@ public:
 
 	Volumef GetVolume() override;
 	bool Init(Renderer& renderer) override;
+	bool InitVolume(const Meshes& meshes) override;
 	bool IsIn(const Vec3f& pos) override;
 	bool IsIn(const Ray& ray) override;
 	void Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix) override;
-
+	
 	void SetCenter(const Vec3f& _center);
 	void SetExtent(const Vec3f& _extent);
 
@@ -47,7 +51,7 @@ private:
 	void GetMinMaxRange(Vec3f& min, Vec3f& max);
 	void GetMinMaxRange(Volumef& volume);
 
-	std::shared_ptr<Mesh> pMesh;
+	std::shared_ptr<Mesh> mesh;
 	Vec3f center;
 	Vec3f extent;
 };
@@ -59,10 +63,11 @@ public:
 
 	Volumef GetVolume() override;
 	bool Init(Renderer& renderer) override;
+	bool InitVolume(const Meshes& meshes)override;
 	bool IsIn(const Vec3f& pos) override;
 	bool IsIn(const Ray& ray) override;
 	void Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix) override;
-
+	
 	void SetRadius(float _radius);
 	void SetCenter(const Vec3f& _center);
 

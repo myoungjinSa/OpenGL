@@ -11,6 +11,21 @@ BoundingVolume::BoundingVolume(Object* pObject)
 	
 }
 
+Volumef BoundingVolume::CalculateVolume(const Meshes& meshes) {
+	std::vector<Volumef> volumes;
+	for (size_t iMesh = 0; iMesh < meshes.size(); iMesh++) {
+		const std::shared_ptr<Mesh>& mesh = meshes.at(iMesh);
+		assert(mesh);
+		Volumef volume = mesh->GetVolume();
+		volumes.push_back(volume);
+	}
+
+	Volumef volume;
+	for (const Volumef& vol : volumes) {
+		volume |= vol;
+	}
+	return volume;
+}
 
 bool BoundingVolume::Init(Renderer& renderer) {
 	pGameObject = dynamic_cast<GameObject*>(pOwner);
@@ -27,6 +42,8 @@ bool BoundingVolume::Init(Renderer& renderer) {
 		LogError(L"Could not initialize the Default Shader\n");
 		return false;
 	}
+
+	return InitVolume(pGameObject->GetMeshes());
 }
 
 void BoundingVolume::Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix) {
@@ -35,11 +52,21 @@ void BoundingVolume::Render(Renderer& renderer, const Matrix<float, 4, 4>& viewM
 
 
 BoundingBox::BoundingBox(Object* pOwner)
-	:BoundingVolume(pOwner), pMesh(nullptr)
-{
+	:BoundingVolume(pOwner), mesh(nullptr)
+{}
 
+bool BoundingBox::InitVolume(const Meshes& meshes) {
+	if (meshes.empty())
+		return false;
+
+	Volumef volume = CalculateVolume(meshes);
+	Vec3f center = volume.GetCenter();
+	SetCenter(center);
+	Vec3f extent = volume.GetSize();
+	SetExtent(extent);
+
+	return true;
 }
-
 void BoundingBox::SetCenter(const Vec3f& _center) {
 	center = _center;
 }
@@ -58,18 +85,17 @@ const Vec3f& BoundingBox::GetExtent() const {
 
 bool BoundingBox::Init(Renderer& renderer) {
 	BoundingVolume::Init(renderer);
-
+	
 	MeshBuilder meshBuilder;
 	meshBuilder.AddCube(center, Vec3f(1.0f, 1.0f, 1.0f), RGBA::GREEN);
 
-	if (!pMesh)
-		pMesh = std::make_shared<Mesh>();
+	if (!mesh)
+		mesh = std::make_shared<Mesh>();
 
-	if (!pMesh)
+	if (!mesh)
 		return false;
 
-	meshBuilder.CopyToMesh(renderer, *pMesh, &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
-
+	meshBuilder.CopyToMesh(renderer, *mesh, &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 }
 
 bool BoundingBox::IsIn(const Vec3f& pos) {
@@ -168,7 +194,7 @@ void BoundingBox::Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatr
 	shaderParam.projectionMatrix = projectionMatrix;
 	
 	DefaultShader->Render(renderer, shaderParam);
-	pMesh->Render(renderer);
+	mesh->Render(renderer);
 
 	renderer.SetDrawMode(oldDrawMode);
 }
@@ -180,6 +206,27 @@ BoundingSphere::BoundingSphere(Object* pOwner)
 }
 
 bool BoundingSphere::Init(Renderer& renderer) {
+
+	return true;
+}
+
+bool BoundingSphere::InitVolume(const Meshes& meshes) {
+	if (meshes.empty())
+		return false;
+
+	Volumef volume = CalculateVolume(meshes);
+	Vec3f center = volume.GetCenter();
+	SetCenter(center);
+
+	float maxValue = volume.GetXSize();
+	if (maxValue < volume.GetYSize()) 
+		maxValue = volume.GetYSize();
+	
+	if (maxValue < volume.GetZSize())
+		maxValue = volume.GetZSize();
+
+	float radius = maxValue;
+	SetRadius(radius);
 
 	return true;
 }

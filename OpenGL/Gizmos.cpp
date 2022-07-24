@@ -43,7 +43,8 @@ bool Gizmos::GizmoHandle::Initialize(Renderer& renderer) {
 		assert(0);
 		return false;
 	}
-	meshBuildFunction(*this, renderer);
+	if (!meshBuildFunction(*this, renderer))
+		return false;
 
 	defaultShader = std::make_shared<ColorShader>(this);
 
@@ -58,10 +59,7 @@ bool Gizmos::GizmoHandle::Initialize(Renderer& renderer) {
 
 	AddComponent<BoundingBox>();
 	auto boundingBox = GetComponent<BoundingBox>();
-
-	boundingBox->SetCenter(transform->GetPosition());
-	boundingBox->SetExtent(GetScale());
-
+	
 	boundingVolume = boundingBox;
 	if (!boundingVolume->Init(renderer))
 		return false;
@@ -148,6 +146,21 @@ Gizmos::GizmoHandle::eHandle Gizmos::GizmoHandles::GetNearestHandle(std::vector<
 	return handle;
 }
 
+Gizmos::GizmoHandle::eHandle Gizmos::GizmoHandles::GetNearestHandleFromCamera(const std::vector<Gizmos::GizmoHandle*>& handles, const Camera& camera) const{
+	double oldDistance = DBL_MAX;
+	double newDistance = 0.0;
+
+	Gizmos::GizmoHandle::eHandle nearestHandleType;
+	for (const auto& handle : handles) {
+		newDistance = CalcDistanceFromCamera(*handle, camera);
+		if (newDistance < oldDistance) {
+			nearestHandleType = handle->type;
+			oldDistance = newDistance;
+		}
+	}
+	return nearestHandleType;
+}
+
 Gizmos::GizmoHandle::eHandle Gizmos::GizmoHandles::Intersect(const Ray& ray, double& distance, eTransformMode transformMode) {
 	GizmoHandle::eHandle handle = GizmoHandle::eHandle::NONE;
 	bool bIntersect = false;
@@ -187,44 +200,43 @@ Gizmos::GizmoHandle::eHandle Gizmos::GizmoHandles::Intersect(const Ray& ray, dou
 
 	return handle;
 }
-void Gizmos::GizmoHandles::Render(Renderer& renderer, ShaderParameter& shaderParam, eTransformMode transformMode) {
+
+double Gizmos::GizmoHandles::CalcDistanceFromCamera(const GizmoHandle& gizmoHandle, const Camera& camera)const {
+	Volumef gizmoVolume;
+	gizmoHandle.GetLocalBoundingBox(gizmoVolume);
+	
+	Vec3f gizmoPos = gizmoHandle.owner.GetPosition();
+	gizmoVolume.Move(gizmoPos);
+
+	Vec3f cameraPos = camera.GetPosition();
+	Vec3d direction = gizmoVolume.GetCenter() - cameraPos;
+	double distance = sqrt(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
+	return distance;
+}
+
+void Gizmos::GizmoHandles::Render(Renderer& renderer, ShaderParameter& shaderParam, const Camera& camera, eTransformMode transformMode) {
 	Renderer::DrawMode oldDrawMode = renderer.GetDrawMode();
+	std::vector<GizmoHandle*> handles;
 	switch (transformMode) {
 	case eTransformMode::TRANSLATE:
 	{
 		renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
 
-		shaderParam.objNo = (int)GizmoHandle::eHandle::TRANSLATE_X;
-		at(GizmoHandle::eHandle::TRANSLATE_X).Render(renderer, shaderParam);
+		handles.push_back(&at(GizmoHandle::eHandle::TRANSLATE_X));
+		handles.push_back(&at(GizmoHandle::eHandle::TRANSLATE_Y));
+		handles.push_back(&at(GizmoHandle::eHandle::TRANSLATE_Z));
+		handles.push_back(&at(GizmoHandle::eHandle::TRANSLATE_XY));
+		handles.push_back(&at(GizmoHandle::eHandle::TRANSLATE_XZ));
+		handles.push_back(&at(GizmoHandle::eHandle::TRANSLATE_YZ));
 
-		shaderParam.objNo = (int)GizmoHandle::eHandle::TRANSLATE_Y;
-		at(GizmoHandle::eHandle::TRANSLATE_Y).Render(renderer, shaderParam);
-
-		shaderParam.objNo = (int)GizmoHandle::eHandle::TRANSLATE_Z;
-		at(GizmoHandle::eHandle::TRANSLATE_Z).Render(renderer, shaderParam);
-
-		shaderParam.objNo = (int)GizmoHandle::eHandle::TRANSLATE_XY;
-		at(GizmoHandle::eHandle::TRANSLATE_XY).Render(renderer, shaderParam);
-
-		shaderParam.objNo = (int)GizmoHandle::eHandle::TRANSLATE_XZ;
-		at(GizmoHandle::eHandle::TRANSLATE_XZ).Render(renderer, shaderParam);
-
-		shaderParam.objNo = (int)GizmoHandle::eHandle::TRANSLATE_YZ;
-		at(GizmoHandle::eHandle::TRANSLATE_YZ).Render(renderer, shaderParam);
 		break;
 	}
 	case eTransformMode::ROTATE:
 	{
 		renderer.SetDrawMode(Renderer::DrawMode::TRIANGLE_STRIP);
-
-		shaderParam.objNo = (int)GizmoHandle::eHandle::ROTATE_X;
-		at(GizmoHandle::eHandle::ROTATE_X).Render(renderer, shaderParam);
-
-		shaderParam.objNo = (int)GizmoHandle::eHandle::ROTATE_Y;
-		at(GizmoHandle::eHandle::ROTATE_Y).Render(renderer, shaderParam);
-
-		shaderParam.objNo = (int)GizmoHandle::eHandle::ROTATE_Z;
-		at(GizmoHandle::eHandle::ROTATE_Z).Render(renderer, shaderParam);
+		handles.push_back(&at(GizmoHandle::eHandle::ROTATE_X));
+		handles.push_back(&at(GizmoHandle::eHandle::ROTATE_Y));
+		handles.push_back(&at(GizmoHandle::eHandle::ROTATE_Z));
 
 		break;
 	}
@@ -232,18 +244,31 @@ void Gizmos::GizmoHandles::Render(Renderer& renderer, ShaderParameter& shaderPar
 	{
 		renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
 
-		shaderParam.objNo = (int)GizmoHandle::eHandle::SCALE_X;
-		at(GizmoHandle::eHandle::SCALE_X).Render(renderer, shaderParam);
-
-		shaderParam.objNo = (int)GizmoHandle::eHandle::SCALE_Y;
-		at(GizmoHandle::eHandle::SCALE_Y).Render(renderer, shaderParam);
-
-		shaderParam.objNo = (int)GizmoHandle::eHandle::SCALE_Z;
-		at(GizmoHandle::eHandle::SCALE_Z).Render(renderer, shaderParam);
+		handles.push_back(&at(GizmoHandle::eHandle::SCALE_X));
+		handles.push_back(&at(GizmoHandle::eHandle::SCALE_Y));
+		handles.push_back(&at(GizmoHandle::eHandle::SCALE_Z));
 
 		break;
 	}
 	}
+
+	Stack<GizmoHandle::eHandle> orderByDistanceFromCamera;
+	while (!handles.empty()) {
+		GizmoHandle::eHandle nearestHandleType = GetNearestHandleFromCamera(handles, camera);
+		handles.erase(std::remove_if(handles.begin(), handles.end(), [=](const GizmoHandle* pHandle) {
+			return pHandle->type == nearestHandleType;
+			}), handles.end());
+
+		orderByDistanceFromCamera.Push(nearestHandleType);
+	}
+
+	while (!orderByDistanceFromCamera.Empty()) {
+		GizmoHandle::eHandle handleType = orderByDistanceFromCamera.Peek();
+		shaderParam.objNo = (int)handleType;
+		at(handleType).Render(renderer, shaderParam);
+		orderByDistanceFromCamera.Pop();
+	}
+
 	renderer.SetDrawMode(oldDrawMode);
 }
 
@@ -264,15 +289,15 @@ Gizmos::eTransformMode Gizmos::GetMode() const {
 bool Gizmos::Initialize(Renderer& renderer) {
 	Gizmos::GizmoHandle translationXHandle {
 		Gizmos::GizmoHandle(*this, [&](Gizmos::GizmoHandle& handle, Renderer& renderer) -> bool {
-			std::list<std::shared_ptr<Mesh>>& meshes = handle.GetMeshes();
+			Meshes& meshes = handle.GetMeshes();
 			MeshBuilder meshBuilder;
-			meshes.push_back(std::make_shared<Mesh>());
+			meshes.Add(std::make_shared<Mesh>());
 			meshBuilder.Begin();
 			meshBuilder.AddCylinder(Vec3f(orgSize, 0.0f, 0.0f), Vec3f(0.0f, 0.01f, 0.0f), Vec3f(0.0f, 0.0f, 0.01f), 32, RGBA::RED);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 			meshBuilder.End();
 
-			meshes.push_back(std::make_shared<Mesh>());
+			meshes.Add(std::make_shared<Mesh>());
 			meshBuilder.Begin();
 			meshBuilder.AddXAxisCone(Vec3f(orgSize, 0.0f, 0.0f), 0.1f, 0.05f, 0.05f, 0.1f, RGBA::RED);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
@@ -287,19 +312,22 @@ bool Gizmos::Initialize(Renderer& renderer) {
 
 	Gizmos::GizmoHandle translationYHandle{
 		GizmoHandle(*this, [&](Gizmos::GizmoHandle& handle, Renderer& renderer) -> bool {
-			std::list<std::shared_ptr<Mesh>>& meshes = handle.GetMeshes();
+			Meshes& meshes = handle.GetMeshes();
 			MeshBuilder meshBuilder;
-			meshes.push_back(std::make_shared<Mesh>());
+			meshes.Add(std::make_shared<Mesh>());
 			meshBuilder.Begin();
 			meshBuilder.AddCylinder(Vec3f(0.0f, orgSize, 0.0f), Vec3f(0.0f, 0.0f, 0.01f), Vec3f(0.01f, 0.0f, 0.0f), 32, RGBA::GREEN);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 			meshBuilder.End();
 
-			meshes.push_back(std::make_shared<Mesh>());
+			meshes.Add(std::make_shared<Mesh>());
 			meshBuilder.Begin();
 			meshBuilder.AddYAxisCone(Vec3f(0.0f, orgSize, 0.0f), 0.05f, 0.1f, 0.05f, 0.1f, RGBA::GREEN);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 			meshBuilder.End();
+
+
+
 			return true;
 
 			}, RGBA::GREEN, RGBA::YELLOW, Gizmos::GizmoHandle::eHandle::TRANSLATE_Y)
@@ -311,15 +339,15 @@ bool Gizmos::Initialize(Renderer& renderer) {
 
 	Gizmos::GizmoHandle translationZHandle {
 		GizmoHandle(*this, [&](Gizmos::GizmoHandle& handle, Renderer& renderer) -> bool {
-			std::list<std::shared_ptr<Mesh>>& meshes = handle.GetMeshes();
+			Meshes& meshes = handle.GetMeshes();
 			MeshBuilder meshBuilder;
-			meshes.push_back(std::make_shared<Mesh>());
+			meshes.Add(std::make_shared<Mesh>());
 			meshBuilder.Begin();
 			meshBuilder.AddCylinder(Vec3f(0.0f, 0.0f, orgSize), Vec3f(0.01f, 0.0f, 0.0f), Vec3f(0.0f, 0.01f, 0.0f), 32, RGBA::BLUE);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 			meshBuilder.End();
 
-			meshes.push_back(std::make_shared<Mesh>());
+			meshes.Add(std::make_shared<Mesh>());
 			meshBuilder.Begin();
 			meshBuilder.AddZAxisCone(Vec3f(0.0f, 0.0f, orgSize), 0.05f, 0.05f, 0.1f, 0.1f, RGBA::BLUE);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
@@ -334,10 +362,10 @@ bool Gizmos::Initialize(Renderer& renderer) {
 
 	Gizmos::GizmoHandle translationXYHandle{
 		GizmoHandle(*this,[&](Gizmos::GizmoHandle& handle, Renderer& renderer)->bool {
-			std::list<std::shared_ptr<Mesh>>& meshes = handle.GetMeshes();
+			Meshes& meshes = handle.GetMeshes();
 
 			MeshBuilder meshBuilder;
-			meshes.push_back(std::make_shared<Mesh>());
+			meshes.Add(std::make_shared<Mesh>());
 			meshBuilder.Begin();
 			meshBuilder.AddCube(Vec3f(orgSize / 2.0f, orgSize / 2.0f, 0.0f), Vec3f(orgSize / 4.0f, orgSize / 4.0f, 0.01f), RGBA::WHITE);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
@@ -352,10 +380,10 @@ bool Gizmos::Initialize(Renderer& renderer) {
 
 	Gizmos::GizmoHandle translationXZHandle{
 		GizmoHandle(*this, [&](Gizmos::GizmoHandle& handle, Renderer& renderer)->bool {
-			std::list<std::shared_ptr<Mesh>>& meshes = handle.GetMeshes();
+			Meshes& meshes = handle.GetMeshes();
 
 			MeshBuilder meshBuilder;
-			meshes.push_back(std::make_shared<Mesh>());
+			meshes.Add(std::make_shared<Mesh>());
 			meshBuilder.Begin();
 			meshBuilder.AddCube(Vec3f(orgSize / 2.0f, 0.0f, orgSize / 2.0f), Vec3f(orgSize / 4.0f, 0.01f, orgSize / 4.0f), RGBA::WHITE);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
@@ -370,10 +398,10 @@ bool Gizmos::Initialize(Renderer& renderer) {
 
 	Gizmos::GizmoHandle translateYZHandle{
 		GizmoHandle(*this, [&](Gizmos::GizmoHandle& handle, Renderer& renderer)->bool {
-			std::list<std::shared_ptr<Mesh>>& meshes = handle.GetMeshes();
+			Meshes& meshes = handle.GetMeshes();
 
 			MeshBuilder meshBuilder;
-			meshes.push_back(std::make_shared<Mesh>());
+			meshes.Add(std::make_shared<Mesh>());
 			meshBuilder.Begin();
 			meshBuilder.AddCube(Vec3f(0.0f, orgSize / 2.0f, orgSize / 2.0f), Vec3f(0.01f, orgSize / 4.0f, orgSize / 4.0f), RGBA::WHITE);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
@@ -389,10 +417,10 @@ bool Gizmos::Initialize(Renderer& renderer) {
 
 	Gizmos::GizmoHandle rotationXHandle{
 		GizmoHandle(*this, [&](Gizmos::GizmoHandle& handle, Renderer& renderer) -> bool {
-			std::list<std::shared_ptr<Mesh>>& meshes = handle.GetMeshes();
+			Meshes& meshes = handle.GetMeshes();
 
 			MeshBuilder meshBuilder;
-			meshes.push_back(std::make_shared<Mesh>());
+			meshes.Add(std::make_shared<Mesh>());
 			meshBuilder.Begin();
 			meshBuilder.AddXAxisCircle(orgSize, orgSize - 0.05f, RGBA::RED);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex), Mesh::TriangleType::MeshType_Strip);
@@ -407,10 +435,10 @@ bool Gizmos::Initialize(Renderer& renderer) {
 
 	Gizmos::GizmoHandle rotationYHandle{
 		GizmoHandle(*this, [&](Gizmos::GizmoHandle& handle, Renderer& renderer)->bool {
-			std::list<std::shared_ptr<Mesh>>& meshes = handle.GetMeshes();
+			Meshes& meshes = handle.GetMeshes();
 
 			MeshBuilder meshBuilder;
-			meshes.push_back(std::make_shared<Mesh>());
+			meshes.Add(std::make_shared<Mesh>());
 			meshBuilder.Begin();
 			meshBuilder.AddYAxisCircle(orgSize, orgSize - 0.05f, RGBA::GREEN);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex), Mesh::TriangleType::MeshType_Strip);
@@ -426,10 +454,10 @@ bool Gizmos::Initialize(Renderer& renderer) {
 
 	Gizmos::GizmoHandle rotationZHandle{
 		GizmoHandle(*this, [&](Gizmos::GizmoHandle& handle, Renderer& renderer)->bool {
-			std::list<std::shared_ptr<Mesh>>& meshes = handle.GetMeshes();
+			Meshes& meshes = handle.GetMeshes();
 
 			MeshBuilder meshBuilder;
-			meshes.push_back(std::make_shared<Mesh>());
+			meshes.Add(std::make_shared<Mesh>());
 			meshBuilder.Begin();
 			meshBuilder.AddZAxisCircle(orgSize, orgSize - 0.05f, RGBA::BLUE);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex), Mesh::TriangleType::MeshType_Strip);
@@ -445,16 +473,16 @@ bool Gizmos::Initialize(Renderer& renderer) {
 
 	Gizmos::GizmoHandle scaleXHandle{
 		GizmoHandle(*this, [&](Gizmos::GizmoHandle& handle, Renderer& renderer)->bool {
-			std::list<std::shared_ptr<Mesh>>& meshes = handle.GetMeshes();
+			Meshes& meshes = handle.GetMeshes();
 
 			MeshBuilder meshBuilder;
-			meshes.push_back(std::make_shared<Mesh>());
+			meshes.Add(std::make_shared<Mesh>());
 			meshBuilder.Begin();
 			meshBuilder.AddCylinder(Vec3f(orgSize, 0.0f, 0.0f), Vec3f(0.0f, 0.01f, 0.0f), Vec3f(0.0f, 0.0f, 0.01f), 32, RGBA::RED);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 			meshBuilder.End();
 
-			meshes.push_back(std::make_shared<Mesh>());
+			meshes.Add(std::make_shared<Mesh>());
 			meshBuilder.Begin();
 			meshBuilder.AddCube(Vec3f(orgSize, 0.0f, 0.0f), Vec3f(0.05f, 0.05f, 0.05f), RGBA::RED);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
@@ -470,16 +498,16 @@ bool Gizmos::Initialize(Renderer& renderer) {
 
 	Gizmos::GizmoHandle scaleYHandle{
 		GizmoHandle(*this, [&](Gizmos::GizmoHandle& handle, Renderer& renderer)->bool {
-			std::list<std::shared_ptr<Mesh>>& meshes = handle.GetMeshes();
+			Meshes& meshes = handle.GetMeshes();
 
 			MeshBuilder meshBuilder;
-			meshes.push_back(std::make_shared<Mesh>());
+			meshes.Add(std::make_shared<Mesh>());
 			meshBuilder.Begin();
 			meshBuilder.AddCylinder(Vec3f(0.0f, orgSize, 0.0f), Vec3f(0.0f, 0.0f, 0.01f), Vec3f(0.01f, 0.0f, 0.0f), 32, RGBA::GREEN);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 			meshBuilder.End();
 
-			meshes.push_back(std::make_shared<Mesh>());
+			meshes.Add(std::make_shared<Mesh>());
 			meshBuilder.Begin();
 			meshBuilder.AddCube(Vec3f(0.0f, orgSize, 0.0f), Vec3f(0.05f, 0.05f, 0.05f), RGBA::GREEN);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
@@ -495,16 +523,16 @@ bool Gizmos::Initialize(Renderer& renderer) {
 
 	Gizmos::GizmoHandle scaleZHandle{
 		GizmoHandle(*this, [&](Gizmos::GizmoHandle& handle, Renderer& renderer)->bool {
-			std::list<std::shared_ptr<Mesh>>& meshes = handle.GetMeshes();
+			Meshes& meshes = handle.GetMeshes();
 
 			MeshBuilder meshBuilder;
-			meshes.push_back(std::make_shared<Mesh>());
+			meshes.Add(std::make_shared<Mesh>());
 			meshBuilder.Begin();
 			meshBuilder.AddCylinder(Vec3f(0.0f, 0.0f, orgSize), Vec3f(0.01f, 0.0f, 0.0f), Vec3f(0.0f, 0.01f, 0.0f), 32, RGBA::BLUE);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 			meshBuilder.End();
 
-			meshes.push_back(std::make_shared<Mesh>());
+			meshes.Add(std::make_shared<Mesh>());
 			meshBuilder.Begin();
 			meshBuilder.AddCube(Vec3f(0.0f, 0.0f, orgSize), Vec3f(0.05f, 0.05f, 0.05f), RGBA::BLUE);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
@@ -545,14 +573,6 @@ double Gizmos::CalcDistanceFromCamera(const Camera& camera)const {
 	Vec3f cameraPosition = camera.GetPosition();
 	Vec3f position = GetPosition();
 	Vec3d direction = cameraPosition - position;
-	double distance = sqrt(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
-	return distance;
-}
-
-double Gizmos::CalcDistanceFromCamera(const GizmoHandle& gizmoHandle, const Camera& camera)const {
-	Vec3f gizmoPos = gizmoHandle.GetPosition();
-	Vec3f cameraPos = camera.GetPosition();
-	Vec3d direction = gizmoPos - cameraPos;
 	double distance = sqrt(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
 	return distance;
 }
@@ -654,5 +674,6 @@ void Gizmos::Render(Renderer& renderer, Camera* pCamera, const Scene& scene) {
 	shaderParam.focusInfo.focusObjNo = (int)context.editingHandle;
 	shaderParam.focusInfo.highlightColor = Vec4f(1.0f, 0.8f, 0.0f, 1.0f);
 	
-	handles.Render(renderer, shaderParam, GetMode());
+
+	handles.Render(renderer, shaderParam, *pCamera, GetMode());
 }

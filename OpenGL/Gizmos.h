@@ -85,12 +85,14 @@ public:
 		bool Add(const GizmoHandle& handle);
 
 		bool DoesExist(GizmoHandle::eHandle handleType) const;
-		void Render(Renderer& renderer, ShaderParameter& shaderParam, eTransformMode transformMode) ;
+		void Render(Renderer& renderer, ShaderParameter& shaderParam, const Camera& camera, eTransformMode transformMode) ;
 		bool Intersect(GizmoHandle::eHandle handleType, const Ray& ray, double& distance);
 		GizmoHandle::eHandle Intersect(const Ray& ray, double &distance, eTransformMode transformMode);
 	
 	private:
 		GizmoHandle::eHandle GetNearestHandle(std::vector<GizmoHandle::eHandle> handleTypes, const Ray& ray, double distance);
+		GizmoHandle::eHandle GetNearestHandleFromCamera(const std::vector<GizmoHandle*>& handleTypes, const Camera& camera)const;
+		double CalcDistanceFromCamera(const GizmoHandle& handle, const Camera& camera)const;
 	};
 	const float orgSize = 0.25f;
 
@@ -111,7 +113,6 @@ public:
 	const GameObject& GetAttachedObjects(uint32_t index) const;
 
 	double CalcDistanceFromCamera(const Camera& camera)const;
-	double CalcDistanceFromCamera(const GizmoHandle& handle, const Camera& camera)const;
 	Vec3f CalcGizmoSize(const Camera& camera)const;	
 	eTransformMode GetMode() const;
 

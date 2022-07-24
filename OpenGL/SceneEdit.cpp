@@ -180,7 +180,7 @@ Matrix<float, 3, 3> SceneEdit::CalcRotationMatrix(const GameObject& baseObject, 
 		float distance = direction.DotProduct(curLength);
 		float radius = scene.gizmos.CalcGizmoSize(scene.GetCamera()).x;
 		float radian = distance / (radius * MathUtils::PI) * 2.0f;
-
+		
 		Matrix<float, 3, 3> rotationMatrix = Matrix<float, 3, 3>::Identity();
 		rotationMatrix = MathUtils::CalculateRotationMatrix(axis, radian);
 		return rotationMatrix;

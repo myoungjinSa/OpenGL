@@ -318,7 +318,25 @@ const Triangle& Mesh::GetTriangleMesh(size_t index) const {
 	return triangles.at(index);
 }
 
+Volumef Mesh::GetVolume() const{
+	Volumef volume;
+	for (size_t iVertex = 0; iVertex < vertexList.size(); iVertex++) {
+		Vertex* pVertex = vertexList.at(iVertex);
+		if (!pVertex)
+			continue;
 
+		volume |= pVertex->position;
+	}
+
+	return volume;
+}
+
+void Meshes::Add(std::shared_ptr<Mesh>&& mesh) {
+	if (!mesh)
+		return;
+
+	emplace_back(mesh);
+}
 
 ///////////////////////////////// Mesh Builder /////////////////////////////
 MeshBuilder::MeshBuilder() 

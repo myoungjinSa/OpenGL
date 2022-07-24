@@ -1,5 +1,4 @@
 #include "Common.h"
-#include "Mesh.h"
 #include "Texture.h"
 #include "Object.h"
 #include "Input.h"
