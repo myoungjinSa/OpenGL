@@ -59,6 +59,23 @@ void RigidTransform::SetScale(const Vec3f& _scale) {
 	SetTransform();
 }
 Matrix<float, 3, 3> RigidTransform::GetRotationMatrix() const {
+	Matrix<float, 3, 3> rotationMatrix = Matrix<float, 3, 3>::Identity();
+	assert(scale.IsZero() == false);
+
+	rotationMatrix.value[0] = worldMatrix.value[0] / scale.x;
+	rotationMatrix.value[1] = worldMatrix.value[1] / scale.x;
+	rotationMatrix.value[2] = worldMatrix.value[2] / scale.x;
+
+	rotationMatrix.value[3] = worldMatrix.value[4] / scale.y;
+	rotationMatrix.value[4] = worldMatrix.value[5] / scale.y;
+	rotationMatrix.value[5] = worldMatrix.value[6] / scale.y;
+
+	rotationMatrix.value[6] = worldMatrix.value[8] / scale.z;
+	rotationMatrix.value[7] = worldMatrix.value[9] / scale.z;
+	rotationMatrix.value[8] = worldMatrix.value[10] / scale.z;
+	return rotationMatrix;
+}
+Matrix<float, 3, 3> RigidTransform::GetRotationMatrixByQuaternion() const {
 	return orientation.GetRotationMatrix();
 }
 
@@ -80,34 +97,25 @@ void RigidTransform::Rotate(const Quaternion& q) {
 }
 
 void RigidTransform::Rotate(const Matrix<float, 3, 3>& _rotationMatrix) {
-	Matrix<float, 4, 4> rotationMatrix = Matrix<float, 4, 4>::Identity();
-	rotationMatrix.value[0] = _rotationMatrix.value[0];
-	rotationMatrix.value[1] = _rotationMatrix.value[1];
-	rotationMatrix.value[2] = _rotationMatrix.value[2];
-							  
-	rotationMatrix.value[4] = _rotationMatrix.value[3];
-	rotationMatrix.value[5] = _rotationMatrix.value[4];
-	rotationMatrix.value[6] = _rotationMatrix.value[5];
-							  
-	rotationMatrix.value[8] = _rotationMatrix.value[6];
-	rotationMatrix.value[9] = _rotationMatrix.value[7];
-	rotationMatrix.value[10] = _rotationMatrix.value[8];
+	Matrix<float, 3, 3> rotationMatrix = Matrix<float, 3, 3>::Identity();
+	rotationMatrix = GetRotationMatrix();
+	rotationMatrix.MultiplyAfter(_rotationMatrix);
 
-	worldMatrix.MultiplyBefore(rotationMatrix);
+	right.x = rotationMatrix.value[0];
+	right.y = rotationMatrix.value[1];
+	right.z = rotationMatrix.value[2];
 
-	right.x = worldMatrix.value[0];
-	right.y = worldMatrix.value[1];
-	right.z = worldMatrix.value[2];
+	up.x = rotationMatrix.value[3];
+	up.y = rotationMatrix.value[4];
+	up.z = rotationMatrix.value[5];
 
-	up.x = worldMatrix.value[4];
-	up.y = worldMatrix.value[5];
-	up.z = worldMatrix.value[6];
+	look.x = rotationMatrix.value[6];
+	look.y = rotationMatrix.value[7];
+	look.z = rotationMatrix.value[8];
 
-	look.x = worldMatrix.value[8];
-	look.y = worldMatrix.value[9];
-	look.z = worldMatrix.value[10];
+	orientation = Quaternion::ConvertRotationMatrixToQuaternion(_rotationMatrix);
 
-	orientation = Quaternion::ConvertRotationMatrixToQuaternion(rotationMatrix);
+	SetTransform();
 }
 
 void RigidTransform::CalculateRotationMatrix(Matrix<float, 4, 4>& rotationMatrix, float pitch, float yaw, float roll, bool bUseQuaternion) {
@@ -194,15 +202,15 @@ Matrix<float, 4, 4> RigidTransform::GetWorldMatrix() const {
 
 void RigidTransform::SetTransform() {
 	worldMatrix.value[0] = scale.x * right.x;
-	worldMatrix.value[1] = right.y;
-	worldMatrix.value[2] = right.z;
+	worldMatrix.value[1] = scale.x * right.y;
+	worldMatrix.value[2] = scale.x * right.z;
 
-	worldMatrix.value[4] = up.x;
+	worldMatrix.value[4] = scale.y * up.x;
 	worldMatrix.value[5] = scale.y * up.y;
-	worldMatrix.value[6] = up.z;
+	worldMatrix.value[6] = scale.y * up.z;
 
-	worldMatrix.value[8] = look.x;
-	worldMatrix.value[9] = look.y;
+	worldMatrix.value[8] = scale.z * look.x;
+	worldMatrix.value[9] = scale.z * look.y;
 	worldMatrix.value[10] = scale.z * look.z;
 
 	worldMatrix.value[12] = position.x;

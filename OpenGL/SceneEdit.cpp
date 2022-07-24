@@ -108,11 +108,15 @@ Vec3f SceneEdit::CalcMoveOffset(const GameObject& baseObject, const Point2i& pre
 	}
 
 	if (0 < plane.normal.DotProduct(curRay.GetDirection())) {
-		plane.normal.Set(-plane.normal);
+		LogDebug(L"Dot < 0\n");
 	}
-
 	Vec3f distance = plane.GetIntersection(curRay.GetLine()) - plane.GetIntersection(prevRay.GetLine());
-	return ClampDragOffset(handleType, distance);
+	
+	LogDebug(L"curRay x=%.8lf, y=%.8lf, z=%.8lf\n", plane.GetIntersection(curRay.GetLine()).x, plane.GetIntersection(curRay.GetLine()).y, plane.GetIntersection(curRay.GetLine()).z);
+	LogDebug(L"prevRay x=%.8lf, y=%.8lf, z=%.8lf\n", plane.GetIntersection(prevRay.GetLine()).x, plane.GetIntersection(prevRay.GetLine()).y, plane.GetIntersection(prevRay.GetLine()).z);
+
+	Vec3f offset = ClampDragOffset(handleType, distance);
+	return offset;
 }
 
 Vec3f SceneEdit::CalcScaleFactor(const GameObject& baseObject, const Point2i& prev, const Point2i& cur) {
@@ -157,7 +161,7 @@ Vec3f SceneEdit::CalcScaleFactor(const GameObject& baseObject, const Point2i& pr
 Matrix<float, 3, 3> SceneEdit::CalcRotationMatrix(const GameObject& baseObject, const Vec3f& prevPickedPoint, const Point2i& cur) {
 	Gizmos::GizmoHandle::eHandle handleType = scene.gizmos.GetEditingHandle();
 	if (handleType == Gizmos::GizmoHandle::eHandle::NONE)
-		return Matrix<float, 4, 4>::Identity();
+		return Matrix<float, 3, 3>::Identity();
 	
 	Vec3f targetPosition = baseObject.GetPosition();
 	if (handleType == Gizmos::GizmoHandle::eHandle::ROTATE_XY) {
@@ -242,7 +246,7 @@ Matrix<float, 3, 3> SceneEdit::CalcRotationMatrix(const GameObject& baseObject, 
 		return rotationMatrix;
 	}
 	assert(0);
-	return Matrix<float, 4, 4>::Identity();
+	return Matrix<float, 3, 3>::Identity();
 }
 
 Quaternion SceneEdit::CalcRotationQuaternion(const GameObject& baseObject, const Vec3f& prevPickedPoint, const Point2i& cur) {

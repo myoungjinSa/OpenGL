@@ -94,7 +94,7 @@ void Camera::SetViewport(const Rect2f& _viewport) {
 }
 
 void Camera::BuildViewMatrix() {
-	Matrix<float, 3, 3> rotationMatrix = transform.get()->GetRotationMatrix();
+	Matrix<float, 3, 3> rotationMatrix = transform.get()->GetRotationMatrixByQuaternion();
 	Vec3f lookAt = Transform(rotationMatrix, Vec3f::FORWARD);
 	Vec3f up = Transform(rotationMatrix, Vec3f::UP);
 	Vec3f right = Transform(rotationMatrix, Vec3f::RIGHT);

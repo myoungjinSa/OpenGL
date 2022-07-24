@@ -25,6 +25,7 @@ public:
 	Vec4d GetOrientation() const { return orientation.GetVector(); }
 
 	Matrix<float, 3, 3> GetRotationMatrix() const;
+	Matrix<float, 3, 3> GetRotationMatrixByQuaternion()const;
 
 	//Vec4f Rotate(const Vec4f& pos, const Vec3f& pivot, float pitch, float yaw, float roll);
 	void Rotate(float pitch, float yaw, float roll);
