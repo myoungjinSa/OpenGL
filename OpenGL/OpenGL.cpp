@@ -456,6 +456,13 @@ bool OpenGL::LoadExtensionList() {
 	if (!glClearBufferiv)
 		return false;
 
+	glCheckFramebufferStatus = (PFNGLCHECKFRAMEBUFFERSTATUSPROC)wglGetProcAddress("glCheckFramebufferStatus");
+	if (!glCheckFramebufferStatus)
+		return false;
+
+	glFramebufferTexture2D = (PFNGLFRAMEBUFFERTEXTURE2DPROC)wglGetProcAddress("glFramebufferTexture2D");
+	if (!glFramebufferTexture2D)
+		return false;
 
 	return true;
 }

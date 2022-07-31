@@ -85,7 +85,8 @@ public:
 
 	virtual unsigned int CreateShader() = 0;
 	virtual bool CreateRenderTarget(RenderTarget& renderTarget, const Size2u& screenSize, bool downSamplingTarget) { return false; }
-	virtual bool CreateTexture(Texture& texture, const Size2u& size, bool managed) { return false; }
+	virtual bool CreateTexture(Texture& texture, const Size2u& size, void* pImage) { return false; }
+	virtual bool CreateDepthStencilTexture(Texture& texture, const Size2u& size) { return true; }
 	virtual void DeleteTexture(Texture& texture) {}
 
 	virtual void SetShader(unsigned int shaderProgram) {}
@@ -95,7 +96,7 @@ public:
 	virtual bool BindVertexAttrib(unsigned int shaderProgram, unsigned int vertexShader, unsigned int fragmentShader, int vertexArgs, ...) { return false; }
 	virtual bool BindVertexAttrib(unsigned int shaderProgram, unsigned int vertexShader, unsigned int geometryShader, unsigned int fragmentShader, int vertexArgs, ...) { return false; }
 
-
+	virtual void SetViewport(const Viewporti& viewport) {};
 	virtual void SetWindingOrder(WindingOrder order) {}
 	virtual void SetCullFace(eFace face) {}
 	virtual void EnableDepthTest(bool bEnable) {}
@@ -124,12 +125,10 @@ public:
 	
 	virtual void BindTexture(unsigned int textureId) {}
 	virtual void BindCubemapTexture(unsigned int textureId){}
-	virtual void SetImage(unsigned int target, void* pImage, unsigned int width, unsigned int height) {}
-	virtual void SetSampleMode(bool bCubemap = false){}
-	virtual void SetFiltering(bool bCubemap = false){}
+	virtual void SetImage(unsigned int target, void* pImage, unsigned int width, unsigned int height, unsigned int textureType, unsigned int realType, unsigned int dataType) {}
+	virtual void SetSampleMode(bool bCubemap, int filterMode, int wrappingMode){}
 
 	virtual void EnableStencilTest(bool bEnable) {}
-	virtual int  ClearStencilBuffer(int stencil) { return 0; }
 	virtual void SetStencilFunc(int face, eCompare _stencilFunc, int ref, unsigned int mask){}
 	virtual void OperateAfterStencilTest(int face, StencilOp stencilFailed, StencilOp depthFailed, StencilOp depthPassed) {}
 	virtual void SetDepthFunc(eCompare depthFunc) {}
@@ -140,7 +139,8 @@ public:
 	virtual void ReleaseVertexArray(unsigned int& vertedxArrayId, size_t arrayCount){}
 	virtual void DrawVertexBuffer(unsigned int vertexArrayId, size_t startPos, size_t vertexCounts){}
 	virtual void DrawIndexBuffer(unsigned int vertexArrayId, size_t indexCount){}
-
+	virtual void BindRenderTarget(RenderTarget& renderTarget) {}
+	virtual void UnbindRenderTarget(RenderTarget& renderTarget) {}
 	virtual bool BeginRender() { return false; }
 	virtual void EndRender() {}
 	
@@ -170,7 +170,8 @@ public:
 
 	unsigned int CreateShader() override;
 	bool CreateRenderTarget(RenderTarget& renderTarget, const Size2u& screenSize, bool downSampleingTarget);
-	bool CreateTexture(Texture& texture, const Size2u& size, bool managed)override;
+	bool CreateTexture(Texture& texture, const Size2u& size, void* pImage)override;
+	bool CreateDepthStencilTexture(Texture& texture, const Size2u& size)override;
 	void DeleteTexture(Texture& texture)override;
 
 	void SetShader(unsigned int shaderProgram) override;
@@ -180,6 +181,7 @@ public:
 	bool BindVertexAttrib(unsigned int shaderProgram, unsigned int vertexShader, unsigned int fragmentShader, int vertexArgs, ...) override;
 	bool BindVertexAttrib(unsigned int shaderProgram, unsigned int vertexShader, unsigned int geometryShader, unsigned int fragmentShader, int vertexArgs, ...) override;
 
+	void SetViewport(const Viewporti& viewport)override;
 	void SetWindingOrder(Renderer::WindingOrder order) override;
 	void SetCullFace(eFace cullMode)override;
 	void EnableDepthTest(bool bEnable) override;
@@ -203,11 +205,10 @@ public:
 
 	void BindTexture(unsigned int textureId)override;
 	void BindCubemapTexture(unsigned int textureId)override;
-	void SetImage(unsigned int target, void* pImage, unsigned int width, unsigned int height) override;
-	void SetSampleMode(bool bCubemap = false)override;
-	void SetFiltering(bool bCubemap = false)override;
+	void SetImage(unsigned int target, void* pImage, unsigned int width, unsigned int height, unsigned int textureType, unsigned int realType, unsigned int dataType) override;
+	void SetSampleMode(bool bCubemap, int filterMode, int wrappingMode);
 
-	int  ClearStencilBuffer(int clearVal)override;
+
 	void EnableStencilTest(bool bEnable)override;
 	void SetStencilFunc(int face, eCompare _stencilFunc, int ref, unsigned int mask)override;
 	void OperateAfterStencilTest(int face, StencilOp stencilFailed, StencilOp depthFailed, StencilOp depthPassed)override;
@@ -219,6 +220,8 @@ public:
 	void ReleaseVertexArray(unsigned int& vertedxArrayId, size_t arrayCount)override;
 	void DrawVertexBuffer(unsigned int vertexArrayId, size_t startPos, size_t vertexCounts)override;
 	void DrawIndexBuffer(unsigned int vertexArrayId, size_t indexCount)override;
+	void BindRenderTarget(RenderTarget& renderTarget)override;
+	void UnbindRenderTarget(RenderTarget& renderTarget)override;
 
 	bool BeginRender() override;
 	void EndRender() override;

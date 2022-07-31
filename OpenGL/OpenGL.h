@@ -92,6 +92,8 @@ typedef void (GLAPIENTRY* PFNGLSTENCILOPSEPARATEPROC) (GLenum face, GLenum sfail
 
 typedef void (GLAPIENTRY* PFNGLCLEARBUFFERIVPROC) (GLenum buffer, GLint drawBuffer, const GLint* value);
 typedef void (GLAPIENTRY* PFNGLENABLEIPROC) (GLenum cap, GLuint index);
+typedef GLenum(GLAPIENTRY* PFNGLCHECKFRAMEBUFFERSTATUSPROC) (GLenum target);
+typedef void (GLAPIENTRY* PFNGLFRAMEBUFFERTEXTURE2DPROC) (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level);
 class OpenGL : public GraphicDevice
 {
 public:
@@ -159,6 +161,8 @@ public:
 	PFNGLSTENCILMASKSEPARATEPROC glStencilMaskSeparate;
 	PFNGLCLEARBUFFERIVPROC glClearBufferiv;
 	PFNGLENABLEIPROC glEnablei;
+	PFNGLFRAMEBUFFERTEXTURE2DPROC glFramebufferTexture2D;
+	PFNGLCHECKFRAMEBUFFERSTATUSPROC glCheckFramebufferStatus;
 private:
 	HDC deviceContext;
 	HGLRC renderingContext;

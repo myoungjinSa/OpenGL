@@ -22,7 +22,9 @@ public:
 	virtual bool IsIn(const Ray& ray) = 0;
 	virtual bool IsIn(const Vec3f& pos) = 0;
 	virtual void Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix);
-	
+	virtual std::vector<Vec3f> GetPoints()const { return std::vector<Vec3f>(); }
+	virtual Vec3f GetNearestPointFromTarget(const GameObject& object)const { return Vec3f(); }
+
 	Volumef CalculateVolume(const Meshes& meshes);
 protected:
 	std::shared_ptr<ColorShader> DefaultShader;
@@ -44,6 +46,9 @@ public:
 	void SetCenter(const Vec3f& _center);
 	void SetExtent(const Vec3f& _extent);
 
+	std::vector<Vec3f> GetPoints()const override;
+	Vec3f GetNearestPointFromTarget(const GameObject& object)const;
+
 	const Vec3f& GetExtent() const;
 	const Vec3f& GetCenter() const;
 private:
@@ -60,6 +65,7 @@ private:
 class BoundingSphere final : public BoundingVolume {
 public:
 	BoundingSphere(Object* pOwner);
+	
 
 	Volumef GetVolume() override;
 	bool Init(Renderer& renderer) override;
@@ -67,7 +73,7 @@ public:
 	bool IsIn(const Vec3f& pos) override;
 	bool IsIn(const Ray& ray) override;
 	void Render(Renderer& renderer, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix) override;
-	
+
 	void SetRadius(float _radius);
 	void SetCenter(const Vec3f& _center);
 

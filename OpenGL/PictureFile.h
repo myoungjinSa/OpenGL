@@ -97,7 +97,7 @@ class VideoInfo {
 public:
 	VideoInfo();
 
-	Size2i imageSize;
+	Size2u imageSize;
 	int	   bpp;
 	ePixelFormat pixelFormat;
 	eColorSpace colorSpace;

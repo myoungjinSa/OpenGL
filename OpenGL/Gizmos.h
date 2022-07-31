@@ -93,6 +93,7 @@ public:
 		GizmoHandle::eHandle GetNearestHandle(std::vector<GizmoHandle::eHandle> handleTypes, const Ray& ray, double distance);
 		GizmoHandle::eHandle GetNearestHandleFromCamera(const std::vector<GizmoHandle*>& handleTypes, const Camera& camera)const;
 		double CalcDistanceFromCamera(const GizmoHandle& handle, const Camera& camera)const;
+		Vec3f GetNearestPointFromCamera(const GizmoHandle& handle, const Camera& camera)const;
 	};
 	const float orgSize = 0.25f;
 

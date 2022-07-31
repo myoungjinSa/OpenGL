@@ -445,12 +445,12 @@ void MeshBuilder::AddCylinder(const Vec3f& axis, const Vec3f& arm1, const Vec3f&
 	}
 	for (uint32_t iSlice = 0; iSlice < sliceCount; ++iSlice) {
 		AddIndex(iSlice * 2);
-		AddIndex(iSlice * 2 + 3);
 		AddIndex(iSlice * 2 + 2);
+		AddIndex(iSlice * 2 + 3);
 
 		AddIndex(iSlice * 2);
-		AddIndex(iSlice * 2 + 1);
 		AddIndex(iSlice * 2 + 3);
+		AddIndex(iSlice * 2 + 1);
 	}
 
 	//Generate caps
@@ -625,13 +625,13 @@ void MeshBuilder::AddYAxisCone(const Vec3f& centerOffset, float halfWidth, float
 		vertices.push_back(stamp);
 
 		SetColor(color);
-		SetPosition(centerOffset + Vec3f(widthPart2, 0.0f, depthPart2));
+		SetPosition(centerOffset + Vec3f(widthPart1, 0.0f, depthPart1));
 		SetUV(fTextureOffsetS2, 0.0f);
 		SetNormal(Vec3f((widthPart1 + widthPart2) / 2.0f, 0.0f, (depthPart1 + depthPart2) / 2.0f));
 		vertices.push_back(stamp);
 
 		SetColor(color);
-		SetPosition(centerOffset + Vec3f(widthPart1 ,0.0f, depthPart1));
+		SetPosition(centerOffset + Vec3f(widthPart2 ,0.0f, depthPart2));
 		SetUV(fTextureOffsetS2, 0.0f);
 		SetNormal(Vec3f((widthPart1 + widthPart2) / 2.0f, 0.0f, (depthPart1 + depthPart2) / 2.0f));
 		vertices.push_back(stamp);
@@ -678,13 +678,13 @@ void MeshBuilder::AddZAxisCone(const Vec3f& centerOffset, float halfWidth, float
 		vertices.push_back(stamp);
 
 		SetColor(color);
-		SetPosition(centerOffset + Vec3f(widthPart2, heightPart2, 0.0f));
+		SetPosition(centerOffset + Vec3f(widthPart1, heightPart1, 0.0f));
 		SetUV(fTextureOffsetS2, 0.0f);
 		SetNormal(Vec3f((widthPart1 + widthPart2) / 2.0f, (heightPart1 + heightPart2) / 2.0f, 0.0f));
 		vertices.push_back(stamp);
 
 		SetColor(color);
-		SetPosition(centerOffset + Vec3f(widthPart1, heightPart1, 0.0f));
+		SetPosition(centerOffset + Vec3f(widthPart2, heightPart2, 0.0f));
 		SetUV(fTextureOffsetS2, 0.0f);
 		SetNormal(Vec3f((widthPart1 + widthPart2) / 2.0f, (heightPart1 + heightPart2) / 2.0, 0.0f));
 		vertices.push_back(stamp);
@@ -692,7 +692,7 @@ void MeshBuilder::AddZAxisCone(const Vec3f& centerOffset, float halfWidth, float
 		iSectorCount++;
 	}
 
-	//Cone Bottom
+	////Cone Bottom
 	for (double bottomAngle = 0; bottomAngle < MathUtils::TWO_PI; bottomAngle += angleStep) {
 		SetColor(color);
 		SetNormal(Vec3f(0.0f, 0.0f, -1.0f));

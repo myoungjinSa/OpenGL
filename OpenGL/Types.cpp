@@ -579,3 +579,4 @@ void Volume<T>::Normalize() {
 	if (max.y < min.y) std::swap(min.y, max.y);
 	if (max.z < min.z) std::swap(min.z, max.z);
 }
+

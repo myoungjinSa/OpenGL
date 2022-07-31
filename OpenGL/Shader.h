@@ -6,7 +6,6 @@
 class OpenGL;
 class Object;
 class GameObject;
-class ShaderVisitor;
 class Renderer;
 class Ray;
 class BoundingVolume;
@@ -53,9 +52,12 @@ public:
 	virtual void Shutdown(Renderer& renderer);
 	void SetShader(Renderer& renderer);
 
-	virtual void Render(Renderer& renderer, const ShaderParameter& shaderParam) = 0;
+	virtual void Render(Renderer& renderer){}
+	virtual void Render(Renderer& renderer, const ShaderParameter& shaderParam) {}
 	
-	virtual bool SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParam) = 0;
+	virtual bool SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParam) { return false; }
+	
+	unsigned int GetShaderProgram()const { return shaderProgram; }
 protected:
 	virtual bool InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer) { return false; }
 	virtual bool InitializeShader(const char* vsFilename, const char* gsFilename, const char* fsFilename, Renderer& renderer) { return false; }
@@ -92,7 +94,7 @@ public:
 	bool Initialize(Renderer& renderer) override;
 	void Shutdown(Renderer& renderer) override;
 	void Render(Renderer& renderer, const ShaderParameter& shaderParam) override;
-	
+
 	bool SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParam) override;
 protected:
 	bool InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer);
@@ -177,3 +179,42 @@ protected:
 	bool InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer);
 };
 
+
+class PostProcessingShader : public Shader {
+public:
+	PostProcessingShader(Object* pOwner);
+	PostProcessingShader(const PostProcessingShader& other) = delete;
+	~PostProcessingShader()override;
+
+	bool Initialize(Renderer& renderer) override;
+	void Shutdown(Renderer& renderer)override;
+	void Render(Renderer& renderer) override;
+protected:
+	bool InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer);
+};
+
+class ColorInversionShader : public PostProcessingShader {
+public:
+	ColorInversionShader(Object* pOwner);
+	ColorInversionShader(const ColorInversionShader& other) = delete;
+	~ColorInversionShader()override;
+
+	bool Initialize(Renderer& renderer) override;
+	void Shutdown(Renderer& renderer) override;
+	void Render(Renderer& renderer) override;
+protected:
+	bool InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer);
+};
+
+class DepthBufferShader : public PostProcessingShader {
+public:
+	DepthBufferShader(Object* pOwner);
+	DepthBufferShader(const DepthBufferShader& other) = delete;
+	~DepthBufferShader()override;
+
+	bool Initialize(Renderer& renderer) override;
+	void Shutdown(Renderer& renderer) override;
+	void Render(Renderer& renderer) override;
+protected:
+	bool InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer);
+};

@@ -47,11 +47,11 @@ void Picture::Destroy() {
 	storage = eStorage::STORAGE_NONE;
 }
 
-bool Picture::Create(const Size2i& imageSize) {
+bool Picture::Create(const Size2u& imageSize) {
 	return Create(imageSize, ePixelFormat::PIXEL_FORMAT_ARGB, eColorSpace::COLOR_SPACE_BT_709);
 }
 
-bool Picture::Create(const Size2i& imageSize, ePixelFormat pixelFormat, eColorSpace colorSpace) {
+bool Picture::Create(const Size2u& imageSize, ePixelFormat pixelFormat, eColorSpace colorSpace) {
 	return Create(imageSize.width, imageSize.height, pixelFormat, colorSpace);
 }
 

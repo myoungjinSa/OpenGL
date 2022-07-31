@@ -143,13 +143,10 @@ bool Terrain::Initialize(Renderer& renderer) {
 	Vec3f specularColor(1.0f, 1.0f, 1.0f);
 
 	diffuseMap = TextureLoader::GetTexture(renderer, L"coast_sand_rocks.jpg");
+	if (!renderer.CreateTexture(*diffuseMap.get(), diffuseMap->GetPicture().GetSize(), diffuseMap->GetPicture().GetMemory()))
+		return false;
 
-	renderer.AllocateTextures(diffuseMap->textureID, 1);
-	renderer.BindTexture(diffuseMap->GetTextureID());
-	renderer.SetImage(GL_TEXTURE_2D, diffuseMap->GetPicture().GetMemory(), diffuseMap->GetPicture().GetWidth(), diffuseMap->GetPicture().GetHeight());
-	renderer.SetSampleMode();
-	renderer.SetFiltering();
-
+	renderer.SetSampleMode(false, GL_LINEAR, GL_REPEAT);
 	material = std::make_shared<Material>(diffuseColor, ambientColor, specularColor, std::make_pair(Material::TextureType::TEXTURE_DIFFUSE, diffuseMap->GetTextureID()));
 
 	return true;

@@ -141,6 +141,7 @@ void TextureShader::Shutdown(Renderer& renderer) {
 	Shader::Shutdown(renderer);
 }
 
+
 /////////////////////////////Texture Shader//////////////////////////////////////////////////////////////////
 PhongShader::PhongShader(Object* pOwner) 
 	: Shader(pOwner)
@@ -464,3 +465,116 @@ bool CubemapEnvShader::InitializeShader(const char* vsFilename, const char* fsFi
 	String inputNormal("inputNormal");
 	return renderer.BindVertexAttrib(shaderProgram, vertexShader, fragmentShader, 3, inputPosition, inputTexcoords, inputNormal);
 }
+
+///////////////////////////////////////////////////////
+PostProcessingShader::PostProcessingShader(Object* pOwner)
+	: Shader(pOwner)
+{
+
+}
+
+PostProcessingShader::~PostProcessingShader() {
+
+}
+
+bool PostProcessingShader::Initialize(Renderer& renderer) {
+	return InitializeShader("Offscreen.vs", "Offscreen.ps", renderer);
+}
+
+void PostProcessingShader::Shutdown(Renderer& renderer) {
+	Shader::Shutdown(renderer);
+}
+
+void PostProcessingShader::Render(Renderer& renderer) {
+	SetShader(renderer);
+}
+
+bool PostProcessingShader::InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer) {
+	shaderProgram = renderer.CreateShader();
+
+	if (!renderer.CompileVertexShader(vsFilename, vertexShader))
+		return false;
+
+	if (!renderer.CompileFragmentShader(fsFilename, fragmentShader))
+		return false;
+
+	String inputPosition("inputPosition");
+	String inputTexCoord("inputTexCoord");
+	return renderer.BindVertexAttrib(shaderProgram, vertexShader, fragmentShader, 2, inputPosition, inputTexCoord);
+}
+
+ColorInversionShader::ColorInversionShader(Object* pOwner) 
+	: PostProcessingShader(pOwner)
+{
+
+}
+
+ColorInversionShader::~ColorInversionShader() {
+
+}
+
+bool ColorInversionShader::Initialize(Renderer& renderer) {
+	return InitializeShader("Offscreen.vs", "ColorInversion.ps", renderer);
+}
+
+void ColorInversionShader::Shutdown(Renderer& renderer) {
+	PostProcessingShader::Shutdown(renderer);
+}
+
+void ColorInversionShader::Render(Renderer& renderer) {
+	PostProcessingShader::Render(renderer);
+}
+
+bool ColorInversionShader::InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer) {
+	shaderProgram = renderer.CreateShader();
+
+	if (!renderer.CompileVertexShader(vsFilename, vertexShader))
+		return false;
+
+	if (!renderer.CompileFragmentShader(fsFilename, fragmentShader))
+		return false;
+
+	String inputPosition("inputPosition");
+	String inputTexCoord("inputTexCoord");
+	return renderer.BindVertexAttrib(shaderProgram, vertexShader, fragmentShader, 2, inputPosition, inputTexCoord);
+}
+
+DepthBufferShader::DepthBufferShader(Object* pOwner) 
+	: PostProcessingShader(pOwner)
+{
+
+}
+
+DepthBufferShader::~DepthBufferShader() {
+
+}
+
+bool DepthBufferShader::Initialize(Renderer& renderer) {
+	return InitializeShader("Offscreen.vs", "DepthBuffer.ps", renderer);
+}
+
+void DepthBufferShader::Shutdown(Renderer& renderer) {
+	PostProcessingShader::Shutdown(renderer);
+} 
+
+void DepthBufferShader::Render(Renderer& renderer) {
+	PostProcessingShader::Render(renderer);
+}
+
+bool DepthBufferShader::InitializeShader(const char* vsFilename, const char* fsFilename, Renderer& renderer) {
+	shaderProgram = renderer.CreateShader();
+
+	if (!renderer.CompileVertexShader(vsFilename, vertexShader))
+		return false;
+
+	if (!renderer.CompileFragmentShader(fsFilename, fragmentShader))
+		return false;
+
+	String inputPosition("inputPosition");
+	String inputTexCoord("inputTexCoord");
+	return renderer.BindVertexAttrib(shaderProgram, vertexShader, fragmentShader, 2, inputPosition, inputTexCoord);
+
+}
+
+
+

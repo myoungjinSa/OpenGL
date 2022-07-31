@@ -9,7 +9,8 @@
 
 class Renderer;
 class TextureLoader;
-
+class Mesh;
+class Shader;
 class Texture
 {
 	friend class Renderer;
@@ -95,22 +96,3 @@ private:
 	static std::vector<std::pair<WString, std::shared_ptr<Texture>>> textures;
 };
 
-class RenderTarget {
-public:
-	RenderTarget();
-	~RenderTarget();
-
-	bool Create(Renderer& renderer, size_t fboCount);
-	
-	void SetSize(const Size2u& _size);
-	void SetSize(size_t width, size_t height);
-	Size2u GetSize() const;
-
-	bool IsNull() const { return iFrameBuffer == 0; }
-
-public:
-	unsigned int iFrameBuffer;
-
-private:
-	Size2u size;
-};

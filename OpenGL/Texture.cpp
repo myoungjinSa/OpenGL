@@ -6,8 +6,8 @@
 #include "TGAReader/tga_reader.h"
 #include "Picture.h"
 #include "PictureFile.h"
-
 #include "OpenGL.h"
+
 Texture::Texture() 
 	: textureID(0)
 	, type(eType::TYPE_COUNT)
@@ -52,9 +52,9 @@ bool Texture::Update(float deltaTime) {
 	}
 
 	renderContext->renderer.BindTexture(textureID);
-	renderContext->renderer.SetImage(GL_TEXTURE_2D, picture.GetMemory(), picture.GetWidth(), picture.GetHeight());
-	renderContext->renderer.SetSampleMode(false);
-	renderContext->renderer.SetFiltering();
+	renderContext->renderer.SetImage(GL_TEXTURE_2D, picture.GetMemory(), picture.GetWidth(), picture.GetHeight(), GL_RGBA, GL_BGRA, GL_UNSIGNED_BYTE);
+	renderContext->renderer.SetSampleMode(false, GL_LINEAR, GL_REPEAT);
+
 	
 	return true;
 }
@@ -121,12 +121,11 @@ bool CubemapTexture::LoadTexture(Renderer& renderer, eCubemapSide side, const WS
 bool CubemapTexture::Init(Renderer& renderer) {
 	renderer.AllocateTextures(textureID, 1);
 	renderer.BindCubemapTexture(textureID);
-	renderer.SetSampleMode(true);
-	renderer.SetFiltering(true);
+	renderer.SetSampleMode(true, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
 	for (size_t iTexture = 0; iTexture < size(); iTexture++) {
 		Size2u imageSize(at(iTexture)->GetPicture().GetWidth(), at(iTexture)->GetPicture().GetHeight());
-		renderer.SetImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + iTexture, at(iTexture)->GetPicture().GetMemory(), imageSize.width, imageSize.height);
+		renderer.SetImage(GL_TEXTURE_CUBE_MAP_POSITIVE_X + iTexture, at(iTexture)->GetPicture().GetMemory(), imageSize.width, imageSize.height, GL_RGBA, GL_BGRA, GL_UNSIGNED_BYTE);
 		at(iTexture)->textureID = textureID;
 	}
 
@@ -192,36 +191,3 @@ bool TextureLoader::Load(Renderer& renderer, const WString& filename) {
 }
 
 ////////////////////////////////////////////////////////////////////////
-RenderTarget::RenderTarget() 
-	: iFrameBuffer(0)
-	, size()
-{
-
-}
-
-RenderTarget::~RenderTarget() {
-
-}
-
-
-bool RenderTarget::Create(Renderer& renderer, size_t fboCount) {
-	if (fboCount == 0)
-		return false;
-
-	
-	return true;
-}
-
-
-void RenderTarget::SetSize(const Size2u& _size) {
-	size = _size;
-}
-
-void RenderTarget::SetSize(size_t width, size_t height) {
-	size.width = width;
-	size.height = height;
-}
-
-Size2u RenderTarget::GetSize() const {
-	return size;
-}

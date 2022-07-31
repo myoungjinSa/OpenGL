@@ -6,6 +6,7 @@
 #include "Camera.h"
 #include "RayCast.h"
 
+
 class Light;
 class Terrain;
 class Shader;
@@ -13,6 +14,7 @@ class ShaderParameter;
 class Renderer;
 class Material;
 class Scene;
+class RenderTarget;
 class GameObjectPicker {
 public:
 	struct sPickedInfo {
@@ -83,6 +85,8 @@ public:
 
 	void SetTransformMode(Gizmos::eTransformMode transformMode);
 private:
+	std::shared_ptr<PostProcessingShader> offscreenShader;
+	std::shared_ptr<RenderTarget> renderTarget;
 	Size2u sceneSize;
 	Camera camera;
 	Gizmos gizmos;

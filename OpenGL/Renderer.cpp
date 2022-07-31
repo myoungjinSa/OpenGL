@@ -118,6 +118,14 @@ void Renderer::SetDrawMode(Renderer::DrawMode _drawMode) {
 
 void Renderer::SetRenderMode(Renderer::RenderMode _renderMode) {
 	renderMode = _renderMode;
+	switch (renderMode) {
+	case RenderMode::SOLID:
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		break;
+	case RenderMode::WIREFRAME:
+		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		break;
+	}
 }
 
 OpenGLRenderer::~OpenGLRenderer() {
@@ -158,15 +166,37 @@ bool OpenGLRenderer::CreateRenderTarget(RenderTarget& renderTarget, const Size2u
 
 	if (renderTarget.IsNull()) {
 		pDevice->glGenFramebuffersEXT(1, &(renderTarget.iFrameBuffer));
-		OpenGL::CheckError();
+		if (pDevice->glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE)
+			return false;
+		//OpenGL::CheckError();
 	}
 	pDevice->glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, renderTarget.iFrameBuffer);
 	OpenGL::CheckError();
 
+	renderTarget.colorTexture = std::make_shared<Texture>();
+	if (!CreateTexture(*renderTarget.colorTexture, screenSize, NULL))
+		return false;
+
+	SetSampleMode(false, GL_LINEAR, GL_CLAMP_TO_EDGE);
+
+	pDevice->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, renderTarget.colorTexture.get()->textureID, 0);
+	
+	renderTarget.depthStencilTexture = std::make_shared<Texture>();
+	if (!CreateDepthStencilTexture(*renderTarget.depthStencilTexture, screenSize))
+		return false;
+
+	SetSampleMode(false, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	pDevice->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH24_STENCIL8, GL_TEXTURE_2D, renderTarget.depthStencilTexture.get()->textureID, 0);
+
+	pDevice->glBindFramebufferEXT(GL_FRAMEBUFFER, 0);
+
+	if (!renderTarget.Create(*this))
+		return false;
+
 	return true;
 }
 
-bool OpenGLRenderer::CreateTexture(Texture& texture, const Size2u& size, bool managed) {
+bool OpenGLRenderer::CreateTexture(Texture& texture, const Size2u& size, void* pImage) {
 	if (size.Empty())
 		return false;
 
@@ -174,12 +204,24 @@ bool OpenGLRenderer::CreateTexture(Texture& texture, const Size2u& size, bool ma
 		AllocateTextures(texture.textureID, 1);
 	}
 
-	glBindTexture(GL_TEXTURE_2D, texture.textureID);
+	BindTexture(texture.textureID);
 	OpenGL::CheckError();
 
-	if (managed) {
-		//texture.Initialize()
-	}
+	SetImage(GL_TEXTURE_2D, pImage, size.width, size.height, GL_RGBA, GL_BGRA, GL_UNSIGNED_BYTE);
+	
+	return true;
+}
+
+bool OpenGLRenderer::CreateDepthStencilTexture(Texture& texture, const Size2u& size) {
+	if (size.Empty())
+		return false;
+
+	if (texture.IsNull())
+		AllocateTextures(texture.textureID, 1);
+
+	BindTexture(texture.textureID);
+	OpenGL::CheckError();
+	SetImage(GL_TEXTURE_2D, NULL, size.width, size.height, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8);
 	return true;
 }
 
@@ -304,6 +346,11 @@ bool OpenGLRenderer::BindVertexAttrib(unsigned int shaderProgram, unsigned int v
 		return false;
 	}
 	return true;
+}
+
+void OpenGLRenderer::SetViewport(const Viewporti& viewport) {
+	Point2i leftTop = viewport.GetLeftTop();
+	glViewport(leftTop.x, leftTop.y, viewport.GetWidth(), viewport.GetHeight());
 }
 
 void OpenGLRenderer::SetWindingOrder(Renderer::WindingOrder order) {
@@ -454,23 +501,25 @@ bool OpenGLRenderer::AllocateTextures(unsigned int& textureId, unsigned int text
 }
 
 
-void OpenGLRenderer::SetSampleMode(bool bCubemap) {
+void OpenGLRenderer::SetSampleMode(bool bCubemap, int filterMode, int wrappingMode) {
 	if (bCubemap) {
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, wrappingMode);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, wrappingMode);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, wrappingMode);
+
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, filterMode);
+		glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, filterMode);
 	}
 	else {
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, filterMode);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, filterMode);
+		
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrappingMode);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrappingMode);
 	}
 }
 
-void OpenGLRenderer::SetFiltering(bool bCubemap) {
-	glTexParameteri(bCubemap ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(bCubemap ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	//pGL->glGenerateMipmap(bCubemap ? GL_TEXTURE_CUBE_MAP : GL_TEXTURE_2D);
-}
+
 void OpenGLRenderer::BindTexture(unsigned int textureId) {
 	//glEnable(GL_TEXTURE_2D);
 	////Set the unique texture unit in which to store the data
@@ -485,8 +534,8 @@ void OpenGLRenderer::BindCubemapTexture(unsigned int textureId) {
 	glBindTexture(GL_TEXTURE_CUBE_MAP, textureId);
 }
 
-void OpenGLRenderer::SetImage(unsigned int target, void* pImage, unsigned int width, unsigned int height) {
-	glTexImage2D(target, 0, GL_RGBA, width, height, 0, GL_BGRA, GL_UNSIGNED_BYTE, pImage);
+void OpenGLRenderer::SetImage(unsigned int target, void* pImage, unsigned int width, unsigned int height, unsigned int textureFormat, unsigned int realFormat, unsigned int dataType) {
+	glTexImage2D(target, 0, textureFormat, width, height, 0, realFormat, dataType, pImage);
 }
 
 void OpenGLRenderer::DisableVertexAttribArray(size_t vertexAttribCount) {
@@ -541,10 +590,19 @@ void OpenGLRenderer::DrawIndexBuffer(unsigned int vertexArrayId, size_t indexCou
 	}
 }
 
-int OpenGLRenderer::ClearStencilBuffer(int clearVal) {
-	int ret = 0;
-	pDevice->glClearBufferiv(GL_STENCIL, 0, &ret);
-	return ret;
+void OpenGLRenderer::BindRenderTarget(RenderTarget& renderTarget) {
+	pDevice->glBindFramebufferEXT(GL_FRAMEBUFFER, renderTarget.iFrameBuffer);
+
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	glEnable(GL_DEPTH_TEST);
+}
+void OpenGLRenderer::UnbindRenderTarget(RenderTarget& renderTarget) {
+	pDevice->glBindFramebufferEXT(GL_FRAMEBUFFER, 0);
+
+	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
 int OpenGLRenderer::GetFace(eFace _face)const {

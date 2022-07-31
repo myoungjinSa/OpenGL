@@ -218,7 +218,30 @@ public:
 	bool Clear();
 };
 
+class PostProcessingShader;
+class RenderTarget : public Object {
+public:
+	RenderTarget();
+	~RenderTarget();
 
+	bool Create(Renderer& renderer);
+	void Render(Renderer& renderer, std::shared_ptr<PostProcessingShader>& shader);
+
+	void SetSize(const Size2u& _size);
+	void SetSize(size_t width, size_t height);
+	Size2u GetSize() const;
+
+	bool IsNull() const { return iFrameBuffer == 0; }
+
+public:
+	std::shared_ptr<Texture> colorTexture;
+	std::shared_ptr<Texture> depthStencilTexture;
+	unsigned int iFrameBuffer;
+private:
+	//std::shared_ptr<Shader> shader;
+	std::shared_ptr<Mesh> mesh;
+	Size2u size;
+};
 
 //class ObjectFactory {
 //public:

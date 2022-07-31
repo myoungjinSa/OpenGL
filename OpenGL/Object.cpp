@@ -110,17 +110,7 @@ bool GameObject::Initialize(Renderer& renderer) {
 	return true;
 }
 void GameObject::Render(Renderer& renderer, ShaderParameter& shaderParam) {
-	switch (renderer.GetRenderMode()) {
-	case Renderer::RenderMode::SOLID:
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		break;
-	case Renderer::RenderMode::WIREFRAME:
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-		break;
-	default:
-		assert(0);
-		break;
-	}
+	
 }
 
 bool GameObject::Intersect(const Ray& ray, double& distance) {
@@ -328,13 +318,11 @@ bool Cube::Initialize(Renderer& renderer) {
 	meshBuilder.End();
 
 	diffuseMap = TextureLoader::GetTexture(renderer, L"·¹µåº§ºª-Feel My Rythm.mp4");
-	
-	renderer.AllocateTextures(diffuseMap->textureID, 1);
-	renderer.BindTexture(diffuseMap->GetTextureID());
-	renderer.SetImage(GL_TEXTURE_2D, diffuseMap->GetPicture().GetMemory(), diffuseMap->GetPicture().GetWidth(), diffuseMap->GetPicture().GetHeight());
-	renderer.SetSampleMode();
-	renderer.SetFiltering();
+	if (!renderer.CreateTexture(*diffuseMap, diffuseMap->GetPicture().GetSize(), diffuseMap->GetPicture().GetMemory())) {
+		return false;
+	}
 
+	renderer.SetSampleMode(false, GL_LINEAR, GL_CLAMP_TO_EDGE);
 	//normalMap = TextureLoader::GetTexture(renderer, "Resource\\Texture\\BMP\\NormalMap.bmp");
 	
 	Vec3f diffuseColor(0.8f, 0.85f, 0.85f);
@@ -416,20 +404,16 @@ bool Sphere::Initialize(Renderer& renderer) {
 	meshBuilder.End();
 
 	diffuseMap = TextureLoader::GetTexture(renderer, L"brick_d.jpg");
+	if (!renderer.CreateTexture(*diffuseMap, diffuseMap->GetPicture().GetSize(), diffuseMap->GetPicture().GetMemory()))
+		return false;
 	
-	renderer.AllocateTextures(diffuseMap->textureID, 1);
-	renderer.BindTexture(diffuseMap->textureID);
-	renderer.SetImage(GL_TEXTURE_2D, diffuseMap->GetPicture().GetMemory(), diffuseMap->GetPicture().GetWidth(), diffuseMap->GetPicture().GetHeight());
-	renderer.SetSampleMode();
-	renderer.SetFiltering();
-
+	renderer.SetSampleMode(false, GL_LINEAR, GL_CLAMP_TO_EDGE);
+	
 	normalMap = TextureLoader::GetTexture(renderer, L"brick_n.jpg");
-	
-	renderer.AllocateTextures(normalMap->textureID, 1);
-	renderer.BindTexture(normalMap->textureID);
-	renderer.SetImage(GL_TEXTURE_2D, normalMap->GetPicture().GetMemory(), normalMap->GetPicture().GetWidth(), normalMap->GetPicture().GetHeight());
-	renderer.SetSampleMode();
-	renderer.SetFiltering();
+	if (!renderer.CreateTexture(*normalMap, normalMap->GetPicture().GetSize(), normalMap->GetPicture().GetMemory()))
+		return false;
+
+	renderer.SetSampleMode(false, GL_LINEAR, GL_CLAMP_TO_EDGE);
 
 	std::shared_ptr<CubemapTexture> cubemapTexture = std::make_shared<CubemapTexture>();
 	cubemapTexture->LoadTexture(renderer, CubemapTexture::eCubemapSide::CUBEMAP_RIGHT, L"SkyBox_Right.png");
@@ -584,12 +568,11 @@ bool Cylinder::Initialize(Renderer& renderer) {
 	meshBuilder.End();
 
 	diffuseMap = TextureLoader::GetTexture(renderer, L"coast_sand_rocks.jpg");
+	if (!renderer.CreateTexture(*diffuseMap, diffuseMap->GetPicture().GetSize(), diffuseMap->GetPicture().GetMemory()))
+		return false;
 
-	renderer.AllocateTextures(diffuseMap->textureID, 1);
-	renderer.BindTexture(diffuseMap->textureID);
-	renderer.SetImage(GL_TEXTURE_2D, diffuseMap->GetPicture().GetMemory(), diffuseMap->GetPicture().GetWidth(), diffuseMap->GetPicture().GetHeight());
-	renderer.SetSampleMode();
-	renderer.SetFiltering();
+	renderer.SetSampleMode(false, GL_LINEAR, GL_CLAMP_TO_EDGE);
+
 
 	Vec3f diffuseColor(0.8f, 0.85f, 0.85f);
 	Vec4f ambientColor(0.3f, 0.3f, 0.3f, 1.0f);
@@ -658,6 +641,65 @@ bool GameObjects::Clear() {
 	}
 	return true;
 }
+
+
+RenderTarget::RenderTarget()
+	: iFrameBuffer(0)
+	, size()
+{
+
+}
+
+RenderTarget::~RenderTarget() {
+
+}
+
+
+bool RenderTarget::Create(Renderer& renderer) {
+	mesh = std::make_shared<Mesh>();
+
+	MeshBuilder meshBuilder;
+	meshBuilder.Begin();
+	meshBuilder.AddQuad(Vec3f(0.0f, 0.0f, 0.0f), Vec3f(1.0f, 1.0f, 0.0f), Vec3f::FORWARD * -1.0f);
+	meshBuilder.CopyToMesh(renderer, *mesh, &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
+	meshBuilder.End();
+
+	//shader = std::make_shared<PostProcessingShader>(this);
+	//if (!shader->Initialize(renderer)) {
+	//	return false;
+	//}
+
+	return true;
+}
+
+void RenderTarget::Render(Renderer& renderer, std::shared_ptr<PostProcessingShader>& shader) {
+	renderer.SetViewport(Viewporti(0, 0, size.width, size.height));
+	renderer.BindTexture(colorTexture.get()->textureID);
+	shader->Render(renderer);
+	
+	glDisable(GL_DEPTH_TEST);
+	
+	int screenTexture = colorTexture.get()->textureID;
+	renderer.SetShaderParameter(shader->GetShaderProgram(), screenTexture, String("screenTexture"));
+	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
+	mesh->Render(renderer);
+
+	renderer.BindTexture(0);
+}
+
+void RenderTarget::SetSize(const Size2u& _size) {
+	size = _size;
+}
+
+void RenderTarget::SetSize(size_t width, size_t height) {
+	size.width = width;
+	size.height = height;
+}
+
+Size2u RenderTarget::GetSize() const {
+	return size;
+}
+
 //std::shared_ptr<GameObject>& ObjectFactory::CreateGameObject(Renderer& renderer, ObjectFactory::eObjectType objType, ObjectFactory::eShaderType shaderType) {
 //	MeshBuilder meshBuilder;
 //	Vec3f defaultPosition(0.0f, 0.0f, 0.0f);

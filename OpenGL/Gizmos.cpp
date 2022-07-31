@@ -202,16 +202,16 @@ Gizmos::GizmoHandle::eHandle Gizmos::GizmoHandles::Intersect(const Ray& ray, dou
 }
 
 double Gizmos::GizmoHandles::CalcDistanceFromCamera(const GizmoHandle& gizmoHandle, const Camera& camera)const {
-	Volumef gizmoVolume;
-	gizmoHandle.GetLocalBoundingBox(gizmoVolume);
-	
-	Vec3f gizmoPos = gizmoHandle.owner.GetPosition();
-	gizmoVolume.Move(gizmoPos);
-
+	Vec3f nearestPositionFromCamera = GetNearestPointFromCamera(gizmoHandle, camera);
 	Vec3f cameraPos = camera.GetPosition();
-	Vec3d direction = gizmoVolume.GetCenter() - cameraPos;
+	Vec3d direction = nearestPositionFromCamera - cameraPos;
 	double distance = sqrt(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
 	return distance;
+}
+
+Vec3f Gizmos::GizmoHandles::GetNearestPointFromCamera(const GizmoHandle& gizmoHandle, const Camera& camera)const {
+	Vec3f neareastPoint = gizmoHandle.boundingVolume.get()->GetNearestPointFromTarget(camera);
+	return neareastPoint;
 }
 
 void Gizmos::GizmoHandles::Render(Renderer& renderer, ShaderParameter& shaderParam, const Camera& camera, eTransformMode transformMode) {
@@ -325,8 +325,6 @@ bool Gizmos::Initialize(Renderer& renderer) {
 			meshBuilder.AddYAxisCone(Vec3f(0.0f, orgSize, 0.0f), 0.05f, 0.1f, 0.05f, 0.1f, RGBA::GREEN);
 			meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 			meshBuilder.End();
-
-
 
 			return true;
 

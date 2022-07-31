@@ -3,37 +3,6 @@
 #include "Logger.h"
 #include "Quaternion.h"
 
-Viewport::Viewport() 
-	: rect()
-{
-
-}
-
-Viewport::Viewport(const Rect2f& rect) 
-{
-	SetViewport(rect);
-}
-
-
-void Viewport::SetViewport(const Rect2f& _rect) {
-	if (_rect.Empty())
-		return;
-
-	rect = _rect;
-
-	if (rect.GetWidth() <= 0.0f) {
-		rect.right = rect.left + 1.0f;
-	}
-	if (rect.GetHeight() <= 0.0f) {
-		rect.bottom = rect.top + 1.0f;
-	}
-
-	halfWidth = rect.GetWidth() / 2.0f;
-	halfHeight = rect.GetHeight() / 2.0f;
-
-	centerX = (rect.left + rect.right) / 2.0f;
-	centerY = (rect.top + rect.bottom) / 2.0f;
-}
 
 Camera::Camera()
 	:GameObject()
@@ -89,7 +58,7 @@ void Camera::Update(float deltaTime) {
 	}
 }
 
-void Camera::SetViewport(const Rect2f& _viewport) {
+void Camera::SetViewport(const Recti& _viewport) {
 	viewport.SetViewport(_viewport);
 }
 

@@ -46,12 +46,12 @@ public:
 
 	int GetWidth() const { return width; }
 	int GetHeight() const { return height; }
-	Size2i GetSize() const { return Size2i(width, height); }
+	Size2u GetSize() const { return Size2u(width, height); }
 	int GetDepth() const { return bpp; }
 	int GetPitch() const { return pitch; }
 
-	bool Create(const Size2i& imageSize);
-	bool Create(const Size2i& imageSize, ePixelFormat pixelFormat, eColorSpace colorSpace);
+	bool Create(const Size2u& imageSize);
+	bool Create(const Size2u& imageSize, ePixelFormat pixelFormat, eColorSpace colorSpace);
 	bool Create(int width, int height, ePixelFormat pixelFormat, eColorSpace coloSpace);
 	bool Create(void* pData, int width, int height, int bpp, ePixelFormat pixelFormat, eColorSpace colorSpace);
 	void Destroy();

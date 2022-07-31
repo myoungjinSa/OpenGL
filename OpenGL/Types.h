@@ -134,9 +134,9 @@ public:
 };
 
 
-typedef Rect<int> Rect2i;
-typedef Rect<float> Rect2f;
-typedef Rect<double> Rect2d;
+typedef Rect<int> Recti;
+typedef Rect<float> Rectf;
+typedef Rect<double> Rectd;
 
 ////////////////////////2D Point /////////////////////////////////////
 
@@ -292,3 +292,83 @@ public:
 typedef Plane<int>    Planei;
 typedef Plane<float>  Planef;
 typedef Plane<double> Planed;
+
+
+template<typename T>
+class Viewport {
+public:
+	Viewport();
+	Viewport(T left, T top, T right, T bottom);
+	Viewport(const Point2<T>& leftTop, const Size<T>& size);
+	Viewport(const Rect<T>& rect);
+
+	bool IsValid()const { return rect.Empty() ? false : true; }
+	void SetViewport(const Rect<T>& rect);
+	T GetWidth() const { return rect.GetWidth(); }
+	T GetHeight() const { return rect.GetHeight(); }
+
+	Point2<T> GetLeftTop()const { return Point2<T>(rect.left, rect.top); }
+
+	Point2<T> GetCenter()const;
+	Rect<T> GetRect() const { return rect; }
+
+private:
+	Rect<T> rect;
+};
+typedef Viewport<int> Viewporti;
+typedef Viewport<float> Viewportf;
+
+template<typename T>
+Viewport<T>::Viewport()
+	: rect()
+{
+
+}
+
+template<typename T>
+Viewport<T>::Viewport(T left, T top, T right, T bottom) {
+	rect.left = left;
+	rect.top = top;
+	rect.right = right;
+	rect.bottom = bottom;
+}
+
+template<typename T>
+Viewport<T>::Viewport(const Point2<T>& leftTop, const Size<T>& size) {
+	rect.left = leftTop.x;
+	rect.top = leftTop.y;
+	rect.right = leftTop.x + size.width;
+	rect.bottom = leftTop.y + size.height;
+}
+
+template<typename T>
+Viewport<T>::Viewport(const Rect<T>& rect)
+{
+	SetViewport(rect);
+}
+
+
+template<typename T>
+void Viewport<T>::SetViewport(const Rect<T>& _rect) {
+	if (_rect.Empty())
+		return;
+
+	rect = _rect;
+
+	if (rect.GetWidth() < 0.0f) {
+		rect.right = rect.left;
+	}
+	if (rect.GetHeight() < 0.0f) {
+		rect.bottom = rect.top;
+	}
+	assert(!rect.Empty());
+}
+
+template<typename T>
+Point2<T> Viewport<T>::GetCenter()const {
+	assert(!rect.Empty());
+
+	T centerX = (T)(rect.left + rect.right) / 2.0f;
+	T centerY = (T)(rect.top + rect.bottom) / 2.0f;
+	return Point2<T>(centerX, centerY);
+}

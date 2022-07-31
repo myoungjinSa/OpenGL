@@ -83,6 +83,35 @@ const Vec3f& BoundingBox::GetExtent() const {
 	return extent;
 }
 
+std::vector<Vec3f> BoundingBox::GetPoints()const {
+	std::vector<Vec3f> points;
+	points.push_back(Vec3f(center.x - extent.x, center.y - extent.y, center.z - extent.z));	//left-bottom-front
+	points.push_back(Vec3f(center.x - extent.x, center.y - extent.y, center.z + extent.z));
+	points.push_back(Vec3f(center.x - extent.x, center.y + extent.y, center.z - extent.z));
+	points.push_back(Vec3f(center.x - extent.x, center.y + extent.y, center.z + extent.z));
+	points.push_back(Vec3f(center.x + extent.x, center.y - extent.y, center.z - extent.z));
+	points.push_back(Vec3f(center.x + extent.x, center.y - extent.y, center.z + extent.z));
+	points.push_back(Vec3f(center.x + extent.x, center.y + extent.y, center.z - extent.z));
+	points.push_back(Vec3f(center.x + extent.x, center.y + extent.y, center.z + extent.z));
+	return points;
+}
+
+Vec3f BoundingBox::GetNearestPointFromTarget(const GameObject& obj)const {
+	Vec3f objPosition = obj.GetPosition();
+
+	std::vector<Vec3f> points = GetPoints();
+	assert(!points.empty());
+
+	float minDistance = DBL_MAX;
+	for (const auto& pt : points) {
+		Vec3f direction = pt - objPosition;
+		float distance = sqrt(direction.x * direction.x + direction.y * direction.y + direction.z * direction.z);
+		if (distance < minDistance)
+			minDistance = distance;
+	}
+	return minDistance;
+}
+
 bool BoundingBox::Init(Renderer& renderer) {
 	BoundingVolume::Init(renderer);
 	

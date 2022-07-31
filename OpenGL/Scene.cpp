@@ -7,6 +7,7 @@
 #include "Material.h"
 #include "Terrain.h"
 #include "Light.h"
+#include "Texture.h"
 
 Scene::Scene() 
 	: gizmos()
@@ -40,12 +41,21 @@ bool Scene::BuildObject(Renderer& renderer) {
 
 	camera.Initialize(renderer);
 	camera.SetPosition(0.0f, 0.0f, -5.0f);
-	camera.SetViewport(Rect2f(0.0f, 0.0f, renderer.GetScreenSize().width, renderer.GetScreenSize().height));
+	camera.SetViewport(Recti(0.0f, 0.0f, renderer.GetScreenSize().width, renderer.GetScreenSize().height));
 	camera.SetNear(1.0f);
 	camera.SetFar(1000.0f);
 	gizmos.Initialize(renderer);
 	
 	sceneSize = Size2u(renderer.GetScreenSize().width, renderer.GetScreenSize().height);
+	
+	renderTarget = std::make_shared<RenderTarget>();
+	if (!renderer.CreateRenderTarget(*renderTarget, sceneSize, false))
+		assert(0);
+	
+	offscreenShader = std::make_shared<ColorInversionShader>(this);
+	if (!offscreenShader->Initialize(renderer))
+		return false;
+
 	return true;
 }
 
@@ -67,6 +77,7 @@ void Scene::Update(double elapsedTime) {
 }
 
 bool Scene::Render(Renderer& renderer) {
+	renderer.BindRenderTarget(*renderTarget);
 	renderer.BeginRender();
 	Size2u screenSize = renderer.GetScreenSize();
 
@@ -76,7 +87,6 @@ bool Scene::Render(Renderer& renderer) {
 	camera.SetFrustum(width, height, camera.GetNear(), camera.GetFar(), MathUtils::DegreesToRadians(60));
 	Matrix<float, 4, 4> projectionMatrix = camera.GetFrustum();
 	
-
 	renderer.EnableDepthTest(true);
 	renderer.SetCullFace(eFace::Back);
 	renderer.SetDepthFunc(eCompare::LEQUAL);
@@ -99,7 +109,11 @@ bool Scene::Render(Renderer& renderer) {
 
 	renderer.EnableDepthTest(false);
 	gizmos.Render(renderer, &camera, *this);
-	
+	renderer.EnableDepthTest(true);
+
+	renderer.UnbindRenderTarget(*renderTarget);
+	renderTarget->Render(renderer, offscreenShader);
+
 	renderer.EndRender();
 	return true;
 }

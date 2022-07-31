@@ -4,24 +4,7 @@
 #include "Object.h"
 #include "Observer.h"
 
-class Viewport {
-public:
-	Viewport();
-	Viewport(const Rect2f& rect);
 
-	void SetViewport(const Rect2f& rect);
-	float GetWidth() const { return rect.GetWidth(); }
-	float GetHeight() const { return rect.GetHeight(); }
-
-	Rect2f GetRect() const { return rect; }
-private:
-	Rect2f rect;
-
-	float halfWidth;
-	float halfHeight;
-	float centerX;
-	float centerY;
-};
 class Camera : public GameObject, Observer
 {
 public:
@@ -36,10 +19,10 @@ public:
 
 	void GetViewMatrix(Matrix<float, 4, 4>& Matrix) const;
 	void SetFrustum(float width, float height, float _near, float _far, float fov);
-	void SetViewport(const Rect2f& _viewPort);
+	void SetViewport(const Recti& _viewPort);
 	Matrix<float, 4, 4> GetFrustum() const { return frustum; }
 	
-	const Viewport& GetViewport() const { return viewport; }
+	const Viewporti& GetViewport() const { return viewport; }
 	float GetFov() const { return MathUtils::PI / 4.0f; }
 	void SetNear(float _Near) { Near = _Near; }
 	float GetNear() const { return Near; }
@@ -56,7 +39,7 @@ public:
 private:
 	void BuildViewMatrix();
 
-	Viewport viewport;
+	Viewporti viewport;
 	Matrix<float, 4, 4> viewMatrix;
 	Matrix<float, 4, 4> frustum;
 	
