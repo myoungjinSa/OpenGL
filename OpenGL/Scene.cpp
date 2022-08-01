@@ -52,7 +52,7 @@ bool Scene::BuildObject(Renderer& renderer) {
 	if (!renderer.CreateRenderTarget(*renderTarget, sceneSize, false))
 		assert(0);
 	
-	offscreenShader = std::make_shared<PostProcessingShader>(this);
+	offscreenShader = std::make_shared<ColorInversionShader>(this);
 	if (!offscreenShader->Initialize(renderer))
 		return false;
 

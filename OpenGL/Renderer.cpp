@@ -186,11 +186,14 @@ bool OpenGLRenderer::CreateRenderTarget(RenderTarget& renderTarget, const Size2u
 		return false;
 
 	SetSampleMode(false, GL_LINEAR, GL_CLAMP_TO_EDGE);
-	pDevice->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH24_STENCIL8, GL_TEXTURE_2D, renderTarget.depthStencilTexture.get()->textureID, 0);
+	pDevice->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, renderTarget.depthStencilTexture.get()->textureID, 0);
+
+	if (pDevice->glCheckFramebufferStatus(GL_FRAMEBUFFER) != GL_FRAMEBUFFER_COMPLETE) {
+		assert(0);
+		return false;
+	}
 
 	pDevice->glBindFramebufferEXT(GL_FRAMEBUFFER, 0);
-
-
 
 	if (!renderTarget.Create(*this))
 		return false;
@@ -229,6 +232,7 @@ bool OpenGLRenderer::CreateDepthStencilTexture(Texture& texture, const Size2u& s
 	BindTexture(texture.textureID);
 	OpenGL::CheckError();
 	SetImage(GL_TEXTURE_2D, NULL, size.width, size.height, GL_DEPTH24_STENCIL8, GL_DEPTH_STENCIL, GL_UNSIGNED_INT_24_8);
+	//pDevice->glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_STENCIL_ATTACHMENT, GL_TEXTURE_2D, texture.textureID, NULL);
 	return true;
 }
 
