@@ -100,9 +100,7 @@ public:
 	Gizmos();
 
 	bool Initialize(Renderer& renderer);
-#ifdef _DEBUG
-	bool VerifyGizmos() const;
-#endif
+
 	bool Intersect(const Ray& ray, double& distance) override;
 	void Attach(GameObject& Target);
 	void Detach();
@@ -129,5 +127,9 @@ private:
 	GizmoHandles handles;
 
 	Point2i oldMousePoint;
+
+#ifdef _DEBUG
+	bool VerifyGizmos() const;
+#endif
 };
 

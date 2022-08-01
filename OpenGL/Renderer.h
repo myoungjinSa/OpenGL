@@ -85,6 +85,7 @@ public:
 
 	virtual unsigned int CreateShader() = 0;
 	virtual bool CreateRenderTarget(RenderTarget& renderTarget, const Size2u& screenSize, bool downSamplingTarget) { return false; }
+	virtual void DestroyRenderTarget(RenderTarget& renderTarget) {}
 	virtual bool CreateTexture(Texture& texture, const Size2u& size, void* pImage) { return false; }
 	virtual bool CreateDepthStencilTexture(Texture& texture, const Size2u& size) { return true; }
 	virtual void DeleteTexture(Texture& texture) {}
@@ -170,6 +171,7 @@ public:
 
 	unsigned int CreateShader() override;
 	bool CreateRenderTarget(RenderTarget& renderTarget, const Size2u& screenSize, bool downSampleingTarget);
+	void DestroyRenderTarget(RenderTarget& renderTarget) override;
 	bool CreateTexture(Texture& texture, const Size2u& size, void* pImage)override;
 	bool CreateDepthStencilTexture(Texture& texture, const Size2u& size)override;
 	void DeleteTexture(Texture& texture)override;

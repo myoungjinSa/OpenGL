@@ -651,7 +651,7 @@ RenderTarget::RenderTarget()
 }
 
 RenderTarget::~RenderTarget() {
-
+	
 }
 
 
@@ -677,7 +677,7 @@ void RenderTarget::Render(Renderer& renderer, std::shared_ptr<PostProcessingShad
 	renderer.BindTexture(colorTexture.get()->textureID);
 	shader->Render(renderer);
 	
-	glDisable(GL_DEPTH_TEST);
+	renderer.EnableDepthTest(false); 
 	
 	int screenTexture = colorTexture.get()->textureID;
 	renderer.SetShaderParameter(shader->GetShaderProgram(), screenTexture, String("screenTexture"));
@@ -685,6 +685,8 @@ void RenderTarget::Render(Renderer& renderer, std::shared_ptr<PostProcessingShad
 	mesh->Render(renderer);
 
 	renderer.BindTexture(0);
+
+	renderer.EnableDepthTest(true);
 }
 
 void RenderTarget::SetSize(const Size2u& _size) {

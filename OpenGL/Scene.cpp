@@ -52,7 +52,7 @@ bool Scene::BuildObject(Renderer& renderer) {
 	if (!renderer.CreateRenderTarget(*renderTarget, sceneSize, false))
 		assert(0);
 	
-	offscreenShader = std::make_shared<ColorInversionShader>(this);
+	offscreenShader = std::make_shared<PostProcessingShader>(this);
 	if (!offscreenShader->Initialize(renderer))
 		return false;
 
@@ -119,6 +119,8 @@ bool Scene::Render(Renderer& renderer) {
 }
 
 void Scene::Shutdown(Renderer& renderer) {
+	renderer.DestroyRenderTarget(*renderTarget);
+
 	for (const auto& obj : gameObjects)
 		obj->Shutdown(renderer);
 

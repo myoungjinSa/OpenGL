@@ -94,6 +94,8 @@ typedef void (GLAPIENTRY* PFNGLCLEARBUFFERIVPROC) (GLenum buffer, GLint drawBuff
 typedef void (GLAPIENTRY* PFNGLENABLEIPROC) (GLenum cap, GLuint index);
 typedef GLenum(GLAPIENTRY* PFNGLCHECKFRAMEBUFFERSTATUSPROC) (GLenum target);
 typedef void (GLAPIENTRY* PFNGLFRAMEBUFFERTEXTURE2DPROC) (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level);
+typedef void (GLAPIENTRY* PFNGLDELETEFRAMEBUFFERSEXTPROC) (GLsizei n, const GLuint* framebuffers);
+
 class OpenGL : public GraphicDevice
 {
 public:
@@ -163,6 +165,7 @@ public:
 	PFNGLENABLEIPROC glEnablei;
 	PFNGLFRAMEBUFFERTEXTURE2DPROC glFramebufferTexture2D;
 	PFNGLCHECKFRAMEBUFFERSTATUSPROC glCheckFramebufferStatus;
+	PFNGLDELETEFRAMEBUFFERSEXTPROC glDeleteFramebuffersEXT;
 private:
 	HDC deviceContext;
 	HGLRC renderingContext;

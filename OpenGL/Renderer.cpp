@@ -190,10 +190,17 @@ bool OpenGLRenderer::CreateRenderTarget(RenderTarget& renderTarget, const Size2u
 
 	pDevice->glBindFramebufferEXT(GL_FRAMEBUFFER, 0);
 
+
+
 	if (!renderTarget.Create(*this))
 		return false;
 
 	return true;
+}
+
+void OpenGLRenderer::DestroyRenderTarget(RenderTarget& renderTarget) {
+	glDeleteTextures(1, &(renderTarget.colorTexture->textureID));
+	glDeleteTextures(1, &(renderTarget.depthStencilTexture->textureID));
 }
 
 bool OpenGLRenderer::CreateTexture(Texture& texture, const Size2u& size, void* pImage) {
@@ -593,16 +600,15 @@ void OpenGLRenderer::DrawIndexBuffer(unsigned int vertexArrayId, size_t indexCou
 void OpenGLRenderer::BindRenderTarget(RenderTarget& renderTarget) {
 	pDevice->glBindFramebufferEXT(GL_FRAMEBUFFER, renderTarget.iFrameBuffer);
 
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	EnableDepthTest(true);
+	
+	glClearColor(0.0, 0.0, 0.0, 1.0);
+	glClearDepth(1.0f);
 
-	glEnable(GL_DEPTH_TEST);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);	
 }
 void OpenGLRenderer::UnbindRenderTarget(RenderTarget& renderTarget) {
 	pDevice->glBindFramebufferEXT(GL_FRAMEBUFFER, 0);
-
-	glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 }
 
 int OpenGLRenderer::GetFace(eFace _face)const {
