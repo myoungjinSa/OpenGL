@@ -319,7 +319,7 @@ bool Cube::Initialize(Renderer& renderer) {
 	meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex));
 	meshBuilder.End();
 
-	diffuseMap = TextureLoader::GetTexture(renderer, L"·¹µåº§ºª-Feel My Rythm.mp4");
+	diffuseMap = TextureLoader::GetTexture(renderer, L"IU-Strawberry moon.mp4");
 	if (!renderer.CreateTexture(*diffuseMap, diffuseMap->GetPicture().GetSize(), diffuseMap->GetPicture().GetMemory())) {
 		return false;
 	}

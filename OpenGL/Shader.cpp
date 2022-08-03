@@ -185,11 +185,12 @@ bool PhongShader::InitializeShader(const char* vsFilename, const char* fsFilenam
 
 
 bool PhongShader::SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParam) {
-	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldMatrix, String("worldMatrix")))				assert(0);
+	renderer.SetShaderParameter(shaderProgram, shaderParam.worldMatrix, String("worldMatrix"));
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldViewMatrix, String("worldViewMatrix")))	assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.projectionMatrix, String("projectionMatrix")))	assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.normalMatrix, String("normalMatrix")))			assert(0);
-	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.viewInverseMatrix, String("viewInverseMatrix")))	assert(0);
+	//if (!renderer.SetShaderParameter(shaderProgram, shaderParam.viewInverseMatrix, String("viewInverseMatrix")))	assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.cameraPosition, String("cameraPosition")))			assert(0);
 
 	int diffuseTexture = shaderParam.diffuseTexture;
 	if (!renderer.SetShaderParameter(shaderProgram, diffuseTexture, String("shaderTexture")))						assert(0);

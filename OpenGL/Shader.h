@@ -23,10 +23,9 @@ struct ShaderParameter {
 	Matrix<float, 4, 4> worldViewMatrix;
 	Matrix<float, 4, 4> worldMatrix;
 	Matrix<float, 4, 4> viewMatrix;
-	Matrix<float, 4, 4> viewInverseMatrix;
 	Matrix<float, 4, 4> projectionMatrix;
 	Matrix<float, 3, 3> normalMatrix;
-
+	Matrix<float, 4, 4> viewInverseMatrix;
 
 	int   objNo;
 	Vec3f lightPosition;

@@ -1,2 +1,4 @@
-The  shader uses varying cameraPos, but previous shader does not write to it.
-Out of resource error.
+Link info
+---------
+error: Order within interface block differs for member variable VS_OUT.UV between stages
+error: Block "VS_OUT" mismatch between shader stages

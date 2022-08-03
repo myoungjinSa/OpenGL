@@ -54,7 +54,6 @@ bool SceneEdit::PickObject(const Ray& _ray) {
 	if (scene.gizmos.IsAlreadyAttached()) {
 		double distance = 0.0;
 		picker.HitTest(scene.gizmos, distance);
-		LogDebug(L"Hit Distance = %.8lf\n", distance);
 
 		return true;
 	}
@@ -111,10 +110,6 @@ Vec3f SceneEdit::CalcMoveOffset(const GameObject& baseObject, const Point2i& pre
 		LogDebug(L"Dot < 0\n");
 	}
 	Vec3f distance = plane.GetIntersection(curRay.GetLine()) - plane.GetIntersection(prevRay.GetLine());
-	
-	LogDebug(L"curRay x=%.8lf, y=%.8lf, z=%.8lf\n", plane.GetIntersection(curRay.GetLine()).x, plane.GetIntersection(curRay.GetLine()).y, plane.GetIntersection(curRay.GetLine()).z);
-	LogDebug(L"prevRay x=%.8lf, y=%.8lf, z=%.8lf\n", plane.GetIntersection(prevRay.GetLine()).x, plane.GetIntersection(prevRay.GetLine()).y, plane.GetIntersection(prevRay.GetLine()).z);
-
 	Vec3f offset = ClampDragOffset(handleType, distance);
 	return offset;
 }
