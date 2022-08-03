@@ -138,11 +138,13 @@ void GameObject::FillShaderParameter(ShaderParameter& shaderParam, const Matrix<
 	Matrix<float, 3, 3> normalMatrix = Matrix<float, 3, 3>::Identity();
 	MakeNormalMatrix(worldViewMatrix, normalMatrix);
 
+
 	shaderParam.worldMatrix = worldMatrix;
 	shaderParam.worldViewMatrix = worldViewMatrix;
 	shaderParam.viewMatrix = viewMatrix;
 	shaderParam.projectionMatrix = projectionMatrix;
 	shaderParam.normalMatrix = normalMatrix;
+	shaderParam.viewInverseMatrix = Inverse(viewMatrix);
 
 	shaderParam.lightPosition = light.GetPosition();
 	shaderParam.diffuse = material->GetDiffuse();
@@ -385,7 +387,7 @@ Sphere::~Sphere() {
 bool Sphere::Initialize(Renderer& renderer) {
 	GameObject::Initialize(renderer);
 
-	shader = std::make_shared<CubemapEnvShader>(this);
+	shader = std::make_shared<PhongShader>(this);
 	if (!shader)
 		return false;
 

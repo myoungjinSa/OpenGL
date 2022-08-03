@@ -966,16 +966,14 @@ void MeshBuilder::AddLathe(const Vec3f& axis, const Vec3f& arm1, const Vec3f& ar
 	//ComputeNormals();
 }
 
-void MeshBuilder::AddGrid(int xStart, int zStart, int xTileCount, int zTileCount, const Vec3f& positionOffset, const Vec3f& scale, const RGBA& color, const TerrainHeightImage& terrainContext) {
+void MeshBuilder::AddGrid(int xStart, int zStart, int xTileCount, int zTileCount, const Vec3f& positionOffset, const Vec3f& scale, const RGBA& color, const TerrainHeightImage* pHeightImage) {
 	int xVertexCount = xTileCount + 1;
 	int zVertexCount = zTileCount + 1;
-	
-	int heightMapWidth = terrainContext.GetWidth();
-	int heightMapLength = terrainContext.GetLength();
+
 	for (int zVertex = zStart; zVertex < (zStart + zVertexCount); zVertex++) {
 		for (int xVertex = xStart; xVertex < (xStart + xVertexCount); xVertex++) {
 			SetColor(color);
-			float height = terrainContext.GetHeight(xVertex, zVertex);
+			float height = pHeightImage ? pHeightImage->GetHeight(xVertex, zVertex) : 0.0f;
 			SetPosition(xVertex * scale.x + positionOffset.x, height + positionOffset.y, zVertex * scale.z + positionOffset.z);
 			SetUV(Vec2f(float(xVertex) / float(scale.x * 0.5f), float(zVertex) / float(scale.z * 0.5f)));
 			

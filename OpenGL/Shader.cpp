@@ -154,7 +154,7 @@ PhongShader::~PhongShader() {
 }
 
 bool PhongShader::Initialize(Renderer& renderer) {
-	return InitializeShader("PhongShading.vs", "PhongShading.ps", renderer);
+	return InitializeShader("PerPixelPhongShading.vs", "PerPixelPhongShading.ps", renderer);
 }
 
 
@@ -183,26 +183,41 @@ bool PhongShader::InitializeShader(const char* vsFilename, const char* fsFilenam
 	return renderer.BindVertexAttrib(shaderProgram, vertexShader, fragmentShader, 3, inputPosition, inputTexCoord, inputNormal);
 }
 
+
 bool PhongShader::SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParam) {
-	if(!renderer.SetShaderParameter(shaderProgram, shaderParam.worldMatrix, String("worldMatrix")))				assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldMatrix, String("worldMatrix")))				assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldViewMatrix, String("worldViewMatrix")))	assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.projectionMatrix, String("projectionMatrix")))	assert(0);
-	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.lightPosition, String("lightPosition")))		assert(0);
-	renderer.SetShaderParameter(shaderProgram, shaderParam.cameraPosition, String("cameraPosition"));
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.normalMatrix, String("normalMatrix")))			assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.viewInverseMatrix, String("viewInverseMatrix")))	assert(0);
 
-	Vec3f diffuse = Vec3f(shaderParam.diffuse.x, shaderParam.diffuse.y, shaderParam.diffuse.z);
-	Vec3f ambient = Vec3f(shaderParam.ambient.x, shaderParam.ambient.y, shaderParam.ambient.z);
-	Vec3f specular = Vec3f(shaderParam.specular.x, shaderParam.specular.y, shaderParam.specular.z);
-
-	renderer.SetShaderParameter(shaderProgram, diffuse, String("diffuseColor"));
-	renderer.SetShaderParameter(shaderProgram, specular, String("specularColor"));
-	renderer.SetShaderParameter(shaderProgram, ambient, String("ambientColor"));
-	
 	int diffuseTexture = shaderParam.diffuseTexture;
 	if (!renderer.SetShaderParameter(shaderProgram, diffuseTexture, String("shaderTexture")))						assert(0);
-	
+
 	return true;
 }
+
+//bool PhongShader::SetShaderParameters(Renderer& renderer, const ShaderParameter& shaderParam) {
+//	if(!renderer.SetShaderParameter(shaderProgram, shaderParam.worldMatrix, String("worldMatrix")))				assert(0);
+//	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldViewMatrix, String("worldViewMatrix")))	assert(0);
+//	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.projectionMatrix, String("projectionMatrix")))	assert(0);
+//	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.lightPosition, String("lightPosition")))		assert(0);
+//
+//	renderer.SetShaderParameter(shaderProgram, shaderParam.cameraPosition, String("cameraPosition"));
+//
+//	Vec3f diffuse = Vec3f(shaderParam.diffuse.x, shaderParam.diffuse.y, shaderParam.diffuse.z);
+//	Vec3f ambient = Vec3f(shaderParam.ambient.x, shaderParam.ambient.y, shaderParam.ambient.z);
+//	Vec3f specular = Vec3f(shaderParam.specular.x, shaderParam.specular.y, shaderParam.specular.z);
+//
+//	renderer.SetShaderParameter(shaderProgram, diffuse, String("diffuseColor"));
+//	renderer.SetShaderParameter(shaderProgram, specular, String("specularColor"));
+//	renderer.SetShaderParameter(shaderProgram, ambient, String("ambientColor"));
+//	
+//	int diffuseTexture = shaderParam.diffuseTexture;
+//	if (!renderer.SetShaderParameter(shaderProgram, diffuseTexture, String("shaderTexture")))						assert(0);
+//	
+//	return true;
+//}
 /////////////////////////////////////////////////////////////////////////////////////////////
 GoraudShader::GoraudShader(Object* pOwner)
 	: Shader(pOwner)

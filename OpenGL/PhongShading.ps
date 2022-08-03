@@ -1,4 +1,4 @@
-#version 400
+#version 400 
 
 in VS_OUT{
     vec3 V;
@@ -70,5 +70,5 @@ vec4 DirectLight(vec3 _normal, vec3 _lightDir, vec3 _viewDir){
 
 void main(){
     vec4 textureColor = texture(shaderTexture, fs_in.UV);
-    out_color = DirectLight(fs_in.N, fs_in.L, fs_in.V) * textureColor ;
+    out_color = DirectLight(fs_in.N, fs_in.L, fs_in.V) * textureColor;
 }

@@ -1,4 +1,5 @@
-ERROR: 0:37: 'refract' : no matching overloaded function found (using implicit conversion) 
-ERROR: 0:37: 'refract' : function is not known 
-ERROR: 0:36: 'assign' :  cannot convert from 'const highp float' to 'varying 3-component vector of highp float'
-
+0(59) : error C0000: syntax error, unexpected identifier, expecting ',' or ';' at token "lightDirection"
+0(62) : error C1503: undefined variable "position"
+0(76) : error C1503: undefined variable "clamedCosine"
+0(83) : error C1009: "difuse" is not member of struct "material"
+0(94) : warning C7533: global variable gl_FragColor is deprecated after version 120
