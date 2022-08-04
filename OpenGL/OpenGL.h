@@ -77,6 +77,7 @@ typedef void (APIENTRY* PFNGLUNIFORMMATRIX4FVPROC) (GLint location, GLsizei coun
 typedef void (APIENTRY* PFNGLUNIFORMMATRIX3FVPROC) (GLint location, GLsizei count, GLboolean transpose, const GLfloat* value);
 typedef void (APIENTRY* PFNGLACTIVETEXTUREPROC) (GLenum texture);
 typedef void (APIENTRY* PFNGLUNIFORM1IPROC) (GLint location, GLint v0);
+typedef void (GLAPIENTRY* PFNGLUNIFORM1FPROC) (GLint location, GLfloat v0);
 typedef void (APIENTRY* PFNGLGENERATEMIPMAPPROC) (GLenum target);
 typedef void (APIENTRY* PFNGLDISABLEVERTEXATTRIBARRAYPROC) (GLuint index);
 typedef void (APIENTRY* PFNGLUNIFORM3FVPROC) (GLint location, GLsizei count, const GLfloat* value);
@@ -95,6 +96,7 @@ typedef void (GLAPIENTRY* PFNGLENABLEIPROC) (GLenum cap, GLuint index);
 typedef GLenum(GLAPIENTRY* PFNGLCHECKFRAMEBUFFERSTATUSPROC) (GLenum target);
 typedef void (GLAPIENTRY* PFNGLFRAMEBUFFERTEXTURE2DPROC) (GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level);
 typedef void (GLAPIENTRY* PFNGLDELETEFRAMEBUFFERSEXTPROC) (GLsizei n, const GLuint* framebuffers);
+
 
 class OpenGL : public GraphicDevice
 {
@@ -154,6 +156,7 @@ public:
 	PFNGLUNIFORMMATRIX3FVPROC glUniformMatrix3fv;
 	PFNGLACTIVETEXTUREPROC glActiveTexture;
 	PFNGLUNIFORM1IPROC glUniform1i;
+	PFNGLUNIFORM1FPROC glUniform1f;
 	PFNGLGENERATEMIPMAPPROC glGenerateMipmap;
 	PFNGLDISABLEVERTEXATTRIBARRAYPROC glDisableVertexAttribArray;
 	PFNGLUNIFORM3FVPROC glUniform3fv;

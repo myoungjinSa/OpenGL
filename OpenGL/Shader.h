@@ -3,6 +3,8 @@
 #include "OpenGL.h"
 #include "Component.h"
 
+class BaseLight;
+class DirectionalLight;
 class OpenGL;
 class Object;
 class GameObject;
@@ -19,20 +21,58 @@ typedef struct FocusInfo {
 	}
 }FocusInfo;
 
+struct sMaterial {
+	Vec4f diffuse;
+	Vec4f ambient;
+	Vec4f specular;
+	float shininess = 1.0f;
+};
+
+struct sBaseLight {
+	Vec4f position;
+	Vec4f diffuseColor;
+	float ambientIntensity;
+	float diffuseIntensity;
+};
+
+struct sAttenuation {
+	float constantAttenuation;
+	float linearAttenuation;
+	float quadraticAttenuation;
+};
+
+struct sDirectionalLight {
+	sBaseLight baseLight;
+	Vec3f direction;
+};
+
+struct sPointLight {
+	sBaseLight baseLight;
+	sAttenuation attenuation;
+};
+
+struct sSpotLight {
+	sBaseLight baseLight;
+	sAttenuation attenuation;
+	float spotCutoff;
+	float spotExponent;
+	Vec3f spotDirection;
+};
+
 struct ShaderParameter {
 	Matrix<float, 4, 4> worldViewMatrix;
 	Matrix<float, 4, 4> worldMatrix;
 	Matrix<float, 4, 4> viewMatrix;
 	Matrix<float, 4, 4> projectionMatrix;
 	Matrix<float, 3, 3> normalMatrix;
-	Matrix<float, 4, 4> viewInverseMatrix;
 
 	int   objNo;
-	Vec3f lightPosition;
-	Vec4f diffuse;
-	Vec4f specular;
-	Vec4f ambient;
+	
+	sDirectionalLight directionalLight;
+	sPointLight pointLight;
+	sSpotLight spotLight;
 
+	sMaterial material;
 	Vec3f cameraPosition;
 	
 	FocusInfo focusInfo;

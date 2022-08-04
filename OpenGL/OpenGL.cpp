@@ -464,6 +464,10 @@ bool OpenGL::LoadExtensionList() {
 	if (!glFramebufferTexture2D)
 		return false;
 
+	glUniform1f = (PFNGLUNIFORM1FPROC)wglGetProcAddress("glUniform1f");
+	if (!glUniform1f)
+		return false;
+
 	return true;
 }
 

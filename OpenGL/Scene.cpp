@@ -22,9 +22,23 @@ Scene::~Scene() {
 
 bool Scene::BuildObject(Renderer& renderer) {	
 	skybox.Initialize(renderer);
-	phongLight = std::make_unique<Light>();
-	phongLight->SetPosition(0.0f, 0.0f, -5.0f);
-	phongLight->SetDirection(Vec3f::FORWARD);
+	directionalLight = std::make_unique<DirectionalLight>();
+	directionalLight->baseLight.SetPosition(Vec3f(0.0f, 0.0f, -10.0f));
+	directionalLight->SetDirection(Vec3f::FORWARD);
+
+	pointLight = std::make_unique<PointLight>();
+	pointLight->baseLight.SetPosition(Vec3f(1.5f, 0.5f, 5.0f));
+	pointLight->baseLight.SetDiffuseColor(Vec4f(1.0f, 1.0f, 0.0f, 1.0f));
+	pointLight->attenuation.linear = 1.0f;
+
+	spotLight = std::make_unique<SpotLight>();
+	spotLight->baseLight.SetPosition(Vec3f(0.0f, 1.0f, 0.0f));
+	spotLight->baseLight.SetDiffuseColor(Vec4f(1.0f, 1.0f, 1.0f, 1.0f));
+	spotLight->attenuation.quadratic = 1.0f;
+
+	spotLight->spotCutoff = 120.0f;
+	spotLight->spotDirection = Vec3f::UP * -1.0f;
+
 
 	terrain = std::make_unique<Terrain>(10, 10);
 	terrain->Initialize(renderer);
@@ -92,18 +106,18 @@ bool Scene::Render(Renderer& renderer) {
 	renderer.SetDepthFunc(eCompare::LEQUAL);
 	ShaderParameter shaderParmaeter;
 	renderer.SetWindingOrder(Renderer::WindingOrder::CW);
-	skybox.FillShaderParameter(shaderParmaeter, GetViewMatrix(), projectionMatrix, *phongLight, camera, 0);
+	skybox.FillShaderParameter(shaderParmaeter, GetViewMatrix(), projectionMatrix, *directionalLight, *pointLight, *spotLight,camera, 0);
 	skybox.Render(renderer, shaderParmaeter);
 	renderer.SetDepthFunc(eCompare::LESS);
 
 	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLE_STRIP);
-	terrain->FillShaderParameter(shaderParmaeter, GetViewMatrix(), projectionMatrix, *phongLight, camera, 0);
+	terrain->FillShaderParameter(shaderParmaeter, GetViewMatrix(), projectionMatrix, *directionalLight, *pointLight, *spotLight, camera, 0);
 	terrain->Render(renderer, shaderParmaeter);
 	renderer.SetDrawMode(Renderer::DrawMode::TRIANGLES);
 
 	for (size_t iObj = 0; iObj < gameObjects.size(); iObj++) {
 		ShaderParameter shaderParmaeter;
-		gameObjects[iObj]->FillShaderParameter(shaderParmaeter, GetViewMatrix(), projectionMatrix, *phongLight, camera, iObj);
+		gameObjects[iObj]->FillShaderParameter(shaderParmaeter, GetViewMatrix(), projectionMatrix, *directionalLight, *pointLight, *spotLight, camera, iObj);
 		gameObjects[iObj]->Render(renderer, shaderParmaeter);
 	}
 

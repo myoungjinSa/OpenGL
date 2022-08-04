@@ -189,7 +189,30 @@ bool PhongShader::SetShaderParameters(Renderer& renderer, const ShaderParameter&
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldViewMatrix, String("worldViewMatrix")))	assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.projectionMatrix, String("projectionMatrix")))	assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.normalMatrix, String("normalMatrix")))			assert(0);
-	//if (!renderer.SetShaderParameter(shaderProgram, shaderParam.viewInverseMatrix, String("viewInverseMatrix")))	assert(0);
+	//if(!renderer.SetShaderParameter(shaderProgram, shaderParam.directionalLight.baseLight.position, String("DirectionalLight.baseLight.position")))
+	
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.pointLight.baseLight.position, String("g_PointLight.baseLight.position"))) assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.pointLight.baseLight.diffuseColor, String("g_PointLight.baseLight.diffuse"))) assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.pointLight.attenuation.constantAttenuation, String("g_PointLight.attenuation.constantAttenuation"))) assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.pointLight.attenuation.linearAttenuation, String("g_PointLight.attenuation.linearAttenuation"))) assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.pointLight.attenuation.quadraticAttenuation, String("g_PointLight.attenuation.quadraticAttenuation"))) assert(0);
+
+
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.spotLight.baseLight.position, String("g_SpotLight.baseLight.position"))) assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.spotLight.baseLight.diffuseColor, String("g_SpotLight.baseLight.diffuse"))) assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.spotLight.attenuation.constantAttenuation, String("g_SpotLight.attenuation.constantAttenuation"))) assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.spotLight.attenuation.linearAttenuation, String("g_SpotLight.attenuation.linearAttenuation"))) assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.spotLight.attenuation.quadraticAttenuation, String("g_SpotLight.attenuation.quadraticAttenuation"))) assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.spotLight.spotCutoff, String("g_SpotLight.spotCutoff"))) assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.spotLight.spotDirection, String("g_SpotLight.spotDirection"))) assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.spotLight.spotExponent, String("g_SpotLight.spotExponent"))) assert(0);
+
+
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.material.diffuse, String("g_Material.diffuse")))      assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.material.ambient, String("g_Material.ambient")))      assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.material.specular, String("g_Material.specular")))      assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.material.shininess, String("g_Material.shininess")))    assert(0);
+
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.cameraPosition, String("cameraPosition")))			assert(0);
 
 	int diffuseTexture = shaderParam.diffuseTexture;
@@ -263,15 +286,12 @@ bool GoraudShader::SetShaderParameters(Renderer& renderer, const ShaderParameter
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldMatrix, String("worldMatrix")))				assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.worldViewMatrix, String("worldViewMatrix")))	assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.projectionMatrix, String("projectionMatrix")))	assert(0);
-	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.lightPosition, String("lightPosition")))		assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.directionalLight.baseLight.position, String("lightPosition")))		assert(0);
 
-	Vec3f diffuse = Vec3f(shaderParam.diffuse.x, shaderParam.diffuse.y, shaderParam.diffuse.z);
-	Vec3f ambient = Vec3f(shaderParam.ambient.x, shaderParam.ambient.y, shaderParam.ambient.z);
-	Vec3f specular = Vec3f(shaderParam.specular.x, shaderParam.specular.y, shaderParam.specular.z);
-
-	if (!renderer.SetShaderParameter(shaderProgram, diffuse, String("diffuseColor"))) 							assert(0);
-	if (!renderer.SetShaderParameter(shaderProgram, specular, String("specularColor")))							assert(0);
-	if (!renderer.SetShaderParameter(shaderProgram, ambient, String("ambientColor"))) 							assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.material.diffuse, String("diffuseColor"))) 							assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.material.specular, String("specularColor")))							assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.material.ambient, String("ambientColor"))) 							assert(0);
+	
 	int diffuseTexture = shaderParam.diffuseTexture;
 	if (!renderer.SetShaderParameter(shaderProgram, diffuseTexture, String("shaderTexture")))						assert(0);
 
@@ -327,16 +347,12 @@ bool BumpShader::SetShaderParameters(Renderer& renderer, const ShaderParameter& 
 	if(!renderer.SetShaderParameter(shaderProgram, shaderParam.worldMatrix, String("worldMatrix")))				assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.viewMatrix, String("viewMatrix")))				assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.projectionMatrix, String("projectionMatrix")))	assert(0);
-	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.lightPosition, String("lightPosition")))		assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.directionalLight.baseLight.position, String("lightPosition")))		assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.cameraPosition, String("cameraPosition")))		assert(0);
 
-	Vec3f diffuse = Vec3f(shaderParam.diffuse.x, shaderParam.diffuse.y, shaderParam.diffuse.z);
-	Vec3f ambient = Vec3f(shaderParam.ambient.x, shaderParam.ambient.y, shaderParam.ambient.z);
-	Vec3f specular = Vec3f(shaderParam.specular.x, shaderParam.specular.y, shaderParam.specular.z);
-
-	renderer.SetShaderParameter(shaderProgram, diffuse, String("diffuseColor"));
-	renderer.SetShaderParameter(shaderProgram, specular, String("specularColor"));
-	renderer.SetShaderParameter(shaderProgram, ambient, String("ambientColor"));
+	renderer.SetShaderParameter(shaderProgram, shaderParam.material.diffuse, String("diffuseColor"));
+	renderer.SetShaderParameter(shaderProgram, shaderParam.material.specular, String("specularColor"));
+	renderer.SetShaderParameter(shaderProgram, shaderParam.material.ambient, String("ambientColor"));
 	
 	int diffuseTexture = shaderParam.diffuseTexture;
 	renderer.SetShaderParameter(shaderProgram, diffuseTexture, String("tex_color"));
@@ -441,16 +457,11 @@ bool CubemapEnvShader::SetShaderParameters(Renderer& renderer, const ShaderParam
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.viewMatrix, String("viewMatrix")))				assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.projectionMatrix, String("projectionMatrix")))	assert(0);
 	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.cameraPosition, String("cameraPosition")))		assert(0);
-	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.lightPosition, String("lightPosition")))		assert(0);
+	if (!renderer.SetShaderParameter(shaderProgram, shaderParam.directionalLight.baseLight.position, String("lightPosition")))		assert(0);
 
-	Vec3f diffuse = Vec3f(shaderParam.diffuse.x, shaderParam.diffuse.y, shaderParam.diffuse.z);
-	Vec3f ambient = Vec3f(shaderParam.ambient.x, shaderParam.ambient.y, shaderParam.ambient.z);
-	Vec3f specular = Vec3f(shaderParam.specular.x, shaderParam.specular.y, shaderParam.specular.z);
-
-	renderer.SetShaderParameter(shaderProgram, diffuse, String("diffuseColor"));
-	renderer.SetShaderParameter(shaderProgram, specular, String("specularColor"));
-	renderer.SetShaderParameter(shaderProgram, ambient, String("ambientColor"));
-
+	renderer.SetShaderParameter(shaderProgram, shaderParam.material.diffuse, String("diffuseColor"));
+	renderer.SetShaderParameter(shaderProgram, shaderParam.material.specular, String("specularColor"));
+	renderer.SetShaderParameter(shaderProgram, shaderParam.material.ambient, String("ambientColor"));
 
 	int diffuseTexture = shaderParam.diffuseTexture;
 	if (!renderer.SetShaderParameter(shaderProgram, diffuseTexture, String("modelTexture"))) {

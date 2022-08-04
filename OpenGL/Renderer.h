@@ -112,7 +112,8 @@ public:
 	virtual bool SetShaderParameter(unsigned int shaderProgram, Vec4f& vec4, String variableName) { return false; }
 	virtual bool SetShaderParameter(unsigned int shaderProgram, Vec3f& vec3, String variableName) { return false; }
 	virtual bool SetShaderParameter(unsigned int shaderProgram, int integer, String variableName) { return false; }
-	
+	virtual bool SetShaderParameter(unsigned int shaderProgram, float value, String variableName) { return false; }
+
 	virtual bool SetShaderParameter(unsigned int shaderProgram, Matrix<float, 4, 4>& matrix, String variableName) { return false; }
 	virtual bool SetShaderParameter(unsigned int shaderProgram, const Matrix<float, 4, 4>& matrix, String variableName) { return false; }
 	virtual bool SetShaderParameter(unsigned int shaderProgram, Matrix<float, 3, 3>& matrix, String variableName) { return false; }
@@ -194,6 +195,8 @@ public:
 	bool SetShaderParameter(unsigned int shaderProgram, Vec4f& vec4, String variableName)override; 
 	bool SetShaderParameter(unsigned int shaderProgram, Vec3f& vec3, String variableName)override;
 	bool SetShaderParameter(unsigned int shaderProgram, int integer, String variableName)override;
+	bool SetShaderParameter(unsigned int shaderProgram, float value, String variableName)override;
+
 
 	bool SetShaderParameter(unsigned int shaderProgram, Matrix<float, 4, 4>& matrix, String variableName)override;
 	bool SetShaderParameter(unsigned int shaderProgram, const Matrix<float, 4, 4>& matrix, String variableName) override;

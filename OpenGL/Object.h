@@ -19,7 +19,11 @@ class BoundingVolume;
 class Renderer;
 class Triangle;
 class Shader;
-class Light;
+
+class DirectionalLight;
+class PointLight;
+class SpotLight;
+
 class Camera;
 class ShaderParameter;
 
@@ -107,7 +111,7 @@ public:
 	void Rotate(const Quaternion& q);
 	void Rotate(const Matrix<float, 3, 3>& rotationMatrix);
 
-	void FillShaderParameter(ShaderParameter& shaderParam, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix, const Light& light, const Camera& Camera, int iObjNo);
+	void FillShaderParameter(ShaderParameter& shaderParam, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix, const DirectionalLight& directionalLight, const PointLight& pointLight, const SpotLight& spotLight, const Camera& Camera, int iObjNo);
 
 	void GetWorldBoundingBox(Volumef& volume)const;
 	void GetLocalBoundingBox(Volumef& volume)const;

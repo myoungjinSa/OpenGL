@@ -7,7 +7,9 @@
 #include "RayCast.h"
 
 
-class Light;
+class DirectionalLight;
+class PointLight;
+class SpotLight;
 class Terrain;
 class Shader;
 class ShaderParameter;
@@ -92,7 +94,9 @@ private:
 	Gizmos gizmos;
 
 	GameObjects gameObjects;
-	std::unique_ptr<Light> phongLight;
+	std::unique_ptr<DirectionalLight> directionalLight;
+	std::unique_ptr<PointLight> pointLight;
+	std::unique_ptr<SpotLight> spotLight;
 	Cubemap skybox;
 	std::unique_ptr<Terrain> terrain;
 };

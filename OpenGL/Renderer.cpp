@@ -474,6 +474,16 @@ bool OpenGLRenderer::SetShaderParameter(unsigned int shaderProgram, int integer,
 	return true;
 }
 
+bool OpenGLRenderer::SetShaderParameter(unsigned int shaderProgram, float value, String variableName) {
+	_ASSERT(pDevice);
+	unsigned int location = pDevice->glGetUniformLocation(shaderProgram, variableName.c_str());
+	if (location == -1)
+		return false;
+
+	pDevice->glUniform1f(location, value);
+	return true;
+}
+
 bool OpenGLRenderer::AllocateVertexBuffer(unsigned int& vertexArrayId, unsigned int& vertexBufferId, void* vertexData, VertexBufferBindCallback* pBindFunction, unsigned int numVertices, unsigned int sizeofVertex) {
 	pDevice->glGenVertexArrays(1, &vertexArrayId);
 	pDevice->glBindVertexArray(vertexArrayId);

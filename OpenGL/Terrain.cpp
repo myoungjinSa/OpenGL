@@ -138,7 +138,7 @@ bool Terrain::Initialize(Renderer& renderer) {
 	meshBuilder.CopyToMesh(renderer, *meshes.back(), &Vertex::BindVertexBuffer, &Vertex::Copy, sizeof(Vertex), Mesh::TriangleType::MeshType_Strip);
 	meshBuilder.End();
 
-	Vec3f diffuseColor(0.8f, 0.85f, 0.85f);
+	Vec3f diffuseColor(0.2f, 0.85f, 0.85f);
 	Vec4f ambientColor(0.3f, 0.3f, 0.3f, 1.0f);
 	Vec3f specularColor(1.0f, 1.0f, 1.0f);
 

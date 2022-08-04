@@ -130,7 +130,7 @@ bool GameObject::Intersect(const Ray& ray, double& distance) {
 	return false;
 }
 
-void GameObject::FillShaderParameter(ShaderParameter& shaderParam, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix, const Light& light, const Camera& Camera, int iObj) {
+void GameObject::FillShaderParameter(ShaderParameter& shaderParam, const Matrix<float, 4, 4>& viewMatrix, const Matrix<float, 4, 4>& projectionMatrix, const DirectionalLight& directionalLight, const PointLight& pointLight, const SpotLight& spotLight, const Camera& Camera, int iObj) {
 	Matrix<float, 4, 4> worldMatrix = transform->GetWorldMatrix();
 	Matrix<float, 4, 4> worldViewMatrix = Matrix<float, 4, 4>::Identity();
 	MakeWorldViewMatrix(worldMatrix, viewMatrix, worldViewMatrix);
@@ -138,19 +138,42 @@ void GameObject::FillShaderParameter(ShaderParameter& shaderParam, const Matrix<
 	Matrix<float, 3, 3> normalMatrix = Matrix<float, 3, 3>::Identity();
 	MakeNormalMatrix(worldViewMatrix, normalMatrix);
 
-
 	shaderParam.worldMatrix = worldMatrix;
 	shaderParam.worldViewMatrix = worldViewMatrix;
 	shaderParam.viewMatrix = viewMatrix;
 	shaderParam.projectionMatrix = projectionMatrix;
 	shaderParam.normalMatrix = normalMatrix;
-	shaderParam.viewInverseMatrix = Inverse(viewMatrix);
+	
+	shaderParam.directionalLight.baseLight.position = directionalLight.baseLight.GetPosition();
+	shaderParam.directionalLight.baseLight.diffuseColor = directionalLight.baseLight.GetDiffuseColor();
+	shaderParam.directionalLight.baseLight.ambientIntensity = directionalLight.baseLight.GetAmbientIntensity();
+	shaderParam.directionalLight.baseLight.diffuseIntensity = directionalLight.baseLight.GetDiffuseIntensity();
 
-	shaderParam.lightPosition = light.GetPosition();
-	shaderParam.diffuse = material->GetDiffuse();
-	shaderParam.ambient = material->GetAmbient();
-	shaderParam.specular = material->GetSpecular();
+	shaderParam.pointLight.baseLight.position = pointLight.baseLight.GetPosition();
+	shaderParam.pointLight.baseLight.diffuseColor = pointLight.baseLight.GetDiffuseColor();
+	shaderParam.pointLight.baseLight.ambientIntensity = pointLight.baseLight.GetAmbientIntensity();
+	shaderParam.pointLight.baseLight.diffuseIntensity = pointLight.baseLight.GetDiffuseIntensity();
+	shaderParam.pointLight.attenuation.constantAttenuation = pointLight.attenuation.constant;
+	shaderParam.pointLight.attenuation.linearAttenuation = pointLight.attenuation.linear;
+	shaderParam.pointLight.attenuation.quadraticAttenuation = pointLight.attenuation.quadratic;
 
+	shaderParam.spotLight.baseLight.position = spotLight.baseLight.GetPosition();
+	shaderParam.spotLight.baseLight.diffuseColor = spotLight.baseLight.GetDiffuseColor();
+	shaderParam.spotLight.baseLight.ambientIntensity = spotLight.baseLight.GetAmbientIntensity();
+	shaderParam.spotLight.baseLight.diffuseIntensity = spotLight.baseLight.GetDiffuseIntensity();
+
+	shaderParam.spotLight.attenuation.constantAttenuation = spotLight.attenuation.constant;
+	shaderParam.spotLight.attenuation.linearAttenuation = spotLight.attenuation.linear;
+	shaderParam.spotLight.attenuation.quadraticAttenuation = spotLight.attenuation.quadratic;
+
+	shaderParam.spotLight.spotCutoff = spotLight.spotCutoff;
+	shaderParam.spotLight.spotDirection = spotLight.spotDirection;
+	shaderParam.spotLight.spotExponent = spotLight.spotExponent;
+
+	shaderParam.material.diffuse = material->GetDiffuse();
+	shaderParam.material.specular = material->GetSpecular();
+	shaderParam.material.ambient = material->GetAmbient();
+	
 	shaderParam.cameraPosition = Camera.GetPosition();
 	shaderParam.objNo = iObj;
 
@@ -430,9 +453,9 @@ bool Sphere::Initialize(Renderer& renderer) {
 	
 	environMap = cubemapTexture;
 
-	Vec3f diffuseColor(0.8f, 0.85f, 0.85f);
+	Vec3f diffuseColor(1.0f, 1.00f, 0.5f);
 	Vec4f ambientColor(0.3f, 0.3f, 0.3f, 1.0f);
-	Vec3f specularColor(1.0f, 1.0f, 1.0f);
+	Vec3f specularColor(0.5f, 0.2f, 1.0f);
 	material = std::make_shared<Material>(diffuseColor, ambientColor, specularColor, std::make_pair(Material::TextureType::TEXTURE_DIFFUSE, diffuseMap->GetTextureID()));
 	material->SetTextureMap(std::make_pair(Material::TextureType::TEXTURE_NORMAL,		normalMap->GetTextureID()));
 	material->SetTextureMap(std::make_pair(Material::TextureType::TEXTURE_ENVIORNMENT,	environMap->GetTextureID()));
