@@ -410,7 +410,7 @@ Sphere::~Sphere() {
 bool Sphere::Initialize(Renderer& renderer) {
 	GameObject::Initialize(renderer);
 
-	shader = std::make_shared<PhongShader>(this);
+	shader = std::make_shared<CubemapEnvShader>(this);
 	if (!shader)
 		return false;
 

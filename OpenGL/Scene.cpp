@@ -34,7 +34,7 @@ bool Scene::BuildObject(Renderer& renderer) {
 	spotLight = std::make_unique<SpotLight>();
 	spotLight->baseLight.SetPosition(Vec3f(0.0f, 1.0f, 0.0f));
 	spotLight->baseLight.SetDiffuseColor(Vec4f(1.0f, 1.0f, 1.0f, 1.0f));
-	spotLight->attenuation.quadratic = 1.0f;
+	spotLight->attenuation.linear = 1.0f;
 
 	spotLight->spotCutoff = 120.0f;
 	spotLight->spotDirection = Vec3f::UP * -1.0f;

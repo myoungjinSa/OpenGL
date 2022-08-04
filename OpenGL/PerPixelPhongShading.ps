@@ -8,17 +8,6 @@ uniform vec3 cameraPosition;
 
 uniform sampler2D shaderTexture;
 
-struct lightSource
-{
-  vec4 position;
-  vec4 diffuse;
-  vec4 specular;
-  float constantAttenuation, linearAttenuation, quadraticAttenuation;
-  float spotCutoff, spotExponent;
-  vec3 spotDirection;
-};
-
-
 vec4 scene_ambient = vec4(0.2, 0.2, 0.2, 1.0);
 
 struct BaseLight{
@@ -145,5 +134,4 @@ void main(){
 
 	vec4 textureColor = texture(shaderTexture, fs_in.UV);
 	out_color = textureColor * vec4(ambientLighting + pointLightColor + spotLightColor, 1.0);
-
 }
